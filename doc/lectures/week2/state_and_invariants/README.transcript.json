@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "State & Invariants",
+    "text": "Welcome to our lecture on State and Invariants. Today, we will explore how state and invariants play a critical role in ensuring the correctness of concurrent systems."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "In this lecture, we will analyze the design pressures that state and invariants impose on concurrent systems. We will also diagnose hidden assumptions that make systems seem correct until they are stressed. Additionally, we'll look at how to evaluate failure evidence, including logs and test outputs, and how to design corrections that preserve relevant invariants while disclosing trade-offs. Finally, we will discuss how to defend our approaches in the Integrity Packet and relate these concepts to our assignment."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Imagine you are working on a course project that appears to be functioning perfectly fine during a demonstration. However, once you introduce concurrency or any kind of operational pressure, hidden assumptions begin to surface. This raises an important question: what must you analyze in order to trust the results your system produces?"
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concepts",
+    "text": "Before we dive deeper, let's understand some core concepts that will guide our discussion. These are System State, Invariants, State Transitions, Invariant Violations, and System Invariants. Each of these plays a significant role in ensuring your system's reliability under pressure."
+  },
+  {
+    "slide": 5,
+    "topic": "System State",
+    "text": "Let's start with System State, which refers to the collective values of all data in your system at a particular point in time. This concept is crucial because it helps define a condition that must be made explicit to test system performance under pressure. If not properly managed, ignoring system state can lead to issues like duplicate work or stale state."
+  },
+  {
+    "slide": 6,
+    "topic": "Invariants",
+    "text": "Next, we have Invariants. These are conditions that must always be true for a system to maintain its correctness. Just like with system state, failing to acknowledge these invariants can result in significant errors such as producing duplicate work or allowing stale states to persist."
+  },
+  {
+    "slide": 7,
+    "topic": "State Transitions",
+    "text": "State Transitions outline the valid paths for moving the system from one correct state to another. It's essential to understand these transitions because failure to recognize them can also lead to problems like duplicate work or stale state, ultimately harming your system's integrity."
+  },
+  {
+    "slide": 8,
+    "topic": "Invariant Violation",
+    "text": "An Invariant Violation occurs when concurrent operations result in the system being left in an impossible or illegal state. This is a serious concern and, similar to the previous concepts, ignoring this can lead to erroneous system behavior. We must ensure that we log transitions and validate behaviors to prevent such violations."
+  },
+  {
+    "slide": 9,
+    "topic": "System Invariant",
+    "text": "Lastly, a System Invariant is a condition that must remain true across all valid executions of the system. This concept ties everything together, enabling us to maintain the integrity of our design whenever actions are coordinated or interleaved."
+  },
+  {
+    "slide": 10,
+    "topic": "Diagram: System / Architecture View",
+    "text": "This diagram illustrates how the various elements we discuss connect to one another. It emphasizes that the question isn't whether your code runs once, but whether the relevant invariants hold true when facing changes in timing, load, retries, or the complexities of coordination."
+  },
+  {
+    "slide": 11,
+    "topic": "Diagram: Worked Example",
+    "text": "In our worked example, we look at an Episode Service where two workers might be trying to read an episode record concurrently. The actions they take represent potential state transitions, which help us visualize how to ensure that the necessary invariants are upheld throughout this process."
+  },
+  {
+    "slide": 12,
+    "topic": "Diagram: Failure Scenario",
+    "text": "In the failure scenario depicted here, we see the two workers reading the same episode before it has been committed by the first worker. This situation demonstrates how overlooked state transitions can lead to both workers attempting to process the episode simultaneously, causing conflicts and potential invariant violations."
+  },
+  {
+    "slide": 13,
+    "topic": "Diagram: Design Response",
+    "text": "The design response to prevent such failures involves creating a protected state that can only be altered through well-defined transitions. This helps ensure that invalid or competing transitions are rejected, which is crucial for maintaining our system's integrity."
+  },
+  {
+    "slide": 14,
+    "topic": "Diagram: Evidence Flow",
+    "text": "In evidence flow, we emphasize the importance of capturing structured evidence to support the claim that invariants have been handled correctly throughout the process. This includes logging necessary data points like previous state, new state, and timestamps to help trace the execution."
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "It's important to be aware of common failure modes and anti-patterns. For instance, a system might pass a single happy-path demonstration but could still fail under realistic concurrent conditions. Recognizing these patterns enables you to ask crucial questions about the design decisions made."
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "text": "In our trade-off analysis, we explore various design approaches, their strengths, weaknesses, and contexts for appropriate usage. For example, while a simple baseline design is easy to understand, it often fails to expose hidden timing assumptions that can cause significant issues."
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "text": "For practical application, I encourage you to identify the most relevant invariant for state & invariants. Write down a sequential scenario that should succeed alongside a pressure scenario that could expose potential failures. This exercise will deepen your understanding of the concepts we've discussed."
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "text": "This lecture directly supports our upcoming assignment. You'll need to connect the concepts discussed today to your semester project, showcasing relevant objects, workflows, events, or recovery mechanisms. It's essential to provide concrete evidence of your understanding."
+  },
+  {
+    "slide": 19,
+    "topic": "Validation and Interview Questions",
+    "text": "As we wrap up, let's consider some validation and interview questions. Reflect on what invariant is most relevant to today's lecture, what hidden assumptions may seem valid, and how you would force a failure in a testing environment. This reflection is crucial for mastering the material."
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "text": "In summary, understanding state and invariants is essential for reasoning about system correctness under execution. The primary goal for engineering professionals is to connect concepts to observability, invariants, and defensible trade-offs in design, ensuring that the system can withstand various operational pressures."
+  }
+]

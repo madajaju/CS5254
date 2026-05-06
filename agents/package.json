@@ -1,0 +1,32 @@
+{
+  "name": "lecture-builder",
+  "version": "1.0.0",
+  "description": "Build expanded lecture README files using AI prompts.",
+  "main": "AIHelper.js",
+  "scripts": {
+    "build:lectures": "node buildLectures.js",
+    "build:slides": "node buildSlides.js ../doc/lectures/week2",
+    "build:pdf": "node generate-pdf.js",
+    "build:video": "node generate-video.js ../doc/lectures/week2",
+    "build:brightspace": "node generateBrightspace.js",
+    "upload:videos": "node uploadVideo.js --credentials youtube.creds.json",
+    "build:lectures:custom": "node buildLectures.js ./lectures ./lectureBuild.md",
+    "start": "npm run build:lectures"
+  },
+  "keywords": [
+    "lectures",
+    "readme",
+    "openai",
+    "curriculum",
+    "education"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "googleapis": "^171.4.0",
+    "openai": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

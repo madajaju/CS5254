@@ -1,0 +1,132 @@
+[
+  {
+    "slide": 1,
+    "topic": "The Illusion of Correctness",
+    "text": "Welcome to today's lecture on the Illusion of Correctness. Throughout this session, we will explore how seemingly correct systems can break under various pressures such as concurrency and operational load. We'll discuss the importance of identifying hidden assumptions and maintaining the integrity of our designs."
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "text": "Imagine presenting a project that appears flawless after a straightforward demonstration. As soon as concurrency or operational stress is introduced, however, you might discover a critical hidden assumption at play, particularly regarding Sequential Bias. Today, we will focus on what engineers need to consider and defend before trusting their results."
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "text": "By the end of this lecture, you should be able to analyze the design pressures stemming from the illusion of correctness. You'll learn how to diagnose the hidden assumptions that make systems appear correct, evaluate failure evidence, design corrective actions that maintain invariants, and effectively defend your design choices."
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concepts",
+    "text": "Let's dive into the core concepts that underline the illusion of correctness. These concepts include Sequential Bias, Implicit Locks, Temporal Coupling, System Invariants, and Failure Modes. Each of these plays a vital role in helping us understand the conditions that must be explicit for a system to function correctly under pressure."
+  },
+  {
+    "slide": 5,
+    "topic": "Sequential Bias",
+    "text": "Sequential Bias refers to the design tendency where we assume that one step always precedes another. This assumption, if left unexamined, can lead to significant issues in concurrent systems. The implications of ignoring this can result in duplicate operations, stale data, and misleading logs, which is why we need to make it explicit before utilizing a system under load."
+  },
+  {
+    "slide": 6,
+    "topic": "Implicit Locks",
+    "text": "In single-threaded environments, a single thread acts as an implicit lock for all state management. However, removing this 'lock' can expose the raw state, leading to unexpected outcomes. By understanding this mechanism, we can recognize the conditions that must be explicitly managed when designing concurrent systems to preserve correctness."
+  },
+  {
+    "slide": 7,
+    "topic": "Temporal Coupling",
+    "text": "Temporal Coupling occurs when different parts of a system depend on each other’s timing without any explicit coordination. This hidden coupling can create scenarios where operations overlap inappropriately, resulting in undesirable outcomes. Recognizing this is crucial when we design interactions that could fail if timings shift."
+  },
+  {
+    "slide": 8,
+    "topic": "System Invariant",
+    "text": "A System Invariant is a condition that must remain true across all valid executions of a system. Identifying these invariants is essential for ensuring that our designs can withstand various conditions. We’ll discuss the implications of invariants and how failure to maintain them can lead to significant design flaws."
+  },
+  {
+    "slide": 9,
+    "topic": "Failure Mode",
+    "text": "Understanding Failure Modes gives us insight into repeatable ways a system can violate its invariants or experience progress issues. Similar to other concepts, recognizing these failure modes helps us prepare for possible failures, identify weaknesses in our designs, and create more resilient systems."
+  },
+  {
+    "slide": 10,
+    "topic": "System / Architecture View",
+    "text": "This visual representation captures the relationship between the concepts we've discussed. The Illusion of Correctness must be connected to validation evidence and design decisions to ensure that our systems operate correctly under all conditions."
+  },
+  {
+    "slide": 11,
+    "topic": "Worked Example",
+    "text": "Let’s look at a practical example from the podcast domain. Imagine updating an Episode where we check if the status is DRAFT before proceeding. While this may seem fine in a single-threaded context, in a concurrent setup, two threads could both check the status and proceed simultaneously, leading to unexpected behaviors."
+  },
+  {
+    "slide": 12,
+    "topic": "Problem Setup",
+    "text": "In our Podcast Domain scenario, the update to an Episode’s status could easily lead to overselling items due to concurrency issues. This illustrates the critical need for design strategies that recognize potential race conditions."
+  },
+  {
+    "slide": 13,
+    "topic": "Naive Implementation",
+    "text": "Consider the naive workflow: an actor performs an operation, the system reads the state, applies the transition, and ultimately emits a side effect. While this may sound correct, it exposes the system to concurrency issues, where the operations can interleave unexpectedly."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Scenario",
+    "text": "Under overlapping executions, the system might read stale state or execute the same operation multiple times. This discrepancy highlights the misalignment between our design assumptions and the actual execution model, which is essential for us to address."
+  },
+  {
+    "slide": 15,
+    "topic": "Corrected Design Direction",
+    "text": "To improve our design, we must name the invariant that needs protection and make transitions observable. Options include using version checks or idempotency keys, as well as explicit coordination among operations. These strategies aim to prevent issues caused by race conditions."
+  },
+  {
+    "slide": 16,
+    "topic": "Visual Model Anchors",
+    "text": "Now let’s examine a visual model that illustrates how different components in our system interact. This model helps us understand the concurrent operations taking place and the potential areas where Sequential Bias can be challenged."
+  },
+  {
+    "slide": 17,
+    "topic": "System Interaction",
+    "text": "In this interaction, we have two workers, A and B, both attempting to read an episode record. If they perform these operations concurrently without proper controls, they might both read the same initial state, leading to conflicts in processing."
+  },
+  {
+    "slide": 18,
+    "topic": "State Transition Model",
+    "text": "This table outlines the various states our Episode can be in, such as DRAFT, PROCESSING, READY_TO_PUBLISH, and PUBLISHED. Each state has defined transitions, which must be carefully handled to maintain system integrity during concurrent operations."
+  },
+  {
+    "slide": 19,
+    "topic": "Failure Interleaving",
+    "text": "Let’s look at a scenario where Worker A and Worker B both check the episode status as DRAFT. As they attempt to transition to PROCESSING, the lack of coordination can lead to both workers initiating the processing jobs. This violation of the invariant is critical to understand."
+  },
+  {
+    "slide": 20,
+    "topic": "Design Response",
+    "text": "To protect the core property of our system, we can implement mechanisms such as atomic compare-and-set or synchronized transitions. However, this approach comes with a trade-off of reduced parallelism, which is a crucial consideration in our design processes."
+  },
+  {
+    "slide": 21,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "Let’s discuss some common failure modes and anti-patterns that occur. One symptom is when a system only passes single happy-path tests, often due to ignored timing conditions. We need to establish failure-focused tests that target the invariants we aim to protect."
+  },
+  {
+    "slide": 22,
+    "topic": "Trade-Off Analysis",
+    "text": "Here we illustrate the trade-offs associated with different design approaches, such as simple baselines versus idempotent designs. It’s essential to factor these considerations into our development strategy based on the context of our systems."
+  },
+  {
+    "slide": 23,
+    "topic": "Practical Application",
+    "text": "As a part of your practical exercise, I encourage you to identify the relevant invariant for the illusion of correctness in your work. Document a sequential scenario that should succeed, and create a pressure scenario to explore potential failures."
+  },
+  {
+    "slide": 24,
+    "topic": "Assignment Integration",
+    "text": "This lecture supports your assignment by encouraging you to connect these concepts to your semester project. Demonstrate your mastery with concrete evidence, which could include logs, diagrams, and design defenses within your Integrity Packet."
+  },
+  {
+    "slide": 25,
+    "topic": "Validation and Interview Questions",
+    "text": "To reinforce your understanding, consider these validation questions: What invariant matters to this lecture? What hidden assumption could lead to a flawed design? How would you demonstrate a failure in a repeatable manner?"
+  },
+  {
+    "slide": 26,
+    "topic": "Summary",
+    "text": "In summary, the illusion of correctness is not only about vocabulary; it serves as a critical framework for assessing system correctness in real-world executions. As engineers, our responsibility includes making connections between these concepts, maintaining observability, and ensuring our designs are defensible."
+  }
+]

@@ -1,0 +1,193 @@
+= Coordination Patterns
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Course Context
+
+* Course: CS 5891b
+* Week: 5
+* Duration: 15 minutes
+* Prerequisites: 
+** Object state
+** Concurrency pressure
+** Structured evidence
+** Integrity Packet reasoning
+
+== Assignment Alignment
+
+* [A2](../../../assignments/A2/index.md)
+
+== Learning Objectives
+
+* Analyze design pressure in concurrent systems
+* Diagnose hidden assumptions creating perceived correctness
+* Evaluate failure evidence using logs, traces
+* Design corrections that maintain invariants
+* Defend approach in Integrity Packet
+
+== Opening Narrative
+
+* Components wait on each other
+* Logs show activity, no completion
+* Local code appears reasonable
+* Coordination contract is incomplete
+* Design rule for observable progress?
+
+== Coordination Boundary
+
+* Definition: Where objects agree on ordering or progress
+* Importance: Must be explicit before trust under pressure
+* Mechanism: State, timing, worker behavior
+* Failure Mode: Duplicate work, stale state, blocked progress
+* Design Implication: Expose invariant, log transitions
+
+== Progress Guarantee
+
+* Definition: Work completes eventually
+* Importance: Must be explicit before trust under pressure
+* Mechanism: State, timing, worker behavior
+* Failure Mode: Duplicate work, stale state, blocked progress
+* Design Implication: Expose invariant, log transitions
+
+== Contention
+
+* Definition: Competition for shared resources
+* Importance: Must be explicit before trust under pressure
+* Mechanism: State, timing, worker behavior
+* Failure Mode: Duplicate work, stale state, blocked progress
+* Design Implication: Expose invariant, log transitions
+
+== System / Architecture View
+
+[plantuml, target=system_architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Coordination Patterns" as Topic
+rectangle "Coordination Boundary" as A
+rectangle "Progress Guarantee" as B
+rectangle "Contention" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Problem Setup
+
+* Centralized examples
+* Assumptions of single operation execution
+* Invisible assumptions in correct-sounding names
+
+== Naive Implementation
+
+* Actor performs operations
+* System reads current state
+* System applies transition
+* System emits side effect
+
+== Failure Scenario
+
+* Overlapping execution can yield stale state or executed twice
+* Mismatch between design assumption and execution model
+
+== Improved Design Direction
+
+* Name the invariant, make transitions observable
+* Introduce controls: 
+** Version checks
+** Idempotency keys
+** State-machine guards
+** Explicit coordination
+** Backoff retries
+
+== Why Improved Design Is Safer
+
+* Shifts from hoping order executes
+* Proves that invalid interleavings are contained
+
+== Failure Modes and Anti-Patterns
+
+* Single happy-path demonstration passes
+** Why: Test avoids timing or pressure conditions
+** Detect: Repeat runs or stress conditions
+** Correct: Add failure-focused tests
+
+* Tool focus over design property
+** Why: Focus on mechanisms before invariants
+** Detect: Ask invariant protection
+** Correct: State invariant first, choose mechanism
+
+* Evidence lacks detail
+** Why: Logs lack IDs or transitions
+** Detect: Reviewer cannot reconstruct failure
+** Correct: Capture structured evidence
+
+* Fix changes behavior not compared to baseline
+** Why: Failure was non-repeatable
+** Detect: Run with same workload
+** Correct: Maintain failing test for redesign
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to implement | Hides timing assumptions | First implementation
+| Guarded transition | Protects invariant | Needs careful modeling | Status changes, workflows
+| Explicit coordination | Makes dependencies visible | Risk of deadlock | Multi-object workflows
+| Retry-safe design | Handles duplicates | Needs deduplication | Queues, external calls
+| Observability design | Produces strong evidence | Adds instrumentation | Assignments requiring proof
+|===
+
+== Practical Application
+
+* Identify relevant invariant or progress property
+* Write sequential scenario expected to succeed
+* Write pressure scenario to expose failure
+* Add IDs to logs before running pressure scenario
+* Capture evidence before/after fix
+* Update Integrity Packet: assumption, evidence
+
+== Assignment Integration
+
+* Connect lecture concepts to semester project
+* Show relevant object, workflow, or failure mechanism
+* Mastery via evidence: 
+** runnable commands
+** structured logs
+** before/after behavior
+
+== Validation Questions
+
+1. What invariant or progress property matters?
+2. What hidden assumption makes baseline correct?
+3. How to force failure in repeatable test?
+4. What evidence proves failure occurred?
+5. Which mechanism first, and what trade-off?
+6. How does issue appear in your stacks?
+7. What to record in Integrity Packet?
+
+== Summary
+
+* Coordination patterns reason about system correctness
+* Connect concepts to invariants, behavior, and trade-offs
+* A design is mature when it can be explained, stressed, and validated

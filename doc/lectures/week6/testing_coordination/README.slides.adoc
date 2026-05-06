@@ -1,0 +1,210 @@
+= Testing Coordination
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Introduction
+
+* Analyze design pressure in stateful concurrent systems
+* Diagnose hidden assumptions in system behavior
+* Evaluate failure evidence with logs and traces
+* Design corrections without obscuring trade-offs
+* Connect to Integrity Packet and A2 deliverables
+
+== Opening Narrative
+
+* Components wait for each other
+* Logs show activity, yet no completion
+* Coordination contract is incomplete
+* Key design rule needed for progress
+
+== Joint Testing
+
+* Definition: Testing interactions between Object A and B
+* Importance: Identifies necessary conditions for trust
+* Failure: Can lead to duplicate work, stale state, or misleading evidence
+* Implication: Expose invariants, log transitions, validate behavior
+
+== Artificial Latency
+
+* Definition: Deliberately slowing down part of a workflow
+* Importance: Reveals trust conditions under pressure
+* Failure: Can create duplicate work or misleading evidence
+* Implication: Expose invariants, log transitions, validate behavior
+
+== Chaos Testing (Small Scale)
+
+* Definition: Randomly reorder incoming signals
+* Importance: Reveals trust conditions under pressure
+* Failure: May produce duplicate work or misleading evidence
+* Implication: Expose invariants, log transitions, validate behavior
+
+== Stress Testing Coordination
+
+* Definition: Run multiple workflows to find deadlocks
+* Importance: Identifies necessary conditions under pressure
+* Failure: Can lead to duplicate work or blocked progress
+* Implication: Expose invariants, log transitions, validate behavior
+
+== Coordination Boundary
+
+* Definition: Independence point of objects requiring agreement
+* Importance: Identifies conditions for trust under pressure
+* Failure: May result in duplicate work or misleading evidence
+* Implication: Expose invariants, log transitions, validate behavior
+
+== System View
+
+[plantuml, target=coordination_system, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Testing Coordination" as Topic
+rectangle "Joint Testing" as A
+rectangle "Artificial Latency" as B
+rectangle "Chaos Testing (Small Scale)" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+== Problem Setup
+
+* Podcast Domain:
+** Generate transcript before audio ingest
+** Send two "Audio Cleaned" signals
+* Order System:
+** Simulate late payment confirmation
+
+== Naive Implementation
+
+* Assumption: Operation occurs once, in order
+* Often invisible: sound method names, passing tests
+* Basic flow: 
+** Actor performs operation
+** System reads state
+** Applies transition
+** Emits side effect
+
+== Failure Scenario
+
+* Overlapping execution yields stale state
+* Executes twice or arrives late
+* Mismatch between design assumption and execution model
+
+== Corrected Design Direction
+
+* Name the invariant and make transitions observable
+* Add correctness controls: version checks, idempotency keys
+
+== Improved Design Safety
+
+* Proves invalid interleavings are rejected or contained
+* Shifts focus from hoping to ensuring correctness
+
+== Failure Modes
+
+* Symptom: Passes single happy-path test
+** Why: Avoids timing/order conditions
+** Detect: Use repeated runs, concurrent actors
+** Correct: Add failure-focused tests
+
+* Symptom: Names tool, not design property
+** Why: Focus on implementation not invariants
+** Detect: Ask which invariant is protected
+** Correct: Identify invariant first
+
+* Symptom: Vague evidence
+** Why: Logs lack essential information
+** Detect: Evidence can't reconstruct failure
+** Correct: Capture structured evidence
+
+* Symptom: Changes behavior but unmeasured
+** Why: Failure not repeatable
+** Detect: No before/after run
+** Correct: Keep failing test for comparison
+
+== Trade-Off Analysis
+
+* Approach: Simple baseline
+** Strength: Easy to explain
+** Weakness: Hides timing assumptions
+** Use: First implementation
+
+* Approach: Guarded state transition
+** Strength: Protects invariant
+** Weakness: Needs careful modeling
+** Use: Status changes
+
+* Approach: Explicit coordination
+** Strength: Makes dependencies visible
+** Weakness: Can cause deadlocks
+** Use: Multi-object workflows
+
+* Approach: Idempotent design
+** Strength: Handles duplicates
+** Weakness: Requires special handling
+** Use: Queues and retries
+
+* Approach: Observability-first design
+** Strength: Strong evidence
+** Weakness: Adds instrumentation
+** Use: Design defense
+
+== Practical Application
+
+* Identify relevant invariant for testing coordination
+* Write a successful sequential scenario
+* Write a pressure scenario to expose failure
+* Add IDs to logs before running the pressure scenario
+* Capture evidence before and after applying a fix
+
+== Assignment Integration
+
+* Connect to [A2](../../../assignments/A2/index.md)
+* Show relevant object, workflow, or failure mechanisms
+* Demonstrate with logs, behavior, diagrams, and explanations
+
+== Validation Questions
+
+1. What invariant relates to this lecture?
+2. What might mislead baseline design?
+3. How to force repeatable failure?
+4. What evidence is required for failure?
+5. Which design mechanism would you choose first?
+6. How could this issue differ in implementations?
+7. What records are needed for the Integrity Packet?
+
+== Summary
+
+* Testing coordination reveals system correctness under pressure
+* Connects concepts to observable behavior and trade-offs
+* A mature design can be repaired and validated with evidence
+
+== Further Reading
+
+* "Testing Coordination distributed systems failure mode"
+* "Testing Coordination concurrency design tradeoffs"
+* Structured logging and correlation IDs
+* Invariants in stateful object-oriented systems
+* Coordination patterns and progress guarantees

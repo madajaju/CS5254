@@ -1,0 +1,278 @@
+[
+  {
+    "slide": 1,
+    "topic": "Coordination Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome everyone to our lecture on Coordination Patterns. Today, we'll explore how to analyze and design systems that maintain correctness under concurrency pressure."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Course Context",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As a reminder, this course is CS 5891b, and we're in week five of the semester. The focus is on coordination within object-oriented systems under concurrency. Today’s session is about fifteen minutes long, so let’s dive right in."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Assignment Alignment",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "You should align the concepts from today's lecture with the upcoming assignment, A2. So, keep in mind how coordination patterns can be applied to your projects as we progress."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "By the end of this lecture, you should be able to analyze design pressures in concurrent systems, diagnose hidden assumptions, and evaluate evidence of failures. Importantly, you'll learn how to design effective corrections that maintain system invariants—essential for justifying your decisions in the Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Imagine a situation where two components are each waiting for the other to continue, resulting in a workflow that never reaches completion."
+      },
+      {
+        "role": "teacher",
+        "text": "Although the logs might show activity, the underlying coordination contract is incomplete. What's a design rule that would enable us to ensure observable progress?"
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Coordination Boundary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s define the Coordination Boundary. This is where independent objects must agree on critical aspects such as ordering and progress. It’s vital because without laying this out explicitly, we cannot trust our system under pressure."
+      },
+      {
+        "role": "teacher",
+        "text": "Ignoring this boundary can lead to issues like duplicated work or blocked progress. Thus, our design must expose the invariant and log critical transitions."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Progress Guarantee",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, we focus on the Progress Guarantee. This represents the assurance that work will complete eventually instead of getting stuck indefinitely."
+      },
+      {
+        "role": "teacher",
+        "text": "Just like before, we need to make this condition explicit to gain trust in our system during high-pressure scenarios. Failure to establish this can lead to similar issues, reinforcing the need for careful logging of transitions."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Contention",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let’s look at Contention, which refers to the competition for shared resources among concurrent actors."
+      },
+      {
+        "role": "teacher",
+        "text": "Similar to our previous concepts, this needs to be explicitly defined, or we risk unfriendly behaviors like stale states or duplicated operations. It’s essential for the design to clarify the invariant and document the transitions properly."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System / Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In this architecture view, we see how the different components interact. Coordination Patterns connect various aspects like Coordination Boundary, Progress Guarantee, and Contention."
+      },
+      {
+        "role": "teacher",
+        "text": "Our focus should be on ensuring that the observed invariants maintain under various execution conditions, rather than just checking if code runs once."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Problem Setup",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s discuss a Real World Problem Setup. We often make assumptions that operations will happen once and in order."
+      },
+      {
+        "role": "teacher",
+        "text": "These assumptions can be hidden within our code, disguised by seemingly correct methods and passing sequential tests. We need to uncover these hidden assumptions to improve our designs."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Implementation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Consider a naive implementation where an actor performs an operation, and the system reads the current state to apply transitions."
+      },
+      {
+        "role": "teacher",
+        "text": "While this might look fine at first glance, it can lead to issues once we introduce concurrency, showing that the apparent correctness can be misleading."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In overlapping execution scenarios, we can run into problems like observing stale states or executing operations multiple times."
+      },
+      {
+        "role": "teacher",
+        "text": "This reveals a fundamental mismatch between our designs’ assumptions and the execution model, emphasizing the need to rethink our approach."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To improve our designs, it’s crucial to name the invariant explicitly and make transitions observable."
+      },
+      {
+        "role": "teacher",
+        "text": "Introducing robust controls, like version checks and idempotency keys, can significantly enhance our system's resilience against failures."
+      },
+      {
+        "role": "teacher",
+        "text": "Think about how we can implement explicit coordination and backoff retries to further secure our workflows."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Why Improved Design Is Safer",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The benefit of improved design shifts the perspective from hoping our workflows execute as intended to proving that we can contain or recover from invalid interleavings."
+      },
+      {
+        "role": "teacher",
+        "text": "This approach is more systematic and reduces our reliance on luck."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's examine common failure modes and anti-patterns. For example, when a system only passes a happy-path demonstration, it often reflects a test that hasn’t considered timing and pressure conditions."
+      },
+      {
+        "role": "teacher",
+        "text": "We can mitigate this by adding failure-focused tests that cover these scenarios."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In our trade-off analysis, we see various approaches with their strengths and weaknesses. For instance, while a simple baseline is easy to implement, it often hides timing assumptions, which can lead to hidden pitfalls during stress-testing."
+      },
+      {
+        "role": "teacher",
+        "text": "Each strategy has its place, and it’s crucial to choose wisely based on the specific context."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As you prepare for practical applications of these concepts, identify the invariant most relevant to your coordination patterns."
+      },
+      {
+        "role": "teacher",
+        "text": "Write a sequential scenario you expect to succeed and a pressure scenario that could expose a failure."
+      },
+      {
+        "role": "teacher",
+        "text": "Make sure to log operation and entity IDs to capture evidence effectively."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Remember, this lecture's ideas tie directly to your semester projects. Show how the concepts of coordination patterns apply to your domain."
+      },
+      {
+        "role": "teacher",
+        "text": "Substantiate your mastery with concrete evidence, including runnable commands and structured logs."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Validation Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To wrap up, consider these validation questions. What invariant matters most here?"
+      },
+      {
+        "role": "teacher",
+        "text": "What hidden assumptions could make a baseline design appear correct? How do you force a failure in a repeatable test?"
+      },
+      {
+        "role": "teacher",
+        "text": "These questions help clarify your understanding and application of today’s concepts."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In conclusion, coordination patterns are not just concepts; they give us a framework to assess whether a system remains correct under realistic execution."
+      },
+      {
+        "role": "teacher",
+        "text": "Our goal as engineers is to connect these concepts to observable behaviors and defensible trade-offs in design."
+      }
+    ]
+  }
+]

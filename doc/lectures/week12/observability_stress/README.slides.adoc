@@ -1,0 +1,179 @@
+= Observability Under Stress
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Introduction
+
+* System stability vs. load
+* Pressure reveals hidden failures
+* Key question: Behavior under stress?
+
+== Learning Objectives
+
+* Analyze design pressure from observability
+* Diagnose hidden assumptions in stateful systems
+* Evaluate failure evidence: logs, traces, outputs
+* Design corrections preserving invariants
+* Connect design to Integrity Packet for A4
+
+== Log Aggregation
+
+* Definition: Combine logs from workers
+* Importance: Identify trust conditions under pressure
+* Mechanism: Object state, timing, coordination
+* Failure: Can lead to duplicate work, stale state
+* Design implication: Expose invariants, log transitions
+
+== Filtering by Pressure
+
+* Definition: Using tools to isolate logs by latency
+* Importance: Trust system under pressure evidenced
+* Mechanism: Object state, timing, coordination
+* Failure: Can lead to duplicate work, stale state
+* Design implication: Expose invariants, log transitions
+
+== Operational Pressure
+
+* Definition: Load, latency, volume revealing limits
+* Importance: Trust system under pressure evidenced
+* Mechanism: Object state, timing, coordination
+* Failure: Can lead to duplicate work, stale state
+* Design implication: Expose invariants, log transitions
+
+== Saturation
+
+* Definition: Excess work causing latency/queues
+* Importance: Trust system under pressure evidenced
+* Mechanism: Object state, timing, coordination
+* Failure: Can lead to duplicate work, stale state
+* Design implication: Expose invariants, log transitions
+
+== Evidence Signal
+
+* Definition: Distinguishes real behavior from assumptions
+* Importance: Trust system under pressure evidenced
+* Mechanism: Object state, timing, coordination
+* Failure: Can lead to duplicate work, stale state
+* Design implication: Expose invariants, log transitions
+
+== System Architecture
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Observability Under Stress" as Topic
+rectangle "Log Aggregation" as A
+rectangle "Filtering by Pressure" as B
+rectangle "Operational Pressure" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example: Podcast Domain
+
+* Problem: `Cleaner` logs differ under load
+* Deduction: Worker pool is saturated
+* Trace analysis: Correlation IDs reveal episode paths
+
+== Failure Scenario
+
+* Overlapping executions lead to stale state
+* Identifying mismatched design vs execution
+* Misalignments in assumptions visible under pressure
+
+== Improved Design Direction
+
+* Name invariants clearly
+* Make transitions observable
+* Control correctness: version checks, retries, coordination
+
+== Why Improved Design Is Safer
+
+* Moves from hoping order to proving invariants
+* Rejects invalid interleavings with evidence
+
+== Failure Modes
+
+* System passes single happy-path test
+  * Detection: Add concurrent runs, structured logs
+  * Correction: Include failure-focused tests
+
+* Uses tool names, not design property
+  * Detection: Ask invariant the mechanism protects
+  * Correction: Write invariant first
+
+* Evidence is vague
+  * Detection: Reviewers can't reconstruct failure
+  * Correction: Capture structured evidence
+
+* Fix changes behavior with no baseline
+  * Detection: No repeatable scenarios
+  * Correction: Keep failing tests for comparison
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
+| Guarded state transition | Protects core invariant | Careful modeling required | Status changes
+| Explicit coordination | Shows dependencies | Can cause deadlock | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires control keys | Queues, retries
+| Observability-first | Strong evidence | Adds instrumentation | Failure proof assignments
+|===
+
+== Practical Application
+
+* Identify invariant relevant to observability
+* Construct sequential and pressure scenarios
+* Include operation IDs in logs
+* Capture evidence before/after applying fixes
+* Update Integrity Packet with assumptions and evidence
+
+== Assignment Integration
+
+* Connect concepts to [A4](../../../assignments/A4/index.md)
+* Show object, workflow, event, failure in projects
+* Demonstrate mastery with concrete evidence
+
+== Validation Questions
+
+1. What invariant is most relevant?
+2. What assumption makes baseline appear correct?
+3. How to force the failure?
+4. What evidence proves the failure?
+5. Which mechanism to choose, and trade-offs?
+6. How would issue appear in different stacks?
+7. What to record in Integrity Packet?
+
+== Summary
+
+* Observability under stress as a reasoning method
+* Connect concepts to invariants and behavior
+* Mature designs require explanation and validation
+
+== Discussion
+
+* How can hidden assumptions impact system stability?
+* What strategies can be employed to improve observability?

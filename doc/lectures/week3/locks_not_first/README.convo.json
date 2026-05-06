@@ -1,0 +1,172 @@
+[
+  {
+    "slide": 1,
+    "topic": "Why Locks Are Not the First Answer",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to today's lecture on 'Why Locks Are Not the First Answer'. In this session, we'll explore the challenges engineers face in ensuring system correctness when concurrency is involved. We'll also discuss the importance of analyzing design pressures and hidden assumptions in the context of concurrent systems."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Our objectives for today are clear. We'll analyze the design pressures surrounding the use of locks, identify hidden assumptions that might compromise system integrity, evaluate the evidence of failures, and design controls that maintain important invariants. We'll also learn how to defend our design choices in the Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's start with an opening narrative. Imagine your course project appears to work perfectly during a simple demonstration. However, once you introduce concurrency, ambiguity, or operational pressure, hidden assumptions about your locking strategy could surface. We need to critically analyze and defend our design results to ensure they stand under scrutiny."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Locking as a Patch",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "First, let's discuss 'Locking as a Patch'. This concept involves adding synchronizations to a system. The key idea here is that while locks may seem like an immediate fix, they can obscure deeper issues that must be made explicit before we trust the system under pressure. If we ignore this, we could end up with duplicate processes, stale state, or other breakdowns in functionality."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Coordination Boundary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, we have the 'Coordination Boundary', which refers to the points in our system where independent objects must reach an agreement on the ordering or ownership of operations. Identifying this boundary is crucial because it highlights conditions that can affect trust in our system. Again, failure to acknowledge this can lead to issues like duplicate work or inconsistent states."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Progress Guarantee",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Moving on, let's look at the 'Progress Guarantee'. This principle ensures that work eventually completes and doesn't stall indefinitely. Failing to implement this could mean that our system might appear to work correctly during happy-path scenarios, while real pressure can reveal underlying issues like duplication or state staleness."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Contention",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let's touch on 'Contention'. This describes the competition amongst concurrent actors for shared resources or signals. It's vital to understand this concept as it can severely impact system performance under load. Ignoring contention can lead to multiple failure modes, similar to previous concepts we've discussed."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "System View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In this system view, we see how all these concepts interconnect. The core of our lecture is situating locks not just as a simplistic solution but as part of a broader system architecture. The question is not whether our code runs once but whether it maintains relevant invariants under various execution conditions. We need to stress-test these connections."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's consider a worked example in the podcast domain. Instead of locking the entire 'Episode' object, think about making 'Asset' objects immutable. This can lead to a more streamlined approach. We'll also analyze the trade-offs between a simple global lock that is easy but slow, versus fine-grained locking which can introduce complexity."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Failure Modes",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "We'll now examine various failure modes we've encountered. One common symptom is when a system passes a single happy-path demonstration. This often happens because tests are too simplistic, avoiding the pressures that reveal weaknesses. We can detect these problems by adding more robust tests that simulate concurrent actions and other complex conditions."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In the trade-off analysis, we compare multiple approaches. Each method has its strengths and weaknesses. For instance, a simple baseline is easy to implement but may overlook timing assumptions. On the other hand, an observability-first design provides strong evidence but can increase the workload due to necessary instrumentation."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As we apply these concepts practically, consider your tasks for tomorrow. Identify the key invariant or progress property in your system. Write both a sequential success scenario and a pressure scenario to expose potential failures. Remember to incorporate operation IDs into your logs, capturing necessary evidence that will aid in validation."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In terms of assignment integration, you'll want to connect the ideas from this lecture with your semester project. Demonstrate your understanding by identifying key objects and workflows within your project. Ensure you provide concrete evidence, including runnable commands, structured logs, and diagrams to support your claims."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Validation Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Finally, let's consider some questions for validation. What invariant or progress property are you focused on? What hidden assumptions must be disclosed? Think critically about how your design might fail under testing, what evidence you would collect, and how you would articulate these points in your Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To summarize, the takeaway here is that understanding why locks should not be the first answer is crucial in reasoning about system correctness under real-world conditions. Your designs need to be backed by robust evidence and clear explanations. The maturity of your design is reflected in its ability to withstand scrutiny and be validated."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Discussion",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Before we conclude, I would like to open the floor for discussion. How do hidden assumptions play a role in your design process? Additionally, what do you think is the significance of evidence in supporting your design decisions?"
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For those interested in diving deeper, I recommend exploring some further reading materials. Look into the phrases 'Why Locks Are Not the First Answer' with a focus on distributed systems failure modes, as well as concurrency design trade-offs. Understanding structured logging and invariants in stateful systems can also provide great insights."
+      }
+    ]
+  }
+]

@@ -1,0 +1,462 @@
+[
+  {
+    "slide": 1,
+    "topic": "The Illusion of Correctness",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to today's lecture on the Illusion of Correctness. Throughout this session, we will explore how seemingly correct systems can break under various pressures such as concurrency and operational load."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Imagine presenting a project that appears flawless after a straightforward demonstration. As soon as concurrency or operational stress is introduced, however, you might discover a critical hidden assumption at play, particularly regarding Sequential Bias."
+      },
+      {
+        "role": "student",
+        "text": "What specific hidden assumptions should we be looking for?"
+      },
+      {
+        "role": "teacher",
+        "text": "Great question! We need to analyze assumptions related to the timing of operations and how they can impact overall system correctness."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "By the end of this lecture, you should be able to analyze the design pressures stemming from the illusion of correctness."
+      },
+      {
+        "role": "student",
+        "text": "How do we evaluate the evidence of failure in these cases?"
+      },
+      {
+        "role": "teacher",
+        "text": "You'll learn to evaluate failure evidence using logs, traces, and repeatable scenarios."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concepts",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's dive into the core concepts that underline the illusion of correctness. These concepts include Sequential Bias, Implicit Locks, Temporal Coupling, System Invariants, and Failure Modes."
+      },
+      {
+        "role": "student",
+        "text": "Why are these concepts so critical for system design?"
+      },
+      {
+        "role": "teacher",
+        "text": "Each plays a vital role in helping us understand the conditions that must be explicit for a system to function correctly under pressure."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Sequential Bias",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Sequential Bias refers to the design tendency where we assume that one step always precedes another. This assumption can lead to issues in concurrent systems."
+      },
+      {
+        "role": "student",
+        "text": "What happens if we ignore this bias during design?"
+      },
+      {
+        "role": "teacher",
+        "text": "Ignoring it can result in duplicate operations, stale data, and misleading logs. That’s why it’s crucial to make it explicit."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Implicit Locks",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In single-threaded environments, a single thread acts as an implicit lock for all state. Removing this 'lock' can expose the raw state."
+      },
+      {
+        "role": "student",
+        "text": "But isn’t this just solved by adding more locks?"
+      },
+      {
+        "role": "teacher",
+        "text": "Not necessarily. We need to recognize the conditions that must be explicitly managed to maintain correctness."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Temporal Coupling",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Temporal Coupling occurs when different parts of a system depend on each other’s timing without explicit coordination."
+      },
+      {
+        "role": "student",
+        "text": "How can we identify if our system suffers from temporal coupling?"
+      },
+      {
+        "role": "teacher",
+        "text": "You must analyze timing and interaction patterns to ensure explicit coordination exists where needed."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "System Invariant",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A System Invariant is a condition that must remain true across all valid executions. Identifying these is essential."
+      },
+      {
+        "role": "student",
+        "text": "What happens if we don’t maintain these invariants?"
+      },
+      {
+        "role": "teacher",
+        "text": "Failure to maintain them can lead to significant design flaws and systemic issues."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "Failure Mode",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Understanding Failure Modes gives us insight into repeatable ways a system can violate its invariants."
+      },
+      {
+        "role": "student",
+        "text": "Can we predict these failure modes in advance?"
+      },
+      {
+        "role": "teacher",
+        "text": "While we can identify potential modes, actual conditions need to be tested under various scenarios."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "System / Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This visual representation captures the relationship between the concepts we've discussed."
+      },
+      {
+        "role": "student",
+        "text": "What should we take away from this architecture view?"
+      },
+      {
+        "role": "teacher",
+        "text": "It emphasizes the need for validation evidence in our design decisions."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Worked Example",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s look at a practical example from the podcast domain where we check if the status is DRAFT."
+      },
+      {
+        "role": "student",
+        "text": "Could this lead to issues in concurrent executions?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! Two threads could both check the status and proceed, causing unexpected behaviors."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Problem Setup",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In our Podcast Domain scenario, updating an Episode’s status can lead to overselling items due to concurrency issues."
+      },
+      {
+        "role": "student",
+        "text": "What design strategies can we employ to avoid this?"
+      },
+      {
+        "role": "teacher",
+        "text": "We need strategies that recognize and mitigate potential race conditions effectively."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Naive Implementation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Consider the naive workflow: an actor performs an operation, then the system reads the state, applies the transition, and emits a side effect."
+      },
+      {
+        "role": "student",
+        "text": "What’s the flaw in this approach?"
+      },
+      {
+        "role": "teacher",
+        "text": "It exposes the system to concurrency issues where operations can interleave unexpectedly."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Under overlapping executions, the system might read stale state or execute the same operation multiple times."
+      },
+      {
+        "role": "student",
+        "text": "How do we address this discrepancy?"
+      },
+      {
+        "role": "teacher",
+        "text": "We must align our design assumptions with the actual execution model, ensuring clarity around potential conflicts."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Corrected Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To improve our design, we must name the invariant that needs protection and make transitions observable."
+      },
+      {
+        "role": "student",
+        "text": "What specific controls should we implement?"
+      },
+      {
+        "role": "teacher",
+        "text": "Options include version checks, idempotency keys, or explicit coordination among operations."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Visual Model Anchors",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now let’s examine a visual model that illustrates how different components in our system interact."
+      },
+      {
+        "role": "student",
+        "text": "What are we specifically looking at in this model?"
+      },
+      {
+        "role": "teacher",
+        "text": "We're focusing on understanding the concurrent operations taking place and the vulnerability to Sequential Bias."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "System Interaction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In this interaction, Workers A and B both attempt to read the same episode record."
+      },
+      {
+        "role": "student",
+        "text": "What risks does this present?"
+      },
+      {
+        "role": "teacher",
+        "text": "If they operate concurrently without proper controls, they might read the same initial state and conflict in processing."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "State Transition Model",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This table outlines the various states our Episode can be in: DRAFT, PROCESSING, READY_TO_PUBLISH, and PUBLISHED."
+      },
+      {
+        "role": "student",
+        "text": "How do we ensure that transitions maintain integrity?"
+      },
+      {
+        "role": "teacher",
+        "text": "We must carefully manage defined transitions to prevent integrity violations during concurrent operations."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Failure Interleaving",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s consider a scenario where Worker A and Worker B both check the status as DRAFT."
+      },
+      {
+        "role": "student",
+        "text": "What’s the consequence of this interaction?"
+      },
+      {
+        "role": "teacher",
+        "text": "The lack of coordination could lead to both workers initiating processing jobs, violating our invariant."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Design Response",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To protect the core property of our system, we can implement mechanisms such as atomic compare-and-set or synchronized transitions."
+      },
+      {
+        "role": "student",
+        "text": "But won't this reduce parallelism?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, that’s a crucial trade-off we need to consider in our design processes."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Failure Modes and Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s discuss common failure modes and anti-patterns, like when a system only passes single happy-path tests."
+      },
+      {
+        "role": "student",
+        "text": "How do we avoid falling into that trap?"
+      },
+      {
+        "role": "teacher",
+        "text": "We need to establish additional failure-focused tests that specifically target the invariants we aim to protect."
+      }
+    ]
+  },
+  {
+    "slide": 22,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Here we illustrate trade-offs associated with different design approaches, such as simple baselines versus idempotent designs."
+      },
+      {
+        "role": "student",
+        "text": "When should we choose one approach over another?"
+      },
+      {
+        "role": "teacher",
+        "text": "It's essential to factor in your system's context and specific requirements when making these decisions."
+      }
+    ]
+  },
+  {
+    "slide": 23,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As part of your practical exercise, identify the relevant invariant for the illusion of correctness in your work."
+      },
+      {
+        "role": "student",
+        "text": "What format should our evidence take when we present it?"
+      },
+      {
+        "role": "teacher",
+        "text": "Document a sequential scenario that should succeed and a pressure scenario exploring potential failures."
+      }
+    ]
+  },
+  {
+    "slide": 24,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This lecture supports your assignment by encouraging you to connect these concepts to your semester project."
+      },
+      {
+        "role": "student",
+        "text": "What kind of evidence should we include in our packages?"
+      },
+      {
+        "role": "teacher",
+        "text": "Demonstrate mastery with concrete evidence, including logs, diagrams, and design defenses in your Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 25,
+    "topic": "Validation and Interview Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To reinforce your understanding, consider these validation questions."
+      },
+      {
+        "role": "student",
+        "text": "What kind of evidence is necessary to prove a failure occurred?"
+      },
+      {
+        "role": "teacher",
+        "text": "You’ll need structured evidence linked to identified design flaws and scenarios."
+      }
+    ]
+  },
+  {
+    "slide": 26,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In summary, the illusion of correctness serves as a critical framework for assessing system correctness in real-world executions."
+      },
+      {
+        "role": "student",
+        "text": "What action should we take to ensure our designs are defensible?"
+      },
+      {
+        "role": "teacher",
+        "text": "Make concrete connections between these concepts, maintain observability, and ensure your designs can withstand scrutiny."
+      }
+    ]
+  }
+]

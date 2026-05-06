@@ -1,0 +1,310 @@
+[
+  {
+    "slide": 1,
+    "topic": "Two-Stack Implementation Strategy",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to today's lecture on the Two-Stack Implementation Strategy. We'll explore how this strategy helps us reason about system behavior under concurrency and design pressures."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In this lecture, we aim to achieve several important objectives. First, we will analyze the design pressure of two-stack implementations in concurrent systems."
+      },
+      {
+        "role": "student",
+        "text": "What do you mean by design pressure?"
+      },
+      {
+        "role": "teacher",
+        "text": "Design pressure refers to the constraints and challenges that arise in a concurrent system, specifically how those affect our implementations' robustness."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Core Concepts",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's dive into the core concepts that underpin our discussion today. Understanding these concepts is crucial for successfully applying the two-stack strategy in systems design."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Feature Parity",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Feature parity ensures that Stack A and Stack B share the same classes, methods, and logic."
+      },
+      {
+        "role": "student",
+        "text": "But what happens if we ignore feature parity?"
+      },
+      {
+        "role": "teacher",
+        "text": "Ignoring it can lead to issues like duplicate work or stale states, ultimately compromising the reliability of our testing."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Portability",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Portability means our designs should not rely too heavily on specific features of a single programming language."
+      },
+      {
+        "role": "student",
+        "text": "How would that really affect our implementations?"
+      },
+      {
+        "role": "teacher",
+        "text": "If we overlook portability, we may face similar issues as feature parity, including unreliable states across different environments."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Validation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Validation involves running the same tests on both stacks to ensure consistent behavior under load."
+      },
+      {
+        "role": "student",
+        "text": "What if one stack has different performance characteristics?"
+      },
+      {
+        "role": "teacher",
+        "text": "That's precisely why validation is essential—to reveal any discrepancies that could expose hidden issues."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "System Invariant",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "System invariants must remain true across all executions, ensuring consistent behavior."
+      },
+      {
+        "role": "student",
+        "text": "Isn't it easy to overlook these during development?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, and failing to uphold these invariants can lead to severe inconsistencies, especially under pressure."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Failure Mode",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A failure mode describes a repeatable way in which our system can violate an invariant."
+      },
+      {
+        "role": "student",
+        "text": "How do we even identify these failure modes?"
+      },
+      {
+        "role": "teacher",
+        "text": "We need to test rigorously and be aware of system behaviors that may deviate from our expectations."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's consider a worked example involving Java and Python stacks."
+      },
+      {
+        "role": "student",
+        "text": "Why is it important both stacks start from the same state?"
+      },
+      {
+        "role": "teacher",
+        "text": "It ensures fair testing, making it easier to evaluate performance under concurrency."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Problem Setup",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The setup involves ensuring both implementations read from the same JSON configuration file."
+      },
+      {
+        "role": "student",
+        "text": "What happens if one stack diverges in behavior?"
+      },
+      {
+        "role": "teacher",
+        "text": "That divergency could introduce critical inconsistencies in our testing outcomes."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Overlapping executions can cause stale state issues or duplicate operations."
+      },
+      {
+        "role": "student",
+        "text": "How do we diagnose these errors effectively?"
+      },
+      {
+        "role": "teacher",
+        "text": "We need to be mindful of our design assumptions and thoroughly test under different scenarios."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Corrected Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To correct issues, we explicitly name the invariant we're guarding."
+      },
+      {
+        "role": "student",
+        "text": "What type of controls can we implement?"
+      },
+      {
+        "role": "teacher",
+        "text": "Controls like version checks or idempotency keys can help ensure correctness."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Why the Improved Design Is Safer",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The improved design shifts our focus to proving that invalid operations are managed appropriately."
+      },
+      {
+        "role": "student",
+        "text": "Why is this change in focus important?"
+      },
+      {
+        "role": "teacher",
+        "text": "It strengthens our validation framework by setting expectations for valid interleavings."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Evidence Flow",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Critical evidence includes structured outputs like version logs and command transcripts."
+      },
+      {
+        "role": "student",
+        "text": "How can we ensure the reviewer can reproduce our results?"
+      },
+      {
+        "role": "teacher",
+        "text": "By providing clear evidence that doesn’t rely on personal IDE setups."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Recognizing failure modes, such as passing a happy-path test, is crucial."
+      },
+      {
+        "role": "student",
+        "text": "But isn't a happy-path test still valuable?"
+      },
+      {
+        "role": "teacher",
+        "text": "It is, but we must supplement it with tests that focus on potential failure scenarios."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Analyzing trade-offs between designs helps balance efficiency and correctness."
+      },
+      {
+        "role": "student",
+        "text": "How do we choose the right approach for our context?"
+      },
+      {
+        "role": "teacher",
+        "text": "Consider project requirements and the level of risk associated with different design choices."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Identify the most relevant invariant for two-stack implementation."
+      },
+      {
+        "role": "student",
+        "text": "What’s the best way to document our scenarios?"
+      },
+      {
+        "role": "teacher",
+        "text": "Utilize detailed logs with operation and entity IDs to ensure clarity."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The two-stack implementation strategy is key to understanding system behavior under real-world pressures."
+      },
+      {
+        "role": "student",
+        "text": "How do we apply these concepts moving forward?"
+      },
+      {
+        "role": "teacher",
+        "text": "Connect these ideas with observability, invariants, and robust design trade-offs."
+      }
+    ]
+  }
+]

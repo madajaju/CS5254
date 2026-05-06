@@ -1,0 +1,332 @@
+[
+  {
+    "slide": 1,
+    "topic": "What is System Stress?",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome, everyone, to this lecture on what system stress really means. Today, we will delve into how systems behave under pressure and why ensuring stability in these moments is crucial."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Introduction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s get started. In this introduction, we recognize that while a system may pass functional tests, issues can emerge when under significant load. The critical question we’ll explore is how does pressure reveal system behavior?"
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "By the end of this lecture, you should be able to analyze system stress in concurrent systems, diagnose hidden assumptions, evaluate failure evidence, design effective controls that maintain invariants, and defend your approach using the Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concept: Stress",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To start with, let's define stress. Stress refers to pushing a system to its operational limits, such as maximum threads or throughput. This really matters because we need to explicitly identify these conditions to trust the system when under pressure."
+      },
+      {
+        "role": "student",
+        "text": "Wait… so it's like understanding how the system acts at its breaking point?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! And if we ignore these stress conditions, the system might pass all functional tests while harboring some serious underlying issues."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concept: Contention",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, we have contention, which occurs when multiple threads compete for the same resource. It's vital to recognize this condition before trusting the system under pressure, as failure to address it can lead to issues like stale states and duplicate work."
+      },
+      {
+        "role": "student",
+        "text": "Is contention what causes systems to slow down or behave unexpectedly sometimes?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, exactly! If we don't account for that contention, things can get messy quickly, leading to unexpected errors."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concept: Saturation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let's discuss saturation. This refers to the point where adding more work actually leads to a decrease in performance. Recognizing saturation is essential for understanding system limits because ignoring it can lead to significant failures and degrade service."
+      },
+      {
+        "role": "student",
+        "text": "So, if we keep pushing the system to do more than it should, it’ll just crash or slow down?"
+      },
+      {
+        "role": "teacher",
+        "text": "That's right! Saturation creates a bottleneck, and if ignored, it results in a poor user experience and system failure."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concept: Edge Cases",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Edge cases are these rare timing combinations that only appear when the system is under heavy load. It's crucial to make these explicit in our designs to build trust in the system, as they can also lead to duplicates and blocked workflows if overlooked."
+      },
+      {
+        "role": "student",
+        "text": "I think I get it, but how do we prepare for those edge cases?"
+      },
+      {
+        "role": "teacher",
+        "text": "Great question! It involves rigorous testing under various load conditions to ensure that we catch these edge cases before they become a problem."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Core Concept: Operational Pressure",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Lastly, operational pressure consists of various conditions such as load and latency that reveal hidden system limits. It's essential to understand these pressures to ensure that our designs continue to function correctly under stress."
+      },
+      {
+        "role": "student",
+        "text": "Right, so we need to be aware of what the system can handle before we push it?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! If we neglect operational pressures, we might encounter failures that are tough to diagnose and fix."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Here’s a structural view of what we’ve discussed. This flow illustrates how understanding system stress is connected to validation evidence and design decisions. Remember, successful systems cannot merely function on good paths; they must hold up under changing pressures."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Podcast Domain",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To make these concepts tangible, let’s consider a worked example in the podcast domain. Imagine processing 50 episodes simultaneously, each with five assets. You'll quickly notice that your in-memory data grows too large, or you may experience 100% CPU usage, revealing critical stress points."
+      },
+      {
+        "role": "student",
+        "text": "So, it's like the system can be overwhelmed and crash if we don’t design for that?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! That kind of stress needs proper handling, or you'll face serious operational issues."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Design Assumption",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A common naive design assumption is that operations occur sequentially and in a specific order. This assumption can be misleading as it often hides failures that we may not realize until under pressure, impacting the system’s stability and reliability."
+      },
+      {
+        "role": "student",
+        "text": "So, if everything seems fine in single testing, that doesn't mean it’ll hold up under pressure?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! That’s why thorough testing with concurrent loads is essential."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Under overlapping executions or delays, stale state can be observed due to mismatched design assumptions. This indicates that factors such as coordination and state management are critical to maintaining system integrity."
+      },
+      {
+        "role": "student",
+        "text": "Could the system just freeze up in those situations?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, it could! You might end up with operations stuck, causing significant downtime."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Improving your design involves naming key invariants and ensuring transitions are observable. Implementing strategies like version checks and idempotency can help protect against the types of failures we have discussed."
+      },
+      {
+        "role": "student",
+        "text": "I see, so it's about making the system more predictable in how it responds?"
+      },
+      {
+        "role": "teacher",
+        "text": "Correct! Being proactive about these invariants can often save you from major headaches down the line."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Safer Design Rationale",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The rationale behind these improved designs is to shift from merely hoping that workflows execute properly to proving that any invalid executions are either rejected or managed effectively. This adds a layer of safety and reliability."
+      },
+      {
+        "role": "student",
+        "text": "So, it’s like establishing rules to guide the system’s behavior when things get messy?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly right! These rules will help maintain integrity even when under stress."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's go over some failure modes you might encounter. For instance, systems may pass a happy-path test due to overly simplistic scenarios. It's important to add stress tests with concurrent actors to reveal hidden weaknesses."
+      },
+      {
+        "role": "student",
+        "text": "Could you give an example of what it means to add those stress tests?"
+      },
+      {
+        "role": "teacher",
+        "text": "Certainly! Running multiple instances of real workload, simulating different user interactions, and analyzing how the system behaves under those conditions can uncover weaknesses."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Moving on to trade-offs, every design choice has strengths and weaknesses. For example, using simple baselines might be easy but can hide critical timing assumptions. Understanding when to use specific approaches is vital for effective design."
+      },
+      {
+        "role": "student",
+        "text": "So, I need to weigh the ease of implementation against performance in real-world loads?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! And that balance is where many teams struggle."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In practical applications, start by identifying the invariant related to system stress. Create sequential scenarios and pressure scenarios, log operation IDs, and capture evidence before and after any fixes you implement."
+      },
+      {
+        "role": "student",
+        "text": "That sounds pretty involved!"
+      },
+      {
+        "role": "teacher",
+        "text": "It is, but that effort is what makes your system robust and trustworthy."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Remember to connect what we've discussed today to your semester projects. It's essential to show the relevant dynamics through evidence-based validation that integrates these concepts into your work."
+      },
+      {
+        "role": "student",
+        "text": "Got it! So I need to make sure my project reflects what we've learned here?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes! That is a key part of demonstrating mastery."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Validation Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "I encourage you to think critically by reflecting on these validation questions. What invariant stands out? What hidden assumptions might you need to address? Understanding these will deepen your grasp of system behavior under pressure."
+      },
+      {
+        "role": "student",
+        "text": "This makes me rethink my last project and how I could have tested more thoroughly."
+      },
+      {
+        "role": "teacher",
+        "text": "That's a great insight! Learning from each project will help you grow as an engineer."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To sum up, our primary insight today is that system stress is about reasoning under realistic conditions. Your designs should connect concepts like observable behavior and trade-offs to ensure that they hold up in challenging scenarios."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For those interested in deepening their knowledge, I recommend exploring topics such as distributed systems failure modes and concurrency design tradeoffs, in addition to structured logging and resilience engineering."
+      }
+    ]
+  }
+]

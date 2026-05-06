@@ -1,0 +1,168 @@
+﻿= Starter System Walkthrough
+
+== Learning Objectives
+* Analyze design pressure in a stateful concurrent system.
+* Diagnose hidden assumptions in simple system demonstrations.
+* Evaluate failure evidence: logs, traces, interleavings, or repeatable tests.
+* Design corrections that preserve invariants without obscuring trade-offs.
+* Defend approaches in the Integrity Packet and link to A1 deliverables.
+
+== Opening Narrative
+* A course project appears correct during a demonstration.
+* Once concurrency or operational pressure is introduced, hidden assumptions are exposed.
+* Analysis is necessary before trusting the results.
+
+== Conceptual Baseline
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Conceptual Baseline" as A
+rectangle "Failure Mode" as B
+
+A --> B
+@enduml
+----
+
+== Mapping Responsibilities
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Mapping Responsibilities" as A
+rectangle "Design Implication" as B
+
+A --> B
+@enduml
+----
+
+== Identifying Flaws
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Identifying Flaws" as A
+rectangle "Failure Mode" as B
+
+A --> B
+@enduml
+----
+
+== System Invariant
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "System Invariant" as A
+rectangle "Design Implication" as B
+
+A --> B
+@enduml
+----
+
+== Failure Mode
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Failure Mode" as A
+rectangle "Design Implication" as B
+
+A --> B
+@enduml
+----
+
+== System / Architecture View
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Starter System Walkthrough" as Topic
+rectangle "Conceptual Baseline" as A
+rectangle "Mapping Responsibilities" as B
+rectangle "Identifying Flaws" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+* Problem Setup
+** Lecture System: Job Queue with multiple workers.
+** Intended Flaw: "Pull" logic not atomic; allows multiple claims.
+
+== Failure Scenario
+* Pressure: Overlapping execution can cause duplicate work.
+* Observed: Stale state leads to blocked progress.
+* Root Cause: Design assumptions are not explicit.
+
+== Visual Model Anchors
+=== System Interaction
+* Actors: Student developer, Java stack, Node.js stack.
+* Flow: Same podcast workflow executed from checked-in script.
+
+=== Failure Interleaving
+* T1: Java stack logs `episode-42` with `operationId=op-17`.
+* T2: Node.js stack logs the same transition without `operationId`.
+
+== Failure Modes and Anti-Patterns
+* Symptom: System passes single happy-path demonstration.
+** Why: Test avoids conditions revealing design weaknesses.
+** How to detect: Use concurrent actors or delayed events.
+** How to correct: Add tests targeting invariants.
+
+== Trade-Off Analysis
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
+| Guarded state transition | Protects core invariant | Requires careful state modeling | Status changes
+| Explicit coordination | Makes dependencies visible | Can introduce delays | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires keys | Queues, retries
+| Observability-first design | Strong evidence | Adds instrumentation work | Assignments requiring proof
+|===
+
+== Practical Application
+* Identify the relevant invariant for the system.
+* Write one sequential and one pressure scenario.
+* Capture evidence for comparison if a fix is applied.
+
+== Assignment Integration
+* Connect lecture concepts to the semester project.
+* Demonstrate mastery with concrete evidence.
+
+== Validation and Interview Questions
+. What invariant is most relevant to this lecture?
+. What hidden assumption could make the design appear correct?
+. How can you force the failure in a repeatable test?
+. What evidence would prove the failure occurred?
+. Which design mechanism would you choose first?
+
+== Summary
+* Connect concepts to invariants and observable behavior.
+* A design is not mature until it can be explained, stressed, and validated.

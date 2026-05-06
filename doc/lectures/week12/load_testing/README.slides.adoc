@@ -1,0 +1,171 @@
+= Load Testing Basics
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Introduction
+
+* Core narrative
+* System failures under load
+* Design and measurement challenges
+
+== Learning Objectives
+
+* Analyze design pressure
+* Diagnose hidden assumptions
+* Evaluate failure evidence
+* Design corrections preserving invariants
+
+== Throughput (TPS/RPS)
+
+* Definition: transactions per second
+* Importance: must be explicit under pressure
+* Failure mode: can obscure duplicate work
+* Design: expose invariant, log transitions
+
+== Latency (p95/p99)
+
+* Definition: time for 95% requests to complete
+* Importance: explicit condition for trust
+* Failure mode: can obscure system behavior
+* Design: log critical transitions, validate behavior
+
+== Ramp-up
+
+* Definition: gradual load increase
+* Importance: identify degradation points
+* Failure mode: can hide failures
+* Design: log transitions, validate with tests
+
+== Steady State
+
+* Definition: consistent load over time
+* Importance: detect leaks, exhaustion
+* Failure mode: hidden problems could arise
+* Design: log transitions, validate behavior
+
+== Operational Pressure
+
+* Definition: stress conditions revealing limits
+* Importance: explicit conditions for trust
+* Failure mode: can miss system weaknesses
+* Design: log behavior under various conditions
+
+== System Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Load Testing Basics" as Topic
+rectangle "Throughput (TPS/RPS)" as A
+rectangle "Latency (p95/p99)" as B
+rectangle "Ramp-up" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+* **Podcast Domain**: Episode workflows
+* **Metrics**: Average publish time increases
+* **Tools**: Bash scripts with curl, parallel
+
+== Naive Implementation
+
+* Assumes order and current state
+* Invisible assumption in code
+* *Actor performs operation* 
+* *System reads current state*
+
+== Failure Scenario
+
+* Overlapping execution, stale state
+* Late deliveries or retries introduce issues
+* Evidence of design assumption mismatch
+
+== Improved Design Direction
+
+* Name the invariant, make transitions observable
+* Use version checks, idempotency, coordination
+* Ensure invalid instances are prevented
+
+== Safety of Improved Design
+
+* Moves from hoping to proving workflow order
+* Rejects invalid interleavings with evidence
+* Strengthens confidence in system behavior
+
+== Failure Modes and Anti-Patterns
+
+* Symptom: passes happy path only
+  * Detection: add concurrent runs
+* Symptom: vague evidence
+  * Detection: lack of operation IDs
+* Symptom: fixes not compared to baseline
+  * Detection: no before/after run
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to implement | Hides pressure assumptions | First comparison point
+| Guarded state | Protects core invariant | Requires modeling | Status changes, reservations
+| Explicit coordination | Visible dependencies | May introduce bottlenecks | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires deduplication | Queues, async workers
+| Observability-first | Strong evidence | Adds instrumentation | When failure proof needed
+|===
+
+== Practical Application
+
+* Identify invariant for load testing
+* Write success and pressure scenarios
+* Capture evidence in logs
+
+== Assignment Integration
+
+* Connect lessons to [A4](../../../assignments/A4/index.md)
+* Show relevant mechanism in projects
+* Provide concrete evidence and explanations
+
+== Validation Questions
+
+1. Key invariant from this lecture?
+2. Hidden assumption making baseline appear correct?
+3. Forcing failures in repeatable tests?
+4. Evidence to prove failure occurring?
+5. Initial design mechanism and its trade-off?
+6. How issue appears in different stacks?
+7. Integrity Packet records to defend conclusion?
+
+== Summary
+
+* Load testing basics for system reasoning
+* Connect concept with observable behavior
+* Mastery via evidence and thorough explanation
+
+== Further Reading
+
+* Search: "Load Testing Basics distributed systems"
+* Search: "Load Testing Basics concurrency tradeoffs"
+* Topics: structured logging, invariants, resilience engineering

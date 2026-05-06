@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "Observability Under Stress",
+    "text": "Welcome everyone to our lecture on Observability Under Stress. Today, we will delve into how system behavior changes under load and why it’s crucial to understand these dynamics in the context of concurrent systems."
+  },
+  {
+    "slide": 2,
+    "topic": "Introduction",
+    "text": "Let's start with a key idea: the balance between system stability and load. As we increase pressure on a system, hidden failures can surface. Our main question for today is how we can understand and measure behavior under stress."
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "text": "By the end of this lecture, you should be able to analyze the pressures of observability, diagnose hidden assumptions in stateful systems, evaluate different types of failure evidence, design corrections that protect invariants, and connect these concepts to the Integrity Packet for your assignments."
+  },
+  {
+    "slide": 4,
+    "topic": "Log Aggregation",
+    "text": "First up is log aggregation, which involves combining logs from multiple workers into a unified view. This is important because it highlights conditions necessary to trust the system under pressure. Failure to properly aggregate logs can lead to confusion, such as duplicate work or stale state."
+  },
+  {
+    "slide": 5,
+    "topic": "Filtering by Pressure",
+    "text": "Next, we have filtering by pressure. This means using tools to isolate logs that exceed a certain latency threshold. It helps us gain trust in our system when it's under stress, but neglecting this can lead again to duplicate work and stale state."
+  },
+  {
+    "slide": 6,
+    "topic": "Operational Pressure",
+    "text": "Now let's discuss operational pressure. This concept refers to factors such as load and latency that can reveal the hidden limits of a system. Just like before, if we don’t account for these factors, we risk encountering duplicated work and other issues."
+  },
+  {
+    "slide": 7,
+    "topic": "Saturation",
+    "text": "Saturation occurs when adding more work causes queues to grow or latency to increase. Understanding this point is critical because if we ignore it, the system can appear functional while actually degrading under load."
+  },
+  {
+    "slide": 8,
+    "topic": "Evidence Signal",
+    "text": "An evidence signal is essentially a log or trace that can differentiate real behavior from assumptions. Capturing this evidence is vital to ensure that our systems behave as expected, especially under pressure."
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture",
+    "text": "Let's visualize our concepts with a system architecture diagram. This representation connects the idea of observability under stress to log aggregation, filtering by pressure, operational pressure, and how these elements converge to support design decisions."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Podcast Domain",
+    "text": "For a practical example, consider a podcast domain where the `Cleaner` logs show noticeable differences in processing times under load. We learn that a saturated worker pool is causing significant delays, recognizable through logs and trace analysis."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "In a failure scenario, we can see how overlapping executions of tasks lead to stale states. This highlights the contrast between our design assumptions and the actual execution of our systems under pressure."
+  },
+  {
+    "slide": 12,
+    "topic": "Improved Design Direction",
+    "text": "To improve our design, we need to clearly define the invariants and make transitions observable. Incorporating mechanisms such as version checks or retries with backoff can help us maintain correctness under various conditions."
+  },
+  {
+    "slide": 13,
+    "topic": "Why Improved Design Is Safer",
+    "text": "The importance of this improved design approach is that it shifts our focus from hoping operations execute correctly to providing evidence that invalid states are rejected or recovered from effectively."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes",
+    "text": "Now, let’s look into common failure modes. One symptom is when a system passes a happy-path test but fails under load. The solution here is to implement stress tests that reveal hidden weaknesses in our designs."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "text": "We need to analyze approaches for managing observability under stress. Each option has its strengths and weaknesses. For instance, a simple baseline is easy but might hide timing assumptions, while a protected state transitions directly safeguard the invariant."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "text": "In your practical applications tomorrow, identify the key invariant relevant to observability, write scenarios to test both sequential execution and pressure scenarios, and ensure you capture the necessary logs and evidence to validate your changes."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "text": "For your assignments, make sure you connect the concepts we discussed today to your semester project. Demonstrating mastery through concrete evidence will be essential for your success."
+  },
+  {
+    "slide": 18,
+    "topic": "Validation Questions",
+    "text": "Finally, let’s prepare for some validation questions. I encourage you to think about what invariant is most relevant, the hidden assumptions that might skew your baseline design, and how you would force failures in a repeatable test."
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "To summarize, observability under stress allows us to reason about system correctness during realistic conditions. Connecting this concept to invariants, observable behaviors, and trade-offs is critical for robust design."
+  },
+  {
+    "slide": 20,
+    "topic": "Discussion",
+    "text": "To wrap up, let’s have a discussion about the impact of hidden assumptions on system stability and explore strategies to enhance observability. Your insights here will be valuable for our learning experience."
+  }
+]

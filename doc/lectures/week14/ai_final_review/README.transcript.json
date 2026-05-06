@@ -1,0 +1,112 @@
+[
+  {
+    "slide": 1,
+    "topic": "AI Final Review: What Was Learned?",
+    "text": "Welcome to the final review for AI, where we will explore what we've learned about object-oriented systems under concurrency. This session will help clarify significant concepts and practical applications that align with your assignments."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "Throughout this lecture, our key objectives are to analyze design pressures in stateful concurrent systems, diagnose underlying assumptions, evaluate failure evidence, design effective corrections, and defend these choices in your Integrity Packet while connecting them to assignment one."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Imagine a scenario where a student asks AI for a design. The response is code that lacks an ordering guard. While this may provide a good starting point, it could lead to stalling workflows or violating invariants. This raises an important question: how can engineers leverage AI-generated designs while maintaining responsibility for their correctness?"
+  },
+  {
+    "slide": 4,
+    "topic": "The Competency Gap",
+    "text": "The competency gap refers to those areas where human engineers identify issues that AI might overlook, such as deep race conditions. Recognizing this gap is crucial because it informs us of the conditions necessary for a system to be trusted under pressure. Ignoring these could lead to significant failures like duplicate work or stale states."
+  },
+  {
+    "slide": 5,
+    "topic": "The Acceleration Factor",
+    "text": "The acceleration factor examines how AI can actually help, for instance by generating boilerplate code or suggesting standard patterns. Identifying this factor becomes essential for establishing trust in the system, especially as it navigates through complex workflows. Again, overlooking this could result in design failures similar to those we see with the competency gap."
+  },
+  {
+    "slide": 6,
+    "topic": "Validation as the Constant",
+    "text": "Validation serves as a constant reminder of the importance of ensuring trust in our designs before adopting them. It is always crucial to understand how our workflows and actor behaviors will affect system reliability. Neglecting these validations can lead to similar issues as those seen in both the competency gap and the acceleration factor."
+  },
+  {
+    "slide": 7,
+    "topic": "AI-Assisted Hypothesis",
+    "text": "When working with AI-generated designs, it is vital to validate these hypotheses before full adoption. This validation ensures that the underlying conditions for trust are clear. Just like earlier points, if not adequately addressed, the same kinds of failures can emerge."
+  },
+  {
+    "slide": 8,
+    "topic": "Human Verification",
+    "text": "Human verification involves engineers checking AI outputs against existing code, tests, and evidence. This step is essential to build confidence in the design, particularly under pressure. The same potential pitfalls we've discussed can arise if this verification step is neglected."
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "text": "Let's consider the system architecture of our lecture content. The flow connects the main topic, identifying competency and acceleration factors, through validation channels, ultimately arriving at concrete design decisions. This interconnectedness highlights how a system must navigate design pressures while remaining resilient to change."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "text": "Let’s dive into a worked example. Reflect on a time when you accepted an AI suggestion without questioning it and later experienced failure. This serves as an important lesson in validation and critical thinking when reviewing AI outputs."
+  },
+  {
+    "slide": 11,
+    "topic": "Problem Setup",
+    "text": "In setting up our problems, we recognize two key instances. One involves accepting fixes from AI that fail, while another revolves around the rejection of AI’s over-engineered suggestions for simpler stress tests. Each of these scenarios raises important questions about verification."
+  },
+  {
+    "slide": 12,
+    "topic": "Naive Implementation",
+    "text": "A naive implementation assumes an operation executes once, in order, and with the current state. This assumption often hides in the method names and can pass superficial tests. However, the underlying reality often betrays those assumptions."
+  },
+  {
+    "slide": 13,
+    "topic": "Failure Scenario",
+    "text": "Consider a situation with overlapping execution or delayed deliveries—it exposes stale state issues. This failure is not a simple syntax error; it's a significant difference between design assumptions and actual execution."
+  },
+  {
+    "slide": 14,
+    "topic": "Corrected Design Direction",
+    "text": "To improve the design, we must explicitly define invariants, make transitions observable, and introduce correctness controls. These include version checks and idempotent actions that can effectively prevent or correct failures."
+  },
+  {
+    "slide": 15,
+    "topic": "Why Improved Design Is Safer",
+    "text": "By honing in on improved designs, we shift the focus from merely hoping the workflow executes correctly to actually proving that any invalid interleavings are adequately handled, rejected, or recovered through evidence."
+  },
+  {
+    "slide": 16,
+    "topic": "Failure Modes",
+    "text": "Let’s discuss common failure modes. One common symptom is achieving a single happy-path success without stress-testing designs. To uncover these weaknesses, we can introduce concurrent actors and more rigorous testing focused on failure scenarios."
+  },
+  {
+    "slide": 17,
+    "topic": "Trade-Off Analysis",
+    "text": "In our analysis of trade-offs, we see multiple approaches each with strengths and weaknesses. For instance, a simple baseline is easy to implement but often masks timing assumptions, while an explicit coordination might expose dependencies at the cost of potential bottlenecks."
+  },
+  {
+    "slide": 18,
+    "topic": "Practical Application",
+    "text": "For practical application, I encourage you to identify the most relevant invariant for our discussion. Draft one sequential scenario and one that introduces pressure to expose potential failures. Remember, capturing evidence before and after applying fixes is critical."
+  },
+  {
+    "slide": 19,
+    "topic": "Assignment Integration",
+    "text": "As we look at assignment integration, think about how the concepts we've explored connect back to your projects. Demonstrate mastery through evidence of your own workflows and systems, including runnable commands, structured logs, and diagrams."
+  },
+  {
+    "slide": 20,
+    "topic": "Validation Questions",
+    "text": "Finally, to reinforce learning, reflect on these validation questions. Consider which invariants stood out, what hidden assumptions were undetected, how you would force failure in tests, and what evidence would convincingly prove such failures occurred."
+  },
+  {
+    "slide": 21,
+    "topic": "Summary",
+    "text": "In summary, the insights we’ve gained today highlight that our final review is not just a checklist item but a framework for reasoning about system correctness under realistic execution. Your task as engineers is to connect these concepts to observable behaviors and defendable design trade-offs."
+  },
+  {
+    "slide": 22,
+    "topic": "Further Reading",
+    "text": "For those looking to deepen their understanding, I encourage you to explore topics related to distributed system failure modes and concurrency design trade-offs. Familiarization with structured logging and correlation IDs will also be advantageous."
+  }
+]

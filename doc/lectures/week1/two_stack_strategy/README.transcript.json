@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "Two-Stack Strategy",
+    "text": "Welcome everyone to our lecture on the Two-Stack Strategy. Today, we're going to explore how different programming environments handle concurrency and the implications that has for software design."
+  },
+  {
+    "slide": 2,
+    "topic": "Course Overview",
+    "text": "This course, CS 5891b, focuses on Object-Oriented Systems Under Concurrency. In our first week, we'll be diving deeper into concurrency concepts, and this lecture will last about 15 minutes. Make sure you're familiar with basic programming principles, runtime concepts, and object-oriented design as we embark on this journey."
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "text": "By the end of this lecture, you should be able to compare how different runtimes expose concurrency issues, design implementations that maintain conceptual parity across these runtimes, and diagnose how stack-specific behaviors can change the outcomes of our tests. Furthermore, you’ll evaluate the trade-offs involved in object models under concurrency and defend your stack choices using evidence from your observations."
+  },
+  {
+    "slide": 4,
+    "topic": "Opening Scenario",
+    "text": "Let's illustrate our topic with a scenario. Imagine you have implemented the same reservation workflow in Java and Node.js. The Java version quickly shows a race condition when multiple threads try to reserve the last seat, while the Node.js version appears safe until it hits a database operation. This difference highlights how the runtime environment can obscure concurrency issues. How can we better compare these two stacks without causing confusion?"
+  },
+  {
+    "slide": 5,
+    "topic": "Runtime Variance",
+    "text": "Runtime variance refers to the differences in how programming environments handle scheduling work, isolating memory, and managing input/output operations. It's crucial to understand this because a design may function correctly in one environment but fail spectacularly in another. Common mechanisms include threads, event loops, and locks which can dramatically alter how we perceive design correctness. The key takeaway here is to maintain an invariant focus rather than getting lost in the syntax."
+  },
+  {
+    "slide": 6,
+    "topic": "Conceptual Parity",
+    "text": "Conceptual parity means that two implementations must represent the same underlying concepts and workflows to have a meaningful comparison. If they are not equivalent, discussing their differences loses relevance. This requires us to use shared domain diagrams and consistent test scenarios to document equivalence, ensuring that any differences in behavior are actually rooted in runtime mechanics rather than the designs themselves."
+  },
+  {
+    "slide": 7,
+    "topic": "Hidden Assumptions",
+    "text": "Hidden assumptions in our designs can lead to misunderstandings about how our software behaves. These are often unstated beliefs regarding execution order or atomic operations that might differ between environments, which can result in issues that are not immediately visible in one stack but are readily apparent in another. To mitigate this, we should craft tests that ensure real overlap in conditions between the stacks we are comparing."
+  },
+  {
+    "slide": 8,
+    "topic": "Comparable Evidence",
+    "text": "When we discuss comparable evidence, we're referring to the logs and outputs that demonstrate and allow us to compare behaviors across different implementations. For effective assignments, you need to capture the same types of state transitions and operation identifiers in both stacks. The lack of conclusive logs can become a barrier in understanding how each stack behaves under concurrent stress."
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture",
+    "text": "In our architecture, we have a shared domain model that underpins both stack implementations. This model connects to each stack while also being subjected to a shared concurrency scenario for testing. As we move through the slides, keep in mind that our goal is to ensure that both stacks operate under a unified conceptual framework while differing only in their runtime mechanics."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "text": "Now, let’s explore a worked example with a podcast system implemented in both Java and Node.js. Key components include Episode, AssetProcessor, and PublishingManager. The primary constraint is that an episode cannot be published until all required assets are ready. Understanding this example will help solidify your grasp on the concepts we're discussing."
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Mental Model",
+    "text": "Consider this naive mental model from our JavaScript implementation. The code for publishing an episode uses asynchronous functions to check if an episode is ready to publish. It exemplifies how a single-threaded approach can give a false sense of safety when it does not account for possible concurrency issues."
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "text": "Let's discuss a potential failure scenario. If two concurrent requests load the same episode, the asynchronous control flow can yield between reading and writing, resulting in stale data being read. This issue could be handled differently in Java due to its threading model. Our understanding of these nuances is critical in ensuring robust implementation."
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "text": "To improve our design, we need to focus on creating atomic transitions when publishing episodes. By structuring our logic to ensure an attempt to transition from 'READY_TO_PUBLISH' to 'PUBLISHED' succeeds before sending notifications, we can maintain a higher level of correctness in both implementations. This focuses our comparison on invariants rather than the runtime differences."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes",
+    "text": "Next, let's identify potential failure modes when implementing our two-stack strategy. For instance, one stack might pass tests due to sequential calls that don't accurately simulate concurrent conditions. To detect this, look for logs that show operations occurring in non-overlapping windows and adjust your tests accordingly to include genuine concurrent scenarios."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "text": "Here we have a trade-off analysis table that outlines various stack combinations, their strengths, and weaknesses. For example, using Java and Node.js provides a striking contrast between threading and event loops, but it requires careful reasoning about asynchronous behavior. As you select your stacks for comparisons, weigh these trade-offs thoughtfully."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "text": "As you approach your practical assignments, begin by selecting two approved stacks, and ensure to document runtime versions and tools used. Writing a shared domain model that is independent of any specific language will help set a solid foundation, alongside defining common states and writing tests that reflect both sequential and concurrent operations."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "text": "This lecture aligns with your upcoming assignments, specifically A0 and A1. A1 requires you to have a functional model that matches across both stacks while demonstrating how they behave under concurrent load. Your goal is to show conceptual equivalence, providing evidence of how runtime differences manifest in behavior."
+  },
+  {
+    "slide": 18,
+    "topic": "Validation Questions",
+    "text": "To gauge your understanding, consider these validation questions. What does conceptual parity mean in a two-stack assignment? How does Node.js still exhibit concurrency issues? Why does Java often expose shared-memory races more quickly? Reflecting on these questions will deepen your grasp of the material."
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "In summary, remember that using two stacks should not be viewed as a chore but rather as a powerful lens for uncovering hidden assumptions within our designs. By drawing parallels across different runtimes, we gain insights that can enhance our engineering skills and improve our understanding of concurrency."
+  },
+  {
+    "slide": 20,
+    "topic": "Further Reading",
+    "text": "For additional insights, I encourage you to explore further reading materials, including those on the Java memory model, JavaScript event loops, and Go's concurrency features. Diving into these topics will further enhance your understanding of the complexities we discussed today."
+  }
+]

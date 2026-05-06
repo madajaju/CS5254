@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "Async Models Across Languages",
+    "text": "Welcome to the lecture on Async Models Across Languages. Today, we'll explore how asynchronous workflows introduce concurrency issues and the ways in which these impact the correctness of our systems. We'll discuss the significance of events and observability in ensuring our designs function properly across different languages."
+  },
+  {
+    "slide": 2,
+    "topic": "Introduction",
+    "text": "To get started, let's address the core concepts of async models. These models significantly change how workflows operate, particularly by moving tasks into background processing. This shift means that correctness relies heavily on understanding events, handling retries, managing ordering, and ensuring we can observe significant state changes. It’s crucial for us to explicitly define how work transitions across time."
+  },
+  {
+    "slide": 3,
+    "topic": "Node.js (Event Loop)",
+    "text": "Let's dive into Node.js, which employs a single-threaded, non-blocking event loop mechanism. This allows us to handle many tasks simultaneously using callbacks or the newer async/await syntax. It's essential to understand that we must make the conditions under which our systems operate explicit; neglecting this could lead to scenarios where duplicate work is generated or the system works with outdated, stale state."
+  },
+  {
+    "slide": 4,
+    "topic": "Java (Threads/Futures)",
+    "text": "Moving on to Java, traditionally a multi-threaded environment, we see it adapting to modern practices with tools like CompletableFuture and Project Loom for managing asynchronous tasks. Similar to Node.js, there are critical conditions that must be made explicit to gain trust in our system's performance under pressure, or we risk running into the same failure modes like stale state and duplicated work."
+  },
+  {
+    "slide": 5,
+    "topic": "Go (Goroutines/Channels)",
+    "text": "Now let's consider Go, which uses lightweight threads called goroutines to handle concurrent tasks. These communicate through channels, allowing for an efficient way to manage concurrency. Just like in Java and Node.js, conditions within this design need to be clearly articulated. If not, we may encounter the same types of failures we've previously discussed."
+  },
+  {
+    "slide": 6,
+    "topic": "Python (Asyncio)",
+    "text": "In Python, we have the asyncio library, which provides an event loop model akin to Node.js but comes with its unique syntax and constraints. It’s vital to clarify the conditions under which operations occur since ignoring them can lead to failures that are prevalent across other asynchronous models."
+  },
+  {
+    "slide": 7,
+    "topic": "Asynchronous Boundary",
+    "text": "Next, we define what we call an Asynchronous Boundary. This is simply a point in our workflow where tasks are paused and will continue later, often on a different worker or event loop. Recognizing and making these boundaries explicit is critical for the overall reliability of our system."
+  },
+  {
+    "slide": 8,
+    "topic": "System / Architecture View",
+    "text": "Here, we visualize the architecture related to async models across different programming languages. At the center is the concept of analyzing how these various async models interact. This architecture emphasizes the need for strong validation evidence, which connects back to our design considerations. It's important to remember that successful implementation isn't just about one-time functionality but rather about maintaining invariants as we scale."
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example",
+    "text": "Let's look at a worked example to ground these concepts. We will consider a two-stack comparison: in Java, we can use ScheduledExecutorService to simulate background tasks, while in Node.js, we might use setImmediate or an EventEmitter. Understanding the syntactic parity between languages will help us grasp these concepts better."
+  },
+  {
+    "slide": 10,
+    "topic": "Problem Setup",
+    "text": "In our problem setup, we acknowledge that naive implementations often incorrectly assume operations will happen once and in the right order. These assumptions frequently remain hidden in the code, making it hard to identify potential failure points until they surface during execution."
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Implementation",
+    "text": "This naive implementation approach typically follows a pattern: an actor performs an operation, the system reads the current state, applies a transition, and emits a side effect. However, the challenges arise due to invisible assumptions that can lead to unexpected behavior."
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "text": "Under situations of overlapping execution or delayed responses, we might encounter stale states, duplicate operations, or even stalled workflows. These aren’t just simple syntax errors; they reflect deeper design flaws where the initial assumptions made are proven incorrect under pressure."
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "text": "To improve our design, we need to clearly name the invariant we're trying to protect, make transitions observable, and implement controls such as version checks or idempotency keys. This structured approach helps to ensure that our systems can handle failures gracefully."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "We must be aware of certain failure modes and anti-patterns. For instance, when a system passes a happy-path test, it may still mask design weaknesses due to inadequate testing under realistic conditions. Recognizing these symptoms allows for better detection and correction strategies, such as adding structured logs and stress tests."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "text": "In our trade-off analysis, we break down various approaches based on their strengths and weaknesses. For example, starting with a simple baseline provides an easy implementation, but it might hide key timing assumptions. Understanding when to use certain approaches, like guarded state transitions or explicit coordination, is crucial for reliable system design."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "text": "As we approach practical applications of these concepts, I'd like you to identify the most relevant invariant for async models in your projects. Write both a sequential and a pressure scenario to test your definitions. Remember to log operation IDs to help capture the full picture when you are under stress testing conditions."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "text": "This lecture ties directly into Assignment 3. You'll need to apply what we've discussed by connecting these async concepts to your semester project. Show how the relevant workflows, events, failures, and recovery mechanisms operate in your domain. Your work should be supported with tangible evidence and detailed explanations in your Integrity Packet."
+  },
+  {
+    "slide": 18,
+    "topic": "Discussion",
+    "text": "Let's take a moment for discussion. I want you to think about which invariant from today's lecture is most relevant to your work. How might you force a failure in a repeatable test? Additionally, consider what hidden assumptions could exist in your baseline designs and what trade-offs you would prioritize in your projects."
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "As we wrap up, remember the central theme: async models have a significant impact on system correctness. It’s vital to connect these concepts to your invariants, observable behaviors, and defensible design choices. Through our discussions and exercises, ensure that your designs can be clearly explained, validated, and adapted to real-world conditions."
+  },
+  {
+    "slide": 20,
+    "topic": "Further Reading",
+    "text": "Finally, for those interested in further readings, I encourage you to explore resources on distributed systems failure modes, concurrency design trade-offs, and structured logging practices. These topics are invaluable for deepening your understanding of async models across languages and improving your systems design skills."
+  }
+]

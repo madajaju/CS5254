@@ -1,0 +1,201 @@
+= Blocking vs. Non-Blocking Coordination
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Learning Objectives
+
+* Analyze the design pressure from blocking vs. non-blocking coordination
+* Diagnose hidden assumptions in concurrent systems
+* Evaluate failure evidence: logs, traces, interleavings
+* Design corrections preserving the invariant
+* Defend the approach in the Integrity Packet
+
+== Opening Narrative
+
+* Two components wait for each other
+* Logs show activity, but workflow halts
+* Coordination contract is incomplete
+* What design rules make progress observable?
+
+== Core Concept: Blocking
+
+* Definition: Thread stops and waits
+* Importance: Must be explicit before trust
+* Mechanism: Through state, timing, behavior
+* Failure Mode: Leads to duplicates, stale state, or misleading evidence
+* Design Implication: Expose invariant, log transition, validate behavior
+
+== Core Concept: Non-Blocking
+
+* Definition: Thread continues while waiting
+* Importance: Must be explicit before trust
+* Mechanism: Through state, timing, behavior
+* Failure Mode: Same as Blocking
+* Design Implication: Expose invariant, log transition, validate behavior
+
+== Core Concept: Thread Starvation
+
+* Definition: All threads blocked waiting
+* Importance: Must be explicit before trust
+* Mechanism: Through state, timing, behavior
+* Failure Mode: Same as Blocking
+* Design Implication: Expose invariant, log transition, validate behavior
+
+== Core Concept: Callbacks/Promises
+
+* Definition: Handles completion notifications
+* Importance: Must be explicit before trust
+* Mechanism: Through state, timing, behavior
+* Failure Mode: Same as Blocking
+* Design Implication: Expose invariant, log transition, validate behavior
+
+== Core Concept: Coordination Boundary
+
+* Definition: Point of agreement on ordering
+* Importance: Must be explicit before trust
+* Mechanism: Through state, timing, behavior
+* Failure Mode: Same as Blocking
+* Design Implication: Expose invariant, log transition, validate behavior
+
+== System Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Blocking vs. Non-Blocking Coordination" as Topic
+rectangle "Blocking" as A
+rectangle "Non-Blocking" as B
+rectangle "Thread Starvation" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example: Problem Setup
+
+* Podcast Domain: 
+  * Blocking: `Orchestrator` sleeps until `cleaner.clean()`
+  * Non-Blocking: `Orchestrator` requests `Cleaner` while fetching new episodes
+* I/O Wait: Blocking reads vs. asynchronous design
+
+== Worked Example: Naive Implementation
+
+* Naive design assumptions:
+  * Operation happens once and in order
+  * Method name sounds correct
+  * Sequential test passes
+
+```text
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+```
+
+== Worked Example: Failure Scenario
+
+* Overlapping execution causes:
+  * Stale state 
+  * Duplicate execution 
+  * Workflow gets stuck 
+* It's a design assumption mismatch, not just syntax.
+
+== Worked Example: Improved Design Direction
+
+* Name the invariant
+* Make transitions observable
+* Add controls like:
+  * Version checks
+  * Idempotency keys
+  * State-machine guards
+
+== Why Improved Design Is Safer
+
+* Shift from assuming order to proving correctness
+* Reject or recover invalid interleavings with evidence
+
+== Failure Modes and Anti-Patterns
+
+* Symptom: Passes happy-path test.
+  * Why: Test avoids timing or pressure conditions.
+  * Correct: Add failure-focused tests.
+* Symptom: Names a tool, not a design property.
+  * Why: Focus on mechanisms before invariants.
+  * Correct: Write the invariant first.
+* Symptom: Vague evidence.
+  * Why: Logs lack critical IDs or information.
+  * Correct: Capture structured evidence.
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
+| Guarded transition | Protects invariant | Requires careful modeling | Status changes
+| Explicit coordination | Visible dependencies | May cause waiting | Multi-object workflows
+| Idempotent design | Handles duplicates | Needs side-effect control | Queues and retries
+| Observability-first | Produces strong evidence | Adds instrumentation | Assignments requiring proof
+|===
+
+== Practical Application
+
+* Identify invariant relevant to coordination
+* Write sequential and pressure scenarios
+* Add operation & entity IDs to logs
+* Capture before/after evidence if fixing
+* Update the Integrity Packet with assumptions and validations
+
+== Assignment Integration
+
+* Connect the lecture concept to [A2](../../../assignments/A2/index.md)
+* Demonstrate mastery with structured evidence
+
+== Validation and Interview Questions
+
+1. What invariant is most relevant here?
+2. What hidden assumption makes the design appear correct?
+3. How would you force the failure in a test?
+4. What proof would validate the failure?
+5. Which mechanism would you choose first? What trade-off?
+6. How would the issue appear in your implementation stacks?
+7. What would you record in the Integrity Packet?
+
+== Discussion
+
+* What design challenges arise in blocking vs. non-blocking systems?
+* How can evidence strengthen your design choices?
+
+== Summary
+
+* Blocking vs. non-blocking coordination connects to system correctness
+* Engineering task: link concepts to invariants and observable behavior
+* Design maturity is validated by evidence and response strategies
+
+== Further Reading
+
+* "Blocking vs. Non-Blocking Coordination distributed systems failure mode"
+* "Blocking vs. Non-Blocking Coordination concurrency design tradeoffs"
+* Structured logging and correlation IDs
+* Invariants in stateful object-oriented systems
+* Coordination patterns, deadlocks, and progress guarantees

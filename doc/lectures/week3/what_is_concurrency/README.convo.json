@@ -1,0 +1,320 @@
+[
+  {
+    "slide": 1,
+    "topic": "What is Concurrency Really?",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to our lecture titled 'What is Concurrency Really?'. Today, we are going to explore the intricacies of concurrency in object-oriented systems. We will analyze the challenges and hidden assumptions that can arise when we introduce concurrency into our projects."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s start with an example: imagine you have a course project that seems to work perfectly during initial demonstrations. However, once we introduce concurrency, we may uncover hidden assumptions that were not apparent. Our goal today is to understand what these assumptions are and how we must analyze and defend our results before we can trust them in a concurrent environment."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Core Concepts",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "We will dive into several core concepts related to concurrency. Our first concept is interleaving, which is the way tasks on a single core can be switched out so quickly that it appears they are executing at the same time. This is crucial for trust in a system because if it’s not explicitly accounted for, it could lead to duplicate work or stale state."
+      },
+      {
+        "role": "student",
+        "text": "Wait… so interleaving is like how a single processor can handle multiple tasks without actually doing them at the same time?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! You're spot on. Interleaving tricks us into thinking that tasks are all progressing simultaneously, while in reality, it’s a rapid switching from one task to another. So, if we don't account for it, we might see unexpected behaviors in our system."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concepts (continued)",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, we discuss parallelism, which involves running multiple tasks simultaneously on different cores. Just like interleaving, it is vital that we understand and acknowledge its implications to maintain system reliability. If we neglect this, we risk facing similar issues like duplicate work."
+      },
+      {
+        "role": "student",
+        "text": "So, with parallelism, tasks actually run at the same time, right? How is that different from interleaving?"
+      },
+      {
+        "role": "teacher",
+        "text": "Correct! Parallelism allows tasks to truly operate simultaneously across multiple cores, while interleaving is essentially a simulation of concurrency on a single core. Each has its own unique implications and potential pitfalls that we need to consider in our designs."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concepts (continued)",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now let's look at context switching. This is a process that saves and restores the state of a thread or process. Like the other concepts, if ignored, it can result in problems such as stale state and, much worse, potentially compromising our system’s reliability under pressure. It’s crucial that we handle this correctly."
+      },
+      {
+        "role": "student",
+        "text": "Okay. So, context switching is like saving your place in a book to go read another one, right? But if you don’t save properly, you could lose track of where you were?"
+      },
+      {
+        "role": "teacher",
+        "text": "That's a great analogy! Yes, if the context isn't managed properly, it could lead to misbehavior in your application, similar to losing your spot in a book. Ensuring that each thread's execution state is preserved accurately is vital for maintaining system integrity."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concepts (continued)",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next is non-determinism, which explains why concurrent programs may yield different results even under the same conditions. Understanding this helps us recognize threats to the correctness of our systems when under concurrent loads. Non-deterministic behavior can be particularly tricky to debug."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concepts (continued)",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Finally, we have the system invariant, which defines conditions that must remain true throughout all valid executions of our concurrent systems. Like all previous concepts, if we fail to apply this, we could encounter unintended consequences such as inconsistencies or duplications in our output."
+      },
+      {
+        "role": "student",
+        "text": "So, basically, invariants are like the rules of the game, right? They need to hold true all the time to ensure everything runs smoothly?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! Keeping our invariants in mind is key to designing robust systems. Whenever we deviate from these rules, we expose ourselves to various risks, including those inconsistencies you mentioned."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "System / Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To visualize these connections, we use a system architecture view. Here, we can see how all these concepts interlink, with our core topic at the center. Each concept feeds into our design decisions, continually refining our understanding and allowing us to establish stronger validation evidence."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s consider a practical example from the podcast domain. In a parallel processing scenario, we might have one core that cleans audio while another generates a transcript simultaneously. Conversely, in an interleaving situation on a single core, we might switch tasks rapidly between these functions."
+      },
+      {
+        "role": "student",
+        "text": "Got it. So, if we run into problems with one of those tasks doing its job on a single core, that takes us back to the idea of hidden assumptions, right?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! Those assumptions can cloud our judgment if we're not vigilant about testing the system under various conditions. We need to know how these concepts interact to foresee potential issues."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Naive Implementation Model",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A naive implementation would operate on the assumption that tasks execute in a straightforward order. In practice, this can lead to invisible issues in the code, where we might think one transition occurs at a time while, in reality, concurrency could disrupt this."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Under certain conditions like overlapping executions or partial failures, stale state becomes a significant risk. This leads to a mismatch between our design assumptions and the actual execution model, often resulting in unexpected behavior. We might see things behaving as if two operations completed successfully when only one actually did."
+      },
+      {
+        "role": "student",
+        "text": "That sounds like it could cause major confusion during debugging!"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! It’s essential for engineers to be aware of these risks and plan accordingly to prevent these scenarios from derailing the project."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Improved Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To address these problems, we need to clearly define our invariants and make state transitions observable. Additionally, we should implement controls such as version checks and idempotency to enhance reliability and avoid potential failures. By being proactive in our design, we can create a more resilient system."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Why Improved Design Is Safer",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This refined design strategy shifts our focus from merely hoping that the workflow executes correctly towards ensuring we can prove invalid interleavings are handled properly. This proactive approach enhances our system’s reliability."
+      },
+      {
+        "role": "student",
+        "text": "So it’s like moving from trusting the code to having evidence that it works as expected?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! That mindset shift is key to building robust systems in the face of concurrency challenges."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "We should be aware of several failure modes. For example, if our system only passes a single happy-path demonstration, it might indicate that we have not sufficiently tested under conditions that might expose design weaknesses. To combat this, we should incorporate tests that focus specifically on failure scenarios. This is where teams get into trouble."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes (continued)",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Another symptom of potential failure is when students can name tools without acknowledging the underlying design properties. This usually happens when the focus is on mechanisms rather than stating the core invariant we need to protect."
+      },
+      {
+        "role": "student",
+        "text": "Right! If someone just talks about tools, it doesn't mean they're addressing the actual problem."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly. We must ensure that the design properties remain front and center in our discussions and analyses."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Failure Modes (continued)",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Evidence may also become unclear and too vague. For instance, logs may lack the required structure or detail to support the claims being made. To rectify this, we should ensure that our evidence captures all relevant information linked to the design claims."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In evaluating strategies, we need to analyze our trade-offs. For instance, a simple baseline implementation is easy to explain but can obscure timing assumptions. On the other hand, an observability-first design, while demanding more instrumentation work, can provide strong evidence for review."
+      },
+      {
+        "role": "student",
+        "text": "So there’s always a balance between simplicity and robustness?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely. Finding that balance is crucial for effective system design."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now moving on to practical applications, I encourage each of you to identify the relevant invariant concerning concurrency in your own context. Write down scenarios, both sequential and those under pressure, which could expose potential failures. This is the part I want you to remember."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As we prepare to connect our lecture concepts to assignment A1, think about how you can demonstrate mastery in your projects. Show the relevance of your objects, workflows, or failure mechanisms through structured evidence and a well-defended Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Validation Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A set of validation questions can help deepen your understanding: What invariant is most relevant? What hidden assumptions could mislead us? How would you create repeatable tests for failures? Remember to think carefully about the evidence needed to support your claims."
+      },
+      {
+        "role": "student",
+        "text": "I think I get it, but how do we identify those hidden assumptions?"
+      },
+      {
+        "role": "teacher",
+        "text": "Great question! It often requires critical analysis of the design itself and considering what could go wrong when pressure is applied."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In summary, our main takeaway is that understanding concurrency is not just about terminology; it’s a critical approach to ensure our systems remain correct under realistic execution conditions. It’s essential to link our concepts to observable behaviors and identifiable trade-offs."
+      }
+    ]
+  },
+  {
+    "slide": 22,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For those looking to delve deeper, I recommend searching for phrases like 'What is Concurrency Really?' along with topics on distributed systems failure modes and concurrency design trade-offs. Also, consider looking into structured logging techniques and the role of invariants in stateful object-oriented systems."
+      }
+    ]
+  },
+  {
+    "slide": 23,
+    "topic": "Discussion",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To wrap up today’s lecture, let’s engage in a discussion. What consequences arise from hidden assumptions in our systems? And how can we ensure the validity of our systems under pressure? I look forward to hearing your thoughts."
+      },
+      {
+        "role": "student",
+        "text": "I think... the consequences can be pretty severe, right? Like, if we don't catch them early, it could lead to full system failures?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! And that’s why we need to be proactive about identifying and handling those assumptions."
+      }
+    ]
+  }
+]

@@ -1,0 +1,219 @@
+= Environment and Repo Structure
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Course Overview
+
+* Course: CS 5891b - Object-Oriented Systems Under Concurrency
+* Duration: 15 minutes
+* Prerequisites:
+** Git basics
+** Command-line execution
+** Package managers
+** Editor or IDE setup
+* Assignment Alignment: A0 - Project Selection, Environment & Integrity Packet
+
+== Learning Objectives
+
+* Design a repository structure for two-stack implementation
+* Evaluate reproducibility of development environments
+* Diagnose setup gaps for concurrency failures
+* Justify tool choices for observability
+* Defend environment evidence in reviews
+
+== Opening Scenario
+
+* A student's concurrent failure demonstrates:
+** Race condition log
+** Different runtime versions
+** Inconsistent logging formats
+** Ad hoc evidence storage
+* How should the environment be structured for reproducibility?
+
+== Reproducible Execution
+
+* Definition: Same workflow, same configuration
+* Importance: Change silence complicates analysis
+* Mechanisms:
+** Versioned runtimes
+** Scripts
+** Containers
+* Failure mode: Works on one machine
+* Design implication: Essential runnable commands
+
+== Two-Stack Repository Layout
+
+* Definition: Separate implementations with conceptual parity
+* Importance: Consistent object model in two environments
+* Mechanisms:
+** Shared documentation
+** Separate directories
+** Common scripts
+* Failure mode: Implementations drift
+* Design implication: Clear comparison necessary
+
+== Structured Logging
+
+* Definition: Consistent event records with key details
+* Importance: Logs provide evidence for behavior
+* Mechanisms:
+** JSON or key-value logs
+** Sorting and filtering capability
+* Failure mode: Unable to trace changes
+* Design implication: Design logging before failures
+
+== Evidence Organization
+
+* Definition: Predictable location for evidence materials
+* Importance: Evidence must be reviewable
+* Mechanisms:
+** Standard folders
+** Clear naming conventions
+* Failure mode: Claims lack sources
+* Design implication: Repo is integral to the system
+
+== System Architecture View
+
+[plantuml, target=repo_structure, format=svg, width=80%]
+----
+@startuml
+rectangle "semester-repo/" {
+  rectangle "A0/"
+  rectangle "A1/"
+  rectangle "A2/"
+  rectangle "A3/"
+  rectangle "A4/"
+  rectangle "docs/"
+  rectangle "integrity-packet/"
+  rectangle "shared/"
+  rectangle "src/" {
+    rectangle "stack-a/"
+    rectangle "stack-b/"
+  }
+  rectangle "scripts/"
+  rectangle "evidence/" {
+    rectangle "logs/"
+    rectangle "screenshots/"
+    rectangle "command-output/"
+  }
+}
+@enduml
+----
+
+== Worked Example: Problem Setup
+
+* Domain: Podcast production
+* Must run the same workflow:
+** Create episode
+** Process assets
+** Mark episode ready
+** Publish
+
+== Naive Mental Model
+
+* Code placed by preference:
+** Java uses console text
+** Node.js logs differently
+* Issue: Inability to compare concurrency behavior
+
+== Failure Scenario
+
+* Five workers publishing the same episode:
+** Java logs thread names
+** Node.js logs request IDs
+* Problem: Missing episode correlation ID
+* Consequence: Inability to show equivalent failures
+
+== Improved Design: Shared Event Schema
+
+```json
+{
+  "operationId": "op-017",
+  "entityType": "Episode",
+  "entityId": "episode-42",
+  "action": "publish_attempt",
+  "previousStatus": "READY_TO_PUBLISH",
+  "newStatus": "PUBLISHED",
+  "stack": "node",
+  "timestamp": "2026-01-15T10:15:30Z"
+}
+```
+
+== Failure Modes and Anti-Patterns (1)
+
+* Symptom: "It works on my machine."
+** Cause: Undocumented setup steps
+** Detection: Peer can't replicate
+** Correction: Add version files or Docker
+
+* Symptom: Logs are readable but not analyzable.
+** Cause: Lacking correlation IDs
+** Detection: Event order cannot be reconstructed
+** Correction: Standardize early
+
+== Failure Modes and Anti-Patterns (2)
+
+* Symptom: Stacks evolve into different systems.
+** Cause: Framework conventions dominate
+** Detection: Object names and states differ
+** Correction: Maintain shared models
+
+* Symptom: Scattered evidence.
+** Cause: Informal output capture
+** Detection: Claims lack links
+** Correction: Store evidence predictably
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Manual local setup | Fast to start | Hard to reproduce | Early exploration only
+| Dockerized setup | Consistent across machines | Adds overhead | When runtime drift matters
+| Shared scripts | Repeatable commands | Maintenance required | Assignment demos
+| Structured logs | Strong evidence | Requires discipline | For all concurrent workflows
+| IDE-only execution | Convenient for debugging | Weak evidence | During debugging only
+|===
+
+== Practical Application
+
+* Confirm tools installed:
+** Git
+** Docker
+** Runtimes
+** Editor
+* Record version commands and outputs
+* Create assignment folder structure
+* Add run scripts and logging schema
+
+== Assignment Integration
+
+* Lecture supports A0 - Project Selection
+* Demonstrate usable evidence-producing systems
+
+== Discussion
+
+1. Why is reproducibility crucial in concurrency?
+2. What details are essential in log records?
+
+== Summary
+
+* Environment setup is integral to engineering arguments.
+* Claims require repeatability, structure, and usability for failure study.
+
+== Further Reading
+
+* Docker for reproducible development
+* Structured logging
+* Correlation IDs in distributed systems
+* Best practices on reproducible environments
+* Logs in 12 factor apps

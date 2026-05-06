@@ -1,0 +1,188 @@
+= Course Model: Design Under Pressure
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Course Overview
+
+- Course: CS 5891b
+- Prerequisites: OOP, Stateful Objects
+- Duration: 15 minutes
+- Assignment: A1 - Object Model Under Concurrency
+
+== Learning Objectives
+
+- Analyze failure of OOP under concurrency
+- Evaluate design cycle: break & fix
+- Diagnose assumptions in object models
+- Defend intentional failure in engineering
+- Justify design claims with evidence
+
+== Opening Narrative
+
+- Team builds a podcast service
+- `Episode` object: passes tests but fails under pressure
+- Focus: When does a clean model become unsafe?
+
+== The Happy Path Trap
+
+- Definition: Error in sequential execution path
+- Issues:
+  * Models seem correct
+  * Assumptions on order & exclusivity
+- Failure: Operations interleave and both succeed
+- Implication: Evaluate states under concurrency.
+
+== Concurrency Pressure
+
+- Definition: Overlapping operations on shared state
+- Issues:
+  * Weak or optimistic object boundaries
+- Failure: Duplicate processing, inconsistent updates
+- Implication: Design must consider concurrency.
+
+== Iterative Resilience
+
+- Definition: Design, break, explain, redesign
+- Issues:
+  * Defending changes with evidence
+- Failure: Symptoms fix, not the invariant
+- Implication: Redesign follows observed failure.
+
+== Evidence-Based Redesign
+
+- Definition: Revision justified by concrete evidence
+- Importance: Defensible claims required
+- Failure: "It seems fixed" lacks validation
+- Implication: Compare before and after changes.
+
+[plantuml, target=system_architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Design baseline\nobject model" as A
+rectangle "Run sequential\nsuccess case" as B
+rectangle "Inject concurrent\npressure" as C
+rectangle "Observe failure" as D
+rectangle "Explain broken\ninvariant" as E
+rectangle "Redesign boundary\nor coordination" as F
+rectangle "Validate under\nsame pressure" as G
+
+A --> B
+B --> C
+C --> D
+D --> E
+E --> F
+F --> G
+@enduml
+----
+
+== Worked Example Overview
+
+- Domain: Podcast with `Episode` object
+- Status transitions:
+  * DRAFT
+  * ASSETS_READY
+  * READY_TO_PUBLISH
+  * PUBLISHED
+
+== Failure Scenario
+
+- Issue: Two workers call `publish` simultaneously
+- Results: Duplicate notifications from incorrect state handling
+
+== Improved Design Direction
+
+- Identify invariant: Publish once, notify once
+- Safer method:
+```python
+def publish(episode_id, expected_version):
+    updated = compare_and_set_status(
+        episode_id,
+        from_status="READY_TO_PUBLISH",
+        to_status="PUBLISHED",
+        expected_version=expected_version
+    )
+    if updated:
+        notify_subscribers(episode_id)
+```
+- Focus on concurrency-aware transitions.
+
+== Failure Modes
+
+- Symptom: System passes sequential tests
+  * Detection: Repeated concurrent tests
+  * Correction: Identify shared state access
+- Symptom: Duplicate notifications
+  * Detection: Count side effects
+  * Correction: Use idempotency keys
+- Symptom: Unjustified locks
+  * Detection: No clear invariant stated
+  * Correction: State invariant before coordination strategy.
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Sequential baseline | Simple | Hides concurrency assumptions | First pass in A1
+| Coarse locking | Quick protection | May reduce throughput | Small critical sections
+| Atomic state transition | Ties correctness to transition | Needs storage support | Status changes
+| Single owner/coordinator | Clarifies responsibility | Can become bottleneck | Strong ordering workflows
+| Idempotent operation | Handles retries | Requires careful design | Queues, retries
+|===
+
+== Practical Application
+
+- Pick one object from your project
+- Write invariant for concurrent access
+- Create a sequential success case
+- Create a concurrent test with overlapping operations
+- Record what breaks
+- Explain cause of failure.
+
+== Assignment Integration
+
+- Aligns with [A1 - Object Model Under Concurrency](../../../assignments/A1/index.md)
+- Task: Capture model, expose failure, defend redesign
+- Evidence: Logs, explanations, validated comparisons.
+
+== Validation Questions
+
+1. Why can a correct model fail under concurrency?
+2. What invariant must be preserved in publishing?
+3. Prove duplicate notifications are a design failure.
+4. When is a lock appropriate?
+5. Evidence for safer redesign?
+6. How does design cycle alter failure role?
+7. What hidden assumption in your domain?
+
+== Summary
+
+- Test correctness under real conditions.
+- A baseline object model is just a hypothesis.
+- Engineers create pressure, observe failures, validate redesigns.
+
+== Further Reading
+
+- Lost update problem
+- Idempotency keys
+- Race conditions in state transitions
+- Compare-and-set & versioned writes
+- Designing invariants for stateful systems.
+
+== Discussion
+
+- How should teams approach hidden assumptions?
+- What strategies would you use to document isolated failures?

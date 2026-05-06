@@ -1,0 +1,188 @@
+﻿= Object Boundaries & Responsibilities
+
+== Learning Objectives
+* Analyze design pressure in stateful concurrent systems.
+* Diagnose hidden assumptions for system correctness.
+* Evaluate failure evidence via logs and tests.
+* Design correction that preserves relevant invariants.
+* Defend approach in Integrity Packet and A1.
+
+== Opening Narrative
+* A course project appears correct during demonstration.
+* Concurrency, ambiguity, or pressure reveals hidden assumptions about Encapsulation of State.
+* What must the engineer analyze and defend before trusting the result?
+
+== Encapsulation of State
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Encapsulation of State" as Topic
+note right of Topic
+  Ensures internal state can only be modified through its own methods.
+  Must be explicit before the system can be trusted under pressure.
+  Failure leads to duplicate work, stale state, blocked progress, or misleading evidence.
+end note
+@enduml
+----
+
+== Single Responsibility Principle (SRP)
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Single Responsibility Principle (SRP)" as Topic
+note right of Topic
+  Each object should have one clear purpose.
+  Must be explicit before the system can be trusted under pressure.
+  Failure leads to duplicate work, stale state, blocked progress, or misleading evidence.
+end note
+@enduml
+----
+
+== Leaky Abstractions
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Leaky Abstractions" as Topic
+note right of Topic
+  Exposes internal data structures, bypassing invariants.
+  Must be explicit before the system can be trusted under pressure.
+  Failure leads to duplicate work, stale state, blocked progress, or misleading evidence.
+end note
+@enduml
+----
+
+== System Invariant
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "System Invariant" as Topic
+note right of Topic
+  Condition that must remain true across all valid executions.
+  Must be explicit before the system can be trusted under pressure.
+  Failure leads to duplicate work, stale state, blocked progress, or misleading evidence.
+end note
+@enduml
+----
+
+== Failure Mode
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Failure Mode" as Topic
+note right of Topic
+  Repeatable way the system violates an invariant or loses progress.
+  Must be explicit before the system can be trusted under pressure.
+  Failure leads to duplicate work, stale state, blocked progress, or misleading evidence.
+end note
+@enduml
+----
+
+== System / Architecture View
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Object Boundaries & Responsibilities" as Topic
+rectangle "Encapsulation of State" as A
+rectangle "Single Responsibility Principle (SRP)" as B
+rectangle "Leaky Abstractions" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+* Podcast Domain: `Episode` object owns its `Status`.
+* Bad Design: Global `Map<EpisodeId, Status>` modified by any part of the system.
+
+=== Naive Implementation
+```text
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+```
+
+== Failure Scenario
+* Overlapping execution can observe stale state or execute twice.
+* The failure is a mismatch between design assumption and execution model.
+
+== Corrected Design Direction
+* Name invariant, make transition observable.
+* Add version checks or explicit coordination.
+
+== Why the Design Is Safer
+* Proves invalid interleavings are rejected or recovered with evidence.
+
+== Trade-Off Analysis
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain and implement | Hides timing assumptions | First implementation and comparison point
+| Guarded state transition | Protects core invariant | Requires careful state modeling | Status changes, reservations, publishing
+| Explicit coordination | Makes dependencies visible | Can introduce deadlocks | Multi-object workflows with ordering
+| Idempotent design | Handles duplicate work | Requires deduplication | Queues, retries, async workers
+| Observability-first design | Produces strong evidence | Adds instrumentation work | Assignments requiring failure proof
+|===
+
+== Practical Application
+* Identify invariant or progress property.
+* Write sequential scenario that should succeed.
+* Write pressure scenario to expose failure.
+* Add operation IDs and entity IDs to logs.
+* Capture before/after evidence if applying a fix.
+* Update Integrity Packet with assumption, evidence, validation.
+
+== Assignment Integration
+* Connect lecture concept to A1.
+* Show relevant object, workflow, event, or recovery mechanism.
+
+== Validation Questions
+* What invariant is most relevant?
+* What hidden assumption could make design appear correct?
+* How would you force the failure in a test?
+* What evidence would prove failure occurred?
+* Which design mechanism to choose first, and what trade-off does it introduce?
+* How would issue appear in different implementation stacks?
+* What to record in Integrity Packet?
+
+== Summary
+* Object boundaries & responsibilities check if systems remain correct under execution.
+* Connect concept to invariants, observable behavior, and defensible trade-offs.
+* Design must be explained, stressed, repaired, and validated with evidence.
+
+== Further Reading
+* Search phrase: "Object Boundaries & Responsibilities distributed systems failure mode"
+* Search phrase: "Object Boundaries & Responsibilities concurrency design tradeoffs"
+* Topic: structured logging and correlation IDs
+* Topic: invariants in stateful object-oriented systems

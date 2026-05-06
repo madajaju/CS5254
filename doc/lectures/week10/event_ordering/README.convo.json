@@ -1,0 +1,364 @@
+[
+  {
+    "slide": 1,
+    "topic": "Out-of-Order Events",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to today's lecture on Out-of-Order Events. In this session, we will explore how certain events in a stateful concurrent system don't always arrive in the order we expect, and how this can impact system correctness."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Our objectives for today are clear. First, we will analyze the design pressure that arises from out-of-order events. Second, we'll diagnose the hidden assumptions that could lead to erroneous behavior in our systems."
+      },
+      {
+        "role": "teacher",
+        "text": "Next, we will evaluate failure evidence, using tools such as logs and traces. Then we'll design effective corrections that preserve our system's invariants. Lastly, you'll learn how to defend these approaches within your Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To illustrate our topic, consider this: events arrive not necessarily in the order they are logically expected. This discrepancy—where delivery order does not match logical order—forces our systems to adapt when causality and timing diverge."
+      },
+      {
+        "role": "teacher",
+        "text": "It's crucial for our architecture to handle this gracefully. Imagine you're waiting for an approval event, but the publication event gets there first. How should the system reason about that?"
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concepts: Non-FIFO Queues",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's dive into our first core concept: Non-FIFO queues. In many distributed systems, the first message in does not always equate to the first message out. This is a significant realization."
+      },
+      {
+        "role": "teacher",
+        "text": "It means we need to explicitly clarify this behavior in our systems to build trust, especially under pressure. If we assume that the order is guaranteed, we might be setting ourselves up for failure."
+      },
+      {
+        "role": "student",
+        "text": "Wait… so if a queue is non-FIFO, how does that affect the reliability of messages?"
+      },
+      {
+        "role": "teacher",
+        "text": "Great question! If we ignore that non-FIFO nature, we can end up with situations like duplicate work or conflicting states in our application because we haven’t validated the transitions properly."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concepts: Race to the Consumer",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, we'll discuss the 'Race to the Consumer' phenomenon. Imagine two events are sent in order, A followed by B. If Event B is processed faster, it may complete before Event A."
+      },
+      {
+        "role": "teacher",
+        "text": "This can lead to unexpected behavior under pressure, which we must clearly address in our systems. So, the speed at which events are processed can impact their logical sequence."
+      },
+      {
+        "role": "student",
+        "text": "So if Event B finishes first, what happens to Event A? Does it just get ignored?"
+      },
+      {
+        "role": "teacher",
+        "text": "Not exactly ignored, but the system may behave incorrectly because it assumes that Event A has completed its necessary processing first. We need to manage these assumptions carefully."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concepts: State Regression",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Another vital concept is State Regression. This occurs when an older event arrives after a newer one, possibly overwriting more recent data."
+      },
+      {
+        "role": "teacher",
+        "text": "To ensure our systems can be trusted, we must handle these situations explicitly, as they can wreak havoc on the state of our objects."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concepts: Asynchronous Boundary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As we continue, let's explore the idea of an Asynchronous Boundary. This is where work transitions to another worker or continues on a different event loop."
+      },
+      {
+        "role": "teacher",
+        "text": "Clear communication across these boundaries is essential for maintaining system integrity. If not, you might end up facing unpredictable behavior."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Core Concepts: Temporal Coupling",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Lastly, we look at Temporal Coupling. This refers to hidden dependencies on the timing of events—when they arrive, when they are processed, or when they are observed."
+      },
+      {
+        "role": "teacher",
+        "text": "Making these dependencies clear is vital for our system's trustworthiness. Without that clarity, we can run into significant issues."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System / Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In the architecture view of Out-of-Order Events, we can see how each concept interacts. The central theme here is to ensure that our systems maintain correctness under varying conditions, whether it's timing, load, retries, or coordination complexity."
+      },
+      {
+        "role": "teacher",
+        "text": "This is where teams often get into trouble—forgetting that their systems need to adapt to these pressures."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To solidify our understanding, we will examine worked examples that highlight these concepts effectively."
+      },
+      {
+        "role": "teacher",
+        "text": "These real-world scenarios will help you see the challenges and strategies involved in handling out-of-order events."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Problem Setup",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In the problem setup, consider two scenarios. In the Podcast domain, the `EpisodeApproved` event is sent, followed by the `EpisodePublished`."
+      },
+      {
+        "role": "teacher",
+        "text": "If the latter arrives first due to network issues, this can lead to failure. Similarly, in an Order System, if a `CancelOrder` event arrives before a `CreateOrder` event, it can cause confusion and errors."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Naive Implementation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A naive implementation might suggest that operations occur once, sequentially, and with the current state."
+      },
+      {
+        "role": "teacher",
+        "text": "However, this oversimplifies the complexity inherent in real-world execution, where timing and order are not always guaranteed."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In our failure scenario, overlapping executions or delayed deliveries can cause operations to observe stale state or arrive late."
+      },
+      {
+        "role": "teacher",
+        "text": "It's crucial to recognize that these issues are not just syntax errors; they're indicative of deeper design mismatches."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Improved Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Toward a more robust design, we should name our invariants and make critical transitions observable."
+      },
+      {
+        "role": "teacher",
+        "text": "By doing this, we gain clarity and control over the operations our systems perform."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Why Improved Design Is Safer",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The improved design not only enhances safety but also shifts our focus from merely hoping that workflows will execute correctly in order."
+      },
+      {
+        "role": "teacher",
+        "text": "We need to ensure that invalid interleavings are effectively rejected or mitigated. This is the part I want you to remember."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Failure Modes: Single Happy-Path Pass",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "One common failure mode occurs when the system successfully passes only a single happy-path demonstration."
+      },
+      {
+        "role": "teacher",
+        "text": "This happens because the test often overlooks the timing or ordering pressures that highlight design weaknesses."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Failure Modes: Tool vs. Property",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Another failure mode is when a student names a tool but not the design property. This reflects a shift in focus from the invariant that must hold true towards the mechanisms themselves."
+      },
+      {
+        "role": "teacher",
+        "text": "If you trust AI here, you're going to get burned if you don't identify the underlying property."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Failure Modes: Vague Evidence",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A third symptom is evidence that is too vague to support the claim made."
+      },
+      {
+        "role": "teacher",
+        "text": "Often, insufficient logging prevents us from tracing failures back to their causes. Stronger evidence is necessary for thorough analysis."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Failure Modes: Fix Without Comparison",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "We also see issues when a fix changes behavior without any comparison to a baseline scenario."
+      },
+      {
+        "role": "teacher",
+        "text": "If the original failure was not preserved, we cannot meaningfully determine the success of our fixes. This is where teams usually get this wrong."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now let’s evaluate trade-offs in our design decisions. For example, a simple baseline approach is easy to understand but may hide critical timing assumptions."
+      },
+      {
+        "role": "teacher",
+        "text": "On the other hand, a more guarded state transition directly protects the core invariant at the cost of requiring careful state modeling. Every design has its compromises."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In practical application, I encourage you to identify the invariant or progress property most relevant to out-of-order events."
+      },
+      {
+        "role": "teacher",
+        "text": "Write a successful sequential scenario and a pressure scenario that exposes potential failures. Ensure your logs contain enough detail for effective tracing."
+      }
+    ]
+  },
+  {
+    "slide": 22,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In connection with Assignment A3, you should demonstrate how the concepts learned today apply to your semester project."
+      },
+      {
+        "role": "teacher",
+        "text": "Show evidence through logs, behaviors, and diagrams to defend your design choices."
+      }
+    ]
+  },
+  {
+    "slide": 23,
+    "topic": "Validation and Interview Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Finally, let's go through some validation questions. These will help you reflect on the invariants relevant to this lecture."
+      },
+      {
+        "role": "teacher",
+        "text": "Uncover hidden assumptions, and think about how to effectively force failures in tests while capturing relevant evidence."
+      }
+    ]
+  },
+  {
+    "slide": 24,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To conclude, we've highlighted how out-of-order events reflect system correctness under realistic conditions."
+      },
+      {
+        "role": "teacher",
+        "text": "Connecting our concepts to invariants and observable behavior is essential. A robust design is one that is backed by solid evidence."
+      }
+    ]
+  },
+  {
+    "slide": 25,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For those interested in diving deeper, I recommend further reading on distributed systems failures, concurrency design trade-offs, and the importance of structured logging and correlation IDs."
+      },
+      {
+        "role": "teacher",
+        "text": "These resources will enrich your understanding of out-of-order events and their implications."
+      }
+    ]
+  }
+]

@@ -1,0 +1,284 @@
+[
+  {
+    "slide": 1,
+    "topic": "State Machines",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome, everyone, to our lecture on State Machines. Today, we will explore how state machines play a critical role in understanding system behaviors, especially when those systems operate under concurrent conditions."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s begin with a scenario. Imagine you have a project that seems to work perfectly during a simple demonstration. However, when we introduce concurrency, hidden assumptions start to surface. Our focus today is on what engineers need to analyze to ensure the system is reliable under these conditions."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "By the end of this lecture, you should be able to analyze the design pressures brought by state machines, diagnose hidden assumptions that emerge before concurrency is introduced, and evaluate failure evidence using tools like logs and traces. Furthermore, you'll learn how to design controls that maintain invariants while addressing necessary trade-offs, and how to defend your approach effectively in the Integrity Packet linked to your assignments."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concepts: States",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's delve into our first core concept: States. A state represents one of several possible conditions an object can be in, such as 'DRAFT', 'CLEANING', or 'PUBLISHED'."
+      },
+      {
+        "role": "teacher",
+        "text": "It's vital to make these states explicit in your design, especially under pressure, to ensure the system can be trusted. Ignoring this can lead to undesirable outcomes like duplicate work or stale state."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concepts: Transitions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next up are Transitions. These represent the valid paths between states, which are triggered by specific events."
+      },
+      {
+        "role": "teacher",
+        "text": "It’s crucial to clearly define these transitions to maintain system trust. Similar to states, overlooking transitions can result in significant system failures or errors, like producing duplicate work or getting stuck in an outdated state."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concepts: Illegal Transition Guard",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let's talk about the Illegal Transition Guard. This is the logic that prevents an event from occurring if it doesn't align with valid transitions from the current state."
+      },
+      {
+        "role": "teacher",
+        "text": "For example, if you’re in a 'DRAFT' state, you shouldn’t be able to move directly to 'PUBLISHED'. Having this guard in place helps maintain system integrity by rejecting invalid transitions, adding another layer of confidence."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concepts: Deterministic Behavior",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Deterministic Behavior is our next focus. It means that given a specific state and an event, the next state must always be predictable."
+      },
+      {
+        "role": "teacher",
+        "text": "This predictability is essential to trust how your system behaves under pressure. If this principle is not adhered to, your system might face issues like executing tasks multiple times or getting stuck, risking overall reliability."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Core Concepts: System Invariant",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Finally, let’s explore System Invariants. An invariant is a condition that must remain true across all valid executions."
+      },
+      {
+        "role": "teacher",
+        "text": "This means that no matter how the system is being used, certain critical properties must hold true. Similar to our previous concepts, neglecting system invariants can lead to major flaws like duplicate tasks or inconsistent data."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Here we have a visual representation of our state machine architecture. The flow outlines how states, transitions, and safeguards work together to ensure the system operates smoothly."
+      },
+      {
+        "role": "teacher",
+        "text": "This architecture emphasizes that maintaining an invariant throughout the operation of a system is crucial, especially when faced with timing and coordination complexities."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Problem Setup",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s look at a practical example to understand these concepts better. In our podcast domain, we define a transition from 'INGESTED' to 'CLEANED' once cleaning is finished. We have a guard that will reject any 'Publish' event while still in 'INGESTED'."
+      },
+      {
+        "role": "teacher",
+        "text": "Similarly, an order system cannot progress to 'SHIPPED' unless it’s marked as 'PAID'."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Worked Example: Naive Implementation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, consider a naive implementation model. This typically involves a series of steps that assume the operation occurs in order, and the current state is accurately read before performing a transition."
+      },
+      {
+        "role": "teacher",
+        "text": "However, this kind of approach can lead to misunderstandings and incorrect operation handling if concurrent processes interfere."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Worked Example: Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In concurrent execution scenarios, the system can encounter several issues. For instance, an operation might read an outdated state or execute multiple times, leading to deadlocks or other malfunctions."
+      },
+      {
+        "role": "teacher",
+        "text": "The key takeaway here is that failures emerge from misalignments between designed assumptions and the reality of execution under these conditions."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Worked Example: Improved Design",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To improve our design, it's crucial to name the invariant clearly. By making transitions observable and implementing controls like version checks or idempotency keys, we can enhance the reliability of our system."
+      },
+      {
+        "role": "teacher",
+        "text": "Adding these mechanisms helps to prevent issues arising from concurrent operations, thus maintaining integrity."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Worked Example: Safer Design",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "An improved design ensures that invalid transitions or interleavings are effectively rejected or contained."
+      },
+      {
+        "role": "teacher",
+        "text": "This shift emphasizes a proactive stance by providing substantive evidence rather than merely hoping that the system executes in the correct order. This is a significant step towards robust system architecture."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's discuss some common failure modes. One symptom is when the system passes a single happy-path test, revealing a design weakness."
+      },
+      {
+        "role": "teacher",
+        "text": "By employing stress tests or failure-focused tests, we can better target these weaknesses and improve the system. Each identified symptom has its own detection and correction strategy."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "We also need to consider trade-offs in our designs. Different strategies come with their own strengths and weaknesses."
+      },
+      {
+        "role": "teacher",
+        "text": "For instance, a simple baseline might be easy to implement, but it often hides crucial timing assumptions. Choosing the right approach depends on the specific requirements and contexts of your system."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Looking ahead, you should practice employing these concepts practically. Identify the most relevant invariant in your system, write a sequential scenario expected to succeed, and create a pressure scenario that could expose potential failures."
+      },
+      {
+        "role": "teacher",
+        "text": "It's essential to integrate robust logging before performing tests and to systematically capture evidence of changes."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As you connect the lecture concepts to your assignments, particularly A3, focus on illustrating relevant objects, workflows, or mechanisms in your domain."
+      },
+      {
+        "role": "teacher",
+        "text": "Demonstrating mastery involves providing concrete evidence and defending your design decisions in the Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Validation Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As we wrap up, I encourage you to reflect on some validation questions. For instance, what invariant stands out as most relevant to this lecture?"
+      },
+      {
+        "role": "teacher",
+        "text": "What hidden assumptions might make your design appear correct at a glance? Think about how you could force a failure in a repeatable test and what evidence would substantiate your claims."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In summary, understanding state machines is crucial for reasoning about system correctness under realistic execution scenarios."
+      },
+      {
+        "role": "teacher",
+        "text": "Our goal as engineers is to connect theoretical concepts to invariants, observable behaviors, and defensible trade-offs. Only when our designs are explainable, stress-tested, and validated with solid evidence can we consider them mature."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For those interested in delving deeper, I recommend exploring some search phrases such as 'State Machines distributed systems failure mode' and 'State Machines concurrency design tradeoffs'."
+      },
+      {
+        "role": "teacher",
+        "text": "Additionally, consider looking into topics like structured logging and invariants in stateful object-oriented systems to enhance your understanding."
+      }
+    ]
+  }
+]

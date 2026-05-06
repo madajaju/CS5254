@@ -1,0 +1,354 @@
+[
+  {
+    "slide": 1,
+    "topic": "Idempotency",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to today's lecture on Idempotency, part of our course on Object-Oriented Systems Under Concurrency. In this session, we'll explore how idempotency impacts the design and reliability of concurrent systems."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Introduction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In this introduction, we will briefly discuss the course context, including the specific week we are in and the topics we've covered so far. Remember, our focus today revolves around the concept of idempotency and its importance in handling concurrency."
+      },
+      {
+        "role": "student",
+        "text": "Wait… so what exactly should we be looking for with idempotency?"
+      },
+      {
+        "role": "teacher",
+        "text": "Great question! Essentially, we want to ensure that our operations perform reliably without unintended consequences when executed multiple times."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Today, we aim to achieve several key learning objectives. We will analyze the design pressures that arise from idempotency, diagnose any hidden assumptions in our systems, and evaluate the evidence of failure through logs and traces. Additionally, we’ll discuss designing corrections, all while managing trade-offs."
+      },
+      {
+        "role": "student",
+        "text": "How do these hidden assumptions usually manifest in a system?"
+      },
+      {
+        "role": "teacher",
+        "text": "They often surface when we think everything is operating smoothly, but then concurrency or load brings out inconsistencies that we didn't notice initially."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s begin by reflecting on a critical narrative: a system may seem correct during initial testing, but when subjected to concurrency or operational pressure, hidden assumptions may surface. It’s essential for engineers to identify what must be analyzed before we can trust our results."
+      },
+      {
+        "role": "student",
+        "text": "Okay, but aren't there going to be situations where the system seems fine, and we think we can trust it?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, absolutely. But we need to be cautious. It’s crucial to develop a mindset to challenge our initial assumptions because that’s where teams usually get into trouble."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Idempotent Operation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "First, let’s define an idempotent operation. This is an operation that produces no additional effect when it is executed multiple times with the same parameters. Understanding this concept is crucial because it assures us that our systems can withstand pressure without unintended consequences like duplicate work or stale states."
+      },
+      {
+        "role": "student",
+        "text": "I think I get it, but can you give an example of where this would matter?"
+      },
+      {
+        "role": "teacher",
+        "text": "Certainly! Imagine a payment system where repeating a transaction accidentally double charges a user. An idempotent operation would ensure that no matter how many times that payment request is received, the user is charged only once."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Idempotency Key",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let’s discuss the idempotency key. This unique identifier, commonly a UUID, is used by the server to recognize requests and ensure that operations are only performed once. It plays a vital role in maintaining trust in our systems during simultaneous operations."
+      },
+      {
+        "role": "student",
+        "text": "So, it seems like this key helps prevent issues? How does it actually work?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! It allows the server to know if an operation has been executed before. When a request comes with that key, the server checks if the operation has been attempted with the same key and can take the appropriate action, keeping operations safe from duplication."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "System Invariant",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, we need to understand what we mean by system invariant. This refers to conditions that must remain true during all executions. It’s about ensuring we have a reliable framework to trust our system under varying conditions."
+      },
+      {
+        "role": "student",
+        "text": "What kind of things can become invariants in a system?"
+      },
+      {
+        "role": "teacher",
+        "text": "Great question! An invariant could be that the total number of items in an order system should never exceed the sum of what’s in stock. Whatever updates we make should respect that invariant."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Design Trade-Off",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now let’s examine design trade-offs. This is the process of balancing competing qualities like simplicity, safety, and throughput. Recognizing these trade-offs is a key skill, as they dictate how resilient our systems are under pressure."
+      },
+      {
+        "role": "student",
+        "text": "So, balancing simplicity and safety—are we saying that sometimes choosing one could lead to problems with the other?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! For instance, making a system overly simple might mean it lacks the safety checks needed under heavy load, leading to system failures."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Here we have a visual representation of the system architecture relating to idempotency. It shows how the idempotent operation links to the idempotency key, the system invariant, and ultimately to our design decisions and validation evidence."
+      },
+      {
+        "role": "student",
+        "text": "It looks pretty interconnected. What happens if one part fails?"
+      },
+      {
+        "role": "teacher",
+        "text": "If one part overshoots, say the idempotency key fails, it could allow duplicate operations, making our system unstable. This is why strong architectural connections are vital."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s consider a worked example in a podcast domain. For instance, an unsafe operation like `episode.addAsset(file)` could add multiple assets if retried. In contrast, an idempotent approach, such as `episode.upsertAsset(assetId, file)`, avoids this by updating or adding without duplication."
+      },
+      {
+        "role": "student",
+        "text": "How would we go about implementing something like that?"
+      },
+      {
+        "role": "teacher",
+        "text": "You'd implement checks for existing assets using the assetId. If an asset with that ID exists, you’d update it. If it doesn’t, you’d create a new one. This keeps your workflow clean!"
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Under certain conditions like delays or retries, operations can encounter stale states or even execute multiple times. This illustrates a design mismatch that can lead to significant issues within our system."
+      },
+      {
+        "role": "student",
+        "text": "Can you give me an example of what could happen in a scenario like that?"
+      },
+      {
+        "role": "teacher",
+        "text": "Sure! Imagine a server is busy, and a user retries a request that isn't reflected in the current state of the server. They may inadvertently trigger a transaction that was already handled, causing incorrect states in the system."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Improved Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To mitigate these failure risks, we should implement a clearer design direction. This includes naming our invariants explicitly, making transitions observable, and enforcing correctness controls such as version checks and idempotency keys."
+      },
+      {
+        "role": "student",
+        "text": "Does that mean we would also have to test these controls regularly?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! Regular testing ensures that the controls we put in place are working effectively and that the system remains stable even under pressure."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Why Improved Design Is Safer",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The safer approach ensures that any invalid workflows or interleavings can be effectively rejected or recovered from, thereby enhancing the integrity of our systems."
+      },
+      {
+        "role": "student",
+        "text": "So basically, it helps us catch problems before they escalate?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! By taking proactive measures, we're able to prevent a whole range of issues from occurring."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes and Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "We should be aware of specific symptoms indicating design flaws. For instance, passing a single happy-path test could be misleading while repeated runs and concurrent actors could reveal underlying issues that need addressing."
+      },
+      {
+        "role": "student",
+        "text": "How do we catch those underlying issues?"
+      },
+      {
+        "role": "teacher",
+        "text": "Increasing the test’s complexity—introducing concurrent runs, testing with variations in load, and examining logs deeply can all help uncover hidden flaws. This part is critical!"
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In trade-off analysis, we evaluate different strategies, such as simple baselines versus guarded state transitions, weighing their strengths and weaknesses. This process helps us determine the best approach for given design challenges."
+      },
+      {
+        "role": "student",
+        "text": "Are there common pitfalls when analyzing trade-offs?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely—one common mistake is to prioritize simplicity over reliability, only to end up with a system that fails under load. That's something to watch out for!"
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For practical applications, consider these tasks: identify the most relevant invariant for idempotency, create both a sequential scenario and a pressure scenario, and ensure your logs capture all relevant IDs before conducting tests."
+      },
+      {
+        "role": "student",
+        "text": "Do you have any tips on how to effectively capture those IDs in logs?"
+      },
+      {
+        "role": "teacher",
+        "text": "A good practice is to structure your logs in a way that includes these identifiers with timestamps and operation details, which can help during troubleshooting later on."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This lecture's concepts tie into your upcoming assignment, A3. You'll need to connect the ideas of idempotency to your project, demonstrating the relevant workflows and recovery mechanisms specific to your focus area."
+      },
+      {
+        "role": "student",
+        "text": "Got it, so we should be looking for ways to implement these concepts in our own projects?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! Show how you apply these principles and the importance of ensuring reliability and correctness in your implementations."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Discussion",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s engage in some discussion. First, what invariant do you think is most relevant in the context of this lecture? Also, consider the hidden assumptions that could impact design validity."
+      },
+      {
+        "role": "student",
+        "text": "I think a key invariant might be ensuring data consistency across requests?"
+      },
+      {
+        "role": "teacher",
+        "text": "That’s a strong choice! Ensuring data consistency is foundational, especially when we consider the potential for concurrent modifications."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To summarize, idempotency is a critical concept for ensuring that our systems remain reliable under real-world conditions. It is our task as engineers to bridge the gap between theoretical concepts and practical applications backed by evidence."
+      },
+      {
+        "role": "student",
+        "text": "It seems like maintaining idempotency requires a lot of vigilance in development."
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! Continuous vigilance and robust design practices will help us build systems that not only work under optimal conditions but also survive under stress."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For those interested in delving deeper, I recommend searching for topics that cover idempotency in distributed systems and concurrency design trade-offs, as well as exploring invariants and message queues."
+      },
+      {
+        "role": "student",
+        "text": "Thanks! I’ll look into those resources."
+      },
+      {
+        "role": "teacher",
+        "text": "You’re welcome! Happy reading!"
+      }
+    ]
+  }
+]

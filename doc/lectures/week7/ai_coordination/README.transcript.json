@@ -1,0 +1,112 @@
+[
+  {
+    "slide": 1,
+    "topic": "AI Coordination Designs: Critique & Validation",
+    "text": "Welcome, everyone, to our lecture on AI coordination designs, which focuses on critique and validation. Today, we'll explore the key concepts that are vital in ensuring correctness in concurrent systems, especially when interacting with AI tools."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "The key objectives for today are to analyze design pressure in AI coordination designs and diagnose any hidden assumptions that may affect system correctness. We will also evaluate how to gather failure evidence from logs and traces, design controls that maintain invariants without blurring trade-offs, and connect these approaches to your upcoming assignment."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Let's consider a scenario: a student asks an AI to design a workflow, but the output lacks a crucial ordering guard. This oversight can lead to problems in the workflow, raising the question of how engineers can effectively utilize AI-generated designs while maintaining accountability for the system's correctness."
+  },
+  {
+    "slide": 4,
+    "topic": "Coordination Hallucinations",
+    "text": "Coordination hallucinations occur when AI suggests patterns without addressing event handling. It's essential to make these conditions explicit, especially under pressure. If we ignore these implications, we risk creating systems that produce duplicate work or get blocked, so we must expose invariants and validate behavior properly."
+  },
+  {
+    "slide": 5,
+    "topic": "Dependency Neglect",
+    "text": "Another issue we encounter is dependency neglect, where the AI might ignore necessary outputs between stages of processing. This can lead to trust issues within the system. Recognizing these explicit conditions is crucial to avoid producing misleading evidence or duplicate work. We must ensure that invariants are logged and validated accurately."
+  },
+  {
+    "slide": 6,
+    "topic": "Validation by Trace",
+    "text": "When it comes to validation, tracing the AI's logic with adversarial interleavings can reveal deadlocks or missed signals. This step emphasizes the importance of identifying conditions that must be clear for the system to be trusted. We need to log transitions meaningfully and validate them through systematic testing."
+  },
+  {
+    "slide": 7,
+    "topic": "Coordination Boundary",
+    "text": "The coordination boundary is where different independent objects must agree on factors like ordering or progress. It's crucial to make these conditions explicit before we can trust the overall system. If we skip this step, consequences can include duplicated work or misleading outputs. Thus, our design should prioritize logging transitions and validation processes."
+  },
+  {
+    "slide": 8,
+    "topic": "Progress Guarantee",
+    "text": "A progress guarantee ensures that work will eventually complete rather than stalling indefinitely. To achieve this, we need to outline explicit conditions that are essential for maintaining trust, especially under pressure. Failure to do so can lead to operational pitfalls, reinforcing the necessity for thorough logging and transition validation."
+  },
+  {
+    "slide": 9,
+    "topic": "System / Architecture View",
+    "text": "In our system architecture view, we observe the relationship between AI coordination designs and various validation aspects. This diagram illustrates how these elements interconnect, emphasizing that we must not only focus on whether a piece of code works in isolation but also understand how it performs under differing operational pressures."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "text": "Let's examine a worked example from the podcast domain. Imagine asking AI to create a workflow that runs transcription and cleanup processes in parallel. While the AI might generate two threads, it may lack the logic to join them correctly before publishing. This scenario illustrates a critical critique: the assumption that notifications will always occur in a specific order without any safeguards."
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Implementation",
+    "text": "A naive implementation often assumes operations happen sequentially and with the correct current state. This assumption can be quite misleading since the method names might sound correct, and passing a sequential test does not guarantee real-world success under concurrent conditions."
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "text": "Now, consider a failure scenario: when operations overlap in execution, we may encounter stale state issues, or the workflow could get stuck. These failures aren't just simple bugs; they reflect a mismatch between our design assumptions and the actual execution model, revealing critical vulnerabilities."
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "text": "To improve the design, we should start by naming the invariants and making the transitions observable. We also need to introduce appropriate controls such as version checks, state-machine guards, and careful coordination to ensure we avoid common pitfalls."
+  },
+  {
+    "slide": 14,
+    "topic": "Safer Design Benefits",
+    "text": "By adopting this improved design direction, we shift our focus from merely hoping the workflow executes correctly to proving that invalid interleavings are proactively rejected or contained. This approach fosters a culture of evidence-based design in our implementations."
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "Let’s discuss some failure modes and anti-patterns we might encounter. A common symptom is when a system passes a single happy-path test, but upon further examination, we find that the test avoids conditions that actually reveal the underlying weaknesses. To address this, we can add stress tests and concurrent actors to expose these vulnerabilities."
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "text": "In our trade-off analysis, we need to examine different approaches to design. For example, a simple baseline might be easy to implement but can obscure timing assumptions. In contrast, an explicit coordination method exposes dependencies more clearly but may introduce risks like deadlock."
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "text": "For the practical application of what we've discussed, I encourage you to identify the most relevant invariant or progress property associated with AI coordination designs. Develop both a sequential scenario that should succeed and a pressure scenario that might uncover failures. It’s crucial to enhance your logs with operation and entity IDs, and capture evidence before and after implementing any fixes."
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "text": "As a reminder, this lecture ties directly into your upcoming assignment, A2. You should look to demonstrate your mastery of these concepts by connecting them to your own semester projects. Prepare to show concrete evidence including structured logs and design justifications that relate to your designs."
+  },
+  {
+    "slide": 19,
+    "topic": "Validation Questions",
+    "text": "Before we wrap up, I want to pose a few validation questions for you to consider: What invariant is most relevant to today's lecture? What hidden assumptions might distort your baseline design? And how would you approach forcing repeatable test failures? These questions help us think critically about the designs we create."
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "text": "In summary, understanding AI coordination designs is critical for maintaining system correctness. As engineers, our role is to link these concepts to observable behavior, ensuring that our designs are mature and capable of validated execution under realistic conditions."
+  },
+  {
+    "slide": 21,
+    "topic": "Further Reading",
+    "text": "For further exploration, consider searching for phrases like 'AI coordination designs failure mode' or topics related to structured logging and invariants in stateful systems. These resources will deepen your understanding and provide additional insights into the complexities of AI in concurrent environments."
+  },
+  {
+    "slide": 22,
+    "topic": "Discussion",
+    "text": "Let's open the floor for discussion. How do we validate AI-generated designs? What hidden failures have you encountered in your own projects? I encourage you to share your experiences and thoughts as we near the end of this lecture."
+  }
+]

@@ -1,0 +1,188 @@
+= Simplicity vs. Scalability
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Opening Narrative
+
+* Project appears correct during simple demo.
+* Concurrency or pressure exposes hidden assumptions.
+* Analyze and defend before trusting results.
+
+== Core Concepts
+
+== Cognitive Load
+
+* Definition: Effort to understand coordination logic.
+* Why it matters: Must be explicit for trust under pressure.
+* Failure mode: Can produce stale state or blocked progress.
+* Design implication: Expose invariant, log transitions, validate behavior.
+
+== Resource Saturation
+
+* Definition: Simple design hits hardware limits.
+* Why it matters: Must be explicit for trust under pressure.
+* Failure mode: Can produce stale state or blocked progress.
+* Design implication: Expose invariant, log transitions, validate behavior.
+
+== Scale-Up vs. Scale-Out
+
+* Definition: Handle more work with more cores/machines.
+* Why it matters: Must be explicit for trust under pressure.
+* Failure mode: Can produce stale state or blocked progress.
+* Design implication: Expose invariant, log transitions, validate behavior.
+
+== System Invariant
+
+* Definition: Condition that must remain true across executions.
+* Why it matters: Must be explicit for trust under pressure.
+* Failure mode: Can produce stale state or blocked progress.
+* Design implication: Expose invariant, log transitions, validate behavior.
+
+== Failure Mode
+
+* Definition: Repeatable way the system violates an invariant.
+* Why it matters: Must be explicit for trust under pressure.
+* Failure mode: Can produce stale state or blocked progress.
+* Design implication: Expose invariant, log transitions, validate behavior.
+
+== System / Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Simplicity vs. Scalability" as Topic
+rectangle "Cognitive Load" as A
+rectangle "Resource Saturation" as B
+rectangle "Scale-Up vs. Scale-Out" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+== Problem Setup
+
+* Podcast Domain
+* Original process: Single Java process using synchronization.
+
+== Naive Implementation
+
+[source]
+----
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+----
+
+== Failure Scenario
+
+* Overlapping execution may result in stale state.
+* Mismatch between design assumption and execution model.
+
+== Improved Design Direction
+
+* Name invariant and make transitions observable.
+* Implement controls: version checks, idempotency keys, etc.
+
+== Why Improved Design?
+
+* Moves from hoping execution order to proving invalid interleavings are handled.
+
+== Failure Modes and Anti-Patterns
+
+== Symptom: Single happy-path demonstration succeeds
+
+* Detection: Add concurrent actors or stress tests.
+* Correction: Add failure-focused test targeting invariant.
+
+== Symptom: Names a tool, not a design property
+
+* Detection: Ask which invariant the mechanism protects.
+* Correction: Write invariant first, then select mechanism.
+
+== Symptom: Evidence too vague to support claims
+
+* Detection: Reviewer cannot reconstruct failure.
+* Correction: Capture structured evidence linked to design claim.
+
+== Symptom: Fix changes behavior without baseline comparison
+
+* Detection: No before/after using same workload.
+* Correction: Keep failing test and rerun after redesign.
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
+| Guarded state | Protects core invariant | Needs careful modeling | Status changes
+| Explicit coordination | Makes dependencies visible | May cause deadlock | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires side-effect control | Queues, retries
+| Observability-first | Strong evidence | Adds instrumentation | Assignments requiring proof
+|===
+
+== Practical Application
+
+* Identify relevant invariant for simplicity vs. scalability.
+* Write sequential scenario that should succeed.
+* Write pressure scenario that could expose failure.
+* Add operation IDs to logs before pressure scenario.
+* Capture before/after evidence if applying a fix.
+
+== Assignment Integration
+
+* Connect lecture to semester project using relevant concepts.
+* Show object, workflow, event, failure, or recovery mechanisms.
+* Demonstrate with structured evidence in the Integrity Packet.
+
+== Validation and Interview Questions
+
+1. What invariant is relevant to this lecture?
+2. What hidden assumption makes baseline design seem correct?
+3. How would you force failure in a repeatable test?
+4. What evidence would prove failure occurred?
+5. Which design mechanism would you choose first, what trade-off does it introduce?
+6. How might the issue appear differently in your two implementation stacks?
+7. What to record in Integrity Packet to defend conclusion?
+
+== Summary
+
+* Simplicity vs. scalability = reasoning about system correctness.
+* Connect concepts to invariants and observable behavior.
+* Design maturity involves explanation, stress-testing, and validation.
+
+== Further Reading
+
+* "Simplicity vs. Scalability distributed systems failure mode"
+* "Simplicity vs. Scalability concurrency design tradeoffs"
+* Structured logging and correlation IDs
+* Invariants in stateful systems
+* Coordination patterns, deadlocks, and progress guarantees
+
+== Discussion
+
+* How do hidden assumptions affect system design?
+* What trade-offs did you encounter in your projects?

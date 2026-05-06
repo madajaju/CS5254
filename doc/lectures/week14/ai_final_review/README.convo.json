@@ -1,0 +1,330 @@
+[
+  {
+    "slide": 1,
+    "topic": "AI Final Review: What Was Learned?",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to the final review for AI, where we will explore what we've learned about object-oriented systems under concurrency. This session will help clarify significant concepts and practical applications that align with your assignments."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Throughout this lecture, our key objectives are to analyze design pressures in stateful concurrent systems, diagnose underlying assumptions, evaluate failure evidence, design effective corrections, and defend these choices in your Integrity Packet while connecting them to assignment one."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Imagine a scenario where a student asks AI for a design. The response is code that lacks an ordering guard. While this may provide a good starting point, it could lead to stalling workflows or violating invariants. This raises an important question: how can engineers leverage AI-generated designs while maintaining responsibility for their correctness?"
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "The Competency Gap",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The competency gap refers to those areas where human engineers identify issues that AI might overlook, such as deep race conditions. Recognizing this gap is crucial because it informs us of the conditions necessary for a system to be trusted under pressure."
+      },
+      {
+        "role": "teacher",
+        "text": "If we ignore these gaps, the consequences can be significant: we might encounter duplicate work, stale states, or other issues that indicate a failure of the system in production."
+      },
+      {
+        "role": "student",
+        "text": "Wait... so the competency gap is basically where we, as engineers, notice things that AI just can't catch?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! It's all about knowing what to look for, especially under pressure."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "The Acceleration Factor",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, let's discuss the acceleration factor. This concept examines areas where AI actually assists us, like generating boilerplate code or suggesting standard patterns. Identifying where AI can truly help is essential."
+      },
+      {
+        "role": "teacher",
+        "text": "However, just like with the competency gap, overlooking when AI's help is not enough can lead to design failures. For instance, if you're relying too heavily on AI to generate critical parts of your system without validation, that’s a risky strategy."
+      },
+      {
+        "role": "student",
+        "text": "So, if I use AI to generate boilerplate stuff, I still need to double-check that it’s good?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! Trust but verify. It's crucial to ensure that it aligns with our design intentions."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Validation as the Constant",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Validation serves as a constant reminder of the importance of ensuring trust in our designs before adopting them. We need to understand how our workflows and actor behaviors will affect system reliability."
+      },
+      {
+        "role": "teacher",
+        "text": "Neglecting validations can lead us into the same pitfalls we've seen with both the competency gap and the acceleration factor. We have to ask ourselves, how well do we truly understand this validation process?"
+      },
+      {
+        "role": "student",
+        "text": "So, validation is about making sure our system can handle real-world conditions?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, precisely! Validation is how we avoid surprises in production."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "AI-Assisted Hypothesis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "When we're working with AI-generated designs, it’s vital to validate these hypotheses before we fully adopt them. This means ensuring that the underlying conditions for trust are clear."
+      },
+      {
+        "role": "teacher",
+        "text": "If we skip this validation step, we're likely to encounter the same failures we've discussed previously."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Human Verification",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Human verification involves engineers checking AI outputs against existing code, tests, and evidence. This step is essential to build confidence in the design, particularly under pressure."
+      },
+      {
+        "role": "teacher",
+        "text": "And again, neglecting this verification opens the door to potential failures, much like what we've seen with the competency gap and validation."
+      },
+      {
+        "role": "student",
+        "text": "So basically, if we just trust the AI, we're setting ourselves up for trouble?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! Trusting AI blindly is where teams often run into problems."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let’s consider the system architecture of our lecture content. The flow connects our main topic—identifying the competency and acceleration factors—through validation channels, leading to concrete design decisions."
+      },
+      {
+        "role": "teacher",
+        "text": "This interconnectedness highlights how a system must navigate design pressures while remaining resilient to change."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s dive into a worked example. Reflect on a time when you accepted an AI suggestion without questioning it, only to later experience failure. This serves as an important lesson in validation and the critical thinking required when reviewing AI outputs."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Problem Setup",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In setting up our problems, we recognize two key scenarios. One involves accepting fixes from AI that ultimately fail, while the other revolves around the rejection of AI’s over-engineered suggestions for simpler stress tests."
+      },
+      {
+        "role": "teacher",
+        "text": "Each of these scenarios raises important questions about what effective verification looks like."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Naive Implementation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A naive implementation operates on the assumption that an operation executes once, in order, and with the current state. This can often hide in our method names, passing superficial tests."
+      },
+      {
+        "role": "teacher",
+        "text": "But in reality, it’s often the case that the assumptions made about the design do not hold."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, consider a situation involving overlapping execution or delayed deliveries—it exposes stale state issues. This failure isn't just a simple syntax error; it points to a significant mismatch between our design assumptions and actual execution."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Corrected Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To improve the design, we must explicitly name our invariants, make transitions observable, and introduce correctness controls such as version checks and idempotency."
+      },
+      {
+        "role": "teacher",
+        "text": "This approach effectively prevents or corrects potential failures by ensuring we maintain accurate state throughout execution."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Why Improved Design Is Safer",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "By honing in on improved designs, we shift the focus from simply hoping that the workflow executes correctly to actually proving that any invalid interleavings are handled or recovered."
+      },
+      {
+        "role": "teacher",
+        "text": "This shift emphasizes evidence-based design, which is crucial for maintaining system integrity."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Failure Modes",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s discuss common failure modes. A common symptom is achieving a single happy-path success without stress-testing designs."
+      },
+      {
+        "role": "teacher",
+        "text": "To uncover these weaknesses, we can introduce concurrent actors and more rigorous testing focused on potential failure scenarios."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In our analysis of trade-offs, we notice multiple approaches, each with strengths and weaknesses. For instance, a simple baseline is easy to implement but may hide crucial timing assumptions."
+      },
+      {
+        "role": "teacher",
+        "text": "On the other hand, explicit coordination can expose dependencies at the cost of introducing waiting times or bottlenecks."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For practical application, I encourage you to identify the invariant or progress property most relevant to our discussion."
+      },
+      {
+        "role": "teacher",
+        "text": "Draft one sequential scenario and one that introduces pressure to expose potential failures. Additionally, make sure to log operation IDs and entity IDs."
+      },
+      {
+        "role": "student",
+        "text": "That sounds like a solid plan. Capturing before/after evidence is really important too, right?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! It’s critical for understanding the impact of any fixes applied."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s integrate what we've discussed with your assignments. Think about how the concepts we've explored connect back to your projects."
+      },
+      {
+        "role": "teacher",
+        "text": "Aim to demonstrate mastery through the relevant objects, workflows, or failure and recovery mechanisms in your own domain."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Validation Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Finally, reflect on these validation questions. Consider which invariants stood out to you, what hidden assumptions may have evaded your notice, and how you would force a failure in tests."
+      },
+      {
+        "role": "teacher",
+        "text": "Identifying the evidence needed to convincingly prove such failures occurred is also key."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In summary, the insights we’ve gained today highlight that our final review is not just a checklist item, but a framework for reasoning about system correctness under realistic execution."
+      },
+      {
+        "role": "teacher",
+        "text": "Your task as engineers is to connect these concepts to observable behaviors and defendable design trade-offs."
+      }
+    ]
+  },
+  {
+    "slide": 22,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For those looking to deepen their understanding, I encourage you to explore topics related to distributed system failure modes and concurrency design trade-offs."
+      },
+      {
+        "role": "teacher",
+        "text": "Familiarization with structured logging and correlation IDs will be advantageous as you continue in this field."
+      }
+    ]
+  }
+]

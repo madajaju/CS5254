@@ -1,0 +1,204 @@
+= Fixing Coordination
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Design Pressure
+
+* Design pressure in concurrent systems
+* Diagnosing hidden assumptions
+* Evaluating failure evidence
+* Designing corrections or controls
+* Defending design choices
+
+== Opening Narrative
+
+Two components wait for each other.
+* Logs show activity
+* Workflow never completes
+* Coordination contract is incomplete
+* What design rule aids observability?
+
+== Explicit Wait States
+
+* Definition: Wait on *condition* (state)
+* Importance: Ensures system trust under pressure
+* Mechanisms: State, workflow timing, retries
+* Failure mode: Duplicate work, stale state
+* Design implication: Expose invariant, log transitions
+
+== Lock Ordering
+
+* Definition: Acquire locks in consistent order
+* Importance: Trust under pressure
+* Mechanisms: State, workflow timing, retries
+* Failure mode: Duplicate work, stale state
+* Design implication: Expose invariant, log transitions 
+
+== Idempotent Transitions
+
+* Definition: Ignore duplicate "Finish" commands
+* Importance: Ensure system trust
+* Mechanisms: State, workflow timing, retries
+* Failure mode: Duplicate work, stale state
+* Design implication: Expose invariant, log transitions
+
+== Timeouts & Recovery
+
+* Definition: Break deadlocks after timeout
+* Importance: Trust under pressure
+* Mechanisms: State, workflow timing, retries
+* Failure mode: Duplicate work, stale state
+* Design implication: Expose invariant, log transitions
+
+== Coordination Boundary
+
+* Definition: Agree on ordering, ownership, progress
+* Importance: Ensure system trust
+* Mechanisms: State, workflow timing, retries
+* Failure mode: Duplicate work, stale state
+* Design implication: Expose invariant, log transitions
+
+== System Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Fixing Coordination" as Topic
+rectangle "Explicit Wait States" as A
+rectangle "Lock Ordering" as B
+rectangle "Idempotent Transitions" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+== Problem Setup
+
+*Podcast Domain*:
+* Lock `Episode` objects by `UUID`
+* Use `CountDownLatch` before `await()`
+
+*Order System*:
+* Reconciliation Job cancels stuck orders
+
+== Naive Implementation
+
+* Assumes single, ordered operation
+* Often invisible in code
+* Method name sounds correct
+
+```text
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+```
+
+== Failure Scenario
+
+* Overlapping execution, delayed delivery
+* Observes stale state, executes twice 
+* Workflow left stuck
+* Mismatch: design vs execution model
+
+== Improved Design Direction
+
+* Name the invariant
+* Make transition observable
+* Add correctness control
+* Employ: version checks, idempotency keys
+
+== Safer Design Justification
+
+* Focus shifts from hoping for correct order
+* Proves invalid interleavings handled
+
+== Failure Modes & Anti-Patterns
+
+* Symptoms: Single happy-path demonstration
+  * Detection: Repeated runs, stress testing
+  * Correction: Add failure-focused tests
+
+* Symptoms: Naming tools over design properties
+  * Detection: Ask about invariant protection
+  * Correction: State invariant first
+
+* Symptoms: Vague evidence
+  * Detection: Reviewer cannot reconstruct
+  * Correction: Capture structured evidence
+
+* Symptoms: Behavior comparison missing
+  * Detection: No before/after runs
+  * Correction: Preserve failing test scenario
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy explanation | Hides timing assumptions | First implementation
+| Guarded state | Protects invariant | Needs careful modeling | State changes
+| Explicit coordination | Makes dependencies visible | Risk of deadlock | Multi-object workflows
+| Idempotent design | Handles duplicates | Needs controls | Queues, retries
+| Observability | Provides strong evidence | Needs instrumentation | Assignments needing proof
+|===
+
+== Practical Application
+
+Tomorrow:
+
+* Identify relevant invariant
+* Write one successful scenario
+* Write one pressure scenario
+* Add IDs to logs
+* Capture before/after evidence
+* Update Integrity Packet with assumptions
+
+== Assignment Integration
+
+Connect lecture concept to [A2](../../../assignments/A2/index.md):
+* Show relevant object, workflow, event, failure
+* Demonstrate mastery via structured evidence
+
+== Validation Questions
+
+1. Which invariant applies here?
+2. What hidden assumption exists?
+3. How to force failure in tests?
+4. What evidence proves failure?
+5. Which design mechanism to use first?
+6. How does the issue appear in different stacks?
+7. What to include in Integrity Packet?
+
+== Summary
+
+* Fixing coordination = reasoning about system correctness
+* Connect concept to invariants, behavior, trade-offs
+* A design matures when validated with evidence
+
+== Discussion
+
+* What assumptions could lead to failure?
+* How can we improve component observability?

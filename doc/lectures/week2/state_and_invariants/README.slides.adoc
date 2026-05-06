@@ -1,0 +1,150 @@
+= State & Invariants
+
+== Learning Objectives
+* Analyze the design pressure of state & invariants in concurrent systems.
+* Diagnose assumptions making the system appear correct.
+* Evaluate failure evidence: logs, traces, interleavings, test outputs.
+* Design corrections preserving relevant invariants; disclose trade-offs.
+* Defend approaches in the Integrity Packet; relate to A1 deliverables.
+
+== Opening Narrative
+* A course project appears correct during a demonstration.
+* Concurrency or operational pressure reveals hidden assumptions.
+* What must the engineer analyze to trust the result?
+
+== Core Concepts
+
+== System State
+* Definition: Collective values of data at a point in time.
+* Mechanism: Revealed through object state, timing, behavior.
+* Failure mode: Ignoring leads to duplicate work, stale state.
+* Design implication: Log transitions and validate behaviors.
+
+== Invariants
+* Definition: Conditions that must *always* hold true for correctness.
+* Mechanism: Revealed through object state, timing, behavior.
+* Failure mode: Ignoring can lead to duplicate work, stale state.
+* Design implication: Log transitions and validate behaviors.
+
+== State Transitions
+* Definition: Valid paths changing the system from one state to another.
+* Mechanism: Revealed through object state, timing, behavior.
+* Failure mode: Ignoring can lead to duplicate work, stale state.
+* Design implication: Log transitions and validate behaviors.
+
+== Invariant Violation
+* Definition: Concurrent operations causing impossible states.
+* Mechanism: Revealed through object state, timing, behavior.
+* Failure mode: Ignoring can lead to duplicate work, stale state.
+* Design implication: Log transitions and validate behaviors.
+
+== System Invariant
+* Definition: Conditions remaining true across valid executions.
+* Mechanism: Revealed through object state, timing, behavior.
+* Failure mode: Ignoring leads to duplicate work, stale state.
+* Design implication: Log transitions and validate behaviors.
+
+== Diagram: System / Architecture View
+```plantuml
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "State & Invariants" as Topic
+rectangle "System State" as A
+rectangle "Invariants" as B
+rectangle "State Transitions" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+```
+
+== Diagram: Worked Example
+```plantuml
+@startuml
+actor A as "Worker A"
+actor B as "Worker B"
+rectangle "Episode Service" as E
+E -> A : reads episode
+E -> B : reads episode
+A -> E : attempts transition
+B -> E : attempts transition
+@enduml
+```
+
+== Diagram: Failure Scenario
+```plantuml
+@startuml
+actor A as "Worker A"
+actor B as "Worker B"
+rectangle "Episode Service" as E
+E -> A : reads episode
+E -> B : reads episode before A commits
+A -> E : processes episode
+B -> E : processes episode
+@enduml
+```
+
+== Diagram: Design Response
+```plantuml
+@startuml
+rectangle "Protected State" as P
+rectangle "Unsafe Transition" as U
+P --> U : improves
+U --> P : correct flow
+@enduml
+```
+
+== Diagram: Evidence Flow
+```plantuml
+@startuml
+rectangle "Claim" as C
+rectangle "Evidence" as E
+C --> E : proves invariant handled
+@enduml
+```
+
+== Failure Modes and Anti-Patterns
+* Symptom: System passes a single happy-path demo.
+* Symptom: Explanation names a tool, not a design property.
+* Symptom: Evidence is too vague to support claims.
+* Symptom: Fix changes behavior; not compared to baseline.
+
+== Trade-Off Analysis
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use |
+| Simple baseline | Easy to explain | Hides timing assumptions | Initial implementation |
+| Guarded state transition | Protects core invariant | Requires careful modeling | Status changes |
+| Explicit coordination | Makes dependencies visible | Can create deadlocks | Multi-object workflows |
+| Idempotent design | Handles duplicates | Requires keys | Queuing |
+| Observability-first | Strong evidence | Adds instrumentation | Failure proof assessments |
+|===
+
+== Practical Application
+* Identify the invariant most relevant to state & invariants.
+* Write a sequential scenario that should succeed.
+* Write a pressure scenario that could expose failure.
+* Capture before/after evidence if applying a fix.
+
+== Assignment Integration
+* This lecture supports [A1](../../../assignments/A1/index.md).
+* Connect lecture concepts to semester project with concrete evidence.
+
+== Validation and Interview Questions
+* What invariant is most relevant?
+* What hidden assumption appears correct?
+* How would you force failure in a test?
+* What evidence proves failure occurred?
+
+== Summary
+* State & invariants reason about system correctness under execution.
+* The task connects concepts to invariants, observable behavior, and trade-offs.

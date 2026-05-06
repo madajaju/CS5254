@@ -1,0 +1,97 @@
+[
+  {
+    "slide": 1,
+    "topic": "Course Model: Design Under Pressure",
+    "text": "Welcome to our first lecture on designing under pressure. Today we will explore critical concepts in understanding how object-oriented systems can behave unexpectedly under concurrent execution despite passing all sequential tests."
+  },
+  {
+    "slide": 2,
+    "topic": "Course Overview",
+    "text": "In this course, CS 5891b, we will discuss fundamental topics related to object-oriented programming and stateful objects. This lecture is timed for about 15 minutes and will set the stage for our first assignment focused on the object model under concurrency."
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "text": "By the end of this lecture, we will be able to analyze the failures of object-oriented programming under concurrent execution, evaluate our design cycle, and learn how to diagnose hidden assumptions within our object models. We'll also discuss the significance of intentional failures in engineering and how we can justify our design decisions with evidence."
+  },
+  {
+    "slide": 4,
+    "topic": "Opening Narrative",
+    "text": "Imagine an engineering team building a podcast publishing service. Their `Episode` object passes all unit tests and the workflow seems flawless. However, when two workers retry the same publish command due to a delay, chaos ensues. Both workers think the episode is ready and send their notifications. This is where our discussion begins—understanding when a model that seems clean can become unsafe."
+  },
+  {
+    "slide": 5,
+    "topic": "The Happy Path Trap",
+    "text": "Let's delve into the Happy Path Trap. This is when we evaluate the correctness of a design only under intended sequential execution paths. The problem arises because many object models look correct as they only run tests from a single actor perspective, hiding critical assumptions about order, exclusivity, and atomicity. The implication? We must evaluate state transitions under concurrent situations to ensure validity."
+  },
+  {
+    "slide": 6,
+    "topic": "Concurrency Pressure",
+    "text": "Next, we will discuss Concurrency Pressure, which involves intentionally introducing overlapping operations against shared state. This is vital because it exposes the weaknesses in object boundaries that might have been too broad or too optimistic. The consequence can be severe: duplicate processing, lost updates, or broken invariants. It highlights that concurrency should be considered part of the design process, not merely a detail for implementation."
+  },
+  {
+    "slide": 7,
+    "topic": "Iterative Resilience",
+    "text": "Here, we introduce Iterative Resilience. This method involves designing a baseline, breaking it, explaining what went wrong, redesigning, and validating the results. The goal is for you to learn to defend your design changes using concrete evidence rather than just personal preferences. Each assignment will build on the concept of increasing system pressure to prepare you for real-world scenarios."
+  },
+  {
+    "slide": 8,
+    "topic": "Evidence-Based Redesign",
+    "text": "Moving on to Evidence-Based Redesign, it focuses on creating revisions backed by hard evidence like logs and tests. Graduate-level engineering means we need to make defensible claims about our designs. A common pitfall is to feel something is fixed without validation. Thus, it's crucial that every correction is supported with a before and after comparison."
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example Overview",
+    "text": "Let's apply our concepts to a worked example involving a podcast system. Here, we have the `Episode` object with various status transitions such as DRAFT, ASSETS_READY, and READY_TO_PUBLISH before it finally gets PUBLISHED. This setup allows us to explore how these statuses interact under concurrent operations."
+  },
+  {
+    "slide": 10,
+    "topic": "Failure Scenario",
+    "text": "In a failure scenario, imagine two workers trying to publish an episode simultaneously. Each reads the status as READY_TO_PUBLISH, sets it to PUBLISHED, and both send out notifications. This situation illustrates how a naive implementation can lead to duplicate notifications due to improper state management."
+  },
+  {
+    "slide": 11,
+    "topic": "Improved Design Direction",
+    "text": "To improve upon our design, we must identify an invariant: an episode should only be published once and notifications must correspond to that successful transition. Our revised method can ensure that the transition is atomic and versioned, thus improving safety in the design. This ensures that only one worker successfully publishes and the notification corresponds to their change."
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Modes",
+    "text": "Let's examine common failure modes we can encounter. For instance, the system might pass all sequential tests because the tests unintentionally assume the operations will execute in isolation. We need to implement repeated concurrent tests to catch these issues. Similarly, we must keep an eye out for duplicate notifications, which indicate a design flaw in how side effects are managed."
+  },
+  {
+    "slide": 13,
+    "topic": "Trade-Off Analysis",
+    "text": "In this trade-off analysis, we can evaluate various approaches to our design. For instance, a sequential baseline is simple but it may hide concurrency assumptions. Coarse locking provides quick protection but can reduce throughput. On the other hand, atomic transitions tie correctness to state changes. Each approach has its strengths and weaknesses, and knowing when to use each is key."
+  },
+  {
+    "slide": 14,
+    "topic": "Practical Application",
+    "text": "For your practical application, I encourage you to pick one object in your project that owns meaningful state. Write down one invariant that must remain true under concurrent access. Then create a sequential success case followed by a concurrent test with overlapping operations. Observe what breaks and articulate whether state ownership, ordering, or side effects caused the failure."
+  },
+  {
+    "slide": 15,
+    "topic": "Assignment Integration",
+    "text": "This lecture connects directly to our first assignment, A1 - Object Model Under Concurrency. Your task will be to capture a model, expose its failures under concurrency, and defend your redesign. Evidence of your understanding will come from logs, explanations, and comparisons showing the changes made."
+  },
+  {
+    "slide": 16,
+    "topic": "Validation Questions",
+    "text": "As we wrap up, consider these validation questions: Why might a correct model fail when faced with concurrency? What invariant must be preserved in our publishing example? How can you distinguish genuine design failures from logging artifacts? Reflecting on these questions will deepen your understanding of the course material."
+  },
+  {
+    "slide": 17,
+    "topic": "Summary",
+    "text": "To summarize, remember that correctness must be tested under conditions that reflect real use scenarios. A baseline object model serves as our starting hypothesis, but as professional engineers, our job is to create pressure, observe where failures happen, and then validate our redesigns carefully."
+  },
+  {
+    "slide": 18,
+    "topic": "Further Reading",
+    "text": "For those interested in delving deeper, consider looking into topics like the lost update problem in optimistic concurrency control or understanding idempotency keys. Also, exploring race conditions in state transitions can further enhance your knowledge. These readings will help reinforce the concepts discussed today."
+  },
+  {
+    "slide": 19,
+    "topic": "Discussion",
+    "text": "Let's end with a discussion. How should teams approach hidden assumptions in their designs? What strategies can you employ to document isolated failures clearly? I encourage you to share your thoughts and insights as we explore these critical questions together."
+  }
+]

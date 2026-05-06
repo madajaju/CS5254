@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "Common Failure Patterns",
+    "text": "Welcome everyone to our lecture on Common Failure Patterns. Today, we'll explore how these patterns affect the reliability of stateful concurrent systems, especially under pressure."
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "text": "Let's start with an important scenario: imagine a student asks AI for a coordination design and gets back code that is missing key ordering guards. While the draft might be useful, it poses significant risks if used in practice. As engineers, we must ensure correctness in any AI-generated designs we utilize."
+  },
+  {
+    "slide": 3,
+    "topic": "Core Concept: Race Condition (Lost Update)",
+    "text": "The first core concept we need to understand is the Lost Update Race Condition. This occurs when multiple writers operate without protection, allowing some updates to be lost. Recognizing conditions like this is essential if we want to trust our systems under pressure."
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concept: Race Condition (Check-Then-Act)",
+    "text": "Next, we have the Check-Then-Act Race Condition. This happens when a system reads stale state information before acting, leading to similar issues as the Lost Update. Again, being explicit about these conditions is critical if we expect reliability."
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concept: Deadlock",
+    "text": "Now, let's discuss Deadlock, which arises from circular resource dependencies. If we encounter this, it can lead to halted progress, and as before, we must be clear about these risks to maintain system trust under various scenarios."
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concept: Missed Signal",
+    "text": "The Missed Signal condition occurs when signals are sent to objects that aren't yet in a waiting state. This can result in blocked workflows and requires us to explicitly define our states to avoid confusion."
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concept: Livelock",
+    "text": "Finally, we have Livelock, where state changes occur but without any productive outcome. Like the previous examples, failing to adequately address this can lead to duplicate work and stale state, ultimately undermining system reliability."
+  },
+  {
+    "slide": 8,
+    "topic": "System View",
+    "text": "Here, we see a system view that connects common failure patterns through a series of dependencies. It emphasizes that the focus should not just be on whether code runs once, but on whether crucial invariants hold up under various real-world conditions."
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example: Problem Setup",
+    "text": "Let’s consider a practical example from the podcast domain. We can encounter a Lost Update when two workers try to increment an AssetCount but one of the updates is overlooked. Similarly, an inconsistent read could show an episode marked as PUBLISHED while it is not actually published."
+  },
+  {
+    "slide": 10,
+    "topic": "Naive Implementation",
+    "text": "In a naive implementation, we assume sequential operations happen correctly based on current state. However, these assumptions can be misleading since they may not account for concurrent processes, which may lead to unexpected issues."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "Now let's discuss a failure scenario. An overlapping execution, delayed deliveries, or retries can expose stale states, resulting in workflows getting stuck. This highlights the importance of aligning design assumptions with actual execution models."
+  },
+  {
+    "slide": 12,
+    "topic": "Corrected Design Direction",
+    "text": "To improve our design, we should name the invariant clearly and ensure transitions are observable. Adding safety controls like version checks, idempotency keys, and explicit coordination can help protect against these failure modes."
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design: Safety",
+    "text": "The goal of the improved design is to move from merely hoping that execution proceeds correctly to proving that our system can handle invalid interleavings effectively."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "Let's discuss some common symptoms of failure modes. For instance, if a happy-path test passes but fails under stress, we need to intentionally incorporate failure-focused tests to reveal hidden issues."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "text": "In our trade-off analysis, we look at various approaches, weighing their strengths and weaknesses. For example, a simple baseline is easy to implement but often hides underlying timing assumptions, while guarded transitions protect invariants directly."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "text": "Moving forward, it's important to apply what we've learned. Identify a relevant invariant, create both a success scenario and a pressure scenario to expose potential failures, and capture detailed logs with operation IDs."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "text": "As a part of your assignments, you'll connect the concepts from this lecture to your semester project. Demonstrate mastery with evidence, which includes runnable commands, structured logs, and a clear explanation in your Integrity Packet."
+  },
+  {
+    "slide": 18,
+    "topic": "Validation Questions",
+    "text": "As we wrap up, consider these validation questions. What's the most relevant invariant? What hidden assumptions could create false correctness? How would you provoke a repeatable failure or provide evidence that it occurred?"
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "To summarize, common failure patterns are pivotal in reasoning about system correctness. Connecting these concepts to observable behaviors and clear trade-offs is essential for robust engineering."
+  },
+  {
+    "slide": 20,
+    "topic": "Discussion",
+    "text": "Finally, let’s open the floor for discussion. How might hidden state impact design, and what strategies could you suggest to reduce the risk of failure in your systems?"
+  }
+]

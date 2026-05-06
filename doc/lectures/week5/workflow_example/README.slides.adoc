@@ -1,0 +1,181 @@
+= Workflow Design Example
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Learning Objectives
+* Analyze design pressure in stateful concurrent systems
+* Diagnose hidden assumptions in system correctness
+* Evaluate failure evidence: logs, traces, interleavings
+* Design corrections preserving invariants, acknowledging trade-offs
+* Defend approaches in Integrity Packet; connect to A2
+
+== Opening Narrative
+* Project appears correct in demo
+* Concurrency/pressure reveals hidden assumptions
+* Key question: What must be analyzed and defended?
+
+== Workflow Mapping
+* Definition: Visual representation of flow
+* Why it matters: Essential for system trust under pressure
+* Mechanism: Through object state, timing, worker behavior
+* Failure mode: Ignored → duplicates, stale state, misleading evidence
+* Design implication: Expose invariant, log transitions, repeatable tests
+
+== System Invariant
+* Definition: True condition across all executions
+* Why it matters: Needed for system trust under pressure
+* Mechanism: Object state, timing, behavior, retries, boundaries
+* Failure mode: Ignored → duplicates, stalled workflows, misleading evidence
+* Design implication: Expose invariant, log transitions, repeatable tests
+
+== Failure Mode
+* Definition: Way system violates invariant or loses progress
+* Why it matters: Needed for system trust under pressure
+* Mechanism: Object state, timing, retries, workflows
+* Failure mode: Ignored → duplicates, stale state, halted progress
+* Design implication: Expose invariant, log transitions, repeatable tests
+
+== Design Trade-Off
+* Definition: Choice between competing qualities
+* Why it matters: Needed for system trust under pressure
+* Mechanism: Object state, timing, behavior, retries, coordination
+* Failure mode: Ignored → unresolved state issues, misleading evidence
+* Design implication: Expose invariant, log transitions, repeatable tests
+
+== System Architecture View
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Workflow Design Example" as Topic
+rectangle "Workflow Mapping" as A
+rectangle "System Invariant" as B
+rectangle "Failure Mode" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Problem Setup
+* Podcast Walkthrough:
+  1. `Ingestor` -> updates `Episode` to `INGESTED`
+  2. `Ingestor` signals `Cleaner`
+  3. `Cleaner` completes -> updates `Episode` to `CLEANED`
+  4. `Orchestrator` checks for `Transcript`
+* Order Walkthrough: Payment -> Inventory Reservation -> Shipping
+
+== Naive Implementation
+* Assumes operations happen once in order
+* Often hidden in code due to naming and passing tests
+```text
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+```
+
+== Failure Scenario
+* Overlapping execution can:
+  * Observe stale state
+  * Execute twice
+  * Arrive late
+  * Leave workflow stuck
+* Failure: mismatch between design assumptions and execution model
+
+== Improved Design Direction
+* Name the invariant
+* Make transitions observable
+* Add correctness control:
+  * Version checks
+  * Idempotency keys
+  * Explicit coordination
+  * State-machine guards
+  * Retries with backoff
+
+== Why Improved is Safer
+* Shifts focus from hope to proof
+* Contains/rejects invalid interleavings
+* Provides evidence for recovery
+
+== Failure Modes and Anti-Patterns
+* Symptom: Happy-path passes
+  * Cause: Timing/order ignored
+  * Detect: Run concurrent actors/structured logs
+  * Correct: Fail-focused tests on invariants
+
+* Symptom: Tool names without design properties
+  * Cause: Focus on frameworks, not what must remain true
+  * Detect: Ask about invariant
+  * Correct: Write invariant first
+
+== Trade-Off Analysis
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | Initial comparison
+| Guarded transition | Protects invariant | Needs careful modeling | Status changes
+| Explicit coordination | Visible dependencies | Can cause deadlocks | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires control | Async workers
+| Observability-first | Strong evidence | Needs instrumentation | Failure proof proof
+|===
+
+== Practical Application
+* Identify invariant relevant to workflow example
+* Write sequential scenario to succeed
+* Write pressure scenario to expose failure
+* Capture operation IDs in logs
+* Collect before/after evidence
+
+== Assignment Integration
+* Aligns with A2
+* Show relevant object, workflow, or failure in project
+* Demonstrate mastery with:
+  * Runnable commands
+  * Structured logs
+  * Diagrams
+  * Failure reproduction
+
+== Validation Questions
+1. Relevant invariant for this lecture?
+2. Hidden assumptions making the baseline appear correct?
+3. How to force failure in repeatable test?
+4. Evidence proving failure occurred?
+5. First design mechanism choice and trade-off?
+6. Issue appearance variance by implementation stack?
+7. Integrity Packet records to defend conclusion?
+
+== Summary
+* Workflow design is about reasoning under execution
+* Connect concept to invariants and evidence
+* Mature designs are explainable, stressable, and defensible
+
+== Further Reading
+* Search: "Workflow Design Example distributed systems failure mode"
+* Search: "Concurrency design trade-offs"
+* Topics:
+  * Structured logging
+  * Invariants in systems
+  * Coordination patterns and guarantees
+
+== Discussion
+* How can hidden assumptions impact system reliability?
+* What strategies can help reveal these assumptions?

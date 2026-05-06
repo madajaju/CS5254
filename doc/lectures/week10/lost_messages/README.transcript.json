@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "Lost Messages",
+    "text": "Welcome to our lecture on Lost Messages. Today, we will explore how lost messages can affect the correctness of stateful concurrent systems and the implications this has on design and trust."
+  },
+  {
+    "slide": 2,
+    "topic": "Introduction",
+    "text": "Let's begin with a scenario: imagine an episode-processing worker that completes audio cleanup and emits a completion event. However, during a broker restart, this event disappears, causing the workflow to remain in a perpetual 'PROCESSING' state. Even though each object may look correct in isolation, the entire system loses progress, raising a critical question: how can a design effectively detect and recover from such message losses?"
+  },
+  {
+    "slide": 3,
+    "topic": "Core Concept: Silent Failures",
+    "text": "The first core concept we need to understand is silent failures. This occurs when a producer sends a message and assumes it has been successfully delivered. However, this message fails to reach its intended queue or consumer, resulting in unwanted consequences like duplicate work or stale state. It's crucial to explicitly address this issue to ensure system reliability, which includes logging transitions and validating behaviors."
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concept: Zombie Workflows",
+    "text": "Next, we have the concept of zombie workflows. These are workflows that get stuck in an 'In Progress' state indefinitely due to a lost 'Finish' event. This reliance on timely message delivery can lead to failures similar to what we see with silent failures. To combat this, we must ensure that our design exposes invariants and validates transitions throughout the workflow process."
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concept: Broker Failures",
+    "text": "Broker failures refer to situations where the message queue crashes or loses persistent data. This form of failure is often overlooked, yet it can significantly compromise the correctness of the system and its state. To build trust and resiliency into our designs, it's vital to implement monitoring and logging for these transitional states."
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concept: Asynchronous Boundary",
+    "text": "Asynchronous boundaries mark points in the system where work continues later, possibly on a different worker or event loop. The risk here is the potential for lost messages. Therefore, we need to explicitly consider this in our designs to ensure workflows remain consistent. It's important to validate the observed behavior after any transitions occur to prevent inconsistencies."
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concept: Temporal Coupling",
+    "text": "Temporal coupling creates hidden dependencies on event timing, meaning the execution of actions depends on when specific events are completed or observed. This can lead to stale states or duplicate executions. It’s critical to uncover these dependencies during pressure testing and state them explicitly as invariants, ensuring that our system functions correctly under varying conditions."
+  },
+  {
+    "slide": 8,
+    "topic": "Architecture Diagram",
+    "text": "Now, let's explore an architecture diagram that encapsulates the ideas discussed. The diagram presents 'Lost Messages' as a central topic, branching into core concepts like silent failures, zombie workflows, and broker failures. It emphasizes the importance of validation evidence and careful design decisions, ultimately illustrating how these concepts refine our understanding of the system."
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example",
+    "text": "Moving on to a worked example, we see practical scenarios like in the podcast domain where an `AudioCleaner` finishes its task but the corresponding message is lost, halting the workflow. Similarly, in an order system, if the `PaymentConfirmed` event is lost, the user’s order will never ship. These scenarios highlight the real-world implications of lost messages."
+  },
+  {
+    "slide": 10,
+    "topic": "Problem Setup",
+    "text": "In our problem setup, we must consider the consequences of these failures. Both examples demonstrate that without proper message delivery, system progress is stalled. Addressing this issue requires a clear understanding of the potential pitfalls in our designs."
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Design",
+    "text": "Let's look at a naive design that operates under the assumption that everything occurs exactly once and in order. This approach often hides invisible failures even if the process passes basic tests. The steps typically involve an actor performing an operation, the system reading the current state, applying a transition, and emitting a side effect."
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "text": "In a failure scenario, overlapping executions can lead to conditions where stale states occur. This situation illustrates that the system may execute actions multiple times or become blocked. The insight here is that real failures highlight a critical mismatch between the initial design assumptions and the reality of execution."
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Direction",
+    "text": "To improve upon the naive design, we should explicitly name the invariant we want to preserve and make transitions observable. Implementing controls such as version checks and idempotency keys can help prove that operations execute in the intended order, shifting our approach away from merely hoping for the best."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes",
+    "text": "Let’s discuss some failure modes we may encounter. One symptom is when a test only demonstrates a single happy path success. This often happens because the test avoids conditions that would expose hidden weaknesses. To rectify this, we need to perform repeated runs and incorporate structured logging to capture potential failures."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "text": "In our trade-off analysis, we can see various design approaches along with their strengths and weaknesses. For instance, a simple baseline is easy to implement but does not reveal timing issues. On the other hand, a guarded state transition can protect core invariants, albeit with a more complex model. Understanding these trade-offs helps us make informed design decisions."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "text": "Now for the practical application. Tomorrow, identify the invariant most relevant to lost messages in your systems. Write down a sequential scenario that should work as expected, another that applies pressure to expose failures, and ensure your logs are equipped with operation and entity IDs. Capturing before and after evidence when applying fixes is crucial."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "text": "As we integrate this lecture with your upcoming assignment A3, your task will be to clearly connect the concepts we've discussed to your semester project. You'll need to illustrate the relevant objects, workflows, events, and any failures or recovery mechanisms in your own domain, providing concrete evidence to support your assertions."
+  },
+  {
+    "slide": 18,
+    "topic": "Validation Questions",
+    "text": "Before we wrap up, consider these validation questions: What invariant or progress property is most relevant to our discussion? What hidden assumptions could cause the baseline design to appear correct? How can you create repeatable tests to force failures, and what evidence would solidly demonstrate that those failures occurred?"
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "To summarize, understanding lost messages is not merely about vocabulary but is essential for reasoning about system correctness under realistic execution scenarios. Our aim should be to connect these concepts to our invariants and observable behavior, ensuring our designs are validated and defensible with robust evidence."
+  },
+  {
+    "slide": 20,
+    "topic": "Further Reading",
+    "text": "For further reading, you can search phrases like 'Lost Messages in distributed systems failure mode' or 'Lost Messages concurrency design tradeoffs.' Additionally, explore topics around structured logging, invariants in stateful object-oriented systems, and message queues to deepen your understanding."
+  }
+]

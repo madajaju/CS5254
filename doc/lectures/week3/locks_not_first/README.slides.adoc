@@ -1,0 +1,171 @@
+= Why Locks Are Not the First Answer
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Learning Objectives
+
+* Analyze design pressure around locks
+* Diagnose hidden assumptions
+* Evaluate failure evidence
+* Design control maintaining invariants
+* Defend approach in Integrity Packet
+
+== Opening Narrative
+
+* Course project appears correct
+* Concurrency introduces assumptions
+* Analyze and defend design results
+
+== Locking as a Patch
+
+* Definition: adding synchronizations
+* Importance: clarifies trust under pressure
+* Mechanism: state, timing, behavior
+* Failure: produces duplicates, stale state
+* Implication: expose invariant, log transitions
+
+== Coordination Boundary
+
+* Definition: agreement on ordering/ownership
+* Importance: clarifies trust under pressure
+* Mechanism: state, timing, behavior
+* Failure: produces duplicates, stale state
+* Implication: expose invariant, log transitions
+
+== Progress Guarantee
+
+* Definition: work completion instead of stall
+* Importance: clarifies trust under pressure
+* Mechanism: state, timing, behavior
+* Failure: produces duplicates, stale state
+* Implication: expose invariant, log transitions
+
+== Contention
+
+* Definition: competition for resources
+* Importance: clarifies trust under pressure
+* Mechanism: state, timing, behavior
+* Failure: produces duplicates, stale state
+* Implication: expose invariant, log transitions
+
+== System View
+
+[plantuml, target=system_view, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Why Locks Are Not the First Answer" as Topic
+rectangle "Locking as a Patch" as A
+rectangle "Coordination Boundary" as B
+rectangle "Progress Guarantee" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+* Podcast Domain: use immutable assets
+* Tradeoff: global lock vs fine-grained locking
+* Naive model: order, current state
+* Failure: stale state or late execution
+* Improved design: name invariant, observable transitions
+
+== Failure Modes
+
+* Symptom: happy-path success
+  * Why: tests avoid pressure conditions
+  * How to detect: repeated runs, delays
+  * How to correct: add failure-focused tests
+
+* Symptom: tool used, not design property
+  * Why: focus on mechanisms, not invariants
+  * How to detect: ask about the invariant 
+  * How to correct: write invariant first
+
+* Symptom: vague evidence
+  * Why: logs lack detail
+  * How to detect: reviewer fails to reconstruct
+  * How to correct: capture structured evidence
+
+* Symptom: fix without comparison
+  * Why: failure not repeatable
+  * How to detect: no before/after workload
+  * How to correct: maintain failing test cases
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy implementation | Hides timing assumptions | First iteration
+| Guarded transition | Protects invariant | Requires modeling | State changes
+| Coordination | Makes dependencies visible | May cause bottlenecks | Object workflows
+| Idempotent design | Handles duplicates | Needs keys for control | Queues, retries
+| Observability-first | Solid evidence | Increases instrumentation | Failure proof requirements
+|===
+
+== Practical Application
+
+Tomorrow morning:
+
+* Identify relevant invariant
+* Write a sequential success scenario
+* Write a pressure scenario for failure
+* Add ID logging before pressure test
+* Capture before/after evidence of fixes
+* Update Integrity Packet with assumptions
+
+== Assignment Integration
+
+Support [A1](../../../assignments/A1/index.md):
+
+* Connect concepts to semester project
+* Show relevant object or failure mechanism
+* Evidence: runnable commands, logs, diagrams
+
+== Validation Questions
+
+1. What invariant is most relevant?
+2. What hidden assumption exists?
+3. How to force failure in a test?
+4. What evidence proves failure?
+5. Which mechanism to choose first?
+6. How does this issue appear in implementations?
+7. What to record in Integrity Packet?
+
+== Summary
+
+* Locks are not just vocabulary
+* Connect concepts to invariants and evidence
+* Design must be explainable and validated
+
+== Discussion
+
+* How do hidden assumptions affect design?
+* What is the role of evidence in design defense?
+
+== Further Reading
+
+* Search: "Why Locks Are Not the First Answer in failure mode"
+* Search: "concurrency design tradeoffs"
+* Topics: structured logging, invariants

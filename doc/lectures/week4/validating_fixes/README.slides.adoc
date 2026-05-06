@@ -1,0 +1,178 @@
+= Validating Fixes
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Learning Objectives
+
+* Analyze design pressure of validating fixes
+* Diagnose hidden assumptions in system correctness
+* Evaluate failure evidence (logs, traces, etc.)
+* Design corrections preserving invariants
+* Defend approach in Integrity Packet and connect to A1
+
+== Fix Verification
+
+* Definition: Re-run failed test to ensure it passes
+* Importance: Identifies explicit conditions for trust
+* Mechanism: Through state, timing, behavior, etc.
+* Failure mode: Duplicate work, stale state
+* Design implication: Expose invariants, log transitions
+
+== Boundary Testing
+
+* Definition: Test system limits (e.g., max threads)
+* Importance: Identifies explicit conditions for trust
+* Mechanism: Through state, timing, behavior, etc.
+* Failure mode: Duplicate work, stale state
+* Design implication: Expose invariants, log transitions
+
+== Sanity Checks
+
+* Definition: Ensure fix for one issue didn’t break others
+* Importance: Identifies explicit conditions for trust
+* Mechanism: Through state, timing, behavior, etc.
+* Failure mode: Duplicate work, stale state
+* Design implication: Expose invariants, log transitions
+
+== Proving Correctness
+
+* Definition: Use logs to show invariants preserved
+* Importance: Identifies explicit conditions for trust
+* Mechanism: Through state, timing, behavior, etc.
+* Failure mode: Duplicate work, stale state
+* Design implication: Expose invariants, log transitions
+
+== System Invariant
+
+* Definition: Condition that must remain true in execution
+* Importance: Identifies explicit conditions for trust
+* Mechanism: Through state, timing, behavior, etc.
+* Failure mode: Duplicate work, stale state
+* Design implication: Expose invariants, log transitions
+
+== System / Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Validating Fixes" as Topic
+rectangle "Fix Verification" as A
+rectangle "Boundary Testing" as B
+rectangle "Sanity Checks" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+== Problem Setup
+
+* Podcast Domain
+* Test: 10 concurrent publishing attempts
+* Validation: Logs show one success, nine failures
+
+== Naive Implementation
+
+* Operation occurs once, in order
+* Method name seems correct, passes sequential tests
+
+== Failure Scenario
+
+* Concurrently, can observe stale state
+* Failure: mismatch between design assumption and execution model
+
+== Improved Design Direction
+
+* Name invariant, observe transitions, add controls
+* Use version checks, idempotency keys, state machine guards
+
+== Why Improved Design Is Safer
+
+* Proves invalid interleavings are rejected or managed
+
+== Failure Modes & Anti-Patterns
+
+* Symptom: System passes single demo
+  * Detection: Add concurrent actors, structured logs
+  * Correction: Maintain happy-path test, add failure-focused tests
+
+* Symptom: Names tool, not design property
+  * Detection: Ask which invariant is protected
+  * Correction: Write invariant first, then select mechanism
+
+* Symptom: Evidence is too vague
+  * Detection: Reviewer cannot reconstruct failure
+  * Correction: Capture structured evidence linking to claims
+
+* Symptom: Fix not compared to baseline
+  * Detection: No repeatable failing scenario
+  * Correction: Preserve failing test and rerun post-redesign
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to implement | Hides timing assumptions | First implementation
+| Guarded transition | Protects core invariant | Requires careful modeling | Reservations, publishing
+| Explicit coordination | Makes dependencies visible | Can introduce deadlock | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires deduplication | Queues, async workers
+| Observability-first | Strong evidence | Adds instrumentation | Assignments requiring proof
+|===
+
+== Practical Application
+
+* Identify relevant invariant for validating fixes
+* Write sequential scenario expected to succeed
+* Capture before/after evidence with IDs in logs
+
+== Assignment Integration
+
+Connect the lecture concept to [A1](../../../assignments/A1/index.md) for a semester project.
+
+== Validation & Interview Questions
+
+1. Relevant invariant for this lecture?
+2. Hidden assumptions in baseline design?
+3. How to force failure in a repeatable test?
+4. What evidence proves failure occurred?
+5. Chosen design mechanism and trade-offs?
+6. How would the issue differ across implementations?
+7. What to record in Integrity Packet?
+
+== Summary
+
+Validating fixes connects concepts to invariants and defensible trade-offs, ensuring systems remain correct under real executions.
+
+== Further Reading
+
+* "Validating Fixes distributed systems failure mode"
+* "Validating Fixes concurrency design tradeoffs"
+* Structured logging and correlation IDs
+* Invariants in stateful object-oriented systems
+
+== Discussion
+
+* Key challenges in validating fixes?
+* How does understanding failures impact design decisions?

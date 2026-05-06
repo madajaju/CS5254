@@ -1,0 +1,112 @@
+[
+  {
+    "slide": 1,
+    "topic": "Tradeoffs",
+    "text": "Welcome to this lecture on tradeoffs. Today, we will explore the hidden assumptions that can appear correct during simple demonstrations but may expose significant issues when faced with concurrency and pressure."
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "text": "To start, let’s consider how a simple demonstration may seem correct at first glance. However, once we introduce concurrency, ambiguity, or operational pressure, we may uncover hidden assumptions regarding performance versus correctness. Our goal is to analyze what aspects must be defended before we can trust our results."
+  },
+  {
+    "slide": 3,
+    "topic": "Core Concepts",
+    "text": "Let’s dive into our first core concept: performance versus correctness. A global lock guarantees correctness, but it can massively slow down operations. It’s crucial to expose this trade-off when the system is under pressure, as ignoring it can lead to issues like duplicate work or stale states."
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concepts",
+    "text": "Next, we’ll discuss complexity versus simplicity. Immutability may make reasoning easier, but it often requires more memory. Again, we need to clear up these assumptions under pressure to avoid failures like duplicate work. Therefore, exposing invariants and logging transitions remains vital."
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concepts",
+    "text": "Now, let’s examine throughput versus latency. Some modifications might enable your system to handle more requests per second but could increase the time it takes to process each request. This trade-off needs to be clearly understood as it can lead to significant issues in system behavior under pressure."
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concepts",
+    "text": "The next concept is the maintenance burden. If your locking logic becomes overly complex, future developers may struggle to maintain it, which raises the risk of introducing new bugs. We must clarify our assumptions around this trade-off to ensure system reliability."
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concepts",
+    "text": "Finally, let’s discuss the system invariant. This is a crucial condition that must hold true across all valid executions. We again see the importance of making these invariants clear under pressure, as failure to do so could lead to duplicate outputs or blocked progress."
+  },
+  {
+    "slide": 8,
+    "topic": "System Architecture",
+    "text": "Here, we visualize the relationships between our concepts. Our primary focus is the trade-offs, which connect various facets like performance, complexity, and evidence of validation. The system must not only execute correctly once but maintain its invariance under varying conditions."
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example",
+    "text": "Let's engage with a worked example from the podcast domain. Should we use a global lock for the EpisodeStore, or individual locks for each episode? While per-episode locks allow more concurrency, they may also introduce deadlocks if multiple episodes need to be processed together. This highlights the complex decision-making required in system design."
+  },
+  {
+    "slide": 10,
+    "topic": "Naive Implementation",
+    "text": "A naive implementation assumes that operations occur once and in order. The method names may sound correct, and if a sequential test passes, it can give a false sense of security. However, it’s critical to be aware of these assumptions as they can lead to serious problems later."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "Imagine a scenario under pressure where overlapping operations could lead to stale state. The same operation might be executed twice due to retries or coordination failures. This exposure of the underlying assumptions underscores the need for rigorous testing."
+  },
+  {
+    "slide": 12,
+    "topic": "Improved Design Direction",
+    "text": "To mitigate these issues, we can adopt a safer design approach. This involves naming the invariant, making transitions observable, and integrating a range of correctness controls such as version checks and idempotency strategies. These adjustments can drastically enhance the system's resilience."
+  },
+  {
+    "slide": 13,
+    "topic": "Why Improved Design Is Safer",
+    "text": "The revised design is safer because it shifts our mindset from merely hoping for successful execution to actively proving that invalid interactions are managed or corrected. This change fundamentally improves our trust in the system."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes",
+    "text": "Let’s consider some common failure modes. One symptom is when a system passes a happy-path test but subsequently fails under realistic pressure. This can be detected with concurrent tests and comprehensive logging, and it should be addressed by adding tests that focus on potential points of failure."
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes",
+    "text": "Another issue arises when explanations focus on tools rather than the underlying design properties. We can detect this by identifying which invariant is being protected in our design and ensuring we articulate that clearly before selecting our mechanisms."
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "text": "Now let’s look at a trade-off analysis table. It summarizes various approaches we may adopt, outlining their strengths, weaknesses, and when to implement them. Consider, for instance, a simple baseline that is easy to implement but often conceals deeper timing assumptions."
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "text": "As we move towards practical application, think about how you can identify the invariant in your designs tomorrow. Write one sequential scenario that should succeed and one pressure scenario that could expose a failure. Make sure to incorporate identifiable operation IDs in your logs."
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "text": "This lecture is closely aligned with Assignment 1. You should connect the concepts we discussed to your semester project. This means demonstrating how the relevant objects, workflows, and failures operate in your context, supported by logs and runnable commands."
+  },
+  {
+    "slide": 19,
+    "topic": "Validation Questions",
+    "text": "To further reinforce your understanding, consider these validation questions. What invariant is most relevant to what we've covered? What hidden assumptions could cause a design to appear correct? How would you approach forcing failures in tests?"
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "text": "In summary, our central insight today revolves around seeing trade-offs as a way to reason about system correctness under realistic execution conditions. A professional engineer must bridge the theory with observable behavior and provide proof of their design decisions."
+  },
+  {
+    "slide": 21,
+    "topic": "Further Reading",
+    "text": "For those interested in diving deeper, consider searching topics like trade-offs in distributed systems and structured logging. These concepts will further enhance your understanding of how to manage invariants in stateful object-oriented systems."
+  },
+  {
+    "slide": 22,
+    "topic": "Discussion",
+    "text": "As we conclude the lecture, I’d like to open the floor for discussion. How do hidden assumptions affect your design processes? I’m eager to hear the trade-offs you’ve encountered in your projects and how you’ve navigated them."
+  }
+]

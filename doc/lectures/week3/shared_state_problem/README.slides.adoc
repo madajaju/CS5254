@@ -1,0 +1,220 @@
+= Shared State is the Problem
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Course Overview
+
+* Course: CS 5891b – Object-Oriented Systems Under Concurrency
+* Week: 3
+* Duration: 15 minutes
+* Prerequisites: 
+  * Object state
+  * Concurrency pressure
+  * Structured evidence
+  * Integrity Packet reasoning
+* Assignment: [A1](../../../assignments/A1/index.md)
+
+== Learning Objectives
+
+* Analyze design pressure of shared state issues.
+* Diagnose hidden assumptions in system correctness.
+* Evaluate failure evidence: logs, traces, interleavings.
+* Design corrections that preserve relevant invariants.
+* Defend approach in Integrity Packet aligned to A1.
+
+== Opening Narrative
+
+* Project appears correct in simple tests.
+* Concurrency introduces hidden assumptions about Mutable Shared State.
+* What must engineers analyze before trusting results?
+
+== Core Concept: Mutable Shared State
+
+* Definition: Data accessed by multiple threads.
+* Importance: Must be explicit for trusted system under pressure.
+* Mechanisms: 
+  * Object state
+  * Workflow timing
+  * Worker behavior
+  * Queues
+  * Coordination boundaries
+* Failure Mode: 
+  * Duplicate work
+  * Stale state
+  * Blocked progress
+  * Misleading evidence
+* Design Implication: Expose invariant, log transition, validate behavior.
+
+== Core Concept: Thread Safety
+
+* Definition: Ensures correct behavior when accessed by multiple threads.
+* Importance: Explicitness required for system trust.
+* Mechanisms: Same as Mutable Shared State.
+* Failure Mode: Same as Mutable Shared State.
+* Design Implication: Expose invariant, log transition, validate behavior.
+
+== Core Concept: State Leakage
+
+* Definition: Internal data structure modification by external threads.
+* Importance: Explicitness required for system trust.
+* Mechanisms: Same as Mutable Shared State.
+* Failure Mode: Same as Mutable Shared State.
+* Design Implication: Expose invariant, log transition, validate behavior.
+
+== Core Concept: System Invariant
+
+* Definition: Condition true across valid executions.
+* Importance: Explicitness required for system trust.
+* Mechanisms: Same as Mutable Shared State.
+* Failure Mode: Same as Mutable Shared State.
+* Design Implication: Expose invariant, log transition, validate behavior.
+
+== Core Concept: Failure Mode
+
+* Definition: System violating invariant or losing progress.
+* Importance: Explicitness required for system trust.
+* Mechanisms: Same as Mutable Shared State.
+* Failure Mode: Same as Mutable Shared State.
+* Design Implication: Expose invariant, log transition, validate behavior.
+
+== System Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Shared State is the Problem" as Topic
+rectangle "Mutable Shared State" as A
+rectangle "Thread Safety" as B
+rectangle "State Leakage" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example: Problem Setup
+
+* **Podcast Domain**: 
+  * *Unsafe*: global `static List<Episode> allEpisodes` accessed by multiple workers.
+  * *Safe*: local `List<Asset> localAssets` within one worker’s execution.
+* **Inventory System**: shared `Integer count` decremented by purchase threads.
+
+== Naive Implementation
+
+A naive design assumes:
+* Operation happens once, in order, with current state.
+* Assumption often invisible.
+```
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+```
+
+== Failure Scenario
+
+* Under concurrent execution or retries:
+  * Observes stale state.
+  * Executes twice.
+  * Workflow left stuck.
+* Failure is a mismatch between assumption and execution.
+
+== Corrected Design Direction
+
+* Name the invariant.
+* Make transitions observable.
+* Add correctness controls:
+  * Version checks
+  * Idempotency keys
+  * State-machine guards
+  * Explicit coordination
+
+== Why Is Improved Design Safer?
+
+* Changes focus from hoping for correct execution to:
+  * Proving invalid interleavings are rejected or recovered with evidence.
+
+== Failure Modes & Anti-Patterns
+
+* Symptom: System passes single happy-path test.
+  * **Detection**: Add repeated runs, concurrent actors.
+* Symptom: Tool names precede design properties.
+  * **Detection**: Ask which invariant is protected.
+* Symptom: Evidence is vague.
+  * **Detection**: Logs lack necessary identifiers or transitions.
+* Symptom: Fix changes behavior without comparison.
+  * **Detection**: No before/after repeatable scenario.
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | Initial implementation
+| Guarded transition | Protects core invariant | Requires careful modeling | Status changes
+| Explicit coordination | Makes dependencies visible | May introduce deadlocks | Complex workflows
+| Idempotent design | Handles duplicates | Requires side-effect control | Queues, retries
+| Observability-first | Provides strong evidence | Needs instrumentation | Failure proof
+|===
+
+== Practical Application
+
+* Identify the invariant relevant to shared state.
+* Write one sequential scenario that should succeed.
+* Write one pressure scenario that could expose failure.
+* Add operation and entity IDs to logs before testing pressure scenario.
+* Capture before/after evidence during fixes.
+* Update Integrity Packet with assumptions and validation.
+
+== Assignment Integration
+
+* Supports [A1](../../../assignments/A1/index.md).
+* Connect concepts to semester project with relevant evidence: logs, diagrams, failure reproduction.
+
+== Validation Questions
+
+1. Identify the relevant invariant for this lecture.
+2. What hidden assumption makes baseline design appear correct?
+3. How to force failure in a repeatable test?
+4. What evidence would prove failure?
+5. Which design mechanism to choose first, and what trade-off?
+6. How would the issue appear in your two implementation stacks?
+7. What to record in Integrity Packet?
+
+== Summary
+
+* Shared state: A lens for system correctness under execution.
+* Task: Connect concepts to invariants and defensible design trade-offs.
+* A mature design proves observable behavior and validates evidence.
+
+== Further Reading
+
+* Search: "Shared State is the Problem distributed systems failure mode"
+* Search: "Shared State is the Problem concurrency design tradeoffs"
+* Topics: 
+  * Structured logging
+  * Invariants in stateful systems
+
+== Discussion
+
+* What are the risks of shared state in your projects?
+* How do your designs reflect trade-offs in concurrency?

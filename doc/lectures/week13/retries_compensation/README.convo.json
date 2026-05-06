@@ -1,0 +1,350 @@
+[
+  {
+    "slide": 1,
+    "topic": "Retries, Compensation, Dead Letter Queues",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome everyone to our lecture on retries, compensation, and dead letter queues. Today, we'll dive into how these concepts affect the design and reliability of stateful systems under concurrency."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As we start, consider how shifting synchronous workflows to background processing impacts our systems. While the user experience improves because they no longer wait, the correctness of the system becomes dependent on events, retries, and how we observe these operations. What must we clarify when our work crosses over time?"
+      },
+      {
+        "role": "student",
+        "text": "Wait, so that means we have to be more careful about timing and event handling, right?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! It's crucial to make the implicit requirements explicit so we can ensure reliability."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Our learning goals today include analyzing the design pressures introduced by retries and dead letter queues. We'll also diagnose hidden assumptions that can mislead us when systems are under pressure, evaluate failure evidence from logs, and design corrections that maintain critical invariants. This is where teams get into trouble—underestimating the complexity added by concurrency."
+      },
+      {
+        "role": "student",
+        "text": "I think I get it, but how do we even begin to evaluate those hidden assumptions?"
+      },
+      {
+        "role": "teacher",
+        "text": "Great question! We start by closely examining how our systems behave under different load conditions and observing any discrepancies that arise."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concept: Exponential Backoff",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's discuss exponential backoff. This technique involves gradually increasing the wait time between retries. It’s crucial because it surfaces systems under stress, helping us to avoid overwhelming components that are struggling. In production, if this is ignored, you might end up facing duplicate work or stale states."
+      },
+      {
+        "role": "student",
+        "text": "So, is that like when you try to send a request multiple times but don't pause between them?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! If you keep bombarding a failing system with requests, you're not giving it a chance to recover, which can lead to a cascading failure."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concept: Compensation (Rollback)",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, we'll explore compensation or rollback strategies. This is when we need to undo a previous successful operation due to a subsequent failure—think of it as refunding a payment if shipping fails. Understanding this helps build trust in our systems' behavior under pressure."
+      },
+      {
+        "role": "student",
+        "text": "Wait… so that means we need to track what has happened so we can revert if something goes wrong?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! You need that tracking to ensure that you're accurately reflecting the state of your operations."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concept: Dead Letter Queue (DLQ)",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now let's look at the concept of a dead letter queue. A DLQ is where messages are sent after all retry attempts fail. It crucially allows us to manually inspect failures without losing sight of them. Without it, we risk creating stale states or blocking progress. If you overlook this, you might end up spinning your wheels trying to figure out what went wrong."
+      },
+      {
+        "role": "student",
+        "text": "So it’s like having a backup plan for failed messages?"
+      },
+      {
+        "role": "teacher",
+        "text": "Precisely! It provides a safety net that helps you diagnose issues without losing any data."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concept: Circuit Breaker",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A circuit breaker acts by temporarily halting requests to failing components, allowing them recovery time. This method is vital for maintaining trust in our systems under stress. If not properly implemented, we might exacerbate existing issues."
+      },
+      {
+        "role": "student",
+        "text": "So, it's like pulling the plug on something that's not working instead of just letting it fail repeatedly?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! It’s about protecting the overall system from being brought down by one component’s failure."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Core Concept: Asynchronous Boundary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As we explore asynchronous boundaries, think of them as points where work pauses and resumes later, often handled by a different worker or event loop. Proper management is critical; failure to do so could lead to misleading evidence of system behavior. This is where many teams overlook the implications."
+      },
+      {
+        "role": "student",
+        "text": "Could you give an example of how that might fail in practice?"
+      },
+      {
+        "role": "teacher",
+        "text": "Sure! Imagine sending a request to fetch user data asynchronously, but if that request fails, you may not know about it unless you've set up adequate logging and error handling."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This architecture diagram highlights the relationships between retries, compensation, dead letter queues, and validation evidence. It visually represents how each concept influences design decisions, underlining the importance of refining our approaches as we progress. The goal here isn’t just to implement these components but to make sure they work in harmony."
+      },
+      {
+        "role": "student",
+        "text": "Got it! So they all need to be interconnected for the system to function effectively?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! It's about creating a reliable framework that supports your operations."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Problem Setup",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's apply what we've learned with a worked example. In the podcast domain, the `AudioCleaner` retries a file upload multiple times, and if these fail, the upload moves to a dead letter queue for further inspection. Similarly, in an order system, compensation is necessary when items turn out of stock after payment is processed."
+      },
+      {
+        "role": "student",
+        "text": "So these examples show how failure handling looks in real scenarios?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! They're practical illustrations of the principles we've discussed."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Worked Example: Naive Mental Model",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A common naive mental model assumes operations execute just once, in sequence, with the belief that state transitions along the way are valid. However, this can lead to problems under stress, as sequential tests may pass while hiding real issues."
+      },
+      {
+        "role": "student",
+        "text": "That makes sense! It's like thinking everything is fine until you actually test it under load."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! This oversight can result in deployment failures that are hard to track down."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Worked Example: Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Imagine a scenario where overlapping executions can lead to observing stale states or even executing the same operation twice. This highlights a failure not just in syntax, but in the fundamental design assumptions that often go unchecked."
+      },
+      {
+        "role": "student",
+        "text": "Right, so the problem is deeper than just a coding bug?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! It's a fundamental mismatch between design assumptions and execution behavior. This is critical to recognize!"
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Worked Example: Corrected Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To improve design, we should start by clearly naming our invariants and ensuring transitions are observable. We want to shift from merely hoping that an execution order holds to proving that any invalid interactions are either rejected or properly handled. This is where teams need to focus their efforts."
+      },
+      {
+        "role": "student",
+        "text": "So it's all about creating verifiable paths?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! A strong design must withstand scrutiny."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes and Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let’s identify common failure modes and anti-patterns. For instance, a system may pass a happy-path test, yet fail under real-world concurrent conditions. We can expose weaknesses by running repeated tests or employing structured logging. This is critical for grabbing the system's latent issues."
+      },
+      {
+        "role": "student",
+        "text": "What should we be looking for in those tests?"
+      },
+      {
+        "role": "teacher",
+        "text": "Look for timing issues, data consistency, and how dynamically your system adjusts under load. These are key indicators of potential failure."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In analyzing trade-offs, we can see various approaches with their strengths and weaknesses. For instance, a simple baseline implementation is straightforward but may hide timing issues, while an observability-first design provides strong evidence but requires the extra effort of instrumentation. This is the part I want you to remember—trade-offs are always present."
+      },
+      {
+        "role": "student",
+        "text": "So we need to balance the complexity of implementation with the robustness we want in our systems?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! Finding that sweet spot is key to successful system design."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In practical application, I encourage you to identify the most relevant invariant regarding retries and compensation. Develop both a sequential and a pressure scenario while enhancing your logs with operation and entity IDs, capturing evidence of any fixes you apply. This hands-on approach is invaluable!"
+      },
+      {
+        "role": "student",
+        "text": "I see, so we have to actually apply these concepts to our projects."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! It’s about taking theory into practice to solidify your understanding."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As you connect these concepts to your assignment, remember to demonstrate mastery through concrete evidence—think of runnable commands, structured logs, and clear diagrams that illustrate your understanding of the topic. This is crucial for your success."
+      },
+      {
+        "role": "student",
+        "text": "Gotcha! I need to make sure I back up my design choices with evidence."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! It's how you prove your thought process is sound."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Validation Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Here are some validation questions to consider: What invariant relates to today's discussion? What hidden assumptions could mislead your designs? How might you force a failure in a repeatable test? These questions help solidify concepts."
+      },
+      {
+        "role": "student",
+        "text": "I see! It helps to think critically about what we’ve learned."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly, critical thinking is key in engineering."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To summarize, our exploration of retries, compensation, and dead letter queues reveals their critical role in ensuring that systems remain reliable under execution pressure. It's essential to connect these concepts with observable behavior and defend design decisions with solid evidence. That’s what engineering is all about—proving reliability."
+      },
+      {
+        "role": "student",
+        "text": "Thanks! I feel more equipped to tackle these topics now."
+      },
+      {
+        "role": "teacher",
+        "text": "I’m glad to hear that! Remember, the more you practice, the more intuitive these concepts will become."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For further study, consider searching for resources on retries, compensation, and dead letter queues in distributed systems. Understanding these topics in depth will help reinforce your ability to design resilient systems."
+      },
+      {
+        "role": "student",
+        "text": "I’ll definitely look into that!"
+      }
+    ]
+  }
+]

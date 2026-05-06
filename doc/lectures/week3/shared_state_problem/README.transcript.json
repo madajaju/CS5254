@@ -1,0 +1,117 @@
+[
+  {
+    "slide": 1,
+    "topic": "Shared State is the Problem",
+    "text": "Welcome, everyone. Today, we are diving into the concept of shared state in concurrent systems. This topic is crucial for understanding how design pressure can impact the correctness of our systems."
+  },
+  {
+    "slide": 2,
+    "topic": "Course Overview",
+    "text": "Let’s start with a brief overview of the course. This week, we're focusing on the Object-Oriented Systems Under Concurrency. You should already have some familiarity with object states and concurrency pressure from prior lectures."
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "text": "Our learning goals today are to analyze the design pressures that shared state introduces, identify hidden assumptions within our systems, and evaluate how to design validations that ensure our systems remain robust under various pressures."
+  },
+  {
+    "slide": 4,
+    "topic": "Opening Narrative",
+    "text": "Imagine you're working on a project that runs smoothly in simple test scenarios but begins to fail when confronted with concurrency. This lecture challenges us to analyze those hidden assumptions that can lead to failure."
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concept: Mutable Shared State",
+    "text": "Mutable shared state refers to data that multiple threads can change. Recognizing this condition is crucial for trustworthiness in system behavior under varying operational pressures. If overlooked, we might experience issues like duplicate work or stale state."
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concept: Thread Safety",
+    "text": "Thread safety is about ensuring that objects or functions behave correctly when accessed by multiple threads. Just like mutable shared state, being explicit about thread safety in our designs is critical to maintaining system trust."
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concept: State Leakage",
+    "text": "State leakage occurs when internal data structures become accessible to other threads, allowing those threads to modify them without the object's oversight. This poses significant risks that must be managed to ensure reliable operation."
+  },
+  {
+    "slide": 8,
+    "topic": "Core Concept: System Invariant",
+    "text": "A system invariant is a condition that should always hold true during valid executions. It’s crucial to understand this concept as it aids in maintaining system integrity amidst various operational pressures."
+  },
+  {
+    "slide": 9,
+    "topic": "Core Concept: Failure Mode",
+    "text": "Failure modes represent predictable ways in which a system may violate its invariants or fail to progress. Recognizing these modes helps us understand potential points of failure in our designs."
+  },
+  {
+    "slide": 10,
+    "topic": "System Architecture View",
+    "text": "This architecture view visually represents the interaction between shared state issues and the need for validation evidence. It emphasizes that should we introduce new pressures to the system, we must ensure that relevant invariants hold."
+  },
+  {
+    "slide": 11,
+    "topic": "Worked Example: Problem Setup",
+    "text": "Let’s consider a podcast domain where unsafe usage of a global list of episodes can lead to concurrency issues. On the other hand, using a local list within a single worker's execution can help avoid these problems."
+  },
+  {
+    "slide": 12,
+    "topic": "Naive Implementation",
+    "text": "A naive implementation assumes operations will happen sequentially and correctly. However, this common assumption often leads to serious concurrency issues that are not immediately obvious just from reading the code."
+  },
+  {
+    "slide": 13,
+    "topic": "Failure Scenario",
+    "text": "Under concurrent execution or retry scenarios, designs can fail by observing stale state, executing operations multiple times, or blocking progress. These are clear indicators that our initial assumptions were flawed."
+  },
+  {
+    "slide": 14,
+    "topic": "Corrected Design Direction",
+    "text": "An effective design approach involves naming the invariant, making transitions clear and observable, and implementing controls such as version checks to ensure correctness when facing concurrency."
+  },
+  {
+    "slide": 15,
+    "topic": "Why Is Improved Design Safer?",
+    "text": "The improved design shifts our perspective from hoping for correct execution to ensuring that incorrect execution paths are effectively handled or prevented, providing a robust evidence-based framework."
+  },
+  {
+    "slide": 16,
+    "topic": "Failure Modes & Anti-Patterns",
+    "text": "We often see symptoms indicating a system passed a single happy-path test, but under real pressure, failures can emerge. It’s essential to thoroughly test designs using concurrent scenarios to expose their weaknesses."
+  },
+  {
+    "slide": 17,
+    "topic": "Trade-Off Analysis",
+    "text": "When evaluating different design approaches, we must consider their strengths and weaknesses. For instance, while a simple baseline is easy to explain, it may hide critical timing and pressure assumptions."
+  },
+  {
+    "slide": 18,
+    "topic": "Practical Application",
+    "text": "As a practical exercise tomorrow, identify the critical invariant relevant to shared state issues within your projects. Create scenarios to test both successful operations and potential failures, capturing the necessary evidence."
+  },
+  {
+    "slide": 19,
+    "topic": "Assignment Integration",
+    "text": "This lecture connects directly to your assignments. Be prepared to demonstrate how the concepts we discussed apply to your own projects, using structured evidence and validation in your Integrity Packet."
+  },
+  {
+    "slide": 20,
+    "topic": "Validation Questions",
+    "text": "To reinforce these concepts, consider these questions: What is the most relevant invariant for this lecture? What hidden assumptions might jeopardize system integrity? How can we accurately capture evidence of failure?"
+  },
+  {
+    "slide": 21,
+    "topic": "Summary",
+    "text": "In summary, understanding that shared state presents real challenges in concurrency is vital. Your task as engineers is to connect these challenges to observable behaviors and defend your design choices with solid evidence."
+  },
+  {
+    "slide": 22,
+    "topic": "Further Reading",
+    "text": "For those interested in exploring further, I encourage you to look up resources on shared state in distributed systems and concurrency design trade-offs. These topics can deepen your understanding."
+  },
+  {
+    "slide": 23,
+    "topic": "Discussion",
+    "text": "Let’s open the floor for discussion. What risks have you encountered regarding shared state in your own projects, and how have your designs reflected the necessary trade-offs in managing concurrency?"
+  }
+]

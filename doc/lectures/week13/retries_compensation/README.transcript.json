@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "Retries, Compensation, Dead Letter Queues",
+    "text": "Welcome everyone to our lecture on retries, compensation, and dead letter queues. Today, we'll dive into how these concepts affect the design and reliability of stateful systems under concurrency."
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "text": "As we start, consider how shifting synchronous workflows to background processing impacts our systems. While the user experience improves because they no longer wait, the correctness of the system becomes dependent on events, retries, and how we observe these operations. What must we clarify when our work crosses over time?"
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "text": "Our learning goals today include analyzing the design pressures introduced by retries and dead letter queues. We'll also diagnose hidden assumptions that can mislead us when systems are under pressure, evaluate failure evidence from logs, and design corrections that maintain critical invariants."
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concept: Exponential Backoff",
+    "text": "Let's discuss exponential backoff. This technique involves gradually increasing the wait time between retries. It’s crucial because it surfaces systems under stress, helping us to avoid overwhelming components that are struggling. If not implemented properly, we may face issues like duplicate work or stale state."
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concept: Compensation (Rollback)",
+    "text": "Next, we'll explore compensation or rollback strategies. This is when we need to undo a previous successful operation due to a subsequent failure—for instance, refunding a payment if shipping fails. Understanding this helps build trust in our systems' behavior under pressure."
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concept: Dead Letter Queue (DLQ)",
+    "text": "Now let's look at the concept of a dead letter queue. This is where messages are sent after all retry attempts fail. It crucially allows us to manually inspect failures without losing sight of them. Without it, we risk creating stale states or blocking progress."
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concept: Circuit Breaker",
+    "text": "A circuit breaker acts by temporarily halting requests to failing components, allowing them recovery time. It's vital for maintaining trust in our systems under stress, and without proper implementation, we might just exacerbate existing issues."
+  },
+  {
+    "slide": 8,
+    "topic": "Core Concept: Asynchronous Boundary",
+    "text": "As we explore asynchronous boundaries, think of them as points where work pauses and resumes later, often handled by a different worker or event loop. The right management of these is critical; failure to do so could lead to misleading evidence of system behavior."
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "text": "This architecture diagram highlights the relationships between retries, compensation, dead letter queues, and validation evidence. It visually represents how each concept influences design decisions, underlining the importance of refining our approaches as we progress."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Problem Setup",
+    "text": "Let's apply what we've learned with a worked example. In the podcast domain, for example, the `AudioCleaner` retries a file upload multiple times, and if these fail, the upload moves to a dead letter queue for further inspection. Similarly, in an order system, compensation is necessary when items turn out of stock after payment is processed."
+  },
+  {
+    "slide": 11,
+    "topic": "Worked Example: Naive Mental Model",
+    "text": "A common naive mental model assumes operations execute just once, in sequence, with the assumption that state transitions along the way are valid. However, this can lead to problems when under stress, as sequential tests may pass by hiding real issues."
+  },
+  {
+    "slide": 12,
+    "topic": "Worked Example: Failure Scenario",
+    "text": "Imagine a scenario where overlapping executions can lead to observing stale states or even executing the same operation twice. This highlights a failure not just in syntax, but in the fundamental design assumptions that often go unchecked."
+  },
+  {
+    "slide": 13,
+    "topic": "Worked Example: Corrected Design Direction",
+    "text": "To improve design, we should start by clearly naming our invariants and ensuring transitions are observable. We want to shift from merely hoping that an execution order holds to proving that any invalid interactions are either rejected or properly handled."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "Now, let’s identify common failure modes and anti-patterns. For instance, a system may pass a happy-path test, yet fail under real-world concurrent conditions. We can expose weaknesses by running repeated tests or employing structured logging."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "text": "In analyzing trade-offs, we can see various approaches with their strengths and weaknesses. For instance, a simple baseline implementation is straightforward but may hide timing issues, while an observability-first design provides strong evidence but requires the extra effort of instrumentation."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "text": "In practical application, I encourage you to identify the most relevant invariant regarding retries and compensation. Develop both a sequential and a pressure scenario while enhancing your logs with operation and entity IDs, capturing evidence of any fixes you apply."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "text": "As you connect these concepts to your assignment, remember to demonstrate mastery through concrete evidence—think of runnable commands, structured logs, and clear diagrams that illustrate your understanding of the topic."
+  },
+  {
+    "slide": 18,
+    "topic": "Validation Questions",
+    "text": "Here are some validation questions to consider: What invariant relates to today's discussion? What hidden assumptions could mislead your designs? How might you force a failure in a repeatable test?"
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "To summarize, our exploration of retries, compensation, and dead letter queues reveals their critical role in ensuring that systems remain reliable under execution pressure. It's essential to connect these concepts with observable behavior and defend design decisions with solid evidence."
+  },
+  {
+    "slide": 20,
+    "topic": "Further Reading",
+    "text": "For further study, consider searching for resources on retries, compensation, and dead letter queues in distributed systems. Understanding these topics in depth will help reinforce your ability to design resilient systems."
+  }
+]

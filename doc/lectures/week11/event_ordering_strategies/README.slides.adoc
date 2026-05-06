@@ -1,0 +1,217 @@
+= Event Ordering Strategies
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Opening Narrative
+
+* Event delivery order ≠ logical order
+* Example: Publish event arrives before approval
+* Impacts integrity of workflows
+* Need for reasoning when time & causality diverge
+
+
+== Learning Objectives
+
+* Analyze design pressure of event ordering strategies
+* Diagnose hidden assumptions in concurrent systems
+* Evaluate failure evidence using various methods
+* Design corrections that preserve invariants
+* Defend approaches in the Integrity Packet
+
+
+== Core Concepts
+
+== Sequence Numbers / Versioning
+
+* Definition: Monotonically increasing number for events
+* Importance: Explicit identification of conditions needed
+* Mechanism: Through state, timing, retries, etc.
+* Failure Mode: Duplicate work, stale state, misleading evidence
+* Design Implication: Log transitions, validate with tests
+
+
+== Causal Ordering
+
+* Definition: Event B cannot process before Event A
+* Importance: Necessary condition for trustworthiness
+* Mechanism: Appears through state, timing, etc.
+* Failure Mode: Duplicate work, blocked progress
+* Design Implication: Log transitions, validate with tests
+
+
+== Buffering/Reordering
+
+* Definition: Temporary buffer for early events
+* Importance: Explicit conditions are vital
+* Mechanism: Through state, timing, retries, etc.
+* Failure Mode: Duplicate work, stale state, misleading evidence
+* Design Implication: Log transitions, validate with tests
+
+
+== Partitioning / Sharding
+
+* Definition: Events for the same entity handled together
+* Importance: Critical for maintaining order
+* Mechanism: Through state, timing, retries, etc.
+* Failure Mode: Duplicate work, stale state, blocked progress
+* Design Implication: Log transitions, validate with tests
+
+
+== Asynchronous Boundary
+
+* Definition: Work continues later, on another worker
+* Importance: Must be made explicit for trust
+* Mechanism: Through state, timing, retries, etc.
+* Failure Mode: Duplicate work, stale state, misleading evidence
+* Design Implication: Log transitions, validate with tests
+
+
+== System / Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Event Ordering Strategies" as Topic
+rectangle "Sequence Numbers / Versioning" as A
+rectangle "Causal Ordering" as B
+rectangle "Buffering/Reordering" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+== Problem Setup
+
+* Podcast Domain:
+  * StatusUpdate includes version number
+  * Consumer waits for missing versions
+* Order System:
+  * OrderCancelled must not create OrderCreated state
+
+
+== Naive Implementation
+
+* Assumes operation occurs in order
+* Often invisible in code
+
+```
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+```
+
+== Failure Scenario
+
+* Overlapping execution, delay, retry, or partial failure
+* Operations can observe stale state or execute twice
+
+
+== Improved Design Direction
+
+* Name invariant, make transitions observable
+* Add correctness controls: version checks, idempotency
+
+== Why Improved Design Is Safer
+
+* Shifts focus to proving invariants
+* Rejects, contains, or recovers invalid interleavings
+
+
+== Failure Modes and Anti-Patterns
+
+* Symptom: System passes single happy-path test
+  * Why: Test avoids revealing design weaknesses
+  * Detection: Use concurrent actors, stress tests
+  * Correction: Add failure-focused tests for invariants
+
+* Symptom: Names a tool, not a design property
+  * Why: Focus on mechanics over invariants
+  * Detection: Ask for the invariant protection
+  * Correction: State invariant first, then mechanism
+
+* Symptom: Vague evidence for claims
+  * Why: Logs lack details for reconstruction
+  * Detection: Reviewer can’t verify failure
+  * Correction: Capture structured evidence
+
+* Symptom: Fix changes behavior but not compared
+  * Why: Failure not preserved repeatably
+  * Detection: No before/after comparison
+  * Correction: Preserve and rerun failing test
+
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | Initial implementation comparison
+| Guarded state transition | Protects core invariant | Requires careful modeling | Status changes, workflows
+| Explicit coordination | Makes dependencies visible | May cause deadlocks | Multi-object workflows
+| Idempotent design | Handles duplicates | Needs deduplication | Queues, retries, async
+| Observability-first | Strong evidence | Needs instrumentation | Assignments needing proof
+|===
+
+
+== Practical Application
+
+* Identify the invariant relevant to event ordering
+* Write one sequential scenario for success
+* Write one pressure scenario for failure
+* Add operation IDs and entity IDs to logs
+* Capture before/after evidence for fixes
+* Update Integrity Packet with assumptions and evidence
+
+
+== Assignment Integration
+
+* Supports [A3](../../../assignments/A3/index.md)
+* Connect concepts to semester project
+* Show relevant components in their domain
+
+
+== Validation and Interview Questions
+
+1. What invariant is most relevant?
+2. What hidden assumption makes baseline appear correct?
+3. How to force the failure in a repeatable test?
+4. What evidence proves the failure?
+5. Which mechanism to choose first, and what trade-off?
+6. How does the issue appear differently in your stacks?
+7. What to record in the Integrity Packet?
+
+
+== Summary
+
+* Event ordering strategies reason about system correctness
+* Connect concepts to invariants and observable behavior
+* Design maturity includes validation and evidence
+
+
+== Discussion
+
+* What trading off correctness for performance looks like?
+* How can we better capture failure evidence?

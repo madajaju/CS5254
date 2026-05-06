@@ -1,0 +1,107 @@
+[
+  {
+    "slide": 1,
+    "topic": "Workflow Design Example",
+    "text": "Welcome everyone to this lecture on Workflow Design Example. Today, we will explore key aspects of designing systems that remain reliable under concurrent operations and how hidden assumptions can impact system integrity."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "We have several learning objectives for this lecture. First, we will analyze design pressure in stateful concurrent systems. Next, we will diagnose hidden assumptions that might make a system appear correct at first glance. We'll then evaluate various types of failure evidence, including logs and traces, before moving on to the design of corrections that preserve system invariants while acknowledging necessary trade-offs. Finally, you'll learn how to defend your design approaches within the Integrity Packet and how they relate to our assignment."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "To set the stage, imagine a course project that appears perfectly functional during a demonstration. However, as we introduce concurrency, ambiguity, or operational pressure, hidden assumptions about Workflow Mapping begin to surface. This raises a critical question: What must we analyze and defend before we can truly trust the outcome of our system?"
+  },
+  {
+    "slide": 4,
+    "topic": "Workflow Mapping",
+    "text": "Let's begin with Workflow Mapping. This is a visual representation of how tasks flow within a system. It is essential for trusting the system under pressure because it highlights the interactions and dependencies that can lead to issues if not properly managed. The mechanisms at play include object states, timing of workflows, and worker behavior. If these components are ignored, we might end up with problems such as duplicate work, stale states, or misleading evidence during operations. Thus, we must incorporate measures to expose the invariant, log important transitions, and ensure our tests can be repeated reliably."
+  },
+  {
+    "slide": 5,
+    "topic": "System Invariant",
+    "text": "Next, we'll discuss the concept of a System Invariant. This is a condition that must remain true across all valid executions of the system. Similar to Workflow Mapping, acknowledging the invariant is crucial for maintaining trust in the system as it operates under pressure. Failure to recognize the relevant invariants can lead to duplicate transactions, stalled workflows, and misleading evidence. Therefore, our implementation must not only expose these invariants but also log transitions and validate behavior through repeatable tests."
+  },
+  {
+    "slide": 6,
+    "topic": "Failure Mode",
+    "text": "Moving on to Failure Modes, this term refers to specific ways in which the system may violate an invariant or lose its expected progress. Understanding these failure modes is essential for establishing system trust during times of significant stress. The same mechanisms apply here, as neglecting these factors can result in duplicate actions or blocked workflows, which can further complicate diagnostics. Hence, it's critical to expose the invariant, log transitions, and confirm successful operations with tests."
+  },
+  {
+    "slide": 7,
+    "topic": "Design Trade-Off",
+    "text": "Let's talk about Design Trade-Offs. This refers to the necessary choices we make that balance competing qualities such as simplicity, safety, and throughput. These decisions can have significant implications, especially under pressure. Similar failure modes arise if these trade-offs are overlooked, leading to mismanagement of state and errant evidence. Therefore, our design must ensure we have clear invariants, supporting logs, and that we can perform repeatable tests."
+  },
+  {
+    "slide": 8,
+    "topic": "System Architecture View",
+    "text": "Here we have a visual representation of the architecture related to our Workflow Design Example. This diagram emphasizes the connections between Workflow Mapping, System Invariants, Failure Modes, Validation Evidence, and Design Decisions. The primary takeaway from this architecture view is that it's not just about whether your code can run under ideal conditions, but whether the relevant invariant holds firm when faced with complexity such as timing changes or coordination challenges."
+  },
+  {
+    "slide": 9,
+    "topic": "Problem Setup",
+    "text": "Now, let’s look at a Problem Setup. Consider a podcast system where the Ingestor processes files and updates the Episode state to 'INGESTED', then signals a Cleaner which subsequently updates the state to 'CLEANED'. We also delve into an Order Walkthrough that details a series of operations: Payment, Inventory Reservation, and finally Shipping. Understanding these workflows is crucial for identifying potential failure points."
+  },
+  {
+    "slide": 10,
+    "topic": "Naive Implementation",
+    "text": "Now, let's examine a naive implementation of these workflows. This approach typically assumes that each operation occurs exactly once and in the defined order, which often leads to hidden assumptions that can compromise system reliability. The assumed process flow might look like this: an actor performs an operation, the system reads the current state, applies a transition, and emits a side effect. However, these assumptions can be misleading."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "Under situations of overlapping execution, we may encounter various failures such as observing stale states, executing operations multiple times, arriving late, or leaving workflows in a stuck position. These failures aren't simply coding errors; they highlight the critical mismatch between what we designed for and what actually occurs in real-world execution."
+  },
+  {
+    "slide": 12,
+    "topic": "Improved Design Direction",
+    "text": "To mitigate these issues, we need to pursue improved design directions. This includes clearly naming the invariant, making transitions observable, and incorporating controls for correctness, such as version checks, idempotency keys, state-machine guards, explicit coordination, and retries with backoff. These strategies aim to enhance system robustness and prevent the unintended consequences that arise from concurrency."
+  },
+  {
+    "slide": 13,
+    "topic": "Why Improved is Safer",
+    "text": "The reason this improved design is safer is that it shifts the focus from merely hoping that workflows execute correctly to providing proof that any invalid interleavings are either rejected, contained, or recovered with adequate evidence. This transition is essential for maintaining operational integrity and user trust."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "Here we discuss common Failure Modes and Anti-Patterns. For instance, a system might pass a happy-path demonstration, but if the timing and ordering of operations are ignored, real issues will likely surface under pressure. We must detect these symptoms by running concurrent actors, employing structured logs, and introducing tests focused on potential failure points. Recognizing these patterns early is crucial to preventing larger systemic failures."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "text": "In our Trade-Off Analysis, we evaluate various approaches to designing workflows. Each approach presents its own strengths and weaknesses. A simple baseline might be easy to implement but could hide timing assumptions, whereas a safeguarded transition allows direct protection of invariants but demands careful state modeling. Explicit coordination enhances visibility into dependencies, though it may introduce risks like deadlock. Understanding these trade-offs is essential for making informed decisions in the design process."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "text": "Let's now focus on the Practical Application of these concepts. Tomorrow, identify the invariant that is most relevant to your own workflow design example. Create a sequential scenario that is meant to succeed and a pressure scenario that could reveal failures. You'll need to add operation IDs and entity IDs to your logs, ensure you capture evidence both before and after applying any fixes, and update the Integrity Packet to reflect your findings."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "text": "This lecture is intricately connected to Assignment 2. You should aim to demonstrate mastery of these concepts through tangible evidence, which may include runnable commands, structured logs, diagrams, and any reproducible failures. Ultimately, you will need to defend your design choices in your Integrity Packet by clearly outlining the relevant object, workflow, or failure mechanisms from your project."
+  },
+  {
+    "slide": 18,
+    "topic": "Validation Questions",
+    "text": "As we conclude, consider the important Validation Questions that arise from this lecture. What invariant or progress property resonates most with you? What hidden assumptions might render the baseline design appear correct? How can you create tests that force failure? What types of evidence prove that a failure occurred? It's crucial to think about which design mechanisms you would prioritize and the associated trade-offs. Understanding how these issues manifest differently across various implementation stacks will also serve your learning. Lastly, reflect on what you need to document in your Integrity Packet to solidify your conclusions."
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "To summarize, understanding Workflow Design is not merely a theoretical exercise; it empowers engineers to reason about system behavior during execution. Our main goal should be to connect these concepts to invariants, observable actions, and defensible design trade-offs. A mature design is one that not only performs well but can also be explained, stressed, repaired, and validated with solid evidence."
+  },
+  {
+    "slide": 20,
+    "topic": "Further Reading",
+    "text": "For further exploration of today's topics, I encourage you to search for resources related to Workflow Design Examples specifically in distributed systems, along with concurrency design trade-offs. There are numerous topics worth delving into, such as structured logging, the role of invariants in stateful object-oriented systems, and various coordination patterns that can ensure progress within your workflows. This additional knowledge will enhance your understanding in practice."
+  },
+  {
+    "slide": 21,
+    "topic": "Discussion",
+    "text": "Lastly, let's open the floor for discussion. How can hidden assumptions in workflow design impact the reliability of a system? What strategies can be employed to uncover these assumptions before they lead to significant failures? I look forward to hearing your thoughts and insights on these important questions."
+  }
+]

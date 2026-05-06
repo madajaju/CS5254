@@ -1,0 +1,247 @@
+﻿= The Illusion of Correctness
+
+== Opening Narrative
+* A course project appears correct during a simple demonstration.
+* Once concurrency, ambiguity, or operational pressure is introduced, the design exposes a hidden assumption about Sequential Bias.
+* What must the engineer analyze and defend before trusting the result?
+
+== Learning Objectives
+* Analyze design pressure from the illusion of correctness.
+* Diagnose hidden assumptions for apparent correctness.
+* Evaluate failure evidence using logs, traces, or repeatable output.
+* Design correction or control that preserves invariants.
+* Defend the chosen approach in the Integrity Packet.
+
+== Core Concepts
+
+== Sequential Bias
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Sequential Bias" as A
+rectangle "Definition" as B
+rectangle "Implication" as C
+rectangle "Failure Mode" as D
+
+A --> B
+A --> C
+A --> D
+@enduml
+----
+
+== Implicit Locks
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Implicit Locks" as A
+rectangle "Definition" as B
+rectangle "Implication" as C
+rectangle "Failure Mode" as D
+
+A --> B
+A --> C
+A --> D
+@enduml
+----
+
+== Temporal Coupling
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Temporal Coupling" as A
+rectangle "Definition" as B
+rectangle "Implication" as C
+rectangle "Failure Mode" as D
+
+A --> B
+A --> C
+A --> D
+@enduml
+----
+
+== System Invariant
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "System Invariant" as A
+rectangle "Definition" as B
+rectangle "Implication" as C
+rectangle "Failure Mode" as D
+
+A --> B
+A --> C
+A --> D
+@enduml
+----
+
+== Failure Mode
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Failure Mode" as A
+rectangle "Definition" as B
+rectangle "Implication" as C
+rectangle "Failure Mode" as D
+
+A --> B
+A --> C
+A --> D
+@enduml
+----
+
+== System / Architecture View
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "The Illusion of Correctness" as Topic
+rectangle "Sequential Bias" as A
+rectangle "Implicit Locks" as B
+rectangle "Temporal Coupling" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+== Problem Setup
+* Podcast Domain: An `Episode` update checks `if (status == DRAFT)`.
+* Concurrent runs may oversell items due to race conditions.
+
+== Naive Implementation
+```text
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+```
+
+== Failure Scenario
+* Under overlapping execution, the operation may observe stale state or execute twice.
+* The failure is a mismatch between the design assumption and execution model.
+
+== Corrected Design Direction
+* Name the invariant and make transitions observable.
+* Examples: version checks, idempotency keys, or explicit coordination.
+
+== Visual Model Anchors
+
+== System Interaction
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+actor "Worker A" as A
+actor "Worker B" as B
+rectangle "Episode record" as R
+
+A --> R : reads DRAFT
+B --> R : reads DRAFT before commit
+A --> R : attempts transition
+B --> R : attempts transition
+@enduml
+----
+
+== State Transition Model
+[cols="1,1", options="header"]
+|===
+| States | Transitions 
+| DRAFT | DRAFT -> PROCESSING: worker claims the episode
+| PROCESSING | PROCESSING -> READY_TO_PUBLISH: asset processing completes
+| READY_TO_PUBLISH | READY_TO_PUBLISH -> PUBLISHED: publish succeeds
+| PUBLISHED | 
+| FAILED | PROCESSING -> FAILED: error occurs
+|===
+
+== Failure Interleaving
+* T1: Worker A checks `episode.status == DRAFT`.
+* T2: Worker B checks `episode.status == DRAFT` before Worker A writes `PROCESSING`.
+* Failure: Two processing jobs start for `episode-42`.
+
+== Design Response
+[plantuml, format=svg]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Protected Property" as A
+rectangle "Mechanism" as B
+rectangle "Trade-off" as C
+
+A --> B
+A --> C
+@enduml
+----
+
+== Failure Modes and Anti-Patterns
+* Symptom: The system passes a single happy-path demonstration.
+** Cause: The test avoids timing conditions exposing weaknesses.
+** Detection: Add repeated runs or stress conditions.
+** Correction: Add a failure-focused test targeting the invariant.
+
+* Symptom: Evidence is too vague to support the claim.
+** Cause: Logs may lack operation IDs or timing information.
+** Detection: A reviewer cannot reconstruct the failure.
+
+== Trade-Off Analysis
+[cols="1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses 
+| Simple baseline | Easy to explain | Hides timing assumptions 
+| Idempotent design | Handles duplicates | Requires deduplication 
+| Explicit coordination | Makes dependencies visible | Can introduce deadlocks 
+|===
+
+== Practical Application
+* Identify the invariant most relevant to the illusion of correctness.
+* Write one sequential scenario that should succeed.
+* Capture before/after evidence if applying a fix.
+
+== Assignment Integration
+* Connect the lecture concept to semester project.
+* Demonstrate mastery with concrete evidence and an Integrity Packet explanation.
+
+== Validation and Interview Questions
+. What invariant is relevant to this lecture?
+. What hidden assumption makes the design appear correct?
+. How would you force the failure in a repeatable test?
+. What evidence would prove a failure occurred?
+
+== Summary
+* The illusion of correctness is a way to reason about system correctness.
+* Connect concepts to invariants, observable behavior, and defensible trade-offs.

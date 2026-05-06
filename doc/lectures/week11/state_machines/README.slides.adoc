@@ -1,0 +1,197 @@
+= State Machines
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Opening Narrative
+
+* A project appears correct during a simple demo.
+* Concurrency introduces hidden assumptions.
+* What must the engineer analyze?
+
+== Learning Objectives
+
+* Analyze design pressure from state machines.
+* Diagnose hidden assumptions pre-concurrency.
+* Evaluate failure evidence with logs and traces.
+* Design controls preserving invariants, addressing trade-offs.
+* Defend approach in the Integrity Packet linked to A3.
+
+== Core Concepts: States
+
+* Definition: Possible conditions (e.g., `DRAFT`, `CLEANING`).
+* Importance: Must be explicit to trust under pressure.
+* Mechanisms: Affected by state, timing, behavior, coordination.
+* Failure: Ignoring leads to duplicate work, stale state.
+* Design: Expose invariant, log transitions, repeat tests.
+
+== Core Concepts: Transitions
+
+* Definition: Valid paths between states.
+* Importance: Must be explicit for system trust.
+* Mechanisms: Affected by state, timing, behavior, coordination.
+* Failure: Ignoring leads to duplicate work, stale state.
+* Design: Expose invariant, log transitions, repeat tests.
+
+== Core Concepts: Illegal Transition Guard
+
+* Definition: Rejects invalid transitions from current state.
+* Importance: Must be explicit for trust.
+* Mechanisms: Affected by state, timing, behavior, coordination.
+* Failure: Ignoring leads to duplicate work, stale state.
+* Design: Expose invariant, log transitions, repeat tests.
+
+== Core Concepts: Deterministic Behavior
+
+* Definition: Predictable next state from current state and event.
+* Importance: Must be explicit to trust.
+* Mechanisms: Affected by state, timing, behavior, coordination.
+* Failure: Ignoring leads to duplicate work, stale state.
+* Design: Expose invariant, log transitions, repeat tests.
+
+== Core Concepts: System Invariant
+
+* Definition: Condition must remain true in valid executions.
+* Importance: Must be explicit for trust.
+* Mechanisms: Affected by state, timing, behavior, coordination.
+* Failure: Ignoring leads to duplicate work, stale state.
+* Design: Expose invariant, log transitions, repeat tests.
+
+== System Architecture View
+
+[plantuml, target=system_architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "State Machines" as Topic
+rectangle "States" as A
+rectangle "Transitions" as B
+rectangle "Illegal Transition Guard" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example: Problem Setup
+
+* **Podcast Example**:
+  * Transition: `INGESTED` + `CleanFinished` -> `CLEANED`.
+  * Guard: Reject `Publish` event if `INGESTED`.
+* **Order System**:
+  * Can't `SHIPPED` unless in `PAID` state.
+
+== Worked Example: Naive Implementation
+
+* Operation sequence:
+  * Actor performs operation.
+  * System reads current state.
+  * System applies transition.
+  * System emits side effect.
+
+== Worked Example: Failure Scenario
+
+* Concurrent operations can:
+  * Observe stale state.
+  * Execute twice or arrive late.
+  * Leave the workflow stuck.
+* Failure reveals mismatch between design assumption and execution.
+
+== Worked Example: Improved Design
+
+* Name the invariant.
+* Make transitions observable.
+* Add controls:
+  * Version checks
+  * Idempotency keys
+  * Coordination, retries, compensation
+
+== Worked Example: Safer Design
+
+* Improved design:
+  * Proves invalid interleavings are rejected or contained.
+  * Changes focus from hoping execution order to solid evidence.
+
+== Failure Modes and Anti-Patterns
+
+* **Symptom**: System passes happy-path demo.
+  * **Detection**: Use stress tests.
+  * **Correction**: Add failure-focused tests targeting the invariant.
+
+* **Symptom**: Tool named, not property.
+  * **Detection**: Ask which invariant is protected.
+  * **Correction**: State the invariant first.
+
+* **Symptom**: Vague evidence.
+  * **Detection**: Reviewer can't reconstruct failures.
+  * **Correction**: Capture structured evidence.
+
+* **Symptom**: Fix changes behavior without baseline.
+  * **Detection**: No before/after runs.
+  * **Correction**: Preserve failing test.
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
+| Guarded transition | Protects core invariant | Requires careful modeling | Status changes
+| Explicit coordination | Makes dependencies visible | Can cause deadlocks | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires control | Queues, retries
+| Observability-first | Strong evidence | Adds instrumentation | Failure proof
+|===
+
+== Practical Application
+
+* Identify the invariant relevant to state machines.
+* Write one sequential scenario.
+* Write one pressure scenario exposing failure.
+* Add operation IDs to logs for pressure test.
+* Capture before/after evidence.
+* Update Integrity Packet with assumptions and risks.
+
+== Assignment Integration
+
+* Connect lecture concepts to [A3](../../../assignments/A3/index.md).
+* Show relevant object, workflow, event, or failure mechanism.
+* Mastery demonstrated with evidence and Integrity Packet defense.
+
+== Validation Questions
+
+1. What invariant is relevant here?
+2. What hidden assumption appears correct?
+3. How to force failure in tests?
+4. What evidence proves failure?
+5. Which design mechanism first, and what trade-off?
+6. How would it appear differently in two stacks?
+7. What to record in Integrity Packet?
+
+== Summary
+
+* State machines enable reasoning about system correctness.
+* Connect to invariants, observable behavior, defensible trade-offs.
+* Design maturity requires explainability and stress testing.
+
+== Further Reading
+
+* Search phrase: "State Machines distributed systems failure mode"
+* Search phrase: "State Machines concurrency design tradeoffs"
+* Topics: structured logging, invariants, idempotency, message queues.

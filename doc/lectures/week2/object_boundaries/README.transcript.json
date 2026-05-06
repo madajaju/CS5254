@@ -1,0 +1,97 @@
+[
+  {
+    "slide": 1,
+    "topic": "Object Boundaries & Responsibilities",
+    "text": "Welcome to today's lecture on Object Boundaries and Responsibilities. Today, we'll explore how these concepts play a crucial role in the design and integrity of concurrent systems."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "By the end of this lecture, you should be able to analyze the pressures design faces in stateful concurrent systems, diagnose hidden assumptions that could lead to failures, evaluate evidence from logs and tests, and design corrections that preserve critical invariants. Furthermore, you'll learn how to defend your design choices in the Integrity Packet and specifically relate these concepts to your assignment."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Imagine you're working on a course project that seems to work perfectly during initial demonstrations. However, once you introduce concurrency or pressure, hidden assumptions about the encapsulation of state can surface. The key question we need to ask is: what must we analyze and defend before we can trust the results of our project?"
+  },
+  {
+    "slide": 4,
+    "topic": "Encapsulation of State",
+    "text": "Encapsulation of state refers to the principle that an object's internal state can only be modified through its own methods. This concept is critical; if it's not clearly defined, the system can fail under real-world pressures, leading to issues like duplicate work or stalled progress. We must ensure that any assumptions about state modification are explicit; otherwise, we risk introducing significant errors into our designs."
+  },
+  {
+    "slide": 5,
+    "topic": "Single Responsibility Principle (SRP)",
+    "text": "The Single Responsibility Principle states that each object should have a clear, singular purpose. If an object, like an 'Episode,' becomes responsible for more than one task, it complicates its behavior and jeopardizes its reliability under pressure. It's essential to articulate this principle within our designs to mitigate risks of failure and maintain clarity in responsibilities."
+  },
+  {
+    "slide": 6,
+    "topic": "Leaky Abstractions",
+    "text": "Leaky abstractions occur when an object exposes its internal data structures. This allows external entities to bypass the invariants that keep the system stable. Such leaks can introduce unpredictable behaviors and must be addressed explicitly to maintain system integrity, especially under concurrent conditions."
+  },
+  {
+    "slide": 7,
+    "topic": "System Invariant",
+    "text": "A System Invariant is a condition that must hold true across all valid executions. It’s vital to outline this invariant clearly, as failing to do so can lead to problems similar to those seen with encapsulation of state; it can allow for errors to creep into the system under various pressures. Maintaining clear invariants will help us evaluate the correctness of our designs."
+  },
+  {
+    "slide": 8,
+    "topic": "Failure Mode",
+    "text": "A failure mode is a repeatable path through which a system violates an invariant or loses progress. Understanding these failure modes is essential for creating robust systems that can handle real-world use. If our designs do not account for potential failure conditions, we risk encountering serious issues that could derail the functionality of our applications."
+  },
+  {
+    "slide": 9,
+    "topic": "System / Architecture View",
+    "text": "We need to approach the lecture topic as an interconnected system of design pressures tied to evidence. Our focus should not solely be on whether the code functions correctly once, but on whether it continues to hold its invariants amid complexities like timing variations, load changes, or retries. This perspective will help guide our design efforts moving forward."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "text": "Let's consider an example from the podcast domain. Here, an 'Episode' object should control its own status. Instead of allowing unrestricted access through a global map that can be modified by any part of the system, we should enforce that changes happen through a defined method, like 'episode.transitionToProcessing().' This encapsulation helps maintain the integrity of the workflow."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "In our example, overlapping executions can lead to observing stale states or executing transitions multiple times. This isn't just a minor bug; it's a fundamental mismatch between our design assumptions and the reality of how the execution model operates under pressure, highlighting the critical nature of correctly defining state transitions."
+  },
+  {
+    "slide": 12,
+    "topic": "Corrected Design Direction",
+    "text": "To address potential failures, we should explicitly name the invariant and make transitions observable. This can include implementing version checks or explicit coordination to ensure that our system handles concurrent operations safely. Such measures help to mitigate risks associated with state changes in concurrent environments."
+  },
+  {
+    "slide": 13,
+    "topic": "Why the Design Is Safer",
+    "text": "The improvements we make to our design make it safer because they shift our approach from hoping the system executes correctly to actively proving that invalid scenarios, such as state interleavings, are either rejected or resolved appropriately. This emphasis on observable behavior reinforces our design’s reliability under pressure."
+  },
+  {
+    "slide": 14,
+    "topic": "Trade-Off Analysis",
+    "text": "When evaluating our design choices, we encounter various trade-offs. For example, a simple baseline approach is easy to implement but often hides timing assumptions that could lead to issues later. On the other hand, using a guarded state transition protects our core invariant but requires meticulous handling of state modeling. Understanding these strengths and weaknesses helps us make informed decisions about our designs."
+  },
+  {
+    "slide": 15,
+    "topic": "Practical Application",
+    "text": "As a practical application of this lecture, you'll want to identify the most crucial invariant or progress property relevant to object boundaries and responsibilities in your system. Write a sequential scenario that represents success, as well as a pressure scenario that could trigger failure. Make sure to add operation and entity IDs to your logs for better traceability and plan ahead for capturing evidence should you need to apply any fixes."
+  },
+  {
+    "slide": 16,
+    "topic": "Assignment Integration",
+    "text": "This lecture directly relates to your upcoming assignment. You should connect these concepts to your own work by identifying the relevant object, workflow, event, or recovery mechanism within your domain. Ensure that your mastery of these concepts reflects through structured evidence, such as runnable commands, logs, or behavioral comparisons."
+  },
+  {
+    "slide": 17,
+    "topic": "Validation Questions",
+    "text": "As we wrap up, consider these validation questions. Identify the invariant that is the most relevant to the concepts we've discussed today. Think about hidden assumptions that could make an otherwise sound design appear correct. How might you provoke a failure in a repeatable test, and what evidence would support that such a failure occurred? Reflect on various design mechanisms you might choose and the trade-offs they entail."
+  },
+  {
+    "slide": 18,
+    "topic": "Summary",
+    "text": "To summarize, the concepts of object boundaries and responsibilities are critical tools for ensuring that systems remain correct under realistic execution conditions. Our task as engineers is to tie these concepts to the invariants, observable behaviors, and defensible trade-offs inherent in our designs. Every mature design must be capable of explanation, stress-testing, repair, and validation with solid evidence."
+  },
+  {
+    "slide": 19,
+    "topic": "Further Reading",
+    "text": "For those interested in deepening your understanding, consider exploring topics like 'Object Boundaries and Responsibilities in distributed systems failure modes,' or 'Concurrency design trade-offs.' You can also look into structured logging techniques and correlation IDs, as well as learn more about invariants in stateful object-oriented systems."
+  }
+]

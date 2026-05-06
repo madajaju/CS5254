@@ -1,0 +1,117 @@
+[
+  {
+    "slide": 1,
+    "topic": "Event Ordering Strategies",
+    "text": "Welcome everyone to our lecture on Event Ordering Strategies. Today, we'll delve into the intricacies of how the order in which events are processed can impact the integrity of systems, particularly under concurrent conditions."
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "text": "Let's start with a scenario that illustrates our main theme. Imagine a situation where a publish event arrives before its corresponding approval event. This sequence disrupts the workflow, demonstrating a critical point: the delivery order does not always equate to the logical order of events. We'll explore the implications of this when time and causality diverge."
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "text": "In this lecture, we aim to accomplish several key objectives. First, we'll analyze the design pressures that arise in event ordering strategies. We'll also learn to diagnose hidden assumptions in concurrent systems and evaluate failure evidence through various methods. Moreover, we'll discuss how to design corrections that preserve critical invariants and how to defend our approaches in our Integrity Packet."
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concepts",
+    "text": "Now, let's move on to the core concepts that will underpin our understanding of event ordering strategies. These concepts will provide the foundation for designing robust concurrent systems."
+  },
+  {
+    "slide": 5,
+    "topic": "Sequence Numbers / Versioning",
+    "text": "First up is the idea of sequence numbers or versioning. This concept involves attaching a monotonically increasing number to each event, allowing consumers to identify gaps or stale data. It’s crucial that we make this condition explicit; if ignored, the system might appear to be functioning correctly but could produce duplicate work or misleading evidence."
+  },
+  {
+    "slide": 6,
+    "topic": "Causal Ordering",
+    "text": "Next, we have causal ordering, which ensures that if Event B depends on Event A, then B must not be processed until after A. This principle is vital for building trust in our systems as it prevents scenarios where operations are processed out of order, which can also lead to duplicate work or blocked progress."
+  },
+  {
+    "slide": 7,
+    "topic": "Buffering/Reordering",
+    "text": "Let's discuss buffering and reordering. This strategy involves temporarily holding onto 'early' events until their predecessors arrive. Just like the previous concepts, this too must be explicitly managed; failure to do so can result in duplicate work and misleading system behavior."
+  },
+  {
+    "slide": 8,
+    "topic": "Partitioning / Sharding",
+    "text": "Now we move to partitioning or sharding, which ensures that all events related to a particular entity are processed by the same consumer in the order they were produced. This practice is essential for maintaining the integrity of the order in which events are handled, as violating this can introduce significant issues in the overall state of the system."
+  },
+  {
+    "slide": 9,
+    "topic": "Asynchronous Boundary",
+    "text": "Our next concept is the asynchronous boundary. This refers to points where processing continues later, often on a different worker or event loop. Making these boundaries explicit is critical; otherwise, it can lead to issues similar to those we've discussed: duplicate work and misleading evidence."
+  },
+  {
+    "slide": 10,
+    "topic": "System / Architecture View",
+    "text": "Here we take a system or architecture view of event ordering strategies. It's important to see how all these concepts connect to create a pressure point in our system. We need to ensure that when timing and coordination complexity change, the relevant invariants still hold."
+  },
+  {
+    "slide": 11,
+    "topic": "Worked Example",
+    "text": "To put these concepts into context, let’s consider a worked example. In the podcast domain, for instance, a status update may include a version number that the consumer uses to wait for any missing versions. Similarly, in an order system, we ensure that an 'Order Cancelled' event should not create an 'Order Created' state if it arrives prematurely."
+  },
+  {
+    "slide": 12,
+    "topic": "Problem Setup",
+    "text": "Let's delve a bit deeper into the problem setup. The podcast example shows us how using versioning helps maintain the order, while the order system example emphasizes the importance of processing events in the right sequence to avoid incorrect states."
+  },
+  {
+    "slide": 13,
+    "topic": "Naive Implementation",
+    "text": "A naive implementation might assume that operations occur in a strict order. Often, this assumption remains hidden in the code and leads to failures when conditions change. The typical process flow appears legitimate but can fail spectacularly under concurrency pressures."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Scenario",
+    "text": "Consider the failure scenario where overlapping executions, delays, retries, or partial failures come into play. These situations can lead to stale states, and in some cases, operations may execute multiple times, leading to inconsistencies we must address."
+  },
+  {
+    "slide": 15,
+    "topic": "Improved Design Direction",
+    "text": "An improved design approach involves explicitly naming the invariant that needs to be preserved and making transitions observable. Incorporating correctness controls, like version checks and idempotency, strengthens the system's reliability against failures."
+  },
+  {
+    "slide": 16,
+    "topic": "Why Improved Design Is Safer",
+    "text": "The enhanced design direction is safer because it shifts our focus from simply hoping that operations execute in the intended order to actively proving that any invalid interleavings are either rejected or recovered appropriately."
+  },
+  {
+    "slide": 17,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "Now, let's explore failure modes and common anti-patterns. Our first symptom is when a system passes a single happy-path demonstration, which often masks design weaknesses. We need to employ stress conditions and concurrent actors to truly test these systems."
+  },
+  {
+    "slide": 18,
+    "topic": "Trade-Off Analysis",
+    "text": "In our trade-off analysis, we’ll evaluate various approaches to event ordering. Each approach has its strengths and weaknesses, and knowing when to use each can help us navigate the complexities of designing robust systems."
+  },
+  {
+    "slide": 19,
+    "topic": "Practical Application",
+    "text": "As we move towards practical application, I encourage you to identify the most relevant invariant in the context of event ordering strategies. Think about writing successful sequential scenarios and challenging pressure scenarios to test your systems."
+  },
+  {
+    "slide": 20,
+    "topic": "Assignment Integration",
+    "text": "This lecture also integrates with your ongoing assignments, particularly A3. I expect you to connect these concepts to your project and demonstrate relevance through structured logs, failure reproductions, and your Integrity Packet."
+  },
+  {
+    "slide": 21,
+    "topic": "Validation and Interview Questions",
+    "text": "To foster discussion, consider these questions: What invariant is most relevant here? What hidden assumption could make your baseline appear valid? How might you force a failure in a repeatable test, and what evidence would prove that failure?"
+  },
+  {
+    "slide": 22,
+    "topic": "Summary",
+    "text": "In summary, our exploration today demonstrated that event ordering strategies are not merely technical terms; they represent a crucial lens through which we can evaluate system correctness. It's essential to connect these concepts to the invariants and behaviors we can observe."
+  },
+  {
+    "slide": 23,
+    "topic": "Discussion",
+    "text": "Finally, I invite you to discuss the trade-offs between correctness and performance. How can we better capture evidence of failures? I look forward to hearing your thoughts."
+  }
+]

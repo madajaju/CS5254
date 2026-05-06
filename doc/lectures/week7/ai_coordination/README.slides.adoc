@@ -1,0 +1,175 @@
+= AI Coordination Designs: Critique & Validation
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Learning Objectives
+
+* Analyze design pressure: AI coordination designs
+* Diagnose hidden assumptions affecting correctness
+* Evaluate failure evidence via logs and traces
+* Design controls preserving invariants without obscuring trade-offs
+* Connect chosen approaches to A2 deliverables
+
+== Opening Narrative
+
+* Student requests AI design, receives flawed code
+* Missing ordering guard leads to workflow issues
+* Engineers navigate AI designs without losing accountability
+
+== Coordination Hallucinations
+
+* AI suggests patterns without event handling
+* Critical to make conditions explicit under pressure
+* Leads to duplicate work or blocked progress
+* Must expose invariants and validate behavior
+
+== Dependency Neglect
+
+* AI may ignore necessary outputs between stages
+* Trust issues arise without explicit conditions
+* Risk of duplicate work or misleading evidence
+* Ensure invariants are logged and validated
+
+== Validation by Trace
+
+* Trace AI logic with adversarial interleavings
+* Identify deadlocks or missed signals
+* Requires explicit conditions for trusted behavior
+* Log transitions, validate with tests
+
+== Coordination Boundary
+
+* Agreement on ordering or progress among objects
+* Vital to expose conditions before trusting system
+* Failure leads to duplicate work or misleading evidence
+* Design should log transitions and validate
+
+== Progress Guarantee
+
+* Shows work eventually completes, not waiting forever
+* Explicit conditions necessary for trust under pressure
+* Can lead to operational failures if ignored
+* Design must log, validate transitions
+
+== System / Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "AI Coordination Designs: Critique & Validation" as Topic
+rectangle "Coordination Hallucinations" as A
+rectangle "Dependency Neglect" as B
+rectangle "Validation by Trace" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+* **Podcast Domain**: AI proposes parallel threads, lacks join logic
+* **Critique**: Assumes `notify()` follows `wait()` without guards
+
+== Naive Implementation
+
+* Assumes operations occur once, in order
+* Often invisible due to method name correctness
+
+== Failure Scenario
+
+* Overlapping execution leads to stale state, blocked progress
+* Mismatch between design assumption and execution
+
+== Improved Design Direction
+
+* Name the invariant, make transitions observable
+* Introduce controls: version checks, state-machine guards
+
+== Safer Design Benefits
+
+* Proves invalid interleavings are rejected or contained
+* Shifts focus from hope to evidence in execution
+
+== Failure Modes and Anti-Patterns
+
+* Symptom: Single happy-path test passes
+  * Detect: Add stress conditions, concurrent actors
+* Symptom: Tool mentioned, no design property stated
+  * Detect: Ask for protected invariant
+* Symptom: Vague evidence for claims
+  * Detect: Log capture is insufficient
+* Symptom: Fix alters behavior, lacks baseline comparison
+  * Detect: No repeatable failure scenario preserved
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | Initial comparison
+| Guarded transition | Protects invariant | Needs careful modeling | Workflow steps
+| Explicit coordination | Visible dependencies | Risk of deadlock | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires deduplication | Queued operations
+| Observability-first | Strong evidence | Adds instrumentation | Failure proof assignments
+|===
+
+== Practical Application
+
+* Identify invariant relevant to AI designs
+* Write sequential scenario and pressure scenario exposing failures
+* Add operation and entity IDs to logs
+* Capture before/after evidence for fixes 
+* Update Integrity Packet with assumptions and validations
+
+== Assignment Integration
+
+* Supports [A2](../../../assignments/A2/index.md)
+* Demonstrate mastery with evidence and structured logs
+
+== Validation Questions
+
+1. What invariant is most relevant?
+2. What hidden assumption distorts baseline design?
+3. How to force repeatable test failures?
+4. What evidence proves failure?
+5. First design mechanism and its trade-off?
+6. Different appearance in implementation stacks?
+7. Integrity Packet records for defense?
+
+== Summary
+
+* AI coordination designs critical for system correctness
+* Engineering connects concepts to observable behavior
+* Design maturity requires evidential support and reasoning
+
+== Further Reading
+
+* Search "AI Coordination Designs failure mode"
+* Topic: Structured logging and correlation IDs
+* Topic: Invariants in stateful systems
+* Topic: Coordination patterns and progress guarantees
+
+== Discussion
+
+* How do we validate AI-generated designs?
+* What hidden failures have you encountered in projects?

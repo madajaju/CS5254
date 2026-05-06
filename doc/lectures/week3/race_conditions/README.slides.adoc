@@ -1,0 +1,166 @@
+= Race Conditions Step-by-Step
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Learning Objectives
+
+* Analyze race conditions in concurrent systems
+* Diagnose hidden assumptions
+* Evaluate failure evidence
+* Design corrections preserving invariants
+* Defend approaches in Integrity Packet
+
+== Opening Narrative
+
+A project appears correct during demonstrations.
+
+* Once under pressure, hidden assumptions emerge.
+* Key analysis needed: What must the engineer defend before trusting results?
+
+== Core Concept: Timeline Analysis
+
+* Definition: Mapping operations (Read, Modify, Write) across threads.
+* Importance: Identify conditions that affect trust under pressure.
+* Mechanism: Object state, timing, worker behavior.
+* Failure Mode: Duplicate work, stale state, blocked progress.
+* Design Implication: Expose invariant, log transitions, validate tests.
+
+== Core Concept: Lost Update
+
+* Definition: Two threads overwriting each other's changes.
+* Importance: Identifies conditions affecting trust.
+* Mechanism: Object state, timing, worker behavior.
+* Failure Mode: Duplicate work, stale state, blocked progress.
+* Design Implication: Expose invariant, log transitions, validate tests.
+
+== Core Concept: Check-Then-Act
+
+* Definition: Condition checked may change by action time.
+* Importance: Identifies conditions affecting trust.
+* Mechanism: Object state, timing, worker behavior.
+* Failure Mode: Duplicate work, stale state, blocked progress.
+* Design Implication: Expose invariant, log transitions, validate tests.
+
+== Core Concept: System Invariant
+
+* Definition: Condition that must remain true in executions.
+* Importance: Identifies conditions affecting trust.
+* Mechanism: Object state, timing, worker behavior.
+* Failure Mode: Duplicate work, stale state, blocked progress.
+* Design Implication: Expose invariant, log transitions, validate tests.
+
+== Core Concept: Failure Mode
+
+* Definition: Repeatable violation of invariant or lost progress.
+* Importance: Identifies conditions affecting trust.
+* Mechanism: Object state, timing, worker behavior.
+* Failure Mode: Duplicate work, stale state, blocked progress.
+* Design Implication: Expose invariant, log transitions, validate tests.
+
+== System Architecture View
+
+[plantuml, target=architecture_view, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Race Conditions Step-by-Step" as Topic
+rectangle "Timeline Analysis" as A
+rectangle "Lost Update" as B
+rectangle "Check-Then-Act" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+* **Podcast Domain**:
+  * Worker A reads `episode.status` (value: `DRAFT`).
+  * Worker B reads `episode.status` (value: `DRAFT`).
+  * Worker A sets status to `PROCESSING`.
+  * Worker B sets status to `PROCESSING`.
+  * *Result*: Duplicate work initiated.
+
+* **Visual Mapping**: Vertical timeline mapping threads.
+
+== Failure Scenario
+
+* Overlapping execution can lead to stale state or executions.
+* Not just a syntax bug; mismatch between design assumptions and execution.
+
+== Corrected Design Direction
+
+* Name the invariant, make transitions observable.
+* Implement correctness controls: version checks, idempotency keys, state-machine guards.
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | Initial implementation comparison
+| Guarded state transition | Protects core invariant | Requires careful modeling | Workflow steps and reservations
+| Explicit coordination | Makes dependencies visible | Can introduce deadlock | Multi-object workflows
+| Idempotent design | Handles duplicate work | Needs deduplication control | Queues, retries, external calls
+| Observability-first design | Strong evidence for review | Adds instrumentation work | Assignments needing proof
+|===
+
+== Practical Application
+
+Tomorrow morning:
+
+* Identify the relevant invariant.
+* Write a sequential scenario that should succeed.
+* Write a pressure scenario that could expose failure.
+* Enhance logs with operation IDs before testing.
+* Capture before/after evidence when applying fixes.
+* Update Integrity Packet with validation.
+
+== Assignment Integration
+
+Connect this lecture to [A1](../../../assignments/A1/index.md).
+
+* Mastery demonstrated via evidence: runnable commands, structured logs, failure reproduction, Integrity Packet explanation.
+
+== Discussion
+
+1. What invariant is most relevant here?
+2. What hidden assumption would appear correct?
+3. How to force a failure in a repeatable test?
+4. What evidence proves the failure?
+5. Which design mechanism to choose first, and why?
+6. How would this issue appear differently in your implementations?
+7. What would you record in the Integrity Packet?
+
+== Summary
+
+Race conditions are a critical reflection on system correctness under execution pressure.
+
+* Connect concepts to invariants and observable behavior.
+* Mature designs require explanation, validation, and repair with evidence.
+
+== Further Reading
+
+* Search: "Race Conditions Step-by-Step distributed systems failure mode"
+* Search: "Race Conditions Step-by-Step concurrency design tradeoffs"
+* Explore: structured logging and correlation IDs
+* Investigate: invariants in stateful systems

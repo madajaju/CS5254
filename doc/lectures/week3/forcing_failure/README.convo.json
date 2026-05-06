@@ -1,0 +1,382 @@
+[
+  {
+    "slide": 1,
+    "topic": "How to Force Failure",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to our lecture on how to force failure. In this session, we will explore the critical design pressures in concurrent systems and how to approach failure in a structured and evidence-based manner."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Today, we have several key objectives. We will analyze design pressures related to forcing failure in concurrent contexts, diagnose hidden assumptions that can make our systems appear correct, and evaluate the evidence of failures through logs and traces. Our goal is to design controls that preserve invariants and effectively connect our designs to the integrity of our work and assignment deliverables."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s start with a scenario: Imagine a student asks an AI for a design solution. They receive code that seems confident but misses a vital ordering guard. This can lead to workflows that are either stalled or violate important invariants."
+      },
+      {
+        "role": "student",
+        "text": "Wait… so does that mean we should always double-check AI-generated code?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! This situation raises a fundamental question for engineers: how can we responsibly use AI-generated designs while ensuring correctness in our systems?"
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Deterministic vs. Probabilistic Failure",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In understanding failures, we distinguish between deterministic and probabilistic failures. A deterministic failure means it fails consistently, while a probabilistic failure signifies it may fail under certain conditions. Recognizing these conditions is crucial because it informs whether we can trust our system under pressure."
+      },
+      {
+        "role": "student",
+        "text": "How do we know if we’ve hit a deterministic failure?"
+      },
+      {
+        "role": "teacher",
+        "text": "Good question! If we ignore these factors, our systems can present misleading evidence and may pass initial tests while still being fundamentally flawed. We must analyze both failure types to design more reliable systems."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Sleep Injection",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, we have the concept of sleep injection. This technique involves adding random sleep calls to increase the chance of encountering race conditions. By introducing these delays, we can simulate stress in our systems and reveal weaknesses that we need to explicitly address to ensure our systems remain reliable under pressure."
+      },
+      {
+        "role": "student",
+        "text": "So, we're basically trying to force a failure, right?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! It's about exposing the hidden weaknesses that might not show up under normal conditions."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Concurrent Test Harness",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The concurrent test harness is another important concept. This approach entails running multiple workers in a loop against the same object to test how the system behaves under load. It’s vital for exposing issues that may not arise in a simple sequential execution."
+      },
+      {
+        "role": "student",
+        "text": "Does this mean if we test that way, we'll see failures we wouldn't catch otherwise?"
+      },
+      {
+        "role": "teacher",
+        "text": "That's right! This helps us to identify potential race conditions and conflicts that exist in a concurrent environment."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Repeatability",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Repeatability is crucial in our testing process. Once we've identified a failure, we need to ensure that we can trigger it again. This validates our findings and confirms that our fixes are effective."
+      },
+      {
+        "role": "student",
+        "text": "But what if we can’t reproduce the failure?"
+      },
+      {
+        "role": "teacher",
+        "text": "If we can’t reproduce failures, we cannot reliably trust the corrections we apply to our systems. That’s why establishing repeatability is fundamental."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "AI-Assisted Hypothesis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "When using AI to generate designs or explanations, it’s imperative to validate them before adoption. While AI can provide useful drafts, we must be cautious as it may not always adhere to the invariants we need."
+      },
+      {
+        "role": "student",
+        "text": "I think I get it, but how do we ensure that the AI-generated design is safe to use?"
+      },
+      {
+        "role": "teacher",
+        "text": "Great question! Ensuring that any AI-assisted design is thoroughly vetted prevents us from misunderstanding its implications under stress."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s consider a high-level architecture view. We treat the process of forcing failure as a design challenge. This involves examining how various concepts like deterministic versus probabilistic failure, sleep injections, concurrent test harnesses, and validation connect and interact with one another in building robust systems."
+      },
+      {
+        "role": "student",
+        "text": "This sounds complex. How do we keep track of all these interactions?"
+      },
+      {
+        "role": "teacher",
+        "text": "That's where structured approaches come in. It’s about always linking back to how each concept supports the overall system integrity."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Problem Setup",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To illustrate these concepts, let’s look at a worked example using a podcast domain. Here, we could simulate a scenario where ten threads are simultaneously trying to mark the same episode as cleaned. By injecting a sleep command into the cleaning method, we can observe potential failures under load."
+      },
+      {
+        "role": "student",
+        "text": "So, we're stressing the code to see what breaks?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! This highlights the importance of race conditions in our designs."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Implementation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A typical naive implementation might assume that operations occur in order without any overlaps, but this is a flawed assumption. The workflow could look like this…"
+      },
+      {
+        "role": "student",
+        "text": "That makes sense, but what if everything just breaks at once?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, when design assumptions fail, you can end up with inconsistent outcomes. It’s not just about the syntax; it's about how the system is designed to execute."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "When operations overlap, you might encounter issues such as stale state or repeated executions which can lead to potential deadlocks or even the application getting stuck in a workflow. It's crucial to realize that these failures stem from a mismatch between our design assumptions and how the system actually executes."
+      },
+      {
+        "role": "student",
+        "text": "So the issue is how the code interacts, not just what's in the code itself?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! Understanding these interactions is essential for debugging and improvement."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To address the flaws, we should name our invariants and make transitions observable. This involves introducing controls that ensure correctness, such as version checks or idempotency keys."
+      },
+      {
+        "role": "student",
+        "text": "Those sound like safety nets for our code?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! These controls help to validate that our systems behave as intended even under stress."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Why Improved Design Is Safer",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "With an improved design, we shift from merely hoping our workflows execute correctly to proving that any invalid interleavings are either rejected or handled appropriately."
+      },
+      {
+        "role": "student",
+        "text": "Wait... so we’re aiming for zero tolerance on mistakes?"
+      },
+      {
+        "role": "teacher",
+        "text": "That’s right! A proactive approach helps us build reliable systems and provides evidence that can be validated post-factum."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let's discuss some common failure modes and anti-patterns. For example, if a system appears to pass the happy path but fails under pressure, it’s indicative of design weaknesses that need uncovering."
+      },
+      {
+        "role": "student",
+        "text": "How can we catch those design weaknesses?"
+      },
+      {
+        "role": "teacher",
+        "text": "By running tests under varied conditions, we can detect these issues and ensure our designs withstand real-world constraints."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "When evaluating different approaches in system design, it’s important to analyze the trade-offs involved. Some strategies are easy to implement but may hide critical timing assumptions, while others provide strong evidence but add complexity."
+      },
+      {
+        "role": "student",
+        "text": "So it’s like balancing between effort and potential issues?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! Choosing the right approach depends on the specific context and requirements of your system."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As a practical exercise, I encourage you to identify the invariant that will be most relevant in forcing failure for your project. Draft sequential scenarios that show expected success, alongside pressure scenarios that could expose potential weaknesses."
+      },
+      {
+        "role": "student",
+        "text": "And we should log everything with IDs?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! Make sure to incorporate operation IDs in your logs to capture structured evidence."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This lecture aligns directly with Assignment 1. You are expected to connect the concepts we’ve discussed today with your semester project."
+      },
+      {
+        "role": "student",
+        "text": "Got it! We’ll show how these ideas apply to our project?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes! Outline the objects, workflows, events, and mechanisms pertinent to failure and recovery."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Validation Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Before we wrap up, let’s consider some validation questions. Think about the invariants relevant to this lecture, any hidden assumptions that might make baseline designs seem correct, and how you would force failure in a repeatable test."
+      },
+      {
+        "role": "student",
+        "text": "How do we validate the assumptions?"
+      },
+      {
+        "role": "teacher",
+        "text": "Great inquiry! Also, reflect on the evidence needed to prove failure and which design mechanisms you might prioritize."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To conclude, the central insight here is that forcing failure is not a mere concept, but a vital aspect of ensuring system correctness."
+      },
+      {
+        "role": "student",
+        "text": "So, it ties back to making our systems resilient?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! The real engineering challenge lies in connecting the idea of failure to actionable invariants, observable behaviors, and defensible trade-offs."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "If you’re interested in exploring more on this topic, I encourage you to search for literature on how to force failure in distributed systems and concurrency design trade-offs."
+      },
+      {
+        "role": "student",
+        "text": "And we should look into structured logging too, right?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes! For deeper understanding, explore invariants in stateful systems as well."
+      }
+    ]
+  },
+  {
+    "slide": 22,
+    "topic": "Discussion",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Finally, let’s open the floor for discussion. I invite you to share your thoughts on how we can prevent hidden assumptions in our designs and what trade-offs we need to consider when working with AI-generated designs."
+      },
+      {
+        "role": "student",
+        "text": "I think staying aware of the systems’ limitations is crucial. What do you think?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! Awareness and proactive validation are key to creating robust designs."
+      }
+    ]
+  }
+]

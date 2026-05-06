@@ -1,0 +1,107 @@
+[
+  {
+    "slide": 1,
+    "topic": "Events, Queues, Workers",
+    "text": "Welcome to the lecture on Events, Queues, and Workers. Today, we're going to explore how these concepts relate to concurrent systems and why they are crucial for ensuring correctness in our applications."
+  },
+  {
+    "slide": 2,
+    "topic": "Introduction",
+    "text": "Let's start with the shift from synchronous to asynchronous workflows. As we move tasks to background workers, we improve user responsiveness. However, this introduces new challenges. Correctness now relies heavily on how we handle events, retries, and ordering within our system."
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "text": "By the end of this lecture, you'll be able to analyze the design pressures in stateful concurrent systems, identify hidden assumptions, evaluate failure evidence, design corrections while preserving important invariants, and connect these ideas to your assignments."
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concept: Event",
+    "text": "Let's dive into the core concept of an event. An event is essentially a record of something that has happened in the past. Understanding events is vital because they serve as the backbone for trust in your system, especially under pressure. If we neglect this aspect, we risk producing duplicate work or having stale state, which can lead to breakdowns in the system."
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concept: Queue",
+    "text": "Next, we have queues. A queue acts as a buffer that stores events until they can be processed. Like events, queues are crucial for maintaining system integrity under load. If we overlook their function, we might end up with blocked progress or create situations where tasks are repeated unnecessarily."
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concept: Worker",
+    "text": "Now, let's talk about the worker, or consumer. Workers are the components responsible for pulling events from queues and executing actions based on those events. Their role is significant in ensuring that the system can handle tasks efficiently. As with events and queues, neglecting the nuances of worker behavior can lead to issues like duplicate work and outdated state."
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concept: Decoupling",
+    "text": "Another important aspect is decoupling. This means that the producer of an event does not need to know who will consume that event or even if the consumer is currently online. This separation is crucial for maintaining system flexibility and robustness. However, if we fail to manage this properly, it could result in misleading evidence or unnecessary duplications."
+  },
+  {
+    "slide": 8,
+    "topic": "Core Concept: Asynchronous Boundary",
+    "text": "Asynchronous boundaries mark points in our system where work is paused and may resume later, potentially on different workers or event loops. Recognizing these boundaries is essential for maintaining trust in the system under pressure. Ignoring them can lead to delays and other failures, similar to those encountered with events and queues."
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "text": "Here, we see a representation of how events, queues, and workers interact within a system. The diagram illustrates not just the relationships between these components but also how decisions are made and validated within the architecture. It's important to understand that the integrity of the system relies on the ongoing connection between these elements."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Setup",
+    "text": "To make these concepts more concrete, let’s consider a worked example. In the podcast domain, an `EpisodeIngestor` puts a message on a `CleanupQueue`, while a worker like `AudioCleaner` processes those messages. Similarly, in an order system, the `Checkout` process sends a `PaymentRequested` message to a queue. This practical application helps illustrate the concepts we are discussing."
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Implementation",
+    "text": "A common mistake when designing these systems is to assume a simple, one-time operation that relies purely on the current state. However, this assumption often masks deeper complexities that can lead to issues when tested under real-world conditions, as demonstrated in our example."
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "text": "Let’s discuss what a failure scenario might look like. In overlapping executions or with delays, a system might encounter problems like stale state or late arrivals, causing workflows to get stuck. This mismatch between design assumptions and actual execution can lead to significant challenges."
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "text": "To mitigate these issues, we can improve our designs. It's important to explicitly name the invariants we want to maintain and ensure that transitions are observable. We can implement controls for correctness by using retries or version checks whenever necessary to handle potential failures."
+  },
+  {
+    "slide": 14,
+    "topic": "Why Improved Design is Safer",
+    "text": "Implementing improved designs shifts our focus from merely hoping a workflow succeeds to guaranteeing that any invalid interleavings are either rejected or can be recovered with clear evidence. This enhances both reliability and our ability to troubleshoot issues down the line."
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes & Anti-Patterns",
+    "text": "We need to be cautious of various failure modes and anti-patterns. For instance, if a system only passes a single happy-path demonstration, it may not reflect reality. We can test for this by introducing concurrent scenarios and failure-focused tests to reveal possible weaknesses."
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "text": "Let's examine some trade-offs in our approaches. For example, a simple baseline might be easy to understand and implement, but it often hides the underlying assumptions about timing and pressure. On the other hand, guarded state transitions require careful modeling to protect the core invariants. Each approach has its strengths and weaknesses depending on the context of use."
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "text": "To apply what we've learned, start by identifying the invariant that is most relevant to your system. Write a sequential scenario that should work smoothly, then draft a pressure scenario that could expose potential failures. Remember to include operation IDs in your logs to facilitate tracking during testing."
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "text": "This lecture ties directly into your assignment A3. You'll need to connect our discussions to your project by illustrating a pertinent object, workflow, or event within your chosen domain. Your goal is to showcase concrete evidence through logs, commands, and other artifacts."
+  },
+  {
+    "slide": 19,
+    "topic": "Discussion",
+    "text": "Now, I’d like to open the floor for discussion with two questions. First, what invariant do you believe is most relevant based on today’s topics? Secondly, what hidden assumptions do you think might lead a design to appear correct, when in fact it may not be?"
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "text": "In summary, understanding events, queues, and workers is crucial for reasoning about system correctness, especially under realistic execution conditions. Our task as professional engineers is to connect these concepts with observable behavior and to justify our design choices through clear evidence."
+  },
+  {
+    "slide": 21,
+    "topic": "Further Reading",
+    "text": "Lastly, I encourage you to explore further reading options. Look into topics such as distributed systems failure modes related to events, queues, and workers, concurrency design trade-offs, structured logging, and invariants in stateful object-oriented systems. These will deepen your understanding and prepare you for practical applications."
+  }
+]

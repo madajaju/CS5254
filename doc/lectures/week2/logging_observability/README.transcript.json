@@ -1,0 +1,132 @@
+[
+  {
+    "slide": 1,
+    "topic": "Structured Logging & Observability",
+    "text": "Welcome to today's lecture on Structured Logging and Observability. We'll explore how apparent correctness can mask underlying issues when concurrency or operational pressures are introduced. It's essential for engineers to analyze and defend their designs to ensure trustworthiness under these conditions."
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "text": "Let's start with a common scenario: A course project that looks flawless during a simple demonstration falls apart when faced with concurrency or ambiguity. This exposes hidden assumptions about the system's logging. What exactly must engineers scrutinize and justify before placing their trust in the outcomes?"
+  },
+  {
+    "slide": 3,
+    "topic": "Core Concepts",
+    "text": "Moving forward, we’ll discuss several core concepts that are vital to understanding structured logging and observability. Each of these concepts addresses critical conditions that need to be explicit for our systems to be robust under pressure."
+  },
+  {
+    "slide": 4,
+    "topic": "Structured Logging",
+    "text": "Structured logging is the practice of recording logs in a format that's easily interpretable by machines, such as JSON. This includes critical metadata, like timestamps and thread IDs. Understanding this mechanism is essential, as neglecting it can lead to serious issues, including duplicate work or outdated states."
+  },
+  {
+    "slide": 5,
+    "topic": "Correlation IDs",
+    "text": "Correlation IDs are unique identifiers assigned to individual requests. These IDs track the flow of a request through various logs. They are important because, without them, we risk generating duplicate work or encountering stale information during processing."
+  },
+  {
+    "slide": 6,
+    "topic": "Traceability",
+    "text": "Traceability refers to the ability to track the journey of an individual object across different threads. This transparency is crucial; failing to implement it can lead to the same failures we've discussed—such as duplicate processing and stale states."
+  },
+  {
+    "slide": 7,
+    "topic": "Observability",
+    "text": "Observability means designing our systems so that we can infer their internal state from external outputs, like logs. This aspect is paramount for maintaining system integrity, as ignoring observability can again result in duplicate work or other discrepancies."
+  },
+  {
+    "slide": 8,
+    "topic": "Operational Pressure",
+    "text": "Operational pressure encompasses factors like load and latency that can reveal underlying system limitations. Identifying how pressure affects system behavior is essential, as overlooking it could lead to duplicate work and performance bottlenecks."
+  },
+  {
+    "slide": 9,
+    "topic": "System / Architecture View",
+    "text": "Now let's visualize the relationships between structured logging, correlation IDs, and other key elements. This architecture illustrates how each of these components feeds into the overall goal of ensuring system integrity under various pressures."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "text": "To anchor our understanding, I’ll walk through a worked example using the podcast domain. Here, we see different workers performing tasks like audio cleanup and transcript generation, all tied to the same episode. These logs are critical for troubleshooting and ensuring workflow consistency."
+  },
+  {
+    "slide": 11,
+    "topic": "Problem Setup",
+    "text": "In our podcast example, we see multiple workers logging actions for the same episode. This setup lays the groundwork for identifying issues that may arise when multiple operations compete for resources, helping us to diagnose hidden faults."
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "text": "When operations overlap—due to delays or retries—the system can yield stale state or duplicate effects. This mismatch reveals a gap between our design assumptions and the reality of the execution model, highlighting the risks of concurrency."
+  },
+  {
+    "slide": 13,
+    "topic": "Corrected or Improved Design Direction",
+    "text": "To mitigate these risks, we must clarify the invariant that our system must maintain. By making state transitions observable and implementing controls like version checks, we can establish a more robust framework that minimizes potential failures."
+  },
+  {
+    "slide": 14,
+    "topic": "Visual Model Anchors",
+    "text": "Next, we’ll look at our visual model anchors. Here we see the actors involved, including the load driver, API gateway, and worker pool, illustrating how they interact and how each role affects the overall design and observability."
+  },
+  {
+    "slide": 15,
+    "topic": "System Interaction",
+    "text": "This diagram outlines the interaction among the load driver, API gateway, and worker pool. The load driver sends concurrent requests, while the API gateway assigns correlation IDs, ensuring that each request can be traced through the logs effectively."
+  },
+  {
+    "slide": 16,
+    "topic": "State Transition Model",
+    "text": "In our state transition model, we visualize the stages the system can undergo from a healthy state to saturated, then degraded, and so forth. Understanding these transitions is vital for maintaining system integrity under varying loads."
+  },
+  {
+    "slide": 17,
+    "topic": "Failure Interleaving",
+    "text": "Here we look at failure interleaving, where a load test pushes concurrent requests while our worker pool handles retries. This scenario highlights the complexities that arise under stress, necessitating careful design considerations to avoid catastrophic failures."
+  },
+  {
+    "slide": 18,
+    "topic": "Failure Scenario",
+    "text": "As pressure builds—whether from sustained load or partial delays—we may observe latency spikes, duplicate work, and gaps in our logging. Recognizing these signs is crucial in diagnosing system failures."
+  },
+  {
+    "slide": 19,
+    "topic": "Design Response",
+    "text": "For a strong design response, we protect the property of system integrity. We implement mechanisms that introduce trade-offs, such as reduced peak throughput, which might delay processing in exchange for better recovery options."
+  },
+  {
+    "slide": 20,
+    "topic": "Evidence Flow",
+    "text": "To substantiate our claims about structured logging and observability, our design must clearly show both failure and recovery paths, supported by measurements and metrics. A solid approach will include stress evidence that gives a complete picture of the system's behavior."
+  },
+  {
+    "slide": 21,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "I want to draw your attention to common failure modes and anti-patterns, such as systems passing a single happy-path demonstration. The way to detect these pitfalls is by implementing tests that account for invariants and pressure scenarios."
+  },
+  {
+    "slide": 22,
+    "topic": "Trade-Off Analysis",
+    "text": "Our trade-off analysis summarizes the strengths and weaknesses of various design approaches. By comparing options, we learn when to apply simple baselines versus more guarded transitions, and the importance of explicit coordination."
+  },
+  {
+    "slide": 23,
+    "topic": "Practical Application",
+    "text": "As a practical exercise, I encourage you to identify the most relevant invariant related to structured logging. Also, consider writing both a sequential scenario that you expect to succeed and a pressure scenario that could reveal a failure."
+  },
+  {
+    "slide": 24,
+    "topic": "Assignment Integration",
+    "text": "Remember, this lecture aligns with your Assignment 1. Think about how the concepts we discussed apply to your semester project, focusing on structures, workflows, and how you will demonstrate the impact of logging and observability."
+  },
+  {
+    "slide": 25,
+    "topic": "Validation and Interview Questions",
+    "text": "To reinforce our learning, let's consider some validation questions. What key invariant applies to this topic? What hidden assumptions might mislead your design? How would you force a repeatable failure test?"
+  },
+  {
+    "slide": 26,
+    "topic": "Summary",
+    "text": "To conclude, structured logging and observability are not merely subjects to discuss; they're essential tools for engineers to ensure a system's reliability under real-world conditions. It's vital that our designs are robust, explainable, and validated through evidence."
+  }
+]

@@ -1,0 +1,112 @@
+[
+  {
+    "slide": 1,
+    "topic": "How to Force Failure",
+    "text": "Welcome to our lecture on how to force failure. In this session, we will explore the critical design pressures in concurrent systems and how to approach failure in a structured and evidence-based manner."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "Today, we have several key objectives. We will analyze design pressures related to forcing failure in concurrent contexts, diagnose hidden assumptions that can make our systems appear correct, and evaluate the evidence of failures through logs and traces. Our goal is to design controls that preserve invariants and effectively connect our designs to the integrity of our work and assignment deliverables."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Let’s start with a scenario: Imagine a student asks an AI for a design solution. They receive code that seems confident but misses a vital ordering guard. This can lead to workflows that are either stalled or violate important invariants. This situation raises a fundamental question for engineers: how can we responsibly use AI-generated designs while ensuring correctness in our systems?"
+  },
+  {
+    "slide": 4,
+    "topic": "Deterministic vs. Probabilistic Failure",
+    "text": "In understanding failures, we distinguish between deterministic and probabilistic failures. A deterministic failure means it fails consistently, while a probabilistic failure signifies it may fail under certain conditions. Recognizing these conditions is crucial because it informs whether we can trust our system under pressure. If we ignore these factors, our systems can present misleading evidence and may pass initial tests while still being fundamentally flawed."
+  },
+  {
+    "slide": 5,
+    "topic": "Sleep Injection",
+    "text": "Next, we have the concept of sleep injection. This technique involves adding random sleep calls to increase the chance of encountering race conditions. By introducing these delays, we can simulate stress in our systems and reveal weaknesses that we need to explicitly address to ensure our systems remain reliable under pressure."
+  },
+  {
+    "slide": 6,
+    "topic": "Concurrent Test Harness",
+    "text": "The concurrent test harness is another important concept. This approach entails running multiple workers in a loop against the same object to test how the system behaves under load. It’s vital for exposing issues that may not arise in a simple sequential execution, helping us to identify potential race conditions and conflicts that exist in a concurrent environment."
+  },
+  {
+    "slide": 7,
+    "topic": "Repeatability",
+    "text": "Repeatability is crucial in our testing process. Once we've identified a failure, we need to ensure that we can trigger it again. This validates our findings and confirms that our fixes are effective. Without this ability to reproduce failures, we cannot reliably trust the corrections we apply to our systems."
+  },
+  {
+    "slide": 8,
+    "topic": "AI-Assisted Hypothesis",
+    "text": "When using AI to generate designs or explanations, it’s imperative to validate them before adoption. While AI can provide useful drafts, we must be cautious as it may not always adhere to the invariants we need. Ensuring that any AI-assisted design is thoroughly vetted prevents us from misunderstanding its implications under stress."
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "text": "Let’s consider a high-level architecture view. We treat the process of forcing failure as a design challenge. This involves examining how various concepts like deterministic versus probabilistic failure, sleep injections, concurrent test harnesses, and validation connect and interact with one another in building robust systems."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Problem Setup",
+    "text": "To illustrate these concepts, let’s look at a worked example using a podcast domain. Here, we could simulate a scenario where ten threads are simultaneously trying to mark the same episode as cleaned. By injecting a sleep command into the cleaning method, we can observe potential failures under load, highlighting the importance of race conditions in our designs."
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Implementation",
+    "text": "A typical naive implementation might assume that operations occur in order without any overlaps, but this is a flawed assumption. The workflow could be represented as an actor performing an operation, the system reading the current state, applying a transition, and emitting a side effect. However, in reality, these steps can interleave and produce inconsistent outcomes."
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "text": "When operations overlap, issues like stale state or repeated executions can occur, leading to potential deadlocks or even applications getting stuck in a workflow. It's crucial to realize that these failures stem not just from incorrect syntax but from a mismatch between our design assumptions and how the system actually executes."
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "text": "To address the flaws, we should name our invariants and make transitions observable. This involves introducing controls that ensure correctness, such as version checks or idempotency keys. These controls help to validate that our systems behave as intended even under stress."
+  },
+  {
+    "slide": 14,
+    "topic": "Why Improved Design Is Safer",
+    "text": "With an improved design, we shift from merely hoping our workflows execute correctly to proving that any invalid interleavings are either rejected or handled appropriately. This proactive approach helps us build reliable systems and provides evidence that can be validated post-factum."
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "Now, let's discuss some common failure modes and anti-patterns. For example, if a system appears to pass the happy path but fails under pressure, it’s indicative of design weaknesses that need uncovering. By running tests under varied conditions, we can detect these issues and ensure our designs withstand real-world constraints."
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "text": "When evaluating different approaches in system design, it’s important to analyze the trade-offs involved. Some strategies are easy to implement but may hide critical timing assumptions, while others provide strong evidence but add complexity. Choosing the right approach depends on the specific context and requirements of your system."
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "text": "As a practical exercise, I encourage you to identify the invariant that will be most relevant in forcing failure for your project. Draft sequential scenarios that show expected success, alongside pressure scenarios that could expose potential weaknesses. Make sure to incorporate operation IDs in your logs to capture structured evidence."
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "text": "This lecture aligns directly with Assignment 1. You are expected to connect the concepts we’ve discussed today with your semester project. Show how these ideas apply to your specific domain, outlining the objects, workflows, events, and mechanisms pertinent to failure and recovery."
+  },
+  {
+    "slide": 19,
+    "topic": "Validation Questions",
+    "text": "Before we wrap up, let’s consider some validation questions. Think about the invariants relevant to this lecture, any hidden assumptions that might make baseline designs seem correct, and how you would force failure in a repeatable test. Also, reflect on the evidence needed to prove failure and which design mechanisms you might prioritize."
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "text": "To conclude, the central insight here is that forcing failure is not a mere concept, but a vital aspect of ensuring system correctness. The real engineering challenge lies in connecting the idea of failure to actionable invariants, observable behaviors, and defensible trade-offs. A design truly matures when it can be thoroughly explained, tested under stress, and validated with clear evidence."
+  },
+  {
+    "slide": 21,
+    "topic": "Further Reading",
+    "text": "If you’re interested in exploring more on this topic, I encourage you to search for literature on how to force failure in distributed systems and concurrency design trade-offs. Look into structured logging, correlation IDs, and the role of invariants in stateful systems for deeper understanding."
+  },
+  {
+    "slide": 22,
+    "topic": "Discussion",
+    "text": "Finally, let’s open the floor for discussion. I invite you to share your thoughts on how we can prevent hidden assumptions in our designs and what trade-offs we need to consider when working with AI-generated designs."
+  }
+]

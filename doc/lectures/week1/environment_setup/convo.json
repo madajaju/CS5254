@@ -1,0 +1,10 @@
+[
+  {
+    "voiceId": "85J9QS6iIte4nuZrrQR6",
+    "text": "For those interested in diving deeper, I encourage you to explore topics such as Docker for reproducible development environments, structured logging, and the importance of correlation IDs in distributed systems."
+  },
+  {
+    "voiceId": "85J9QS6iIte4nuZrrQR6",
+    "text": "These resources will enhance your understanding of creating reliable and observable environments."
+  }
+]

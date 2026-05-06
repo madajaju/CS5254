@@ -1,0 +1,112 @@
+[
+  {
+    "slide": 1,
+    "topic": "Testing Coordination",
+    "text": "Welcome to today's lecture on Testing Coordination. This session is part of the CS 5891b course on Object-Oriented Systems Under Concurrency. Over the next fifteen minutes, we will explore how to analyze design pressures in stateful concurrent systems."
+  },
+  {
+    "slide": 2,
+    "topic": "Objectives",
+    "text": "In this lecture, we will focus on four key objectives. First, we'll analyze the design pressure in concurrent systems. Next, we'll diagnose hidden assumptions that can lead to seemingly correct designs that fail under pressure. Third, we'll learn how to evaluate failures using various forms of evidence like logs and traces. Lastly, we'll discuss how to design corrections that preserve critical invariants, and how to effectively defend our approach in the Integrity Packet while connecting all of this to our second assignment."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Let's start with an intriguing scenario. Imagine two components, each waiting on the other to make progress. The logs show activity, but the workflow never actually completes. The code may seem reasonable at first glance, but the coordination contract between these components is incomplete. What rule or practice can we establish to ensure that progress is observable and defensible in such a situation?"
+  },
+  {
+    "slide": 4,
+    "topic": "Joint Testing",
+    "text": "Joint Testing is the process of testing the interactions between two objects, rather than just their individual methods. This is crucial because it helps us identify conditions that must be explicitly addressed before we trust the system under pressure. The mechanisms for this could include analyzing object state, workflow timing, or the behavior of worker threads. A failure in this area might not immediately show in tests, as the system can pass under ideal circumstances while still exhibiting issues like stale state or duplicate work. Thus, it’s imperative that we expose relevant invariants and log critical transitions."
+  },
+  {
+    "slide": 5,
+    "topic": "Artificial Latency",
+    "text": "Next, we have Artificial Latency, which involves intentionally slowing down one branch of a parallel workflow. This technique allows us to test whether the other components can handle such delays correctly. Again, we focus on identifying necessary conditions for trust under pressure. While this aims to reveal potential weaknesses, if we ignore it, we risk experiencing issues such as stale state or blocked progress. Therefore, implementing this requires us to expose invariants and log necessary transitions."
+  },
+  {
+    "slide": 6,
+    "topic": "Chaos Testing",
+    "text": "Chaos Testing involves the random reordering of incoming signals, such as 'Asset Complete'. This approach helps uncover essential conditions that must remain explicit for a system to be reliable under pressure. Spoiler alert: failure modes include producing duplicates or stale states, which emphasizes that our design must expose its invariants and document transitions accordingly."
+  },
+  {
+    "slide": 7,
+    "topic": "Stress Testing Coordination",
+    "text": "Another important practice is Stress Testing Coordination, which means running a large number of workflows simultaneously—think about 50 at once. This helps us identify timing edge cases that might lead to deadlocks. Here again, the principle is that certain conditions need to be explicitly defined for system reliability. As with the previous topics, failure can lead to hidden deadlocks or duplicate work, so our design implications must focus on exposing invariants and logging transitions."
+  },
+  {
+    "slide": 8,
+    "topic": "Coordination Boundary",
+    "text": "Coordination Boundaries are critical points where multiple independent objects must agree on factors like ordering, ownership, or making progress. This concept highlights conditions that need to be effectively managed under pressure. If ignored, faults can remain concealed until stress reveals them. Thus, it's vital that we ensure observable invariants and accurately record transitions at these boundaries."
+  },
+  {
+    "slide": 9,
+    "topic": "Coordination System Diagram",
+    "text": "Here we have a diagram that visually represents our discussion of Testing Coordination. It presents the key concepts we've covered, including Joint Testing, Artificial Latency, and Chaos Testing, all leading towards the ultimate goal of validating evidence and making design decisions. This interconnectedness shows that we must refine our understanding and approach continuously."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "text": "Let's explore a practical example, focusing on a podcast domain. One of the tests could involve generating the transcript before the audio has been ingested, effectively checking if our system waits correctly for the audio. Another scenario might be to send two 'Audio Cleaned' signals for the same episode, exposing potential race conditions. In an order system, we could simulate a payment confirmation that arrives after the shipping timeout to see how the system reacts."
+  },
+  {
+    "slide": 11,
+    "topic": "Problem Setup",
+    "text": "Now, think about the naive implementation. Many designs operate under the assumption that sequences happen once and in order, applying transitions based on the current state. However, this assumption often leads to unexpected behavior, especially when faced with overlapping executions or new conditions."
+  },
+  {
+    "slide": 12,
+    "topic": "Naive Implementation",
+    "text": "The false comfort in a naive implementation stems from the belief that an operation can simply be performed once, correctly. It usually goes as follows: the actor performs an operation, the system reads the current state, then it applies that transition and emits a side effect. What happens, though, when conditions change? Under concurrent execution or delayed deliveries, that single assumption can crumble."
+  },
+  {
+    "slide": 13,
+    "topic": "Failure Scenario",
+    "text": "There are significant risks involved. In overlapping execution scenarios, one can encounter stale states, where the same operation could execute multiple times or arrive late. The real issue here is that the failure isn't just a single bug in the syntax; it reveals a critical conflict between the design assumption and the actual execution model of the system."
+  },
+  {
+    "slide": 14,
+    "topic": "Improved Design Direction",
+    "text": "To improve designs, we must first identify and name our invariants—those elements that need to remain constant throughout operation. Additionally, transitions should become observable. Introducing controls for correctness is vital, whether they are version checks, idempotency keys, or explicit coordination practices."
+  },
+  {
+    "slide": 15,
+    "topic": "Why Improved Design Is Safer",
+    "text": "Now, why is this improved design direction safer? It transitions the focus from simply hoping for a correct workflow execution to proactively proving that invalid interleavings are either rejected, contained, or managed with clear evidence. This enhances our system’s robustness and its ability to recover from failures."
+  },
+  {
+    "slide": 16,
+    "topic": "Failure Modes",
+    "text": "Let’s look at common failure modes. One symptom you might encounter is a system that only passes a single happy-path demonstration. The reason? Often, these tests ignore timing or pressure conditions, which can hide underlying weaknesses. To detect such failures, we should run repeated tests with concurrent actors and delayed events. The solution is to complement the happy-path test with focus on failure that directly targets the relevant invariant."
+  },
+  {
+    "slide": 17,
+    "topic": "Trade-Off Analysis",
+    "text": "In analyzing trade-offs, we find an array of approaches, each with its strengths and weaknesses. A simple baseline is easy to explain but often obscures critical timing assumptions. On the other hand, an explicit coordination setup is great for visibility but can also introduce potential wait states or deadlocks. Understanding these trade-offs allows us to choose the right strategy for our specific situation."
+  },
+  {
+    "slide": 18,
+    "topic": "Practical Application",
+    "text": "For practical application, tomorrow morning, I challenge you to identify the invariant or progress property that is most relevant to testing coordination. Write a scenario that should succeed and one that could possibly expose a failure under pressure. Don’t forget to incorporate operation IDs in logs and to capture before/after evidence of any fixes you apply, all while updating your Integrity Packet to reflect these aspects."
+  },
+  {
+    "slide": 19,
+    "topic": "Assignment Integration",
+    "text": "As for assignment integration, this lecture ties directly to Assignment 2. You’re expected to relate concepts from our discussion to your semester project by clearly demonstrating the relevant object, workflow, event, failure, or recovery mechanism—whatever fits your domain. Make sure your evidence is concrete, utilizing structured logs and diagrams."
+  },
+  {
+    "slide": 20,
+    "topic": "Discussion Questions",
+    "text": "Before we conclude, let's open the floor for discussion. I have a couple of questions for you to ponder: First, what invariant or progress property do you believe is most critical based on today's lecture? Secondly, how do hidden assumptions influence the basic design of a system? Think about your experiences and share your thoughts."
+  },
+  {
+    "slide": 21,
+    "topic": "Summary",
+    "text": "In summary, today we've learned that testing coordination is pivotal in assessing whether a system maintains its correctness during realistic execution. The role of a professional engineer is to connect concepts to invariants, observable behavior, and defensible design trade-offs. Ultimately, we recognize that a mature design should be able to survive scrutiny, handle stress, and stand validated through evidence."
+  },
+  {
+    "slide": 22,
+    "topic": "Further Reading",
+    "text": "For those looking to deepen their understanding, I recommend exploring literature around Testing Coordination, specifically looking at failure modes in distributed systems, concurrency design trade-offs, and structured logging with correlation IDs. Delve into the concepts of invariants in stateful object-oriented systems and coordination patterns that ensure progress guarantees."
+  }
+]

@@ -1,0 +1,242 @@
+[
+  {
+    "slide": 1,
+    "topic": "What Makes a Good System for This Course",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to our lecture on what makes a good system for this course, CS 5891b, focusing on object-oriented systems under concurrency. In this lecture, we will cover essential criteria to evaluate and select project domains that possess sufficient complexity while being manageable within a semester."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Introduction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's begin with a quick overview of our course and objectives. This course is designed to be completed in just fifteen minutes, and it assumes that you have a basic understanding of domain modeling and object-oriented responsibilities."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "By the end of this lecture, you should be able to evaluate project domains for concurrency pressure effectively. You'll learn to compare domains by their shared state and workflow complexity, design an adaptable object model, and justify the size and complexity of the domain you choose for your projects."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To illustrate our topic, consider two student project proposals. One suggests a simple note-taking app, which lacks complexity, while the other proposes a full-scale distributed database that might be too large to handle. Our key question today is: What kind of system can be both small enough to implement and rich enough to experience meaningful failures?"
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Shared Mutable State",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A critical concept we need to understand is shared mutable state. This refers to data that multiple actors can access and modify, and it's essential for causing concurrency failures. Think about how different workers, users, or systems might interact with the same data. We need to choose domains that have valuable state to protect."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Multi-Step Workflow",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, let's discuss multi-step workflows. This concept encapsulates processes that involve several ordered stages rather than just a single operation. This ordering is what creates necessary coordination and invariants. If a step is executed out of order, it could lead to critical errors, such as publishing content prematurely."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Natural Failure Potential",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Natural failure potential is another key aspect. A suitable domain should have the capability to break under conditions like concurrency and retries. It’s important to recognize that if a domain is trivial, it won’t provide the meaningful failures we need to observe and redesign. We should aim for domains with realistic pressure points."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Bounded Complexity",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Bounded complexity refers to choosing systems that are complex enough to offer design trade-offs but small enough that we can implement them repeatedly. We want our students to engage in cycles of designing, breaking, and fixing their systems. A focused workflow supports depth without overwhelming scope."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System / Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let’s look at a systems architecture view. The goal is not to create the most complex system possible but rather to identify a domain where correctness hinges on key factors such as object boundaries, state transitions, and coordination. The diagram reflects the pathway from candidate domains to identifying a good course system."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Podcast Production",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To make these concepts clearer, let's dive into a worked example involving podcast production. In this scenario, each episode relies on the completion of several assets, including audio, transcripts, and artwork. The publication of the episode is contingent on all these elements being ready."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Mental Model",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In a naive model of this workflow, we might see something like setting flags for readiness of different components. However, this approach can oversimplify how these elements interact and may lead to mistakes in publication timing."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Consider a failure scenario where a publish operation checks the readiness of assets while those assets are still being updated. If one field is completed early, it could mistakenly influence the system to trigger publication too soon or even process it multiple times."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To improve upon this, we can define a central invariant that stipulates an episode cannot be published until all required assets are finalized. This design focuses on protecting the essential state and validating the transition through clear conditions."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes and Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's now turn to common failure modes and anti-patterns that we should be aware of. For instance, a project that mainly consists of CRUD operations can be a symptom of a weak workflow, as it might lack the necessary contested transitions."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Symptom: Project is mostly CRUD",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "When you notice that your project is primarily CRUD, it often means that the domain does not include a meaningful workflow. We can detect this by observing the absence of contested transitions. The fix involves integrating shared state workflows."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Symptom: Project is too ambitious",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "If a project appears overly ambitious, it may indicate that an industry-scale system has been selected where a more appropriate course-scale workflow would suffice. If you cannot distill it down to a few core objects, it’s a signal to narrow your focus."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Symptom: Failures are artificial",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Another common symptom to be wary of is that failures in the project appear artificial. If the domain lacks concurrent actors, then any failure scenarios that require them might not reflect the reality of the system, making the project's integrity questionable."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Symptom: Domain cannot evolve",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Lastly, if your domain cannot evolve through assignments, it often means that there is no room for growth or adaptation in the initial design. We can identify this if the first assignment completely exhausts the domain's potential."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's analyze various approaches. For example, podcast production has clear workstreams but requires careful asset modeling, while order fulfillment is an example with familiar invariants but can drift into complexities like external payments."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Looking ahead to tomorrow, your task will be to select an approved project domain. You should identify three to five core objects and write a workflow backbone. Additionally, name the shared mutable state and create two invariants with descriptions of a potential race condition and a partial failure."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This lecture aligns with Assignment A0, where you'll need to justify your choice of project domain by outlining its concurrency pressure. This includes providing a domain description, initial object model, and expected failure modes."
+      }
+    ]
+  },
+  {
+    "slide": 22,
+    "topic": "Validation and Interview Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As part of your understanding, you should be ready to respond to questions like what makes a domain suitable for this course and which objects own crucial shared states. It's essential to think critically about invariants and what happens during concurrent actions."
+      }
+    ]
+  },
+  {
+    "slide": 23,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In conclusion, the central insight we’ve discussed is that a good course system emphasizes clear pressure points rather than scale. Choosing the right problem allows you to analyze state, workflow, and failures effectively, laying a solid foundation for your semester."
+      }
+    ]
+  },
+  {
+    "slide": 24,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For additional context, you may want to explore resources such as the Project Domains document and the Project Selection Guide. Topics like domain-driven design and workflow state machine design are also valuable for deepening your understanding."
+      }
+    ]
+  }
+]

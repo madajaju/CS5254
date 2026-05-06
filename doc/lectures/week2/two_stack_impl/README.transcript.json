@@ -1,0 +1,92 @@
+[
+  {
+    "slide": 1,
+    "topic": "Two-Stack Implementation Strategy",
+    "text": "Welcome to today's lecture on the Two-Stack Implementation Strategy. We'll explore how this strategy helps us reason about system behavior under concurrency and design pressures."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "In this lecture, we aim to achieve several important objectives. First, we will analyze the design pressure of two-stack implementations in concurrent systems. Next, we'll diagnose hidden assumptions that may make a system appear correct, even when it isn’t. We will also evaluate failure evidence using logs, traces, and repeatable tests. Additionally, we’ll look at designing controls that preserve system invariants while being mindful of trade-offs. Finally, students should be prepared to defend their approaches in the Integrity Packet while linking these discussions to their assignment deliverables."
+  },
+  {
+    "slide": 3,
+    "topic": "Core Concepts",
+    "text": "Let's dive into the core concepts that underpin our discussion today. Understanding these concepts is crucial for successfully applying the two-stack strategy in systems design."
+  },
+  {
+    "slide": 4,
+    "topic": "Feature Parity",
+    "text": "Feature parity is a key notion that refers to ensuring that Stack A and Stack B share the same classes, methods, and logic. This becomes essential when trying to build trust in your system under pressure. If ignored, we risk producing duplicate work or encountering stale states, which can lead to misleading evidence during testing. As a result, it's important that our implementations expose invariant behaviors, log critical transitions, and validate actions through repeatable tests."
+  },
+  {
+    "slide": 5,
+    "topic": "Portability",
+    "text": "Portability is another important concept, which means designing our object models to be less reliant on specific features of one programming language. This awareness becomes critical when ensuring that the functionality we've built can be trusted across different environments. Ignoring portability can lead to similar issues as we discussed with feature parity, such as duplicate work and unreliable states. The implication here is that we should again expose invariants and validate through rigorous testing."
+  },
+  {
+    "slide": 6,
+    "topic": "Validation",
+    "text": "Validation involves running the same test suite across both stacks to ensure that they behave identically under load. This verification is crucial under concurrent conditions. If we do not validate effectively, we might encounter discrepancies that can cause significant issues. Thus, like our previous concepts, this also involves capturing the right evidence and validating outcomes through structured testing."
+  },
+  {
+    "slide": 7,
+    "topic": "System Invariant",
+    "text": "System invariants are the conditions that must remain true during all valid executions of your system. Being explicit about these invariants is crucial for maintaining trustworthiness. They help ensure consistent behavior in your application, particularly under various pressure scenarios. Failing to maintain these invariants can lead to serious failures, like inconsistent behavior across different stacks."
+  },
+  {
+    "slide": 8,
+    "topic": "Failure Mode",
+    "text": "A failure mode describes a repeatable way in which our system violates an invariant or loses progress. This concept is particularly essential because we must understand how different elements can contribute to system instability. If our found failure modes remain unaddressed, they can lead to significant errors manifesting in real-world scenarios, so it's crucial that we are vigilant in testing these aspects."
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example",
+    "text": "Let’s look at a worked example to cement our understanding. Consider the problem setup involving Java and Python stacks and the strategy of utilizing a JSON configuration file to ensure both begin from the same effective baseline. This ensures fair testing where both systems start from an identical point, crucial when evaluating performance under concurrency."
+  },
+  {
+    "slide": 10,
+    "topic": "Problem Setup",
+    "text": "The original lecture frames this topic with examples such as Java and Python stacks. The strategy involves creating a JSON configuration file that both implementations read to define their starting state, ensuring they both start from the exact same baseline."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "In exploring failure scenarios, we must recognize situations like overlapping executions, where an operation might execute with stale or inconsistent state, leading to doubled operations. When our design assumptions don’t align with how the system executes, that’s where hidden issues emerge, and this can be quite tricky to diagnose."
+  },
+  {
+    "slide": 12,
+    "topic": "Corrected Design Direction",
+    "text": "To correct these issues, we need to explicitly name the invariant we are guarding, make state transitions observable, and implement controls that ensure correctness, such as version checks or idempotency keys. This proactive approach serves to fortify our design against unintended operations during concurrent executions."
+  },
+  {
+    "slide": 13,
+    "topic": "Why the Improved Design Is Safer",
+    "text": "The improvements we discussed provide additional safety by shifting our design focus—rather than merely hoping that operations execute in order, we’ll be proving that any invalid interleavings are appropriately managed or rejected. This establishes a stronger framework for validating our system’s functionality."
+  },
+  {
+    "slide": 14,
+    "topic": "Evidence Flow",
+    "text": "Now, let’s examine the flow of evidence required to support our claims. For any project preparing for Assignment 1, it’s critical to demonstrate that you can provide structured evidence of your design, whether that be through version outputs, command transcripts, or stack-specific logs. Reviewers must be able to reproduce your outcomes without dependency on personal IDE configurations."
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "Moreover, we must recognize common failure modes and anti-patterns that might arise during our implementations. For instance, a system might pass a single happy-path demonstration but fall short under real-world pressures. Addressing these symptoms involves rigorous testing beyond the happy path to uncover hidden assumptions and validate the design's robustness."
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "text": "Understanding the trade-offs between different approaches is crucial in system design. Each approach has its own strengths and weaknesses. For example, a simple baseline is easy to implement but often hides critical timing assumptions. By analyzing these trade-offs, we can choose methods that best balance efficiency with correctness for our contexts."
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "text": "For practical application, I encourage you to identify the most relevant invariant related to the two-stack implementation strategy. Write one scenario expected to succeed and one pressure scenario that may reveal potential failures. Remember, proper logging with operation IDs and entity IDs is essential when running these scenarios."
+  },
+  {
+    "slide": 18,
+    "topic": "Summary",
+    "text": "To conclude, the two-stack implementation strategy is integral for understanding how systems can maintain correctness under real-world pressures. Your takeaway should be that connecting these concepts with observability, invariants, and defensible design trade-offs is essential for mature system design."
+  }
+]

@@ -1,0 +1,107 @@
+[
+  {
+    "slide": 1,
+    "topic": "Environment and Repo Structure",
+    "text": "Welcome to our lecture on Environment and Repository Structure. Today, we'll explore how to create a robust development environment that facilitates repeatability and analysis in concurrent systems."
+  },
+  {
+    "slide": 2,
+    "topic": "Course Overview",
+    "text": "In this course, CS 5891b, our focus is on Object-Oriented Systems Under Concurrency. This first week’s lecture will last approximately 15 minutes, and it's essential that you have a basic understanding of Git, command-line execution, package managers, and a well-set up editor or IDE as prerequisites for our discussions."
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "text": "Our learning objectives today include designing a repository structure that supports a two-stack implementation. We will evaluate how reproducible our development environments are and learn to diagnose setup gaps that might lead to concurrency failures. Additionally, we’ll discuss how to justify the tools we choose in terms of observability and repeatability."
+  },
+  {
+    "slide": 4,
+    "topic": "Opening Scenario",
+    "text": "Let’s begin with an opening scenario. Imagine a student demonstrates a concurrent failure on their laptop. The logs reveal a race condition, but when the command runs on another machine, it doesn’t fail. This is often due to different runtime versions, inconsistent logging formats, and poorly organized evidence storage. So, our challenge today is to figure out how to structure the environment to be more reproducible."
+  },
+  {
+    "slide": 5,
+    "topic": "Reproducible Execution",
+    "text": "Reproducible execution refers to the ability to run the same workflow with the same configuration and expect comparable behavior. This is crucial because, in the realm of concurrency, changes in the environment can lead to silent errors, complicating analysis. We can achieve reproducibility through versioned runtimes, scripts, and containers, ensuring we have essential runnable commands documented."
+  },
+  {
+    "slide": 6,
+    "topic": "Two-Stack Repository Layout",
+    "text": "A two-stack repository layout allows us to separate implementations while keeping conceptual parity. This matters because it ensures that we can maintain the same object model across two different runtime environments. With shared documentation, separate stack directories, and common scripts, we can safeguard against implementations drifting apart and losing comparison value."
+  },
+  {
+    "slide": 7,
+    "topic": "Structured Logging",
+    "text": "Structured logging entails consistent event records that include critical information like time, operation ID, and action state. This consistency is vital because logs serve as the primary evidence for understanding concurrency behavior. Using formats like JSON, we can enhance our ability to sort and filter logs, supporting better correlation of events that impact our systems."
+  },
+  {
+    "slide": 8,
+    "topic": "Evidence Organization",
+    "text": "The organization of evidence is crucial. We need a predictable location for commands, screenshots, logs, test outputs, and integrity packet entries. This organization is significant because it allows for review by others, ensuring that claims made about system behavior can be substantiated with traceable raw outputs."
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "text": "Let’s look at a visual representation of the proposed repository structure. The layout separates coursework milestones from implementation code while keeping evidence and integrity documentation readily accessible across assignments. This organization is key for running experiments and conducting analyses effectively."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Problem Setup",
+    "text": "Now, let's consider a worked example where a student focuses on podcast production. The goal here is to run a uniform workflow: creating an episode, processing assets, marking it ready, and publishing. This consistency across stacks is fundamental to analyzing potential concurrency issues."
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Mental Model",
+    "text": "Initially, the student's approach might place code where each framework prefers. For example, Java may output to the console while Node.js may log differently. This naive approach can lead to significant complications when it's time to compare concurrency behavior across stacks."
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "text": "Consider a situation where five workers are publishing the same episode. While Java logs thread names, Node.js uses request IDs, and neither log entries include a correlation ID for the episode. This discrepancy can make it impossible for the student to prove that the same failure occurred in both implementations, which is a critical oversight."
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design: Shared Event Schema",
+    "text": "To mitigate these issues, we can define a shared event schema. This structured approach ensures that every log entry contains necessary identifiers, actions, and timestamps. By having a consistent schema, we can more easily observe and defend against failures, making our concurrency analysis much more effective."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes and Anti-Patterns (1)",
+    "text": "Now, let’s discuss some common failure modes and anti-patterns. One classic symptom is the phrase 'It works on my machine,' which usually indicates that setup steps and runtime versions were not well documented. If a peer cannot replicate the environment, you'll want to implement measures such as adding version files or using Docker."
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns (2)",
+    "text": "Another symptom to watch for is when logs are readable but not analyzable due to missing correlation IDs. It becomes essential to standardize event fields early on to avoid potential analysis paralysis later in your work. Additionally, failing to maintain shared models between stacks can result in differing systems that are hard to align."
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "text": "Here, we have a trade-off analysis that weighs various approaches to setting up your development environment. Manual setups are fast but difficult to reproduce, while Dockerized environments ensure consistency across machines but add some configuration overhead. It's crucial to choose the right approach based on your project needs."
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "text": "For practical application, tomorrow morning you should confirm that you have Git, Docker, your required runtimes, and your editor installed. You'll also want to record version commands, create your assignment and implementation folder structure, and add run scripts with a shared logging schema. Capturing this setup evidence in your repository is vital."
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "text": "This lecture is directly aligned with A0 - Project Selection and Environment & Integrity Packet. When completing this assignment, students must not only choose their domain and two stacks but also demonstrate that their environment is not just installed but can function as a reliable evidence-producing system."
+  },
+  {
+    "slide": 19,
+    "topic": "Discussion",
+    "text": "As we wrap up, let's engage in a discussion. Consider why reproducibility is especially crucial in a concurrency course. Also, think about the essential details that must be present in log records to effectively analyze a race condition. I look forward to hearing your thoughts."
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "text": "In summary, setting up your environment is not just a preliminary step; it is integral to the engineering arguments we make. If we cannot run, observe, and compare our systems effectively, our claims about their correctness become vulnerable. A structured approach to evidence and repeatability will serve you well throughout this course."
+  },
+  {
+    "slide": 21,
+    "topic": "Further Reading",
+    "text": "For those interested in diving deeper, I encourage you to explore topics such as Docker for reproducible development environments, structured logging, and the importance of correlation IDs in distributed systems. These resources will enhance your understanding of creating reliable and observable environments."
+  }
+]

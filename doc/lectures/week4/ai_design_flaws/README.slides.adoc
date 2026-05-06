@@ -1,0 +1,188 @@
+= AI-Generated Designs: Common Flaws
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Introduction
+
+* AI-generated designs can appear correct
+* Hidden flaws emerge under pressure
+* Importance of design accountability
+* How to use AI outputs safely
+
+== Core Concept: Thread-Safety Hallucinations
+
+* Definition: Misleading thread-safety claims
+* Why it matters: Trust under pressure
+* Mechanisms: Object state, timing, worker behavior
+* Failure: Stale state, duplicate work, blocked progress
+* Implication: Expose invariant, log transitions
+
+== Core Concept: Missing Edge Cases
+
+* Definition: Ignoring high-contention scenarios
+* Why it matters: Trust must be explicit
+* Mechanisms: Object state, timing, queues
+* Failure: Duplicate work, stale state, blocked progress
+* Implication: Expose invariant, log transitions
+
+== Core Concept: Complexity Overload
+
+* Definition: Overly complex solutions suggested
+* Why it matters: Simplicity is key under pressure
+* Mechanisms: Object state, timing, queues
+* Failure: Overhead leads to design flaws
+* Implication: Expose invariant, log transitions
+
+== Core Concept: Assumed Atomicity
+
+* Definition: Misunderstanding atomic operations
+* Why it matters: Must define atomic conditions
+* Mechanisms: Object state, timing, coordination
+* Failure: Mismatched assumptions in execution
+* Implication: Expose invariant, log transitions
+
+== Core Concept: AI-Assisted Hypothesis
+
+* Definition: Generated designs require validation
+* Why it matters: Must ensure correctness
+* Mechanisms: Object state, timing, coordination
+* Failure: Misleading paths without strict checks
+* Implication: Expose invariant, log transitions
+
+== System Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "AI-Generated Designs: Common Flaws" as Topic
+rectangle "Thread-Safety Hallucinations" as A
+rectangle "Missing Edge Cases" as B
+rectangle "Complexity Overload" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic -left-> A
+A -left-> B
+B -left-> C
+C -left-> V
+V -left-> D
+D -down-> A : refine
+@enduml
+----
+
+== Example Setup
+
+* Podcast Domain
+* Request for "safe status update"
+* Incorrectly generated code with risks
+* Key focus: observable state transition principles
+
+== Naive Implementation
+
+* Assumes a singular operation in order
+* Flawed sequential assumption
+* Invisible state mismatches
+
+== Failure Scenario
+
+* Overlapping execution pitfalls
+* Outcomes: stale state, interference, stalled workflows
+* Not just syntax bugs: deeper design flaws exposed
+
+== Improved Design Direction
+
+* Define the invariant clearly
+* Make transitions observable
+* Add correctness checks (e.g., version checks)
+* Focus on evidence-based design
+
+== Why Improved Design Is Safer
+
+* Moves from assumptions to proof
+* Prevents invalid interleavings
+* Protects workflow integrity with evidence
+
+== Failure Modes & Anti-Patterns
+
+* Symptom: Happy-path tests pass
+  * Cause: Avoids pressure conditions
+  * Detect: Use diverse tests
+  * Correct: Add failure-focused tests
+
+* Symptom: Tool names without properties
+  * Cause: Failing to state invariants
+  * Detect: Inquire about invariant protection
+  * Correct: State invariant first
+
+* Symptom: Vague evidence for claims
+  * Cause: Lack of detailed logs
+  * Detect: Poor reconstruction of failures
+  * Correct: Capture structured evidence
+
+* Symptom: Fixes change behavior in isolation
+  * Cause: History of repeatable failures lost
+  * Detect: No baseline comparisons
+  * Correct: Preserve failing tests
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | Initial comparison point
+| Guarded transition | Protects core invariant | Requires careful modeling | Status changes or workflows
+| Explicit coordination | Makes dependencies visible | May introduce wait issues | Complex workflows needing order
+| Idempotent design | Handles duplicates | Needs deduplication | Queues, retries, async scenarios
+| Observability-first | Strong evidence generation | Adds instrumentation work | Requires design defense
+|===
+
+== Practical Application
+
+* Identify the core invariant in designs
+* Write sequential and pressure scenarios
+* Log operation IDs pre-execution
+* Record evidence of fixes applied
+
+== Assignment Connection
+
+* Relate lecture to [A1](../../../assignments/A1/index.md)
+* Show invariants and mechanisms in project
+* Include evidence: logs, behavior, explanations
+
+== Validation Questions
+
+1. Identify key invariants relevant to this topic.
+2. Discuss hidden assumptions in baseline design.
+3. Describe how to force a failure scenario.
+4. Identify evidence for failure occurrence.
+5. Which design mechanism would you prioritize?
+
+== Discussion
+
+* How should engineers validate AI-generated designs?
+* What are the essential trade-offs when choosing mechanisms?
+
+== Summary
+
+* AI-generated designs bring risks of unseen flaws
+* Core insights center on invariants and observable behavior
+* Justify design maturity with robust evaluations and clear evidence
+
+== Further Reading
+
+* Search: "AI-Generated Designs and Failure Modes"
+* Explore: Structured logging and correlation ID best practices
+* Investigate: Invariants in object-oriented systems

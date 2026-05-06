@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "AI as a Thinking Partner in Software Development",
+    "text": "Welcome to our lecture on AI as a Thinking Partner in Software Development. Today, we'll explore how AI can assist in engineering design while emphasizing that ultimate responsibility lies with the engineers making those decisions."
+  },
+  {
+    "slide": 2,
+    "topic": "Introduction",
+    "text": "Let's start by framing our discussion around AI as a collaborative tool and the crucial aspect of ownership in design decisions. We'll illustrate these points with a scenario involving a publish function for a podcast episode."
+  },
+  {
+    "slide": 3,
+    "topic": "Key Concept: AI as Draft",
+    "text": "A key idea here is that AI outputs should be viewed as proposed artifacts. They require careful checking before being put to use. This is important because fluent AI responses can create a false sense of confidence, making us overlook the need for a robust verification workflow."
+  },
+  {
+    "slide": 4,
+    "topic": "Productive AI Use",
+    "text": "When we think about productive use of AI, we're looking at how it can expand our options in the design process. This means asking AI for alternatives, critiques, and insights while avoiding turning it into just an answer machine. Prompts should encourage consideration of risks and strategies for validation."
+  },
+  {
+    "slide": 5,
+    "topic": "AI Failure Modes",
+    "text": "Let's discuss AI failure modes, which are the incorrect, incomplete, or misleading outputs we can expect. Understanding these predictable failures is critical because it allows us to deliberately analyze and avoid issues such as hallucinations or incorrect assumptions about state."
+  },
+  {
+    "slide": 6,
+    "topic": "Concurrency Blind Spot",
+    "text": "AI often operates under the assumption of single-threaded execution. However, we need to focus on systems that can fail when operations occur simultaneously. This includes issues like race conditions and lost updates, which is why reviewing for shared state and interleavings is vital."
+  },
+  {
+    "slide": 7,
+    "topic": "Individual Integrity Packet",
+    "text": "An important tool in our process is the Individual Integrity Packet. This document tracks how you utilize AI, evaluate its contributions, and take ownership of the final decisions. It distinguishes between assisted learning and outsourcing by capturing prompts, critiques, and evidence."
+  },
+  {
+    "slide": 8,
+    "topic": "AI-Assisted Workflow",
+    "text": "The AI-assisted workflow includes several stages: prompting for drafts or critiques, reviewing AI outputs, running tests, and validating claims against sources. Remember, the process isn’t complete until you can defend your revised work with appropriate evidence."
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example",
+    "text": "Let's look at a worked example. We have a publish function for a podcast episode that appears to work at first glance. However, it operates under a hidden assumption that no other worker modifies the episode during operations, which can lead to issues."
+  },
+  {
+    "slide": 10,
+    "topic": "Failure Scenario",
+    "text": "Imagine two workers both attempting to publish the same episode, leading to duplicated notifications. In this scenario, the AI-generated implementation fails since it does not properly manage state transitions between workers."
+  },
+  {
+    "slide": 11,
+    "topic": "Safer Design Direction",
+    "text": "To address this, we propose a safer design that ensures only the successful operation affects side effects. This version requires an expected version parameter, helping to avoid race conditions and ensuring that only one notification is sent."
+  },
+  {
+    "slide": 12,
+    "topic": "Integrity Packet Entry",
+    "text": "In the Integrity Packet, summarize what the AI suggested, critique its lack of consideration for concurrency, and provide evidence from tests that show the original approach led to duplicates. Also, document how the design was revised to ensure atomic transitions and idempotent notifications."
+  },
+  {
+    "slide": 13,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "As we analyze failure modes and anti-patterns, we identify common symptoms like producing valid code that violates invariants, inventing APIs, omitting necessary behaviors, or students being unable to explain AI outputs. Each symptom provides a chance for critical learning and improvement."
+  },
+  {
+    "slide": 14,
+    "topic": "Trade-Off Analysis",
+    "text": "In our trade-off analysis, we see various approaches to AI use: for brainstorming, code drafting, idea generation, and critique. Each approach has its own strengths and weaknesses, which helps us understand when it's appropriate to rely on AI in the development process."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "text": "For practical applications, think about how you could ask AI to generate various object models and rate their concurrency risks. Document all your interactions with AI in your Integrity Packet, noting which suggestions you accept or reject, and run tests to verify AI-generated claims."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Applications",
+    "text": "This lecture connects to the assignments A0 and A1 where you'll need to demonstrate AI's role in supporting your reasoning. The key is to show that while you can use AI, it must not replace your own critical thinking and understanding."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Connection",
+    "text": "Let's engage in a discussion about the differences between AI output and actual engineering evidence. Also, why do you think concurrency is such a common blind spot in AI-generated code? Consider your experiences and insights."
+  },
+  {
+    "slide": 18,
+    "topic": "Discussion",
+    "text": "To summarize, while AI can greatly accelerate our thinking processes, it cannot be relied upon for correctness. It's crucial that we verify AI outputs against system constraints and document our thought process in a visible and validated manner."
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "For further reading, I recommend exploring the AI Usage Log Template and the Integrity Packet Template. These resources will deepen your understanding of responsible AI use in software engineering and provide templates for your own documentation."
+  },
+  {
+    "slide": 20,
+    "topic": "Further Reading",
+    "text": "Recommended resources include the AI Usage Log Template and the Integrity Packet Template, among others related to AI-assisted software engineering verification and best practices."
+  }
+]

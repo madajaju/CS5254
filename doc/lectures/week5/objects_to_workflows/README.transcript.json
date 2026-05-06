@@ -1,0 +1,112 @@
+[
+  {
+    "slide": 1,
+    "topic": "From Objects to Workflows",
+    "text": "Welcome to today's lecture on 'From Objects to Workflows.' In this session, we will dive deep into understanding how systems maintain correctness under concurrency and the pressures of real-world conditions."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "We have several learning objectives for this lecture. First, we will analyze the design pressure workflows introduce. Next, we will diagnose any hidden assumptions within systems. We will then evaluate failure evidence using logs and traces, design controls that preserve invariants, and finally, we will discuss how to defend our design choices in the Integrity Packet."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Imagine working on a course project that seems to run perfectly during initial demonstrations. However, once we introduce operational pressure or concurrency, it inevitably fails. This raises a crucial question: What must we analyze and defend to ensure our systems can be trusted under these conditions?"
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concept: Coordination",
+    "text": "Let's explore the concept of coordination. Coordination refers to managing dependencies between multiple objects so that we can achieve a higher-level goal. Its importance cannot be overstated; we must make these dependencies explicit before we can trust our systems under pressure. If we fail to do so, it can lead to issues like duplicate work or stale state, underscoring the need to expose relevant invariants and logging critical transitions."
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concept: Workflow",
+    "text": "Next, we define workflow as a sequence of operations where the output of one often becomes the input for another. Just as with coordination, we need to understand the mechanisms involved, such as object state and timing. If we overlook these aspects, we might find ourselves producing duplicate work or encountering other failures, necessitating our design to clearly expose invariants and validate behavior through logging."
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concept: Life-cycle Management",
+    "text": "Life-cycle management is crucial as it involves tracking the overall progress of entities as they pass through various states across components. Like before, if we do not make these transitions explicit, we risk facing duplicate work and stale states, making it important to expose relevant invariants and log any critical transitions."
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concept: System Invariant",
+    "text": "A system invariant is a condition that must always be true for all valid executions. It's important to expose these conditions; neglecting to do so might lead to significant failures, echoing the same themes of exposing invariants and validating behavior through proper logging."
+  },
+  {
+    "slide": 8,
+    "topic": "Core Concept: Failure Mode",
+    "text": "Understanding failure modes is essential, as these represent repeatable ways in which our system can violate invariants or lose progress. Just like the previous concepts, if we do not make these modes explicit, we may find ourselves dealing with serious discrepancies, highlighting the importance of logging transitions and validating designs."
+  },
+  {
+    "slide": 9,
+    "topic": "System / Architecture View",
+    "text": "Now, let's look at a system architecture view that encapsulates these concepts. It illustrates how moving from objects to workflows connects various components such as coordination, workflow, life-cycle management, validation evidence, and design decisions. This holistic view prompts us to consider whether our relevant invariant is still upheld under various pressures."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Problem Setup",
+    "text": "To ground our understanding, let’s examine two practical examples. In the podcast domain, we transition from a simple operation of updating an episode to managing a production pipeline that coordinates various objects like ingestion and transcription. Similarly, in order fulfillment, we coordinate multiple components like inventory management and payment processing. These examples illustrate how complex workflows require careful coordination."
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Implementation",
+    "text": "A common naive implementation often assumes that all operations occur sequentially with a current state. We might picture the actor performing an operation, the system reading the current state, applying a transition, and emitting a side effect. This assumption can be dangerous because it's typically invisible in the code, especially when method names sound intuitive."
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "text": "In scenarios where operations overlap, are delayed, or when retries occur, the assumptions break down. An operation might operate with stale state or execute multiple times. These situations often lead to workflows that become stuck, revealing the significant gap between our naive models and actual behavior."
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "text": "To improve our design, we should explicitly name the invariant, make transitions observable, and add controls such as version checks and idempotency keys. Doing this will help us ensure that our workflows are robust against the types of challenges that can arise in real systems."
+  },
+  {
+    "slide": 14,
+    "topic": "Why Improved Design Is Safer",
+    "text": "The improved design approach transitions from mere hope that workflows execute correctly to actually proving that invalid interleavings are either rejected or can be recovered from. This focus on correctness under various execution scenarios makes our designs significantly safer."
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "Let’s consider common anti-patterns that reveal failure modes. For instance, a system might pass a simple happy-path demonstration because the tests avoid conditions that introduce timing or pressure, highlighting the importance of adding rigorous failure-focused tests."
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "text": "Here, we analyze various approaches, noting their strengths and weaknesses. For example, a simple baseline implementation is easy to explain but often hides timing assumptions. In contrast, an explicit coordination approach reveals dependencies but might introduce bottlenecks. Understanding these trade-offs is essential for making informed architectural decisions."
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "text": "In applying these concepts, I encourage you to identify the invariant most relevant to the workflows in your own projects. Create a sequential scenario expected to succeed alongside a pressure scenario to uncover potential failures. Ensure your logs capture important identifiers and always document assumptions and risks in your Integrity Packet."
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "text": "As you work on your assignments, particularly A2, connect these lecture concepts with your project. Show the relevant objects, workflows, and failure or recovery mechanisms in your domain, and support your arguments with concrete evidence and thorough documentation."
+  },
+  {
+    "slide": 19,
+    "topic": "Validation Questions",
+    "text": "Reflect on the following validation questions: What invariant is most relevant to workflows? What hidden assumptions render baseline designs seem correct? How would you elicit repeatable failures? And which design mechanisms would you prioritize in your solutions? These questions are vital for your understanding and application of the material."
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "text": "In summary, the journey from objects to workflows is critical for engineers. It's not just about terminology but a profound way to reason about system correctness under real-world conditions. Always connect your design to invariants, make behaviors observable, and understand the trade-offs inherent in your decisions."
+  },
+  {
+    "slide": 21,
+    "topic": "Further Reading",
+    "text": "For those interested in delving deeper, I recommend exploring topics such as distributed systems failure modes, concurrency design trade-offs, and structured logging. These areas will enrich your understanding and application of today's material."
+  },
+  {
+    "slide": 22,
+    "topic": "Discussion",
+    "text": "As we wrap up, let’s engage in a discussion. How can we systematically identify hidden assumptions in our designs? What practical strategies can you propose to ensure that our systems are robust under concurrency? I look forward to your thoughts and insights."
+  }
+]

@@ -1,0 +1,187 @@
+= Lost Messages
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Introduction
+
+* An episode-processing worker completes audio cleanup.
+* Emits a completion event.
+* Event disappears during broker restart.
+* Workflow remains in PROCESSING forever.
+* All objects are locally correct.
+* System has lost progress.
+
+== Core Concept: Silent Failures
+
+* Definition: Producer sends a message, assumes arrival.
+* Failure: Message never reaches queue or consumer.
+* Result: Can lead to duplicate work, stale state.
+* Importance: Must be made explicit to ensure trust.
+* Action: Log transitions, validate behavior.
+
+== Core Concept: Zombie Workflows
+
+* Definition: Workflows stuck in "In Progress" indefinitely.
+* Cause: Lost "Finish" event.
+* Result: Similar failures as silent failures.
+* Implication: Highlights reliance on message delivery.
+* Action: Must expose invariants, validate transitions.
+
+== Core Concept: Broker Failures
+
+* Definition: Message queue crashes or loses data.
+* Risk: Failure modes frequently ignored.
+* Impact: Affects system correctness and state.
+* Trust: Can be broken under pressure.
+* Action: Implement monitoring, logging transitions.
+
+== Core Concept: Asynchronous Boundary
+
+* Definition: Work continues later on another worker.
+* Risk: Potential for lost messages.
+* Requirement: Explicit design considerations.
+* Result: May lead to workflow inconsistencies.
+* Action: Validate observed behavior post-transition.
+
+== Core Concept: Temporal Coupling
+
+* Definition: Hidden dependency on event timing.
+* Result: Can lead to stale states or duplicate execution.
+* Importance: Critical to uncover during pressure testing.
+* Requirement: Should be explicitly stated as a part of invariants.
+* Action: Validate resilience against timing issues.
+
+== Architecture Diagram
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Lost Messages" as Topic
+rectangle "Silent Failures" as A
+rectangle "Zombie Workflows" as B
+rectangle "Broker Failures" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+== Problem Setup
+
+* Podcast Domain:
+  * Scenario: `AudioCleaner` finishes, sends `AudioCleaned`. 
+  * Issue: Message lost, no progress.
+
+* Order System:
+  * Scenario: `PaymentConfirmed` lost.
+  * Issue: User order never shipped.
+
+== Naive Design
+
+* Assumes operations occur once, in order.
+* Often invisible in code despite passing tests.
+* Steps:
+  * Actor performs operation.
+  * System reads current state.
+  * System applies transition.
+  * System emits side effect.
+
+== Failure Scenario
+
+* Issue: Overlapping execution leads to stale states.
+* Result: System may execute actions twice or block.
+* Insight: Failure highlights assumption mismatch.
+
+== Improved Direction
+
+* Strategy: Name invariant, make transitions observable.
+* Controls: Version checks, idempotency keys.
+* Goal: Prove valid execution order.
+* Shift: Avoid reliance on hopeful designs.
+
+== Failure Modes
+
+* Symptom: Single happy-path success.
+  * Cause: Test avoids timing, ordering conditions.
+  * Solution: Need repeated runs, structured logs.
+
+* Symptom: Tool mentioned, no design property identified.
+  * Cause: Inattention to invariant focus.
+  * Solution: Identify which invariant is protected.
+
+* Symptom: Evidence too vague to support claims.
+  * Cause: Lack of structured logging.
+  * Solution: Ensure review can reconstruct failure.
+
+* Symptom: Fix leads to behavior change unexplained.
+  * Cause: Failure not preserved as a scenario.
+  * Solution: Maintain baseline comparisons.
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain and implement | Hides timing and pressure assumptions | Initial implementation comparison
+| Guarded state transition | Protects core invariant | Requires careful state modeling | For workflow steps
+| Explicit coordination | Makes dependencies visible | Can lead to deadlock or bottlenecks | Multi-object workflows
+| Idempotent or retry-safe design | Handles duplicates, partial failure | Needs keys or deduplication | Async workers, retry mechanisms
+| Observability-first design | Yields strong evidence for review | Adds instrumentation work | Assignments requiring proof and defense
+|===
+
+== Practical Application
+
+* Step 1: Identify relevant invariant/property.
+* Step 2: Write one successful sequential scenario.
+* Step 3: Create one pressure scenario to expose failures.
+* Step 4: Add operation and entity IDs to logs.
+* Step 5: Capture before/after evidence if applying fixes.
+
+== Assignment Integration
+
+* Task: Connect lecture to [A3](../../../assignments/A3/index.md).
+* Show: Relevant object, workflow, event, failure in own domain.
+* Evidence: Include runnable commands, logs, diagrams, explanations.
+
+== Validation Questions
+
+1. What invariant/property is relevant here?
+2. What hidden assumption makes design appear correct?
+3. How can you force the failure in a repeatable test?
+4. What evidence proves the failure occurred?
+5. Which design mechanism would you first choose?
+6. How might this issue differ across implementations?
+7. What to record in the Integrity Packet?
+
+== Summary
+
+* Insight: Lost messages critical for reasoning about correctness.
+* Task: Connect invariants to observable behavior.
+* Goal: Ensure design is defensible, validated with evidence.
+
+== Further Reading
+
+* Search: "Lost Messages distributed systems failure mode"
+* Search: "Lost Messages concurrency design tradeoffs"
+* Topics: Structured logging, invariants in stateful systems, message queues.

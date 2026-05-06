@@ -1,0 +1,92 @@
+[
+  {
+    "slide": 1,
+    "topic": "Starter System Walkthrough",
+    "text": "Welcome to today's lecture on the Starter System Walkthrough. This session will explore key concepts related to object-oriented systems under concurrency, focusing on important design considerations when under pressure."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "In this lecture, we will aim to analyze design pressure in stateful concurrent systems. We will diagnose hidden assumptions in simple system demonstrations, and learn how to evaluate failure evidence, including logs and traces. Our goal is to design corrections that preserve invariants without obscuring trade-offs, and to effectively defend these approaches in the context of the Integrity Packet and in our upcoming assignments."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Let’s start with an opening narrative. Imagine a course project that appears correct during a straightforward demonstration. However, as soon as you introduce concurrency or operational pressure, hidden assumptions can surface. It's crucial that we analyze these before we place our trust in the results."
+  },
+  {
+    "slide": 4,
+    "topic": "Conceptual Baseline",
+    "text": "Now, let's discuss the Conceptual Baseline. This idea revolves around using a straightforward system, like a Task Tracker, to illustrate design patterns. It highlights a condition that requires explicit acknowledgement before we can ensure the system functions correctly under stress. If we overlook this concept, our systems might seem to function correctly but can produce significant errors in reality."
+  },
+  {
+    "slide": 5,
+    "topic": "Mapping Responsibilities",
+    "text": "Next, we focus on Mapping Responsibilities. This concept illustrates how the interaction between a 'Task' object and a 'Worker' object operates. It is essential to define these interactions so that we can trust the system's behavior under concurrent operations. If these responsibilities aren’t clear, we risk encountering duplicated work or blocked processes."
+  },
+  {
+    "slide": 6,
+    "topic": "Identifying Flaws",
+    "text": "Identifying Flaws is the next critical concept. Recognizing design flaws allows us to understand what conditions must be made explicit for the system to be reliable. If we fail to identify these flaws, our systems can easily produce misleading outcomes."
+  },
+  {
+    "slide": 7,
+    "topic": "System Invariant",
+    "text": "The System Invariant is an important element of our discussion. This refers to conditions that must remain true across all valid executions. Clearly identifying invariants is crucial as it helps us establish what needs to be maintained through the design process to avoid potential errors later on."
+  },
+  {
+    "slide": 8,
+    "topic": "Failure Mode",
+    "text": "Let's talk about Failure Modes. This concept demonstrates repeatable ways in which a system can violate an invariant or lose progress. Recognizing these modes empowers us to anticipate how things could go wrong under various conditions, ensuring we design more robust systems."
+  },
+  {
+    "slide": 9,
+    "topic": "System / Architecture View",
+    "text": "Here, we presented a system architecture view reflecting the Starter System Walkthrough. This model connects our lecture topic to key evidence collection processes. It emphasizes the importance of not only getting code to run but ensuring that invariants continue to hold during various execution scenarios, such as under load and timing changes."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "text": "Let's look at a Worked Example. We set up a Job Queue system where multiple workers pull jobs. However, an intended flaw exists in the 'pull' logic, which currently isn’t atomic, allowing multiple workers to claim the same job. This provides a practical illustration of how our design must accommodate failure scenarios."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "In our failure scenario, overlapping executions can lead to duplicate work. We might observe that stale state leads to blocked progress, revealing that our design assumptions were not adequately defined. It’s important we learn from these observations to inform future designs."
+  },
+  {
+    "slide": 12,
+    "topic": "Visual Model Anchors",
+    "text": "Next, we explore Visual Model Anchors, outlining key actors involved such as the student developer and different stacks like Java and Node.js. The workflow when both stacks execute the same podcast illustrates how functionality must operate uniformly across various environments."
+  },
+  {
+    "slide": 13,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "We’ve listed some common failure modes and anti-patterns to be aware of. A common symptom is the system passing a single happy-path demonstration, which often hides underlying design weaknesses. Detecting these issues early ensures more robust testing will be utilized."
+  },
+  {
+    "slide": 14,
+    "topic": "Trade-Off Analysis",
+    "text": "In our Trade-Off Analysis, different approaches are examined in terms of their strengths and weaknesses. Understanding these trade-offs assists in making informed decisions about which design strategy to employ based on specific system requirements and constraints."
+  },
+  {
+    "slide": 15,
+    "topic": "Practical Application",
+    "text": "For practical application, I urge you to identify the invariant or progress property most relevant to our discussion. Write both a sequential and a pressure scenario, capturing evidence for comparison if you apply any fixes. This exercise will deepen your understanding of the concepts we've covered."
+  },
+  {
+    "slide": 16,
+    "topic": "Assignment Integration",
+    "text": "Finally, let’s discuss Assignment Integration. The goal here is to connect the concepts we’ve discussed in the lecture to your semester project. You should demonstrate your understanding through concrete evidence, such as runnable commands and structured logs."
+  },
+  {
+    "slide": 17,
+    "topic": "Validation and Interview Questions",
+    "text": "As we move toward the conclusion of this lecture, consider the validation and interview questions provided. These questions are designed to help you think critically about the concepts and principles we've discussed. Reflect on how these apply to your project and make sure you're ready to discuss them."
+  },
+  {
+    "slide": 18,
+    "topic": "Summary",
+    "text": "In summary, the Starter System Walkthrough isn’t just a theoretical discussion; it's key to reasoning about system correctness under realistic execution scenarios. The professional engineering task is not only making designs but also explaining, articulating, and validating them with evidence."
+  }
+]

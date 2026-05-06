@@ -1,0 +1,151 @@
+= Two-Stack Implementation Strategy
+
+== Learning Objectives
+* Analyze design pressure of two-stack implementation in concurrent systems.
+* Diagnose hidden assumptions behind a seemingly correct system.
+* Evaluate failure evidence using logs, traces, and repeatable tests.
+* Design controls that preserve invariants without obscuring trade-offs.
+* Defend approaches in the Integrity Packet linking to A1 deliverables.
+
+== Core Concepts
+
+== Feature Parity
+```plantuml
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Feature Parity" as A
+rectangle "Importance" as B
+rectangle "Failure Mode" as C
+rectangle "Design Implication" as D
+
+A --> B
+A --> C
+C --> D
+@enduml
+```
+
+== Portability
+```plantuml
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Portability" as A
+rectangle "Importance" as B
+rectangle "Failure Mode" as C
+rectangle "Design Implication" as D
+
+A --> B
+A --> C
+C --> D
+@enduml
+```
+
+== Validation
+```plantuml
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Validation" as A
+rectangle "Importance" as B
+rectangle "Failure Mode" as C
+rectangle "Design Implication" as D
+
+A --> B
+A --> C
+C --> D
+@enduml
+```
+
+== System Invariant
+```plantuml
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "System Invariant" as A
+rectangle "Importance" as B
+rectangle "Failure Mode" as C
+rectangle "Design Implication" as D
+
+A --> B
+A --> C
+C --> D
+@enduml
+```
+
+== Failure Mode
+```plantuml
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Failure Mode" as A
+rectangle "Importance" as B
+rectangle "Failure Mode" as C
+rectangle "Design Implication" as D
+
+A --> B
+A --> C
+C --> D
+@enduml
+```
+
+== Worked Example
+
+== Problem Setup
+* Stacks: Java and Python.
+* Strategy: JSON configuration file for consistent starting state.
+
+== Failure Scenario
+* Overlapping execution: stale state or double execution.
+* Assumption mismatch between design and execution model.
+
+== Corrected Design Direction
+* Name the invariant, make transitions observable, add correctness controls.
+* Suggested controls: version checks, idempotency keys.
+
+== Why the Improved Design Is Safer
+* Validates that invalid interleavings are rejected.
+* Ensures temporal validity of operations.
+
+== Evidence Flow
+[cols="1,1,1,1", options="header"]
+|===
+| Claim | Evidence | Review Question | Decision
+| The project is ready for A1 | Version output, command transcript, stack-specific logs | Can another student reproduce the same run without IDE assistance? | Reject claims lacking evidence
+|===
+
+== Failure Modes and Anti-Patterns
+* Symptom: System passes single happy-path test.
+* Symptom: Explanation cites tools but not design properties.
+* Symptom: Evidence lacks detail to support claims.
+* Symptom: Fix changes behavior without baseline comparison.
+
+== Trade-Off Analysis
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Masks timing assumptions | First implementation
+| Guarded state transition | Protects core invariant | Needs careful modeling | Status changes
+| Explicit coordination | Reveals dependencies | Risk of deadlock | Multi-object workflows
+| Idempotent design | Handles duplicates | Needs deduplication | External calls
+| Observability-first | Strong evidence produced | Requires instrumentation | Fail-proof scenarios
+|===
+
+== Practical Application
+* Identify the invariant for two-stack implementation.
+* Write a sequential scenario expected to succeed.
+* Write a pressure scenario to uncover potential failures.
+
+== Summary
+* Two-stack implementation strategy relates to system correctness under realistic scenarios.
+* Connect concepts with invariants, observable behaviors, and defensible trade-offs.

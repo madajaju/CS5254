@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "Debugging Concurrency with Logs",
+    "text": "Welcome to our lecture on Debugging Concurrency with Logs. Today, we will explore the intricacies of debugging in stateful concurrent systems and how logs can be used effectively to ensure that our designs hold up under pressure. We'll cover several core concepts and practical applications to enhance our understanding."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "In this section, we’ll outline our learning objectives. First, we'll analyze the design pressures associated with debugging concurrency through logs. Next, we will diagnose hidden assumptions in our concurrent systems. Moving on, we'll evaluate evidence of failure as presented through logs and traces, and finally, we'll design corrections that preserve relevant invariants while being able to defend our chosen approaches in our integrity packets."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Imagine working on a course project that initially appears to function correctly during a demonstration. However, as we introduce concurrency or operational pressure, hidden assumptions start to surface. Today, we will learn how to analyze and defend these hidden aspects before we can fully trust our results."
+  },
+  {
+    "slide": 4,
+    "topic": "Interleaved Log Analysis",
+    "text": "Let’s discuss interleaved log analysis. This is a method for validating concurrent behavior, and it plays a crucial role in ensuring system reliability when under stress. We need to consider how factors such as states, timing, and coordination can affect our processes. Ignoring these elements can lead to serious issues, such as duplicate work or misleading evidence in our logs. Therefore, as part of our design, it’s essential to log transitions clearly and validate our tests."
+  },
+  {
+    "slide": 5,
+    "topic": "System Invariant",
+    "text": "A system invariant is a condition that must maintain its truth across all valid executions. This concept is vital for trusting systems during concurrent operations. The invariant becomes apparent when we examine states, timing, and behaviors. If ignored, we can end up with issues like blocked progress or stale states in our system. Thus, it’s crucial to log these transitions to validate the expected behavior of our system."
+  },
+  {
+    "slide": 6,
+    "topic": "Failure Mode",
+    "text": "When we speak of failure mode, we refer to a repeatable way in which our system can violate an invariant or lose progress. Understanding this is crucial as it sheds light on conditions under which we can trust the system to operate correctly. Issues often surface through state conflicts and timing discrepancies, potentially leading to duplicate work or workflows that become blocked. Hence, logging critical transitions is necessary for validation purposes."
+  },
+  {
+    "slide": 7,
+    "topic": "Design Trade-Off",
+    "text": "In system design, we often encounter trade-offs, which are deliberate choices made between competing qualities like simplicity, safety, or throughput. Recognizing these trade-offs helps in prioritizing what matters most in our designs. The mechanisms that impact these trade-offs emerge from our states, timing, and behaviors. If not carefully managed, they can lead to hidden issues during execution. Consequently, we must log our transitions and validate our system's functionality."
+  },
+  {
+    "slide": 8,
+    "topic": "System Architecture View",
+    "text": "Here, we can visualize our system architecture in terms of debugging concurrency with logs. Notice how interleaved log analysis, system invariants, failure modes, validation evidence, and design decisions are all interconnected. The crucial takeaway is that our design decisions must always be linked to observable evidence, as the system’s correctness is not confirmed by a single successful run but by its resilience under various operational conditions."
+  },
+  {
+    "slide": 9,
+    "topic": "Worked Example",
+    "text": "Let’s dive into a practical illustration using a podcast domain as an example. Picture threads in our system checking and updating the status of an episode. We see logs indicating simultaneous access attempts to the same resource. This log analysis reveals that one thread read the status before the other could update it, showcasing the conflict. Such an example highlights the importance of order and state visibility in concurrent programming."
+  },
+  {
+    "slide": 10,
+    "topic": "Naive Implementation",
+    "text": "A common assumption in naive implementation is that operations will execute once and in strict order, without considering concurrency. This assumption, however, can be deceptive as it often hides potential issues within the method’s behavior. The simplistic execution model is linear: an actor performs an operation, the system reads the current state, applies a transition, and emits a side effect. But this doesn’t hold true under concurrent demands."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "In a failure scenario, overlapping executions can lead to stale observations, duplicate updates, or workflows that become stuck. It’s important to understand that such issues do not simply arise from syntax errors but from a fundamental mismatch between our design assumptions and the realities of execution in a concurrent environment."
+  },
+  {
+    "slide": 12,
+    "topic": "Corrected Design Direction",
+    "text": "To improve our design, we should explicitly name the invariant in play, ensure that transitions are observable, and implement correctness controls. These may include version checks, idempotency controls, coordination mechanisms, and retries. By accounting for these factors, we can create a robust design that withstands the complexities of concurrency."
+  },
+  {
+    "slide": 13,
+    "topic": "Why Safer Design?",
+    "text": "Why do we consider this corrected design safer? The key is shifting from simply hoping that our workflows execute in the intended order, to actively proving that any invalid interleavings are either rejected or recoverable. This proof adds an essential layer of confidence in our system's reliability."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes",
+    "text": "Understanding failure modes is critical. A common symptom is when a system passes a single happy-path demonstration, yet that test does not reflect real-world pressures. To detect these issues, we can introduce concurrent actors and structured logs. We should also be cautious if the explanation focuses more on tools rather than the design properties. This indicates a need to reframe our focus on what invariant we are trying to protect."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "text": "In analyzing trade-offs, we review various approaches and their respective strengths and weaknesses. For example, a simple baseline is easy to use but often obscures timing assumptions. Guarded state transitions protect core invariants but require careful modeling. Explicit coordination shines a light on dependencies but risks introducing bottlenecks. Understanding these nuances is vital for making informed design decisions."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "text": "Now, let’s consider practical applications of what we've learned. Tomorrow, I encourage you to identify the most relevant invariant related to debugging concurrency with logs. Create both a successful sequential scenario and a pressure scenario that could reveal a failure. Don’t forget to add operation IDs and entity IDs to your logs and capture evidence for validation post-fix."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "text": "This lecture aligns closely with Assignment 1. You are expected to integrate these concepts into your semester project. Demonstrate how the relevant object, workflow, event, failure, or recovery mechanism applies within your domain. Mastery will be shown through structured evidence, including logs, before-and-after behavior, and the creation of an Integrity Packet explaining your design choices."
+  },
+  {
+    "slide": 18,
+    "topic": "Validation Questions",
+    "text": "As we wrap up, let’s reflect on a few validation questions to consolidate our understanding. Consider what invariant or progress property is most relevant to this lecture. Think about what hidden assumptions could mislead your design. How would you enforce repeatable failure tests, and what concrete evidence would you provide to prove a failure occurred? Also, identify the design mechanism you would prioritize and the trade-offs associated with it."
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "In summary, our key insight today is that debugging concurrency with logs transcends vocabulary; it requires reasoning about whether a system remains correct under realistic execution scenarios. Our responsibility as engineers is to connect these concepts to invariants, observable behaviors, and defensible trade-offs. A mature design can be correctly explained, stressed, repaired, and validated with evidence."
+  },
+  {
+    "slide": 20,
+    "topic": "Discussion",
+    "text": "To conclude our lecture, let’s open the floor for discussion. Think about the common failures you have encountered in your experience with concurrency. How do your design decisions impact system reliability? This reflection will help deepen our collective understanding of debugging concurrency."
+  }
+]

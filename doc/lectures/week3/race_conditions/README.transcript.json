@@ -1,0 +1,92 @@
+[
+  {
+    "slide": 1,
+    "topic": "Race Conditions Step-by-Step",
+    "text": "Welcome, everyone, to this lecture on Race Conditions Step-by-Step. Today, we will be exploring the complexities of concurrency in object-oriented systems and how race conditions can lead to unexpected behavior."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "In this session, we aim to analyze race conditions in concurrent systems, diagnose hidden assumptions, evaluate failure evidence, and design corrections that preserve invariants. Additionally, you will learn how to defend your approaches in the Integrity Packet."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Imagine that a project appears correct during demonstrations. However, once it faces real-world pressure, hidden assumptions can come to light. As engineers, we need to ask ourselves what we must defend before trusting the results of our systems."
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concept: Timeline Analysis",
+    "text": "Timeline Analysis refers to mapping out when each operation, such as Read, Modify, or Write, occurs across threads. This concept is crucial because it identifies conditions that must be explicitly understood before we can trust our system under pressure."
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concept: Lost Update",
+    "text": "The Lost Update condition arises when two threads read the same value and overwrite each other's changes. Understanding this is vital as it uncovers issues with trust in our system's operations during concurrent execution."
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concept: Check-Then-Act",
+    "text": "Check-Then-Act is a common pattern where the condition checked may change by the time we perform the action. It's essential to recognize this vulnerability, as it can lead to unexpected behavior under concurrent load."
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concept: System Invariant",
+    "text": "A System Invariant is a condition that must remain true across all valid executions. Identifying these invariants helps ensure trustworthiness in our system before, during, and after applying operational pressure."
+  },
+  {
+    "slide": 8,
+    "topic": "Core Concept: Failure Mode",
+    "text": "Failure Mode refers to a repeatable way our system can violate an invariant or lose progress. By understanding failure modes, we can better analyze how to maintain system integrity even under demanding conditions."
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "text": "Our system architecture interacts in a way that emphasizes the importance of evidence and invariant preservation. The design question we need to consider is not just whether the code runs but whether our invariants hold across varying conditions like timing and load."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "text": "Let's consider a practical example from the podcast domain. Imagine two workers reading the status of an episode. If both read that the status is 'DRAFT' and try to set it to 'PROCESSING' simultaneously, we face a problem of duplicate work. Visualizing this on a timeline can clarify the overlaps in operation."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "In cases where executions overlap, we may encounter stale states and unintended actions. It's critical to recognize that this isn't merely a syntax error but a fundamental mismatch between what we designed and how our system executes under actual conditions."
+  },
+  {
+    "slide": 12,
+    "topic": "Corrected Design Direction",
+    "text": "In addressing these issues, it's essential to clearly name invariants, make transitions observable, and establish correctness controls such as version checks or state-machine guards. These measures will help safeguard against race conditions."
+  },
+  {
+    "slide": 13,
+    "topic": "Trade-Off Analysis",
+    "text": "We must weigh our design choices against their strengths and weaknesses. For instance, a simple baseline is easy to implement but may hide critical timing assumptions. By considering trade-offs, we can make more informed decisions in our designs."
+  },
+  {
+    "slide": 14,
+    "topic": "Practical Application",
+    "text": "As an exercise for tomorrow, identify the invariant relevant to race conditions. Write sequential and pressure scenarios, enhance your logging with IDs, and prepare to capture evidence before and after you apply any fixes."
+  },
+  {
+    "slide": 15,
+    "topic": "Assignment Integration",
+    "text": "This lecture aligns with your upcoming assignment A1. As you work on your projects, make sure to connect the concepts from today's lecture to your specific scenarios, demonstrating mastery through evidence such as runnable commands and structured logs."
+  },
+  {
+    "slide": 16,
+    "topic": "Discussion",
+    "text": "Now, let's open up for discussion. Consider the following questions: What invariant stands out to you? What hidden assumptions can you identify? How would you force a failure in a repeatable test setup? Let's share our thoughts."
+  },
+  {
+    "slide": 17,
+    "topic": "Summary",
+    "text": "In summary, reflecting on race conditions is essential for maintaining system correctness under execution pressure. Connecting our concepts to invariants and observable behavior is key to developing mature designs that can be validated and repaired with evidence."
+  },
+  {
+    "slide": 18,
+    "topic": "Further Reading",
+    "text": "For those interested in deepening your understanding, I recommend searching for topics related to race conditions in distributed systems, concurrency design trade-offs, and structured logging. These resources will further enhance your knowledge."
+  }
+]

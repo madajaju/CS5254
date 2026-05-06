@@ -1,0 +1,190 @@
+= Failure is Normal
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Learning Objectives
+
+* Analyze design pressure: failure is normal in concurrent systems
+* Diagnose hidden assumptions for structure and correctness
+* Evaluate evidence: logs, traces, interleavings, tests
+* Design controls that maintain invariants and trade-offs
+* Defend designs in Integrity Packet and connect to A4
+
+== Opening Narrative
+
+* Scenario: AI generates code without an ordering guard
+* Effect: Workflow stalls or breaks invariants 
+* Question: How to use AI designs without losing responsibility?
+
+== Core Concept: Partial Failure
+
+* Definition: Component fails; others continue
+* Importance: Critical to trust under pressure
+* Mechanism: Object state, timing, behavior
+* Failure mode: Duplicate work, stale state, misleading evidence
+* Design: Expose invariants, log transitions, validate behavior
+
+== Core Concept: Fail-Fast
+
+* Definition: Detect errors early, stop workflow
+* Importance: Critical for trust in pressure
+* Mechanism: Object state, timing, behavior
+* Failure mode: Duplicate work, stalled workflows
+* Design: Expose invariants, log transitions, validate
+
+== Core Concept: Graceful Degradation
+
+* Definition: Reduced functionality on component failure
+* Importance: Trust under pressure
+* Mechanism: Object state, timing, behavior
+* Failure mode: Duplicate work, stalled workflows
+* Design: Expose invariants, log transitions, validate
+
+== Core Concept: Blast Radius
+
+* Definition: Limit impact of failures
+* Importance: Trust under pressure
+* Mechanism: Object state, timing, behavior
+* Failure mode: Duplicate work, stalled workflows
+* Design: Expose invariants, log transitions, validate
+
+== Core Concept: AI-Assisted Hypothesis
+
+* Definition: Generated designs needing validation
+* Importance: Trust under pressure
+* Mechanism: Object state, timing, behavior
+* Failure mode: Duplicate work, stalled workflows
+* Design: Expose invariants, log transitions, validate
+
+== System / Architecture View
+
+[plantuml, target=architecture_view, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Failure is Normal" as Topic
+rectangle "Partial Failure" as A
+rectangle "Fail-Fast" as B
+rectangle "Graceful Degradation" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example: Problem Setup
+
+* Podcast Domain:
+    * Scenario: `TranscriptionGenerator` down 
+    * Handling: Mark `TRANSCRIPTION_FAILED`, allow `AudioCleaner`
+* Order System: Payment Gateway unreachable after reservation 
+
+== Naive Implementation
+
+* Assumes operations happen once and in order
+* Often invisible in code
+* Simplistic flow:
+    * Actor performs operation
+    * System reads state
+    * System applies transition
+    * System emits side effect
+
+== Failure Scenario
+
+* Under concurrency: stale state, late execution, blocked workflow
+* Not a syntax bug; design assumption mismatch
+
+== Improved Design Direction
+
+* Name invariant, observable transitions
+* Add correctness controls:
+    * Version checks, idempotency keys
+    * Explicit coordination, retries
+
+== Why Improved Design Is Safer
+
+* Moves from hoping for correctness 
+* Proves invalid interleavings are handled
+
+== Failure Modes & Anti-Patterns
+
+* Symptom: Single happy-path test passes
+    * Why: Test avoids timing conditions
+    * Detect: Use stress tests, concurrent actors
+    * Correct: Add targeted failure tests
+
+* Symptom: Tool mentioned, not design property
+    * Why: Focus on mechanisms over invariants
+    * Detect: Ask which invariant is protected
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to implement | Hides timing assumptions | First implementation
+| Guarded state | Protects core invariant | Requires careful modeling | Status changes
+| Explicit coordination | Makes dependencies visible | Can introduce deadlocks | Multi-object workflows
+| Idempotent design | Handles duplicates | Needs deduplication controls | Queues, retries
+| Observability-first | Produces strong evidence | Adds instrumentation work | Design defense
+|===
+
+== Practical Application
+
+* Identify invariant relevant to failure
+* Write one successful scenario
+* Write pressure scenario to expose failure
+* Add IDs to logs before testing
+* Capture before/after evidence of fixes
+
+== Assignment Integration
+
+* Connect lecture concepts to [A4](../../../assignments/A4/index.md)
+* Show relevant mechanisms in semester project
+* Demonstrate mastery with evidence in Integrity Packet
+
+== Validation Questions
+
+1. Relevant invariant for this lecture?
+2. Hidden assumption in baseline design?
+3. How to force failure in a test?
+4. What evidence proves failure occurred?
+5. First design mechanism choice and trade-off?
+6. How would issue differ across stacks?
+7. Evidence in Integrity Packet to defend?
+
+== Summary
+
+* Failure is normal: a reasoning process
+* Connect concepts to invariants and behavior
+* A design matures with evidence and validation
+
+== Further Reading
+
+* Search: "Failure is Normal distributed systems"
+* Topic: structured logging, correlation IDs
+* Topic: invariants in object-oriented systems
+* Topic: resilience engineering and load testing
+
+== Discussion
+
+* What hidden assumption would make systems appear correct?
+* How can we design tests that reveal failure under pressure?

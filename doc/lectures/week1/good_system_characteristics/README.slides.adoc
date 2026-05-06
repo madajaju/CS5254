@@ -1,0 +1,204 @@
+= What Makes a Good System for This Course
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Introduction
+
+* Course: CS 5891b - Object-Oriented Systems Under Concurrency
+* Duration: 15 minutes
+* Prerequisites: Basic domain modeling, object-oriented responsibilities
+
+== Learning Objectives
+
+* Evaluate project domain concurrency pressure
+* Compare domains by shared state and workflow
+* Design an adaptable object model
+* Justify domain size and complexity
+* Defend suitability with invariants and failure scenarios
+
+== Opening Narrative
+
+* Student proposes:
+** Note-taking app (too simple)
+** Full distributed database (too large)
+* Key question: What system is small yet rich enough to fail meaningfully?
+
+== Shared Mutable State
+
+* Definition: Data accessed by multiple actors
+* Importance: Enables concurrency failures
+* Mechanisms: Workers, users, queues interact
+* Failure modes: Lost updates, inconsistent reads
+* Implication: Choose domains with worthwhile state
+
+== Multi-Step Workflow
+
+* Definition: Ordered stages in a process
+* Importance: Creates invariants and coordination
+* Mechanism: Ensure prerequisite completion
+* Failure modes: Premature publishing or shipping
+* Implication: Meaningful state transitions
+
+== Natural Failure Potential
+
+* Definition: Domain plausibly breaks under concurrency
+* Importance: Assignments need observable failures
+* Mechanism: Actors compete for resources
+* Failure modes: Trivial domains lack meaningful breaks
+* Implication: Select domains with realistic pressure points
+
+== Bounded Complexity
+
+* Definition: Complex enough for tradeoffs
+* Importance: Students need to iterate designs
+* Mechanism: Focused workflows with depth
+* Failure modes: Overly broad systems yield vague designs
+* Implication: Prefer strong workflows over weak features
+
+== System / Architecture View
+
+[plantuml, target=system-view, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+
+start
+:Candidate Domain;
+if (Shared state?) then (yes)
+  if (Multi-step workflow?) then (yes)
+    if (Observable failure modes?) then (yes)
+      if (Bounded enough?) then (yes)
+        :Good course system;
+      else (no)
+        :Reduce scope;
+      endif
+    else (no)
+      :Weak course fit;
+    endif
+  else (no)
+    :Mostly CRUD;
+  endif
+else (no)
+  :Too simple;
+endif
+stop
+@enduml
+----
+
+== Worked Example: Podcast Production
+
+* Problem setup:
+** Episode relies on audio, transcript, artwork, review
+** Publish depends on all assets
+
+== Naive Mental Model
+
+[source,python]
+----
+episode.audio_ready = True
+episode.transcript_ready = True
+episode.art_ready = True
+episode.status = "PUBLISHED"
+----
+
+== Failure Scenario
+
+* Condition: Publish checks state while asset updates occur
+* Issues:
+** Early field write may mislead readiness
+** Publication could trigger twice
+
+== Improved Design Direction
+
+* Define central invariant:
+** An episode cannot publish until all assets are complete
+* Safer design: State to protect and transitions to validate
+
+== Failure Modes and Anti-Patterns
+
+== Symptom: Project is mostly CRUD
+
+* Why: Domain lacks meaningful workflow
+* Detect: No contested transitions
+* Correct: Add shared state workflow
+
+== Symptom: Project is too ambitious
+
+* Why: Industry-scale system chosen
+* Detect: Cannot explain in few core objects
+* Correct: Narrow to one workflow
+
+== Symptom: Failures are artificial
+
+* Why: Lacks concurrent actors
+* Detect: Unrealistic test behavior required
+* Correct: Choose domains with real competition
+
+== Symptom: Domain cannot evolve
+
+* Why: Initial system lacks room for growth
+* Detect: A1 exhausts the domain
+* Correct: Select a workflow with growth potential
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Podcast production | Clear workflow | Asset modeling required | Strong default
+| Order fulfillment | Familiar invariants | External payment complexity | Inventory examples
+| Distributed job processing | Natural concurrency | Queue infrastructure heavy | Coordinator focus
+| Reservation system | Resource failure modes | Edge cases multiply | Capacity examples
+| AI content pipeline | Relevant to AI | Focus on behavior vs correctness | Content workflow
+|===
+
+== Practical Application
+
+* Tomorrow morning:
+** Choose a project domain
+** Identify core objects
+** Write workflow backbone
+** Name shared mutable state
+** Write two invariants
+** Describe race condition & partial failure
+
+== Assignment Integration
+
+* Supports A0 - Project Selection
+* Students justify chosen domain's concurrency pressure: 
+** Domain description
+** Initial object model
+** Identified state
+** Expected failure modes
+
+== Validation and Interview Questions
+
+1. What makes a domain suitable for this course?
+2. Which object owns important shared state?
+3. What invariant breaks with concurrent actions?
+4. Why is CRUD application weak?
+5. How can a large system harm evidence quality?
+6. How will your domain evolve over assignments?
+7. What failure shows real concurrency pressure?
+
+== Summary
+
+* Key insight: A good course system has clear pressure points.
+* Importance: Selecting a relevant problem enables reasoning on state, workflow, and evidence.
+
+== Further Reading
+
+* [Project Domains](../../../projects/README.md)
+* [Project Selection Guide](../../../projects/supporting-files/project-selection-guide.md)
+* Topic: Domain-driven design aggregates
+* Search: "workflow state machine design"

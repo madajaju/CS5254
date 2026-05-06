@@ -1,0 +1,336 @@
+[
+  {
+    "slide": 1,
+    "topic": "Object Boundaries & Responsibilities",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to today's lecture on Object Boundaries and Responsibilities. Today, we'll explore how these concepts play a crucial role in the design and integrity of concurrent systems."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "By the end of this lecture, you should analyze pressures in stateful concurrent systems and diagnose hidden assumptions that could lead to failures."
+      },
+      {
+        "role": "student",
+        "text": "How can we connect what we learn today to our assignments?"
+      },
+      {
+        "role": "teacher",
+        "text": "You'll learn to evaluate evidence and design corrections while defending your choices in the Integrity Packet, which is key for your project."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Imagine working on a project that seems flawless during initial tests but fails under real pressure."
+      },
+      {
+        "role": "student",
+        "text": "What should we focus on analyzing to prevent these hidden assumptions from sneaking in?"
+      },
+      {
+        "role": "teacher",
+        "text": "We need to be vigilant about verifying our encapsulation of state and other design principles throughout its lifecycle."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Encapsulation of State",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Encapsulation of state means that an object's internal state can only be modified through its methods. This principle is crucial for maintaining system integrity under pressure."
+      },
+      {
+        "role": "student",
+        "text": "If we ignore this, what kind of failure modes might we encounter?"
+      },
+      {
+        "role": "teacher",
+        "text": "You could face issues such as duplicate work or stale state, undermining the reliability of your system."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Single Responsibility Principle (SRP)",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The Single Responsibility Principle states that each object should have one clear purpose."
+      },
+      {
+        "role": "student",
+        "text": "But what happens if an object takes on multiple tasks?"
+      },
+      {
+        "role": "teacher",
+        "text": "That complicates behavior and impacts reliability, especially under pressure. Clarity in responsibilities is essential."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Leaky Abstractions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Leaky abstractions occur when an object exposes its internal structures, allowing bypassing of invariants."
+      },
+      {
+        "role": "student",
+        "text": "How can we evaluate whether our abstractions are leaking?"
+      },
+      {
+        "role": "teacher",
+        "text": "We need to continuously ensure that our structure doesn't expose any internal details that would compromise stability, especially in concurrent environments."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "System Invariant",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A System Invariant is a condition that must remain true across all valid executions."
+      },
+      {
+        "role": "student",
+        "text": "What if we forget to define these invariants?"
+      },
+      {
+        "role": "teacher",
+        "text": "Then we risk allowing errors into our system, similar to the issues seen with encapsulation. Clear definitions are critical."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Failure Mode",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A failure mode is a repeatable way the system violates an invariant or loses progress."
+      },
+      {
+        "role": "student",
+        "text": "How do we identify potential failure modes early on?"
+      },
+      {
+        "role": "teacher",
+        "text": "By analyzing every part of the workflow and ensuring it accounts for possible edge cases and pressures we might encounter in real-world usage."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System / Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "We should view our topic as interconnected design pressures related to evidence collection."
+      },
+      {
+        "role": "student",
+        "text": "Does this mean we need to continuously test under various conditions?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, we must verify that our invariants hold under all relevant conditions, not just standard scenarios."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's explore the podcast domain, where an 'Episode' should manage its own status."
+      },
+      {
+        "role": "student",
+        "text": "What does that mean for system design?"
+      },
+      {
+        "role": "teacher",
+        "text": "It means avoiding global states that expose the status to unauthorized changes—encapsulation is key."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Under overlapping execution, stale states can lead to multiple transition executions."
+      },
+      {
+        "role": "student",
+        "text": "Why is that such a critical failure?"
+      },
+      {
+        "role": "teacher",
+        "text": "Because it highlights a fundamental mismatch between assumptions and the execution model, which could jeopardize the entire workflow."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Corrected Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A better design includes naming of invariants and making transitions observable."
+      },
+      {
+        "role": "student",
+        "text": "What specific implementations do you suggest for concurrency safety?"
+      },
+      {
+        "role": "teacher",
+        "text": "Consider adding version checks or explicit coordination mechanisms to safeguard against race conditions."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Why the Design Is Safer",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The improvements we discuss shift the paradigm from hoping for correct execution to proving it."
+      },
+      {
+        "role": "student",
+        "text": "How do we demonstrate that invalid scenarios are properly handled?"
+      },
+      {
+        "role": "teacher",
+        "text": "By incorporating observable behaviors that validate every transition and ensure proper handling of interleavings."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Examining trade-offs is essential; a simple baseline hides timing complexities, while guarded state transitions protect invariants."
+      },
+      {
+        "role": "student",
+        "text": "When might we prefer a simpler approach?"
+      },
+      {
+        "role": "teacher",
+        "text": "In initial implementations, but we must be cautious about evolving to more complex structures as needed."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Your task is to identify key invariants relevant to object boundaries and responsibilities."
+      },
+      {
+        "role": "student",
+        "text": "What should we focus on in our logging?"
+      },
+      {
+        "role": "teacher",
+        "text": "Don't forget to incorporate operation IDs and entity IDs; they will enhance traceability."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This lecture ties closely to your upcoming assignment, where you apply these concepts in your domain."
+      },
+      {
+        "role": "student",
+        "text": "How can we best demonstrate our understanding in the project?"
+      },
+      {
+        "role": "teacher",
+        "text": "By providing structured evidence through runnable commands, structured logs, and detailed behavior comparisons."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Validation Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As we conclude, consider questions about relevant invariants and hidden assumptions."
+      },
+      {
+        "role": "student",
+        "text": "What specific hidden assumptions should we be looking out for?"
+      },
+      {
+        "role": "teacher",
+        "text": "Any assumption that could mislead your design should be a red flag, particularly if it causes a disconnect between expected behavior and actual outcomes."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In summary, object boundaries and responsibilities are vital to maintaining system correctness."
+      },
+      {
+        "role": "student",
+        "text": "What should we take away from this lecture?"
+      },
+      {
+        "role": "teacher",
+        "text": "Connect these concepts to observable behaviors and defensible trade-offs; evidence is crucial for a mature design."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For deeper understanding, consider exploring various phrases and topics relating to our discussion today."
+      },
+      {
+        "role": "student",
+        "text": "Are there any specific resources you recommend?"
+      },
+      {
+        "role": "teacher",
+        "text": "Look into structured logging, failure modes, and concurrency design trade-offs for comprehensive insights."
+      }
+    ]
+  }
+]

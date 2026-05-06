@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "Idempotency",
+    "text": "Welcome to today's lecture on Idempotency, part of our course on Object-Oriented Systems Under Concurrency. In this session, we'll explore how idempotency impacts the design and reliability of concurrent systems."
+  },
+  {
+    "slide": 2,
+    "topic": "Introduction",
+    "text": "In this introduction, we will briefly discuss the course context, including the specific week we are in and the topics we've covered so far. Remember, our focus today revolves around the concept of idempotency and its importance in handling concurrency."
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "text": "Today, we aim to achieve several key learning objectives. We will analyze the design pressures that arise from idempotency, diagnose any hidden assumptions in our systems, and evaluate the evidence of failure through logs and traces. Additionally, we’ll discuss designing corrections, all while managing trade-offs."
+  },
+  {
+    "slide": 4,
+    "topic": "Opening Narrative",
+    "text": "Let’s begin by reflecting on a critical narrative: a system may seem correct during initial testing, but when subjected to concurrency or operational pressure, hidden assumptions may surface. It’s essential for engineers to identify what must be analyzed before we can trust our results."
+  },
+  {
+    "slide": 5,
+    "topic": "Idempotent Operation",
+    "text": "First, let’s define an idempotent operation. This is an operation that produces no additional effect when it is executed multiple times with the same parameters. Understanding this concept is crucial because it assures us that our systems can withstand pressure without unintended consequences like duplicate work or stale states."
+  },
+  {
+    "slide": 6,
+    "topic": "Idempotency Key",
+    "text": "Now, let’s discuss the idempotency key. This unique identifier, commonly a UUID, is used by the server to recognize requests and ensure that operations are only performed once. It plays a vital role in maintaining trust in our systems during simultaneous operations."
+  },
+  {
+    "slide": 7,
+    "topic": "System Invariant",
+    "text": "Next, we need to understand what we mean by system invariant. This refers to conditions that must remain true during all executions. It’s about ensuring we have a reliable framework to trust our system under varying conditions."
+  },
+  {
+    "slide": 8,
+    "topic": "Design Trade-Off",
+    "text": "Now let’s examine design trade-offs. This is the process of balancing competing qualities like simplicity, safety, and throughput. Recognizing these trade-offs is a key skill, as they dictate how resilient our systems are under pressure."
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture",
+    "text": "Here we have a visual representation of the system architecture relating to idempotency. It shows how the idempotent operation links to the idempotency key, the system invariant, and ultimately to our design decisions and validation evidence."
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example",
+    "text": "Let’s consider a worked example in a podcast domain. For instance, an unsafe operation like `episode.addAsset(file)` could add multiple assets if retried. In contrast, an idempotent approach, such as `episode.upsertAsset(assetId, file)`, avoids this by updating or adding without duplication."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "Under certain conditions like delays or retries, operations can encounter stale states or even execute multiple times. This illustrates a design mismatch that can lead to significant issues within our system."
+  },
+  {
+    "slide": 12,
+    "topic": "Improved Design Direction",
+    "text": "To mitigate these failure risks, we should implement a clearer design direction. This includes naming our invariants explicitly, making transitions observable, and enforcing correctness controls such as version checks and idempotency keys."
+  },
+  {
+    "slide": 13,
+    "topic": "Why Improved Design Is Safer",
+    "text": "The safer approach ensures that any invalid workflows or interleavings can be effectively rejected or recovered from, thereby enhancing the integrity of our systems."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "We should be aware of specific symptoms indicating design flaws. For instance, passing a single happy-path test could be misleading while repeated runs and concurrent actors could reveal underlying issues that need addressing."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis",
+    "text": "In trade-off analysis, we evaluate different strategies, such as simple baselines versus guarded state transitions, weighing their strengths and weaknesses. This process helps us determine the best approach for given design challenges."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "text": "For practical applications, consider these tasks: identify the most relevant invariant for idempotency, create both a sequential scenario and a pressure scenario, and ensure your logs capture all relevant IDs before conducting tests."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "text": "This lecture's concepts tie into your upcoming assignment, A3. You'll need to connect the ideas of idempotency to your project, demonstrating the relevant workflows and recovery mechanisms specific to your focus area."
+  },
+  {
+    "slide": 18,
+    "topic": "Discussion",
+    "text": "Let’s engage in some discussion. First, what invariant do you think is most relevant in the context of this lecture? Also, consider the hidden assumptions that could impact design validity."
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "To summarize, idempotency is a critical concept for ensuring that our systems remain reliable under real-world conditions. It is our task as engineers to bridge the gap between theoretical concepts and practical applications backed by evidence."
+  },
+  {
+    "slide": 20,
+    "topic": "Further Reading",
+    "text": "For those interested in delving deeper, I recommend searching for topics that cover idempotency in distributed systems and concurrency design trade-offs, as well as exploring invariants and message queues."
+  }
+]

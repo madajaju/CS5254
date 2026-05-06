@@ -1,0 +1,158 @@
+= Debugging Concurrency with Logs
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Learning Objectives
+* Analyze design pressure of debugging concurrency with logs
+* Diagnose hidden assumptions in concurrent systems
+* Evaluate failure evidence through logs and traces
+* Design corrections preserving relevant invariants
+* Defend chosen approaches in Integrity Packet
+
+== Opening Narrative
+* Course project appears correct during demo
+* Concurrency or operational pressure exposes hidden assumptions
+* Analyze and defend before trusting results
+
+== Interleaved Log Analysis
+* Definition: A method for validating concurrent behavior
+* Importance: Ensures system reliability under pressure
+* Mechanism: Influenced by states, timing, and coordination
+* Failure Mode: Can result in duplicate work or misleading evidence
+* Design Implication: Log transitions and validate tests
+
+== System Invariant
+* Definition: A condition maintaining truth across executions
+* Importance: Key to trusting systems under concurrency
+* Mechanism: Revealed through state, timing, and behavior
+* Failure Mode: Leads to blocked progress and stale states
+* Design Implication: Log transitions to validate behavior
+
+== Failure Mode
+* Definition: Repeatable system violations of invariants
+* Importance: Highlights conditions for trust in the system
+* Mechanism: Reveals issues through state and timing
+* Failure Mode: Causes duplicate work or blocked workflows
+* Design Implication: Log critical transitions for validation
+
+== Design Trade-Off
+* Definition: Choices between competing qualities
+* Importance: Reveals priorities in system design
+* Mechanism: Influenced by state, timing, and behavior
+* Failure Mode: May lead to hidden issues in execution
+* Design Implication: Log transitions, validate workings
+
+== System Architecture View
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+
+rectangle "Debugging Concurrency with Logs" as Topic
+rectangle "Interleaved Log Analysis" as A
+rectangle "System Invariant" as B
+rectangle "Failure Mode" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+* Podcast Domain Log Example
+** `12:00:00.001 [Thread-1] Checking status for Ep-1: DRAFT`
+** `12:00:00.002 [Thread-2] Checking status for Ep-1: DRAFT`
+** `12:00:00.005 [Thread-1] Updating status to PROCESSING`
+** `12:00:00.006 [Thread-2] Updating status to PROCESSING`
+* Analysis: Validates read before update conflict
+
+== Naive Implementation
+* Assumption: Operation occurs once, in order
+* Execution model: Hidden in method behavior
+```text
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+```
+
+== Failure Scenario
+* Overlapping execution leads to:
+** Stale state observation
+** Duplicate execution of updates
+** Workflow becoming stuck
+* Not just a syntax bug; breaks the design assumption
+
+== Corrected Design Direction
+* Name the invariant and make transitions observable
+* Controls for correctness: Version checks, idempotency, coordination, retries
+
+== Why Safer Design?
+* Moves from assumption of execution order to proof of valid interleavings
+* Ensures invalid scenarios are rejected or recoverable
+
+== Failure Modes
+* Symptom: Single happy-path demonstration passes
+** Test does not simulate real pressure or timing
+** Detection: Use concurrent actors and structured logs
+* Symptom: Focus on tools, not design properties
+** Detection: Identify which invariant is being protected
+* Symptom: Vague evidence fails to support claims
+** Detection: Logs need operation IDs and timestamps
+
+== Trade-Off Analysis
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
+| Guarded state transition | Protects invariants | Careful state modeling needed | Status changes
+| Explicit coordination | Visible dependencies | Risk of deadlock | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires deduplication | Queues and retries
+| Observability-first | Strong review evidence | Adds instrumentation | Failure proof requirements
+|===
+
+== Practical Application
+* Identify relevant invariant for debugging
+* Write sequential scenario to succeed
+* Create pressure scenario to expose failure
+* Add operation IDs to logs
+* Capture evidence for validation post-fix
+
+== Assignment Integration
+* Connect to [A1](../../../assignments/A1/index.md)
+* Show relevant object, workflow, or failure mechanism
+* Demonstrate mastery with structured evidence
+
+== Validation Questions
+1. What invariant is relevant to this lecture?
+2. What hidden assumption could mislead the design?
+3. How to enforce repeatable failure tests?
+4. What evidence proves failure occurrence?
+5. Which design mechanism first, and what trade-off?
+6. How does the issue differ across implementation stacks?
+7. What to record in Integrity Packet for defense?
+
+== Summary
+* Central insight: Logs help reason about concurrency correctness
+* Connect concepts to invariants and evidence
+* Mature design requires proof, stress, and validation
+
+== Discussion
+* What are common failures in your experience with concurrency?
+* How do design decisions impact system reliability?

@@ -1,0 +1,137 @@
+[
+  {
+    "slide": 1,
+    "topic": "System Reasoning Walkthrough",
+    "text": "Welcome everyone to our lecture on System Reasoning Walkthrough. Today, we will delve into the intricacies of analyzing system behavior, especially when concurrency and pressure are introduced."
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "text": "Our learning objectives for today include analyzing design pressure in stateful concurrent systems and diagnosing the hidden assumptions that can make systems appear correct in simpler scenarios. We will also evaluate failure evidence using logs and tests, design corrections that maintain our invariants, and finally, we’ll discuss how to defend our methods in the Integrity Packet."
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "text": "Imagine you have a project that seems perfect during a demo, but once you add some operational pressure, it exposes hidden assumptions. What should we analyze to trust the results in such situations? Let's explore."
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concepts",
+    "text": "In this section, we discuss core concepts essential to understanding system reasoning. We'll cover Deductive Reasoning, Mental Modeling, Hypothesis Testing, System Invariants, and Failure Modes."
+  },
+  {
+    "slide": 5,
+    "topic": "Deductive Reasoning",
+    "text": "Deductive Reasoning involves using external observations to infer internal behaviors in the system. This is crucial for identifying conditions that must be explicit before trusting the system, particularly under pressure. If ignored, we risk creating duplicate work or misleading evidence, emphasizing the need to expose invariants, log transitions, and validate our tests."
+  },
+  {
+    "slide": 6,
+    "topic": "Mental Modeling",
+    "text": "Mental Modeling is about creating a conceptual map of how the system operates without direct code examination. This helps us pinpoint conditions we need to clarify for trusting the system under stress. Similar to Deductive Reasoning, failing to model mentally can lead to stale states or workflow halts. Again, we must effectively reveal invariants."
+  },
+  {
+    "slide": 7,
+    "topic": "Hypothesis Testing",
+    "text": "Hypothesis Testing involves forming a theory about where a failure could arise and then conducting tests to validate or invalidate that theory. It's crucial in ensuring we understand the conditions necessary for system reliability. Remember, if we overlook this, systems can yield duplicate outputs or misleading logs, so we must be diligent about documenting invariants."
+  },
+  {
+    "slide": 8,
+    "topic": "System Invariant",
+    "text": "A System Invariant is a condition that must remain true throughout all valid executions of the system. Recognizing and ensuring these invariants exist can help us trust our system under pressure. We also need to be aware of how failure to maintain these can lead to misleading evidence or even loss of system progress."
+  },
+  {
+    "slide": 9,
+    "topic": "Failure Mode",
+    "text": "Failure Mode refers to a specific way the system might violate an invariant or lose progress. Understanding these modes is essential because they often relate to internal states, timing, or interleaved behaviors. The implications are similar: we need to expose invariants and ensure proper documentation and logging."
+  },
+  {
+    "slide": 10,
+    "topic": "System View",
+    "text": "This diagram illustrates how the concepts interconnect within our discussion of system reasoning. It highlights the flow from Deductive Reasoning to design decisions influenced by validation evidence. This reinforces the importance of linking system correctness to evidence, especially as conditions change."
+  },
+  {
+    "slide": 11,
+    "topic": "Worked Example",
+    "text": "Now, let's look at a worked example. Picture live analysis of logging where we observe `Episode-1` being published twice, revealing a system that lacks proper locking between checks and updates. This reveals critical design assumptions that can affect project outcomes."
+  },
+  {
+    "slide": 12,
+    "topic": "Problem Setup",
+    "text": "In our example, we have logs from two threads checking a status nearly simultaneously, which leads us to deduce that there's no adequate locking mechanism in place. Understanding this failure context in our project settings—perhaps an Order Fulfillment system—helps us see the real-world applications."
+  },
+  {
+    "slide": 13,
+    "topic": "Mental Model",
+    "text": "Let’s consider a simple mental model that assumes operations occur once and sequentially. However, this often doesn’t reflect true execution. The assumption may remain invisible in the code, leading to unforeseen consequences, especially when operational overlaps occur."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Scenario",
+    "text": "As we bring in overlapping executions or operational delays, what happens? We might observe stale states or duplicate executions. The mismatch between our design assumptions and the actual execution patterns can result in system failures, which are more than mere syntax errors."
+  },
+  {
+    "slide": 15,
+    "topic": "Improved Design Direction",
+    "text": "To avoid the pitfalls we've just examined, we should focus on clearly naming our invariants. We also want transitions to be observable and introduce controls like version checks or retry mechanisms. Each element plays a critical role in safeguarding our system's robustness."
+  },
+  {
+    "slide": 16,
+    "topic": "Why Is It Safer?",
+    "text": "By shifting our focus from merely trusting operational execution to proving the containment of invalid states with proper evidence, we create a design that is not only reliable but also defensible. This approach helps us manage risks more effectively."
+  },
+  {
+    "slide": 17,
+    "topic": "Failure Modes",
+    "text": "Let’s explore some common failure modes. For instance, if a system passes test cases without addressing timing or concurrent pressures, it might appear successful at first glance. By introducing repeated runs and stressing these tests, we can better detect underlying weaknesses."
+  },
+  {
+    "slide": 18,
+    "topic": "Happy-path Success",
+    "text": "A common symptom of potential failure lies in ‘happy-path’ successes, where the tests don't incorporate the pressure conditions. We can address this by refining our test approaches to include failure-focused scenarios that target specific invariants."
+  },
+  {
+    "slide": 19,
+    "topic": "Naming Tools",
+    "text": "Another symptom is when tools are named without acknowledging the underlying design properties they are meant to safeguard. We must prompt ourselves to identify which invariant a tool is protecting. Writing down the invariant first can clarify our mechanisms' roles."
+  },
+  {
+    "slide": 20,
+    "topic": "Vague Evidence",
+    "text": "Vague evidence supporting our design claims can lead to confusion. For instance, if logs lack critical identifiers, reviewers may struggle to interpret the failure scenarios. Structuring our logs and linking them directly to our design claims is a necessary corrective measure."
+  },
+  {
+    "slide": 21,
+    "topic": "Trade-Off Analysis",
+    "text": "Let’s perform a trade-off analysis across various approaches. For instance, a simple baseline is easy to implement but can hide critical timing assumptions. In contrast, adopting a guarded state transition might directly protect invariants while requiring careful state modeling."
+  },
+  {
+    "slide": 22,
+    "topic": "Practical Application",
+    "text": "As we wrap up our discussion, tomorrow, I encourage you to identify the most relevant invariant for your projects. Craft both a sequential success scenario and a pressure scenario to explore potential failures while enhancing your logs for detailed tracking."
+  },
+  {
+    "slide": 23,
+    "topic": "Assignment Integration",
+    "text": "Remember, this lecture aligns with your [A1] assignment. You’ll want to connect today's concepts to your semester project by demonstrating relevant objects, workflows, events, or recovery mechanisms in your domain. Concrete evidence will be key."
+  },
+  {
+    "slide": 24,
+    "topic": "Validation Questions",
+    "text": "Here are some validation questions to consider: What invariant is most relevant to your work? What hidden assumption appears to make a baseline design correct? Explore how you might force a failure in tests or record evidence of that failure occurring."
+  },
+  {
+    "slide": 25,
+    "topic": "Summary",
+    "text": "In summary, our journey today through system reasoning has revealed the critical links between invariants, observable behavior, and the trade-offs necessary to maintain correctness under pressure. Mastery of these concepts is vital in our engineering practices."
+  },
+  {
+    "slide": 26,
+    "topic": "Further Reading",
+    "text": "For those interested in delving deeper, I recommend exploring topics such as structured logging and correlation IDs, or looking into invariants in stateful object-oriented systems. This will enhance your understanding and application of today's concepts."
+  },
+  {
+    "slide": 27,
+    "topic": "Discussion",
+    "text": "Let’s open the floor for discussion. How can we improve our testing strategies under pressure? I'm curious to hear your insights into the unseen assumptions you often navigate in your work."
+  }
+]

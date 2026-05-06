@@ -1,0 +1,364 @@
+[
+  {
+    "slide": 1,
+    "topic": "Designing for Recovery",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to today's lecture on 'Designing for Recovery.' In this session, we will explore how to ensure our systems can withstand stresses brought on by concurrency and operational pressures."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Course Overview",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's start with an overview of the course. This week, we are continuing in CS 5891b, focusing on object-oriented systems under concurrency. Today's lecture will take about 15 minutes, and remember, it's essential to have a good grasp of prior subjects such as object state and concurrency pressure."
+      },
+      {
+        "role": "student",
+        "text": "So, we’ll need to connect this lecture back to what we learned about those earlier topics, right?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! Understanding those foundational concepts will be crucial for applying what we learn today."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "By the end of this lecture, you should be able to analyze the design pressures associated with recovery scenarios, diagnose the hidden assumptions that may exist in system behavior, evaluate evidence of failures effectively, design corrections that preserve relevant invariants, and ultimately defend these approaches in your Integrity Packet for assignment A4."
+      },
+      {
+        "role": "student",
+        "text": "That sounds like a lot of critical thinking and analysis needed!"
+      },
+      {
+        "role": "teacher",
+        "text": "It is! It's important to recognize the vulnerabilities in our systems, especially when they’re under pressure."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Imagine presenting a course project that appears to function correctly during a simple demonstration. However, when concurrency is introduced, hidden assumptions about Check-pointing can surface. This raises an important question: what should an engineer analyze and defend to trust their results under pressure?"
+      },
+      {
+        "role": "student",
+        "text": "Wait… so that means the design can look fine in isolation but fails in real scenarios?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly. This is a common pitfall, and it emphasizes the need for rigorous testing under varying conditions."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Check-pointing",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's dive into the first core concept: Check-pointing. This refers to periodically saving the state of a workflow so that it can resume from the last known point. This is crucial for trusting a system under pressure. If not properly handled, you risk falling into failure modes such as duplication of work or producing a stale state."
+      },
+      {
+        "role": "student",
+        "text": "Can you give an example of what that looks like in practice?"
+      },
+      {
+        "role": "teacher",
+        "text": "Sure! Imagine a long-running process that needs to save its state periodically. If the system crashes during a task without these checkpoints, you might have to restart the entire process. This can lead to wasted resources and time—a perfect representation of what happens when check-pointing is ignored."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Reconciliation (Self-Healing)",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, we have Reconciliation, often termed self-healing. This process involves scanning the system for objects that are orphaned or stuck and automatically fixing them. Again, it’s vital to make this mechanism explicit to ensure system trustworthiness under pressure, as failure to do so can lead to similar issues like duplicate work or blocked progress."
+      },
+      {
+        "role": "student",
+        "text": "So, it's like a safety net for your application?"
+      },
+      {
+        "role": "teacher",
+        "text": "Precisely! It's about ensuring that the system can recover independently from transient failures that might otherwise disrupt service."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Stateless Workers",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Another important concept is Stateless Workers. These are designed to avoid holding any critical state in memory, allowing them to restart without any data loss. This design choice is significant for ensuring trust and can help avoid failures that stem from stale or duplicate information."
+      },
+      {
+        "role": "student",
+        "text": "Is this a common pattern in web applications?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, notably in microservices architectures. This design reduces complexity and risk associated with state management during execution."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "System Invariant",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The System Invariant refers to a condition that must remain true across all valid executions of the system. It’s essential to expose this invariant, for if ignored, your system could produce misleading evidence or get stuck in an undesirable state."
+      },
+      {
+        "role": "student",
+        "text": "What happens if the invariant is violated?"
+      },
+      {
+        "role": "teacher",
+        "text": "Good question! If violated, you might see critical errors, such as inconsistencies in the database or, worse, a system crash. This is where teams get into trouble."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now let’s take a look at the architectural view of our topic, 'Designing for Recovery.' Here, various concepts like Check-pointing, Reconciliation, and Stateless Workers connect to show a whole system approach, emphasizing that systems need to maintain relevant invariants even when pressures change."
+      },
+      {
+        "role": "student",
+        "text": "It seems like they all depend on each other."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! Each component reinforces the others to create a robust design."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Worked Example: Problem Setup",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s consider a worked example using a Podcast domain. Imagine that the entire system crashes while an episode is rendering. Upon restarting, a Reconciliation Job can detect the incomplete output and re-queue the necessary rendering task. Similarly, in an Order System, we may need to re-process orders that have been stuck in a pending state for a specified time."
+      },
+      {
+        "role": "student",
+        "text": "That makes sense! So the recovery mechanisms help in these cases?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! Without those mechanisms, you could lose significant work or have incorrect outputs."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Naive Implementation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In contrast to our designed approach, let’s discuss a naive implementation. This approach often assumes operations occur once in order and with the current state. It may seem intuitive, but as we will see, this assumption frequently leads to serious failures."
+      },
+      {
+        "role": "student",
+        "text": "I suppose that leads to unexpected behavior when things go wrong."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly. This underlines the importance of understanding the execution context."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "When working within overlapping executions or due to delays, a naive implementation can lead to stale states or even repeated execution of the same operation, which may consequently leave the workflow stuck."
+      },
+      {
+        "role": "student",
+        "text": "Could you give an example of that?"
+      },
+      {
+        "role": "teacher",
+        "text": "Certainly! For example, if two requests to process an order overlap, one might read outdated information, leading to duplicates or a situation where the workflow halts unexpectedly."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Improved Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To avoid these pitfalls, it's essential to name your invariants explicitly and make your transitions observable. Implementing controls such as version checks or idempotency keys can provide significant safeguards against these weaknesses."
+      },
+      {
+        "role": "student",
+        "text": "Got it. So it's all about making sure we handle possible overlaps or retries carefully."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly. Proactively managing these aspects leads to a more resilient design."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Safer Design Benefits",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The main advantage of the improved design is proactive. Instead of merely hoping that everything executes in the intended order, it focuses on proving that invalid states or interleavings are contained or recovered through solid evidence."
+      },
+      {
+        "role": "student",
+        "text": "That sounds like a much more reliable approach."
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely. This proactive stance leads to greater trust in system behavior under load."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let’s discuss some common failure modes and anti-patterns. One symptom we might observe is a system that passes a happy-path test without encountering any real pressure or concurrency. To detect this, encourage repeated runs or introduce concurrent actors to reveal hidden flaws."
+      },
+      {
+        "role": "student",
+        "text": "Sounds like a good way to stress-test the system."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! Testing under varied conditions is crucial."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In balancing design decisions, we have to analyze trade-offs. Different approaches can offer unique strengths and weaknesses, which you can weigh based on your specific use case. For instance, a simple baseline might be easy to implement but could hide significant timing assumptions."
+      },
+      {
+        "role": "student",
+        "text": "Can you give an example of when to use a more complex design?"
+      },
+      {
+        "role": "teacher",
+        "text": "Certainly! If your application involves multiple workflows that need to be coordinated, an explicit coordination design might be necessary despite the added complexity."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Tomorrow, reflect on your learnings. Identify the most relevant invariant or progress property, develop sequential and pressure scenarios, and remember to capture logging IDs. This will help you assess your fixes and support your findings in the Integrity Packet."
+      },
+      {
+        "role": "student",
+        "text": "That sounds like a solid plan. So we need to make our evidence relevant and actionable?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! The stronger your evidence, the better your defense in your designs."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This lecture is directly integrated with assignment A4. I encourage you to connect these design concepts to your own projects. Demonstrate your understanding through runnable commands, structured logs, and clear evidence of your system’s reliability."
+      },
+      {
+        "role": "student",
+        "text": "How do we ensure we're demonstrating everything effectively?"
+      },
+      {
+        "role": "teacher",
+        "text": "Focus on the invariants, provide clear case studies or scenarios, and track everything through your logs to make your case compelling."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Discussion",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Now, let’s open up the floor for discussion. I encourage you to consider: what invariant is most crucial to this lecture? Additionally, identify any hidden assumptions that may jeopardize the design robustness we’ve discussed."
+      },
+      {
+        "role": "student",
+        "text": "I think the invariant about ensuring the system state is reliable during transitions is vital."
+      },
+      {
+        "role": "teacher",
+        "text": "That's a very good point. Many designs overlook invariants during operational transitions, which can lead to issues."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As we conclude, remember that designing for recovery is not just a concept; it's a vital way to reason about system correctness under realistic execution scenarios. The primary task of an engineer is to connect these concepts with invariants, observable behavior, and sound trade-offs."
+      },
+      {
+        "role": "student",
+        "text": "Thanks! This gives me a lot to think about for my project."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For those looking to delve deeper into this topic, I recommend searching for 'Designing for Recovery' alongside failure modes in distributed systems, as well as exploring concepts around structured logging and invariants in stateful systems."
+      },
+      {
+        "role": "student",
+        "text": "I’ll definitely check those out!"
+      }
+    ]
+  }
+]

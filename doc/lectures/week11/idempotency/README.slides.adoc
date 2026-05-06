@@ -1,0 +1,163 @@
+= Idempotency
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Introduction
+
+* Course: CS 5891b - Object-Oriented Systems Under Concurrency
+* Week: 11
+* Duration: 15 minutes
+* Prior Topics: Object state, concurrency pressure, Integrity Packet reasoning
+
+== Learning Objectives
+
+* Analyze design pressure from idempotency
+* Diagnose hidden system assumptions
+* Evaluate failure evidence using logs, traces
+* Design corrections while managing trade-offs
+* Defend approaches in Integrity Packet
+
+== Opening Narrative
+
+A system appears correct until exposed to concurrency or pressure. What assumptions must engineers analyze before trusting results?
+
+== Idempotent Operation
+
+* Definition: No additional effect when called multiple times with same parameters
+* Importance: Key for trusting systems under pressure
+* Mechanism: Through state, timing, worker behavior
+* Failure: Causes duplicate work, stale state
+* Design: Expose invariant, log transitions, validate with tests
+
+== Idempotency Key
+
+* Definition: Unique identifier for request recognition
+* Importance: Key for trusting systems under pressure
+* Mechanism: Through state, timing, worker behavior
+* Failure: Causes duplicate work, stale state
+* Design: Expose invariant, log transitions, validate with tests
+
+== System Invariant
+
+* Definition: Condition that remains true across executions
+* Importance: Key for trusting systems under pressure
+* Mechanism: Through state, timing, worker behavior
+* Failure: Causes duplicate work, stale state
+* Design: Expose invariant, log transitions, validate with tests
+
+== Design Trade-Off
+
+* Definition: Choice between competing qualities
+* Importance: Key for trusting systems under pressure
+* Mechanism: Through state, timing, worker behavior
+* Failure: Causes duplicate work, stale state
+* Design: Expose invariant, log transitions, validate with tests
+
+== System Architecture
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Idempotency" as Topic
+rectangle "Idempotent Operation" as A
+rectangle "Idempotency Key" as B
+rectangle "System Invariant" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+* Podcast Domain:
+  * Unsafe: `episode.addAsset(file)` (Multiple assets if retried)
+  * Idempotent: `episode.upsertAsset(assetId, file)` (Avoids duplicates)
+
+* Order System:
+  * `client_request_id` prevents double-charging.
+
+== Failure Scenario
+
+Under delays, retries, or failures, operations can observe stale state or execute twice. This reveals a design mismatch.
+
+== Improved Design Direction
+
+* Name the invariant
+* Make transitions observable
+* Implement correctness controls: version checks, idempotency keys
+
+== Why Improved Design Is Safer
+
+It ensures invalid interleavings are rejected or recovered with evidence.
+
+== Failure Modes and Anti-Patterns
+
+* Symptom: Single happy-path test passes
+  * Detection: Use repeated runs, concurrent actors
+  * Correction: Add targeted failure tests
+
+* Symptom: Names a tool, not a design property
+  * Detection: Ask for the invariant
+  * Correction: Write invariant first
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
+| Guarded state | Protects invariant | Requires state modeling | Status changes
+| Explicit coordination | Dependencies visible | May introduce deadlocks | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires keys | Queues, retries
+| Observability-first | Strong evidence | Adds instrumentation | Failure proofing
+|===
+
+== Practical Application
+
+* Identify relevant invariant
+* Write sequential and pressure scenarios
+* Capture IDs in logs
+* Document before/after evidence
+* Update Integrity Packet accordingly
+
+== Assignment Integration
+
+This lecture supports [A3](../../../assignments/A3/index.md). Show relevant object, workflow, and recovery mechanisms.
+
+== Discussion
+
+1. What invariant is most relevant here?
+2. Which hidden assumption affects design validity?
+3. How to force failure in tests?
+4. What evidence supports the failure?
+
+== Summary
+
+Idempotency is crucial for reasoning about system correctness under realistic execution. Connect concepts to invariants and evidence.
+
+== Further Reading
+
+* "Idempotency distributed systems failure mode"
+* "Idempotency concurrency design tradeoffs"
+* Invariants in stateful object-oriented systems
+* Message queues and event ordering

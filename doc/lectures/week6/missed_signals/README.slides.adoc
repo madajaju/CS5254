@@ -1,0 +1,156 @@
+= Missed Signals
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Learning Objectives
+
+* Analyze design pressure in stateful concurrent systems
+* Diagnose hidden assumptions of correctness
+* Evaluate failure evidence: logs, traces, interleavings
+* Design corrections preserving relevant invariants
+* Defend approaches in Integrity Packet related to A2
+
+== The Lost Signal
+
+* **Definition**: Signal sent before the receiver waits.
+* **Important**: Must be explicit to trust under pressure.
+* **Mechanism**: Affects object state, timing, worker behavior.
+* **Failure Mode**: Leads to duplicate work, stale state, blocked progress.
+* **Design Implication**: Log transitions, validate via repeatable tests.
+
+== Race to Wait
+
+* **Definition**: Thread checks condition, finds it unmet, then meets condition before waiting.
+* **Important**: Must be clearly defined for trust.
+* **Mechanism**: Influences object state or worker behavior.
+* **Failure Mode**: Results in duplicate work or blocked progress.
+* **Design Implication**: Emphasize invariants and critical transitions.
+
+== State-Based Signaling
+
+* **Definition**: Signals based on current object state.
+* **Important**: Necessary for trust in system behavior.
+* **Mechanism**: Key to workflow timing and coordination.
+* **Failure Mode**: Can produce misleading evidence.
+* **Design Implication**: Maintain clear state checks and logging.
+
+== Coordination Boundary
+
+* **Definition**: Points where objects agree on progress.
+* **Important**: Essential to ensure trustworthiness.
+* **Mechanism**: Influences state and coordination.
+* **Failure Mode**: Can lead to miscommunication; lost messages.
+* **Design Implication**: Clearly define ownership and ordering.
+
+== Progress Guarantee
+
+* **Definition**: Ensures work completes rather than stalling.
+* **Important**: Guarantees confidence in system behavior.
+* **Mechanism**: Tied to object state and workflow timing.
+* **Failure Mode**: Risks blockages and incomplete workflows.
+* **Design Implication**: Validate transitions meticulously.
+
+== System Overview
+
+[plantuml, target=system_overview, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Missed Signals" as Topic
+rectangle "The Lost Signal" as A
+rectangle "Race to Wait" as B
+rectangle "State-Based Signaling" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example: Podcast Domain
+
+* **Scenario**: `Ingestor` signals "File Ready." `Cleaner` isn't ready yet.
+* **Fix**: `Cleaner` checks `episode.isIngested()` before waiting.
+
+== Naive Implementation
+
+* Assumes operation runs once in order.
+* **Flow**:
+  actor performs operation
+  system reads current state
+  system applies transition
+  system emits side effect
+
+== Failure Scenario
+
+* Overlapping execution, delays, or partial failures lead to stale state or workflow blockages.
+* The issue lies in mismatched design assumptions versus execution reality.
+
+== Improvements Direction
+
+* Name the invariant, make transitions observable.
+* Implement correctness controls: version checks, retries, state-machine guards.
+
+== Safer Design Justification
+
+* Focus shifts from hope of execution order to proof against invalid interleavings.
+
+== Failure Modes Overview
+
+* **Symptom**: System passes happy-path, but fails under pressure.
+  * **Detection**: Use structured logs, stress testing.
+  * **Correction**: Add failure-focused tests targeting invariants.
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to implement | Hides assumptions | First implementation
+| Guarded transitions | Protects invariants | Needs careful modeling | Status updates
+| Explicit coordination | Visibility of dependencies | May cause deadlocks | Multi-object workflows
+|===
+
+== Practical Application
+
+* Identify relevant invariant for missed signals.
+* Write scenarios: one for success, one for failure.
+* Update logs before running pressure scenarios, document evidence.
+
+== Assignment Integration
+
+* Connect concepts from this lecture to [A2](../../../assignments/A2/index.md).
+* Demonstrate mastery: structured logs, runnable commands, evidence collection.
+
+== Discussion
+
+* What invariant is most relevant to this lecture?
+* How would you force a failure in a test?
+
+== Summary
+
+* Missed signals reason about system correctness under execution.
+* Link concepts to observable behavior and defensible trade-offs.
+
+== Further Reading
+
+* "Missed Signals distributed systems failure mode"
+* "Missed Signals concurrency design trade-offs"
+* Topics: structured logging, invariants in concurrency, coordination patterns.

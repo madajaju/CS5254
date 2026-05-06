@@ -1,0 +1,178 @@
+= Two-Stack Strategy
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Course Overview
+* Course: CS 5891b - Object-Oriented Systems Under Concurrency
+* Week: 1
+* Duration: 15 minutes
+* Prerequisites: Basic programming, runtime concepts, object-oriented design
+* Assignment Alignment: A0, A1
+
+== Learning Objectives
+* Compare runtimes in concurrency exposure
+* Design implementations with conceptual parity
+* Diagnose stack-specific behavioral changes
+* Evaluate runtime tradeoffs under concurrency
+* Defend stack choices with evidence
+
+== Opening Scenario
+* Java vs. Node.js reservation workflow
+* Race condition vs. async safety
+* Runtime changes affect visibility of issues
+* Using stacks for comparison, not confusion
+
+== Runtime Variance
+* Definition: Variations in scheduling and I/O handling
+* Impact: Designs can fail differently
+* Mechanisms: Threads, event loops, locks
+* Failure mode: Misinterpreting design correctness
+* Focus: Maintain invariant, ignore syntax
+
+== Conceptual Parity
+* Definition: Two stacks represent the same concepts
+* Importance: Equivalence is crucial for meaningful comparison
+* Mechanisms: Shared domain diagrams, test scenarios
+* Failure mode: Non-equivalent workflows mislead
+* Focus: Document parity before style differences
+
+== Hidden Assumptions
+* Definition: Unstated beliefs about execution specifics
+* Impact: Different stacks reveal or hide assumptions
+* Mechanisms: Execution order affects data races
+* Failure mode: Concluding correctness from one stack
+* Focus: Create overlap in test conditions
+
+== Comparable Evidence
+* Definition: Logs and outputs for behavior comparison
+* Importance: Required evidence for A1 assignments
+* Mechanisms: ID logs and state transitions
+* Failure mode: Inconclusive evidence for failures tested
+* Focus: Evidence format integral to strategy
+
+== System Architecture
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+
+rectangle "Shared Domain Model" as Model
+rectangle "Stack A\nImplementation" as StackA
+rectangle "Stack B\nImplementation" as StackB
+rectangle "Shared Concurrency\nScenario" as Test
+rectangle "Structured Logs A" as LogsA
+rectangle "Structured Logs B" as LogsB
+rectangle "Invariant Comparison" as Compare
+
+Model --> StackA
+Model --> StackB
+Test --> StackA
+Test --> StackB
+StackA --> LogsA
+StackB --> LogsB
+LogsA --> Compare
+LogsB --> Compare
+@enduml
+----
+
+== Worked Example
+* Problem: Podcast system in Java and Node.js
+* Key components: `Episode`, `AssetProcessor`, `PublishingManager`
+* Constraint: Episode cannot publish until assets are ready
+
+== Naive Mental Model
+```javascript
+async function publishEpisode(id) {
+  const episode = await loadEpisode(id);
+  if (episode.status === "READY_TO_PUBLISH") {
+    await saveStatus(id, "PUBLISHED");
+    await notifySubscribers(id);
+  }
+}
+```
+
+== Failure Scenario
+* Concurrent requests load the same episode
+* `await` causes stale reads
+* Java exposes through threads, Node.js through async
+
+== Improved Design Direction
+* Conceptual fix: Atomic transition of states
+* Procedure:
+** publish(id):
+*** attempt READY_TO_PUBLISH -> PUBLISHED
+*** emit notification once if transition succeeds
+
+== Failure Modes
+* One stack passes due to sequential test calls
+** Detect: Logs show non-overlapping operations
+** Correct: Introduce concurrent conditions
+
+* Implementations drift from shared model
+** Detect: Differing responsibilities
+** Correct: Maintain shared object parity
+
+* Runtime behavior mistaken for design proof
+** Detect: Explanations describe platform, not states
+** Correct: Center answers on invariant
+
+* Logs cannot be compared due to differences
+** Detect: Absence of common operation IDs
+** Correct: Define shared log schema
+
+== Trade-Off Analysis
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Java plus Node.js | Strong contrast between concurrency models | Requires careful async reasoning | Good default comparison
+| Python plus Go | Contrasts interpreter constraints with concurrency | Misunderstand Python behavior | Worker-style tests
+| Java plus Go | Strong primitives in both | Implementation overhead | Students with compiled languages
+| Node.js plus Python | Fast to prototype | Can hide parallelism | Smaller async workflows
+| Same language twice | Easier parity | Weak comparison | Approved explicitly
+|===
+
+== Practical Application
+* Choose two approved stacks from A0
+* Record runtime versions and tools
+* Write shared domain model
+* Define common object names and states
+* Create sequential tests for both stacks
+* Design one shared concurrent test
+* Standardize logs before analysis
+
+== Assignment Integration
+* Supports A0 and A1
+* A1 requires functional model parity under concurrency
+* Show conceptual equivalence and explain runtime behavior
+
+== Validation Questions
+1. What does conceptual parity mean?
+2. How can Node.js exhibit concurrency bugs?
+3. Why does Java expose races quickly?
+4. What evidence shows invariant testing?
+5. How to detect implementation drift?
+6. When to redesign based on runtime differences?
+7. Why is "the language prevents it" insufficient?
+
+== Summary
+* Two stacks as a lens for hidden assumptions
+* Professional comparisons across runtimes reveal insights
+* Preserve design concept while observing execution model variance
+
+== Further Reading
+* A1 - Object Model Under Concurrency
+* Java memory model and synchronization
+* JavaScript event loop and async/await
+* Go goroutines and channels
+* Search: "event loop race condition async await"
+* Search: "structured concurrency runtime comparison"

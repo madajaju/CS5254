@@ -1,0 +1,102 @@
+[
+  {
+    "slide": 1,
+    "topic": "Object Ownership & Thread Confinement",
+    "text": "Welcome everyone to this lecture on Object Ownership & Thread Confinement. Today, we're going to explore how these concepts relate to building trust in our systems, especially when concurrency is involved."
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "text": "Let's start with a scenario. Imagine you have a project that appears to behave correctly in a simple demonstration. However, when you introduce concurrency, ambivalence, or operational pressure, hidden assumptions about Thread Confinement may come to light. It's crucial to analyze these assumptions and be prepared to defend your conclusions in order to trust the outcomes you achieve."
+  },
+  {
+    "slide": 3,
+    "topic": "Thread Confinement",
+    "text": "Thread Confinement is the practice of restricting an object's access to a single thread. This is pivotal for establishing trust in our system under pressure. It manifests through aspects like object state and worker behavior. If we neglect this principle, we risk producing duplicates, dealing with stale data, or encountering blocked progress. To mitigate these risks, we need to log critical transitions and validate our workflows with thorough testing."
+  },
+  {
+    "slide": 4,
+    "topic": "System Invariant",
+    "text": "Now, let's delve into the concept of a System Invariant. This is a condition that must hold true across all valid executions of our system. Identifying and maintaining these invariants is essential for system reliability under pressure. Ignoring them can lead to misleading evidence and potentially halt progress. Therefore, our design should always emphasize the invariants and properly log the transitions that occur."
+  },
+  {
+    "slide": 5,
+    "topic": "Failure Mode",
+    "text": "A Failure Mode is essentially a repeatable way that the system can violate an invariant or lose progress. The importance of understanding this concept is clear: if we don't make these failure modes explicit, we can't trust our systems during demanding conditions. Failure modes can result in duplicated efforts, stale states, or even blocked progress, so it's crucial to log these transitions and validate our system's behavior."
+  },
+  {
+    "slide": 6,
+    "topic": "Design Trade-Off",
+    "text": "Moving on to Design Trade-Offs, this refers to the deliberate choices we make between competing qualities in our systems, like simplicity versus safety or throughput versus debuggability. It's vital to make these choices explicit, as they directly affect the system's ability to handle pressure. Ignoring trade-offs can lead to misleading evidence about the system's stability. Therefore, just like before, we must ensure we log transitions and validate behavior."
+  },
+  {
+    "slide": 7,
+    "topic": "System Architecture View",
+    "text": "Here, we have a depiction of the relationship between Object Ownership and Thread Confinement. This view highlights how these concepts interconnect with various system components like system invariants, failure modes, and validation evidence. Remember, we need to consider not just if the code runs once, but if it maintains its integrity under various conditions like timing and load."
+  },
+  {
+    "slide": 8,
+    "topic": "Worked Example: Podcast Domain",
+    "text": "Let's look at a practical example in the podcasting domain. In this scenario, a Cleaner thread exclusively owns an AudioAsset while performing cleaning. Once that task is complete, it hands off the asset to a Publisher thread, clearing its own reference afterward. This demonstrates effective confinement and ownership transfer, and a similar principle can be applied to queue-based ownership."
+  },
+  {
+    "slide": 9,
+    "topic": "Naive Implementation Model",
+    "text": "When we consider a naive implementation, it typically assumes that operations are conducted once, in order and with the current state. A common pattern is when an actor performs an operation, the system reads the current state, applies a transition, and finally emits a side effect. This assumption can often be hidden within the code, making it seem correct until cases of concurrency arise."
+  },
+  {
+    "slide": 10,
+    "topic": "Failure Scenario",
+    "text": "However, issues arise in scenarios where we encounter delays, retries, or overlapping executions. Under these circumstances, the same operation may observe stale state or even execute multiple times. This discrepancy highlights a mismatch between our design assumptions and the actual execution model, which can lead to significant problems."
+  },
+  {
+    "slide": 11,
+    "topic": "Improved Design Direction",
+    "text": "To enhance our design, we can focus on clearly naming the invariant and making transitions observable. This could involve implementing version checks, employing idempotency keys, and utilizing state-machine guards or explicit coordination mechanisms. These elements significantly elevate our ability to manage complexity and maintain system integrity."
+  },
+  {
+    "slide": 12,
+    "topic": "Why the Design Is Safer",
+    "text": "The reason why the improved design is more robust is that it transitions our focus from merely trusting that the workflow will execute as intended to providing evidence that invalid interleavings are either rejected, contained, or recoverable. This evidence-based validation helps us build confidence in our designs."
+  },
+  {
+    "slide": 13,
+    "topic": "Anti-Patterns: System Weaknesses",
+    "text": "Let's discuss some common anti-patterns that reveal weaknesses in our systems. A significant symptom is passing a single happy-path test. This can occur when tests avoid necessary timing, ordering, or pressure conditions. It’s critical to detect such weaknesses by running concurrent actors or stress tests and to rectify this by adding tests that focus on failure modes."
+  },
+  {
+    "slide": 14,
+    "topic": "Failure Modes Continued",
+    "text": "Other symptoms might include focusing on tools instead of on design properties, or where the evidence gathered is too vague to substantiate claims. It's essential to first articulate what invariant is being protected before selecting mechanisms. Moreover, without structured logs, it becomes challenging to reconstruct failures, therefore ensure evidence capture is linked directly to design claims."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Off Analysis Table",
+    "text": "In this table, we analyze various approaches. Each approach has its strengths, weaknesses, and the contexts in which they should be utilized. For instance, a simple baseline is easy to understand and implement but often hides crucial timing assumptions, making it suitable for initial comparison. In contrast, approaches like explicit coordination might make dependencies more apparent but could also introduce performance bottlenecks."
+  },
+  {
+    "slide": 16,
+    "topic": "Practical Application",
+    "text": "To put theory into practice, start by identifying the invariant most relevant to object ownership and thread confinement. Then, craft both a sequential scenario, which should succeed, and a pressure scenario, which could potentially expose failure points. Don’t forget to enhance your logs with operation IDs and capture before-and-after evidence when you implement fixes."
+  },
+  {
+    "slide": 17,
+    "topic": "Assignment Integration",
+    "text": "This lecture directly supports your assignment, A1. You are expected to integrate the concepts we've discussed today into your semester project. Focus on demonstrating your understanding of relevant objects, workflows, events, failures, or recovery mechanisms in your specific domain."
+  },
+  {
+    "slide": 18,
+    "topic": "Validation and Interview Questions",
+    "text": "As we wrap up, consider some critical validation questions. What invariant or progress property is the most relevant to this lecture? What hidden assumption might cause the baseline design to seem correct? Think about how you would enact failure in a repeatable test and what type of evidence would confirm that failure occurred."
+  },
+  {
+    "slide": 19,
+    "topic": "Summary",
+    "text": "In summary, understanding object ownership and thread confinement allows us to assess the correctness of our systems under realistic execution conditions. The key takeaway is that we must connect these concepts to the observable behavior and defensible trade-offs in our designs. A design is only truly complete when we can validate it with robust evidence."
+  },
+  {
+    "slide": 20,
+    "topic": "Discussion",
+    "text": "To conclude, let's open the floor to discussion. What hidden assumptions might exist in your own projects? How do you go about evaluating evidence from test failures? I'm eager to hear your insights."
+  }
+]

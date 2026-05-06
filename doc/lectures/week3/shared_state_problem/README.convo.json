@@ -1,0 +1,404 @@
+[
+  {
+    "slide": 1,
+    "topic": "Shared State is the Problem",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome, everyone. Today, we are diving into the concept of shared state in concurrent systems. This topic is crucial for understanding how design pressure can impact the correctness of our systems."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Course Overview",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s start with a brief overview of the course. This week, we're focusing on Object-Oriented Systems Under Concurrency. You should already have some familiarity with object states and concurrency pressure from prior lectures."
+      },
+      {
+        "role": "student",
+        "text": "Got it! So, we’re building on what we learned before?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, exactly! Each concept builds on your understanding of those earlier lectures. It's like adding layers to your knowledge, making our system designs robust under concurrency."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Our learning goals today are to analyze the design pressures that shared state introduces, identify hidden assumptions within our systems, and evaluate how to design validations that ensure our systems remain robust under various pressures."
+      },
+      {
+        "role": "student",
+        "text": "And these hidden assumptions... are they like flaws in our initial design?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! They're assumptions that may seem correct during simple scenarios but can lead to unexpected failures when real operational pressure, like concurrency, comes into play."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Imagine you're working on a project that runs smoothly in simple test scenarios but begins to fail when confronted with concurrency. This lecture challenges us to analyze those hidden assumptions that can lead to failure."
+      },
+      {
+        "role": "student",
+        "text": "So, it’s like the system is pretending to work until the real stress test comes?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes! It’s crucial to identify and test those assumptions early, or else you might find yourself with a system that stops functioning correctly under heavy load."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "Core Concept: Mutable Shared State",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Mutable shared state refers to data that multiple threads can change. Recognizing this condition is crucial for trustworthiness in system behavior under varying operational pressures."
+      },
+      {
+        "role": "student",
+        "text": "What kind of problems can come from ignoring mutable shared state?"
+      },
+      {
+        "role": "teacher",
+        "text": "If overlooked, we might experience issues like duplicate work or stale state. Imagine a scenario where two threads read a variable at the same time, but one modifies it. The other thread might act on outdated information, leading to incorrect outcomes."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Core Concept: Thread Safety",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Thread safety is about ensuring that objects or functions behave correctly when accessed by multiple threads. Just like mutable shared state, being explicit about thread safety in our designs is critical to maintaining system trust."
+      },
+      {
+        "role": "student",
+        "text": "So, if it’s not thread-safe, then things can just go wrong?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly. You could end up with corrupted data or worse, an application crash. When we talk about thread safety, we mean taking specific measures to ensure that each operation is completed without interference from others."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "Core Concept: State Leakage",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "State leakage occurs when internal data structures become accessible to other threads, allowing those threads to modify them without the object's oversight."
+      },
+      {
+        "role": "student",
+        "text": "Oh, so it’s like letting someone else edit my private notes without me knowing?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! This poses significant risks, as it can inadvertently lead to inconsistent states within your application and must be managed carefully to ensure reliable operation."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Core Concept: System Invariant",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A system invariant is a condition that should always hold true during valid executions. It’s crucial to understand this concept as it aids in maintaining system integrity amidst various operational pressures."
+      },
+      {
+        "role": "student",
+        "text": "So, it’s like a rule we can't break if we want our system to work?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! The invariant provides a foundation for validating that the correct conditions are met at all times. Breaking the invariant usually means our system is headed for trouble."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "Core Concept: Failure Mode",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Failure modes represent predictable ways in which a system may violate its invariants or fail to progress. Recognizing these modes helps us understand potential points of failure in our designs."
+      },
+      {
+        "role": "student",
+        "text": "Can you give an example of a failure mode?"
+      },
+      {
+        "role": "teacher",
+        "text": "Sure! One common failure mode occurs when threads compete for a shared resource. If two threads try to modify the same data simultaneously, it can lead to corrupt data or missed updates."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "System Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This architecture view visually represents the interaction between shared state issues and the need for validation evidence. It emphasizes that if we introduce new pressures to the system, we must ensure that relevant invariants hold."
+      },
+      {
+        "role": "student",
+        "text": "So if pressures change, we might need to re-evaluate our whole system?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! Changing pressures means updating your models and invariants. It's a continuous process to maintain integrity against new challenges."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Worked Example: Problem Setup",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s consider a podcast domain where unsafe usage of a global list can lead to concurrency issues. On the other hand, using a local list within a single worker's execution can help avoid these problems."
+      },
+      {
+        "role": "student",
+        "text": "Got it! Global state is dangerous in that case."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! There’s a clear thread contention risk when multiple workers access the same global state."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Naive Implementation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "A naive implementation assumes operations will happen sequentially and correctly. However, this common assumption often leads to serious concurrency issues that are not immediately obvious just from reading the code."
+      },
+      {
+        "role": "student",
+        "text": "So, it seems like developers can overlook potential problems so easily?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes, and that's where danger lies. Developers can be blind to the real behavior of their systems under pressure. This is a foundational principle in understanding concurrency."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Under concurrent execution or retry scenarios, designs can fail by observing stale state, executing operations multiple times, or blocking progress. These are clear indicators that our initial assumptions were flawed."
+      },
+      {
+        "role": "student",
+        "text": "So, all of these can happen simultaneously?"
+      },
+      {
+        "role": "teacher",
+        "text": "Yes! The problem compounds if not addressed, leading to a detrimental user experience. It's vital to constantly revisit our assumptions."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Corrected Design Direction",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "An effective design approach involves naming the invariant, making transitions clear and observable, and implementing controls such as version checks to ensure correctness when facing concurrency."
+      },
+      {
+        "role": "student",
+        "text": "Do all controls apply in every scenario, or is it case-by-case?"
+      },
+      {
+        "role": "teacher",
+        "text": "It varies case-by-case! Not all contexts will need the same level of control. You should apply what makes sense per your system’s architecture and user needs."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Why Is Improved Design Safer?",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The improved design shifts our perspective from hoping for correct execution to ensuring that incorrect execution paths are effectively handled or prevented, providing a robust evidence-based framework."
+      },
+      {
+        "role": "student",
+        "text": "That makes sense. It's about reducing assumptions and increasing clarity!"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely, clarity leads to stability, especially under pressure."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Failure Modes & Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "We often see symptoms indicating a system passed a single happy-path test, but under real pressure, failures can emerge. It’s essential to thoroughly test designs using concurrent scenarios to expose their weaknesses."
+      },
+      {
+        "role": "student",
+        "text": "So, we can’t just trust everything runs correctly once?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly! That’s a common pitfall. Systems must be stress-tested to verify stability across different conditions."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "When evaluating different design approaches, we must consider their strengths and weaknesses. For instance, while a simple baseline is easy to explain, it may hide critical timing and pressure assumptions."
+      },
+      {
+        "role": "student",
+        "text": "So some solutions might seem good initially but lead to more problems down the line?"
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly. You have to balance simplicity against potential unseen complexities that could arise later in production."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As a practical exercise tomorrow, identify the critical invariant relevant to shared state issues within your projects. Create scenarios to test both successful operations and potential failures, capturing the necessary evidence."
+      },
+      {
+        "role": "student",
+        "text": "That sounds like a good way to apply what we learned."
+      },
+      {
+        "role": "teacher",
+        "text": "Yes! It’s essential to practice how these theories translate into real-world application."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This lecture connects directly to your assignments. Be prepared to demonstrate how the concepts we discussed apply to your own projects, using structured evidence and validation in your Integrity Packet."
+      },
+      {
+        "role": "student",
+        "text": "So integrating this into A1 will help reinforce our understanding, right?"
+      },
+      {
+        "role": "teacher",
+        "text": "Absolutely! It’s a practical way to ensure you can defend your design decisions with real examples."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Validation Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "To reinforce these concepts, consider these questions: What is the most relevant invariant for this lecture? What hidden assumptions might jeopardize system integrity? How can we accurately capture evidence of failure?"
+      },
+      {
+        "role": "student",
+        "text": "These questions seem like they can really get us thinking deeper."
+      },
+      {
+        "role": "teacher",
+        "text": "That’s the goal! Thinking critically about these questions is what solidifies understanding."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In summary, understanding that shared state presents real challenges in concurrency is vital. Your task as engineers is to connect these challenges to observable behaviors and defend your design choices with solid evidence."
+      },
+      {
+        "role": "student",
+        "text": "It seems like attention to detail is key in these systems."
+      },
+      {
+        "role": "teacher",
+        "text": "Exactly. A mature design proves observable behavior and validates evidence—those are essential for system reliability."
+      }
+    ]
+  },
+  {
+    "slide": 22,
+    "topic": "Further Reading",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For those interested in exploring further, I encourage you to look up resources on shared state in distributed systems and concurrency design trade-offs. These topics can deepen your understanding."
+      },
+      {
+        "role": "student",
+        "text": "Thanks for those suggestions! I’ll check them out."
+      }
+    ]
+  },
+  {
+    "slide": 23,
+    "topic": "Discussion",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let’s open the floor for discussion. What risks have you encountered regarding shared state in your own projects, and how have your designs reflected the necessary trade-offs in managing concurrency?"
+      },
+      {
+        "role": "student",
+        "text": "I think sometimes I underestimate the impact of shared data when users are accessing it simultaneously."
+      },
+      {
+        "role": "teacher",
+        "text": "That’s a common challenge! Understanding these risks will help you design better, more resilient systems in the future."
+      }
+    ]
+  }
+]

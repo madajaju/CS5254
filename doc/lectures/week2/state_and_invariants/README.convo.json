@@ -1,0 +1,354 @@
+[
+  {
+    "slide": 1,
+    "topic": "State & Invariants",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Welcome to our lecture on State and Invariants. Today, we will explore how state and invariants play a critical role in ensuring the correctness of concurrent systems."
+      }
+    ]
+  },
+  {
+    "slide": 2,
+    "topic": "Learning Objectives",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In this lecture, we will analyze the design pressures that state and invariants impose on concurrent systems."
+      },
+      {
+        "role": "student",
+        "text": "What types of hidden assumptions should we be looking for?"
+      },
+      {
+        "role": "teacher",
+        "text": "Great question! We'll be focusing on those that mislead us into thinking the system is correct until it's under stress."
+      }
+    ]
+  },
+  {
+    "slide": 3,
+    "topic": "Opening Narrative",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Imagine you are working on a course project that appears to be functioning perfectly fine during a demonstration."
+      },
+      {
+        "role": "student",
+        "text": "So, what happens when we introduce concurrency?"
+      },
+      {
+        "role": "teacher",
+        "text": "Concurrency can reveal hidden assumptions that challenge our trust in the results."
+      }
+    ]
+  },
+  {
+    "slide": 4,
+    "topic": "Core Concepts",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Before we dive deeper, let's understand some core concepts that will guide our discussion."
+      },
+      {
+        "role": "student",
+        "text": "What are the key concepts we need to understand?"
+      },
+      {
+        "role": "teacher",
+        "text": "These include System State, Invariants, State Transitions, Invariant Violations, and System Invariants."
+      }
+    ]
+  },
+  {
+    "slide": 5,
+    "topic": "System State",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Let's start with System State, which refers to the collective values of all data in your system at a particular point in time."
+      },
+      {
+        "role": "student",
+        "text": "What issues can arise if we ignore system state?"
+      },
+      {
+        "role": "teacher",
+        "text": "Ignoring it can lead to problems like duplicate work and stale state, compromising system reliability."
+      }
+    ]
+  },
+  {
+    "slide": 6,
+    "topic": "Invariants",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Next, we have Invariants. These are conditions that must always be true for a system to maintain its correctness."
+      },
+      {
+        "role": "student",
+        "text": "How can we ensure these invariants are respected?"
+      },
+      {
+        "role": "teacher",
+        "text": "We must log transitions and validate behaviors to prevent mistakes."
+      }
+    ]
+  },
+  {
+    "slide": 7,
+    "topic": "State Transitions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "State Transitions outline the valid paths for moving the system from one correct state to another."
+      },
+      {
+        "role": "student",
+        "text": "What happens if we overlook these transitions?"
+      },
+      {
+        "role": "teacher",
+        "text": "Failure to recognize them can lead to duplicate work or stale state, violating system integrity."
+      }
+    ]
+  },
+  {
+    "slide": 8,
+    "topic": "Invariant Violation",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "An Invariant Violation occurs when concurrent operations result in the system being left in an impossible state."
+      },
+      {
+        "role": "student",
+        "text": "Can you give an example of how this might occur?"
+      },
+      {
+        "role": "teacher",
+        "text": "Certainly. If we allow simultaneous operations that alter the same data, we can easily end up in an illegal state."
+      }
+    ]
+  },
+  {
+    "slide": 9,
+    "topic": "System Invariant",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "Lastly, a System Invariant is a condition that must remain true across all valid executions."
+      },
+      {
+        "role": "student",
+        "text": "How do we verify that an invariant is maintained during execution?"
+      },
+      {
+        "role": "teacher",
+        "text": "We need mechanisms that validate state consistency throughout the system's operation."
+      }
+    ]
+  },
+  {
+    "slide": 10,
+    "topic": "Diagram: System / Architecture View",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram illustrates how the various elements we discuss connect to one another."
+      },
+      {
+        "role": "student",
+        "text": "What’s the main takeaway from this architecture?"
+      },
+      {
+        "role": "teacher",
+        "text": "The key point is whether the relevant invariants hold true when faced with execution pressures."
+      }
+    ]
+  },
+  {
+    "slide": 11,
+    "topic": "Diagram: Worked Example",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In our worked example, we look at an Episode Service where two workers might be reading an episode record concurrently."
+      },
+      {
+        "role": "student",
+        "text": "What could go wrong in this scenario?"
+      },
+      {
+        "role": "teacher",
+        "text": "If both workers attempt state transitions simultaneously, it could lead to violations of our invariants."
+      }
+    ]
+  },
+  {
+    "slide": 12,
+    "topic": "Diagram: Failure Scenario",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In the failure scenario depicted here, we see two workers reading the same episode before it has been committed."
+      },
+      {
+        "role": "student",
+        "text": "What do we need to prevent this issue?"
+      },
+      {
+        "role": "teacher",
+        "text": "We must ensure that only one worker can process the episode at a time to uphold the invariant."
+      }
+    ]
+  },
+  {
+    "slide": 13,
+    "topic": "Diagram: Design Response",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The design response to prevent such failures involves creating a protected state for well-defined transitions."
+      },
+      {
+        "role": "student",
+        "text": "Could you clarify how this actually protects the system?"
+      },
+      {
+        "role": "teacher",
+        "text": "By ensuring transitions are controlled, we can reject invalid or competing transitions, safeguarding our system integrity."
+      }
+    ]
+  },
+  {
+    "slide": 14,
+    "topic": "Diagram: Evidence Flow",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In evidence flow, we emphasize capturing structured evidence to support our claims."
+      },
+      {
+        "role": "student",
+        "text": "What kind of evidence should we be collecting?"
+      },
+      {
+        "role": "teacher",
+        "text": "Data points like previous state, new state, and timestamps are crucial for tracing execution."
+      }
+    ]
+  },
+  {
+    "slide": 15,
+    "topic": "Failure Modes and Anti-Patterns",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "It's important to be aware of common failure modes and anti-patterns."
+      },
+      {
+        "role": "student",
+        "text": "How can we detect if a system is hiding these anti-patterns?"
+      },
+      {
+        "role": "teacher",
+        "text": "By conducting repeated runs and introducing concurrent actors or stress conditions."
+      }
+    ]
+  },
+  {
+    "slide": 16,
+    "topic": "Trade-Off Analysis",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In our trade-off analysis, we explore various design approaches and their respective impacts."
+      },
+      {
+        "role": "student",
+        "text": "How do we choose which approach to implement?"
+      },
+      {
+        "role": "teacher",
+        "text": "It's context-dependent; each approach has its strengths, weaknesses, and the situations they are best suited for."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Practical Application",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "For practical application, identify the most relevant invariant for state and invariants."
+      },
+      {
+        "role": "student",
+        "text": "What should I include in my scenarios?"
+      },
+      {
+        "role": "teacher",
+        "text": "Write a successful sequential scenario along with a pressure scenario that exposes potential failures."
+      }
+    ]
+  },
+  {
+    "slide": 18,
+    "topic": "Assignment Integration",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This lecture directly supports our upcoming assignment."
+      },
+      {
+        "role": "student",
+        "text": "What do I need to focus on for the assignment?"
+      },
+      {
+        "role": "teacher",
+        "text": "Connect the concepts discussed to your semester project, demonstrating understanding with concrete evidence."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Validation and Interview Questions",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "As we wrap up, let's consider some validation and interview questions."
+      },
+      {
+        "role": "student",
+        "text": "What will be most important for mastering this material?"
+      },
+      {
+        "role": "teacher",
+        "text": "Reflecting on invariants, hidden assumptions, and how to force failures in tests is crucial."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Summary",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "In summary, understanding state and invariants is essential for reasoning about system correctness."
+      },
+      {
+        "role": "student",
+        "text": "What’s the overall goal as we apply these concepts?"
+      },
+      {
+        "role": "teacher",
+        "text": "To connect concepts to observability, invariants, and defensible trade-offs in design."
+      }
+    ]
+  }
+]

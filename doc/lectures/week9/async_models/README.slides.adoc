@@ -1,0 +1,162 @@
+= Async Models Across Languages
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Introduction
+
+* Async models introduce concurrency issues.
+* Shift in workflows impacts correctness.
+* Events and observability become critical.
+* Must make time-based work explicit.
+
+== Node.js (Event Loop)
+
+* Single-threaded and non-blocking.
+* Uses callbacks and `async/await`.
+* Condition must be explicit for trust.
+* Failure can lead to duplicate work or stale state.
+
+== Java (Threads/Futures)
+
+* Traditionally multi-threaded.
+* `CompletableFuture` and Project Loom.
+* Condition must be explicit for trust.
+* Failure modes similar to Node.js.
+
+== Go (Goroutines/Channels)
+
+* Light-weight "green" threads.
+* Communicate via channels.
+* Condition must be explicit for trust.
+* Possible failure modes mirror prior languages.
+
+== Python (Asyncio)
+
+* Event loop model; different syntax.
+* Condition needs explicit clarification.
+* Similar failure modes persist across models.
+
+== Asynchronous Boundary
+
+* Work continues at later points.
+* Exposes complexity in systems.
+* Must be made explicit for reliability.
+
+== System / Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Async Models Across Languages" as Topic
+rectangle "Node.js (Event Loop)" as A
+rectangle "Java (Threads/Futures)" as B
+rectangle "Go (Goroutines/Channels)" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example
+
+== Problem Setup
+
+* Two-Stack Comparison:
+** Java: `ScheduledExecutorService` for tasks.
+** Node.js: `setImmediate()` or `EventEmitter`.
+* Syntactic parity between languages.
+
+== Naive Implementation
+
+* Assumes:
+** Operation happens once.
+** Current state is accurate.
+* Invisible assumptions exist in code.
+
+== Failure Scenario
+
+* Overlapping execution can yield:
+** Stale state.
+** Duplicate operations.
+** Workflow stalls.
+* Not just syntax bugs; underlying design flaws.
+
+== Improved Design Direction
+
+* Name the invariant.
+* Make transitions observable.
+* Add controls like:
+** Version checks.
+** Idempotency keys.
+
+== Failure Modes and Anti-Patterns
+
+* Symptom: Single happy-path passes tests.
+** Use repeated runs for detection.
+* Symptom: Focus on tools, not design properties.
+** Ask about the invariant.
+* Symptom: Vague evidence lacks proper IDs.
+** Capture structured logs.
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
+| Guarded state transition | Protects invariants | Requires careful modeling | Status changes
+| Explicit coordination | Visible dependencies | Can cause deadlocks | Multi-object workflows
+| Idempotent design | Handles duplicates | Needs deduplication | Queues, retries
+| Observability-first | Strong evidence | Adds instrumentation work | Assignments with failure proof
+|===
+
+== Practical Application
+
+* Identify relevant invariant.
+* Write sequential scenario to succeed.
+* Write pressure scenario to expose failure.
+* Log operation IDs before stress testing.
+
+== Assignment Integration
+
+* Connect lecture concepts to [A3](../../../assignments/A3/index.md).
+* Show relevant workflows and failures.
+* Defend design choices in Integrity Packet.
+
+== Discussion
+
+* What invariant is most relevant?
+* How would you force a failure?
+* What hidden assumptions exist in the baseline?
+* What trade-offs would you consider?
+
+== Summary
+
+* Async models impact system correctness.
+* Connect concepts to invariants and evidence.
+* Ensure designs are explainable and validated.
+
+== Further Reading
+
+* Search: "Async Models Across Languages distributed systems failure mode"
+* Search: "Async Models Across Languages concurrency design tradeoffs"
+* Topics: structured logging, invariants, message queues.

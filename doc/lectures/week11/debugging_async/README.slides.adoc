@@ -1,0 +1,196 @@
+= Debugging Async Systems
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Overview
+
+* Course: CS 5891b - Object-Oriented Systems Under Concurrency
+* Week: 11
+* Duration: 15 minutes
+* Prerequisites: Prior lectures on object state, concurrency pressure
+* Assignment Alignment: [A3](../../../assignments/A3/index.md)
+
+== Learning Objectives
+
+* Analyze design pressure of async systems
+* Diagnose hidden assumptions in correct-looking systems
+* Evaluate failure evidence: logs, traces, interleavings
+* Design corrections preserving relevant invariants
+* Connect findings to A3 deliverables
+
+== Opening Narrative
+
+* Background workers enhance responsiveness.
+* Correctness depends on events, retries, ordering, observability.
+* What needs to be explicit when work moves across time?
+
+== Key Concept: Event Tracing
+
+* Definition: Follow Correlation ID across queues/workers.
+* Importance: Identifies necessary conditions for trust.
+* Mechanism: Object state, workflow timing, worker behavior.
+* Failure: Duplicate work, stale state, blocked progress.
+* Design: Expose invariant, log transitions, validate tests.
+
+== Key Concept: State Snapshots
+
+* Definition: Log object state before/after async events.
+* Importance: Identifies necessary conditions for trust.
+* Mechanism: Object state, workflow timing, worker behavior.
+* Failure: Duplicate work, stale state, blocked progress.
+* Design: Expose invariant, log transitions, validate tests.
+
+== Key Concept: Asynchronous Boundary
+
+* Definition: Point where work continues later (in another worker).
+* Importance: Identifies necessary conditions for trust.
+* Mechanism: Object state, workflow timing, worker behavior.
+* Failure: Duplicate work, stale state, blocked progress.
+* Design: Expose invariant, log transitions, validate tests.
+
+== Key Concept: Temporal Coupling
+
+* Definition: Hidden dependency on event timings.
+* Importance: Identifies necessary conditions for trust.
+* Mechanism: Object state, workflow timing, worker behavior.
+* Failure: Duplicate work, stale state, blocked progress.
+* Design: Expose invariant, log transitions, validate tests.
+
+== Key Concept: Correlation
+
+* Definition: Linking logs/events to a single workflow instance.
+* Importance: Identifies necessary conditions for trust.
+* Mechanism: Object state, workflow timing, worker behavior.
+* Failure: Duplicate work, stale state, blocked progress.
+* Design: Expose invariant, log transitions, validate tests.
+
+== System / Architecture View
+
+[plantuml, target=architecture, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+left to right direction
+
+rectangle "Debugging Async Systems" as Topic
+rectangle "Event Tracing" as A
+rectangle "State Snapshots" as B
+rectangle "Asynchronous Boundary" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+
+Topic --> A
+A --> B
+B --> C
+C --> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Worked Example: Problem Setup
+
+* Podcast Domain: Log aggregator shows `Episode-123` picked by `Worker-A`.
+* Trace Analysis: `Publish` event processed before `Cleaned` event.
+
+== Naive Implementation
+
+* Assumes operation happens once, in order, with current state.
+* Illustration:
+    actor performs operation
+    system reads current state
+    system applies transition
+    system emits side effect
+
+== Failure Scenario
+
+* Under overlapping execution, the same operation can:
+  * observe stale state
+  * execute twice
+  * arrive late
+  * leave the workflow stuck
+
+== Improved Design Direction
+
+* Name the invariant and make transitions observable.
+* Add correctness controls appropriate to failure:
+    * version checks
+    * idempotency keys
+    * explicit coordination
+
+== Why the Design Is Safer
+
+* Shift from hoping the workflow executes correctly to proving it.
+
+== Failure Modes and Anti-Patterns
+
+* **Symptom**: System passes happy-path test.
+    * **Detection**: Add concurrent actors or stress conditions.
+    * **Correction**: Preserve happy-path but add failure-focused tests.
+* **Symptom**: Naming tools, not design properties.
+    * **Detection**: Ask which invariant the mechanism protects.
+* **Symptom**: Vague evidence.
+    * **Detection**: Logs lack IDs/timing.
+    * **Correction**: Capture structured evidence.
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+| Simple baseline | Easy to explain | Hides timing assumptions | Initial implementation
+| Guarded transition | Protects core invariant | Requires careful modeling | Workflow changes
+| Explicit coordination | Visible dependencies | Can cause deadlocks | Multi-object workflows
+| Idempotent design | Handles duplicates | Requires deduplication | Queues, async workers
+| Observability-first | Strong evidence | Adds instrumentation | Failure proof assignments
+|===
+
+== Practical Application
+
+* Identify invariant relevant to async debugging.
+* Write sequential scenario expected to succeed.
+* Write pressure scenario exposing potential failure.
+* Add operation/entity IDs to logs for pressure scenario.
+* Capture before/after evidence if fix is applied.
+
+== Assignment Integration
+
+* Connect lecture concept to semester project.
+* Show relevant object/workflow/event in project domain.
+* Mastery through concrete evidence: structured logs, diagrams, etc.
+
+== Validation Questions
+
+1. What invariant is relevant to this lecture?
+2. What assumption makes design appear correct?
+3. How to force the failure in a repeatable test?
+4. What evidence proves failure occurred?
+5. Which design mechanism to choose first?
+6. How would the issue appear in two stacks?
+7. What to record in the Integrity Packet?
+
+== Summary
+
+* Debugging async systems requires reasoning about correctness.
+* Connect concepts to invariants, observable behavior, and trade-offs.
+
+== Further Reading
+
+* Search phrase: "Debugging Async Systems distributed systems failure mode"
+* Topic: structured logging and correlation IDs
+* Topic: invariants in stateful systems
+
+== Discussion
+
+* How can we ensure our async systems remain correct?
+* What trade-offs are acceptable in async design?

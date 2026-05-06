@@ -1,0 +1,191 @@
+= AI as a Thinking Partner in Software Development
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Introduction
+
+* AI as a collaborative tool
+* Ownership of design decisions
+* Example: Publish function scenario
+
+== Key Concept: AI as Draft
+
+* AI output = proposed artifact
+* Must be checked before use
+* Risk of false confidence
+* Need for verification workflow
+
+== Productive AI Use
+
+* Expanding options in design
+* Asking for alternatives and critiques
+* Avoiding AI as an answer machine
+* Prompts should focus on risks and validation
+
+== AI Failure Modes
+
+* Incorrect, incomplete, or misleading outputs
+* Need to deliberate on predictable failures
+* Examples: hallucinations, state assumptions
+
+== Concurrency Blind Spot
+
+* AI assumes single-threaded operations
+* Focus on systems with overlapping execution
+* Issues: race conditions, lost updates
+* Review for shared state and interleavings
+
+== Individual Integrity Packet
+
+* Record of AI usage and corrections
+* Distinguishes learning from outsourcing
+* Contents: prompts, critiques, evidence
+* Must be visible and connected to design
+
+== AI-Assisted Workflow
+
+[plantuml, target=workflow, format=svg, width=80%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+
+rectangle "Prompt AI for\ndraft or critique" as Prompt
+rectangle "AI output" as Output
+rectangle "Human review" as Review
+rectangle "Run tests\nand checks" as Tests
+rectangle "Validate claims\nagainst sources" as Sources
+rectangle "Analyze shared state\nand interleavings" as Concurrency
+rectangle "Revise design" as Revision
+rectangle "Document in\nIntegrity Packet" as IIP
+rectangle "Defend final work" as Defense
+
+Prompt -right-> Output
+Output -right-> Review
+Review --> Tests
+Review --> Sources
+Review --> Concurrency
+Tests --> Revision
+Sources --> Revision
+Concurrency --> Revision
+Revision -left-> IIP
+IIP -left-> Defense
+@enduml
+----
+
+== Worked Example
+
+* Problem: Publish function for an episode
+* Naive implementation may pass tests
+* Hidden assumption: no concurrent modifications
+
+== Failure Scenario
+
+* Two workers publish the same episode
+* Both notify subscribers simultaneously
+* AI did not handle state transitions correctly
+
+== Safer Design Direction
+
+* A design that ties side effects to state transitions
+* Only the operation that wins the transition emits effects
+
+```python
+def publish_episode(episode_id, expected_version):
+    changed = transition_status(
+        episode_id,
+        from_status="draft",
+        to_status="published",
+        expected_version=expected_version
+    )
+    if changed:
+        notify_subscribers_once(episode_id)
+```
+
+== Integrity Packet Entry
+
+* AI Output Summary: Simple check-then-save publish function
+* Critique: Did not discuss concurrency or notifications
+* Evidence: Test with multiple workers caused duplicates
+* Revision: Use atomic transition and ensure idempotent notification
+* Validation: Verified single publish transition per episode
+
+== Failure Modes and Anti-Patterns
+
+* AI produces code that compiles but violates invariants
+* Invented APIs or citations
+* Omissions of failure behavior
+* Student inability to explain AI output
+* Logged suggestions without critique
+
+== Trade-Off Analysis
+
+== Trade-Off Analysis
+
+[cols="1,1,1,1", options="header"]
+|===
+| Approach | Strengths | Weaknesses | When to Use
+
+| AI for brainstorming
+| Expands options quickly
+| Generic alternatives
+| Early design exploration
+
+| AI for code draft
+| Speeds implementation
+| Misses constraints
+| Reviewed code units
+
+| AI for test ideas
+| Surfaces edge cases
+| May lack relevance
+| Validation planning
+
+| AI for critique
+| Challenges assumptions
+| Misses domain-specific failures
+| After baseline design
+
+| No AI use
+| Forces independent thought
+| Reduces design exposure
+| When unaided work is needed
+|===
+
+== Practical Applications
+
+* Ask AI for object models and concurrency risks
+* Mark accepted, rejected suggestions
+* Run tests for AI-generated claims
+* Document in Integrity Packet
+
+== Assignment Connection
+
+* Supports A0 and A1 assignments
+* Use AI to assist reasoning, not replace it
+* Show mastery through revisions and critiques
+
+== Discussion
+
+* What is the difference between AI output and engineering evidence?
+* Why is concurrency a common blind spot in AI-generated code?
+
+== Summary
+
+* AI accelerates thought, not correctness
+* Need for verification against constraints
+* Visible and validated AI use is essential
+
+== Further Reading
+
+* [AI Usage Log Template](../../../assignments/shared/ai-usage-log-template.md)
+* [Integrity Packet Template](../../../assignments/shared/integrity-packet-template.md)

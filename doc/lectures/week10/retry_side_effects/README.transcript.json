@@ -1,0 +1,82 @@
+[
+  {
+    "slide": 1,
+    "topic": "Retry Side Effects",
+    "text": "Welcome everyone to this lecture on Retry Side Effects. Today, we will explore the complexities and challenges introduced when managing systems under concurrency pressure."
+  },
+  {
+    "slide": 2,
+    "topic": "Introduction",
+    "text": "To set the stage, this course lasts for approximately fifteen minutes, and it is tailored for those who have some foundational knowledge about object state and concurrency pressure. We'll delve into a crucial inquiry: As engineers, what must we analyze to trust the results of our systems under pressure?"
+  },
+  {
+    "slide": 3,
+    "topic": "Retry Storms",
+    "text": "Let's discuss Retry Storms. This phenomenon occurs when multiple workers attempt to retry their operations simultaneously, which can overwhelm the downstream system. The key idea here is that we need to make this behavior explicit to ensure our systems remain reliable."
+  },
+  {
+    "slide": 4,
+    "topic": "Partial Success Failure",
+    "text": "Now, consider Partial Success Failure. In this scenario, a worker may complete part of its task only to encounter a failure later on, leading to conflicts and duplication of work. This highlights the importance of keeping these potential scenarios in mind to maintain the reliability of our systems."
+  },
+  {
+    "slide": 5,
+    "topic": "Zombie Resources",
+    "text": "Next, we have Zombie Resources. This refers to the scenario where repeating retries create multiple copies of a resource, which can become problematic under pressure. Understanding how these mismanaged states can lead to resource wastage is crucial for effective system design."
+  },
+  {
+    "slide": 6,
+    "topic": "System Invariants",
+    "text": "Let's move on to System Invariants. These are critical conditions that must remain true across all valid executions. Identifying and maintaining these invariants ensures that our systems do not fall into inconsistencies or issues under various operating conditions."
+  },
+  {
+    "slide": 7,
+    "topic": "Concept Diagram",
+    "text": "Now, I want to introduce a concept diagram that ties together the themes of this lecture. It visually represents the relationships between retry side effects, our various failure modes, and design decision processes. This interconnectedness is vital as we analyze how design pressures influence overall system reliability."
+  },
+  {
+    "slide": 8,
+    "topic": "Worked Example: Podcast Domain",
+    "text": "Let’s look at a worked example using a podcast domain. Imagine a scenario where a publisher starts uploading a 1GB file, but at 99%, the connection drops. If the platform doesn’t support resumable uploads, retries could double the bandwidth consumption unnecessarily. This represents a hidden assumption about our operations succeeding without error."
+  },
+  {
+    "slide": 9,
+    "topic": "Failure Scenario Overview",
+    "text": "Moving to Failure Scenario Overview, we recognize that overlapping executions can introduce unexpected states. This is where our assumptions about execution design can breakdown, leading to failures that aren't aligned with our original designs."
+  },
+  {
+    "slide": 10,
+    "topic": "Improved Design Direction",
+    "text": "As we consider Improved Design Direction, we must prioritize naming the invariants and making transitions observable. We should implement controls—like version checks and idempotency keys—to provide assurance that our operations will proceed correctly despite the complexity of concurrency."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Modes and Anti-Patterns",
+    "text": "Here we address Failure Modes and Anti-Patterns that we often encounter. For instance, if our system only demonstrates success along a single happy path, it could lead to shortcomings under concurrency conditions. Recognizing this, we can introduce tests focused on failure scenarios to better understand resilience."
+  },
+  {
+    "slide": 12,
+    "topic": "Trade-Off Analysis",
+    "text": "Next, let’s examine Trade-Off Analysis. We have various approaches—each with strengths and weaknesses. For example, while a simple baseline might be easy to implement, it often hides critical timing assumptions. An effective designer must discern when to apply each strategy depending on their specific context."
+  },
+  {
+    "slide": 13,
+    "topic": "Practical Application",
+    "text": "Moving forward to Practical Application, I encourage you to identify the critical invariant related to retry side effects in your work. Additionally, ensure that your logs enhance traceability before stress testing your systems and capture evidence post-fix to support your findings."
+  },
+  {
+    "slide": 14,
+    "topic": "Assignment Integration",
+    "text": "For Assignment Integration, it’s essential to connect the concepts we discussed today to your project in A3. Show the relevant object, workflow, event, failure, or recovery mechanism specific to your domain, using concrete evidence like logs and diagrams."
+  },
+  {
+    "slide": 15,
+    "topic": "Discussion",
+    "text": "Let’s open the floor for discussion. Think about what the critical invariant is for this topic. What hidden assumptions might exist in baseline designs? How can we force failures in tests, and what evidence would support our claims? I would love to hear your thoughts."
+  },
+  {
+    "slide": 16,
+    "topic": "Summary",
+    "text": "In conclusion, retry side effects is a crucial lens through which we evaluate system correctness under realistic execution scenarios. We must learn to connect these concepts to the invariants we hold and collect evidence to validate our designs. Our designs should be stress-tested and supported with strong proof for maturity."
+  }
+]
