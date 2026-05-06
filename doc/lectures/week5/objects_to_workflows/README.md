@@ -1,7 +1,7 @@
 ﻿# From Objects to Workflows
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 5
 - Lecture: From Objects to Workflows
 - Duration: 15 minutes

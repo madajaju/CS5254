@@ -13,7 +13,7 @@ Dr. Darren Pulsipher
 
 == Overview
 
-* Course: CS 5891b - Object-Oriented Systems Under Concurrency
+* Course: CS 5254b - Object-Oriented Systems Under Concurrency
 * Week: 11
 * Duration: 15 minutes
 * Prerequisites: Prior lectures on object state, concurrency pressure

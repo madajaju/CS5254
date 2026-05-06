@@ -1,7 +1,7 @@
 ﻿# Object Ownership & Thread Confinement
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 4
 - Lecture: Object Ownership & Thread Confinement
 - Duration: 15 minutes

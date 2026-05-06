@@ -5,7 +5,7 @@
     "dialogue": [
       {
         "role": "teacher",
-        "text": "Welcome to today's lecture on Testing Coordination. This session is part of the CS 5891b course on Object-Oriented Systems Under Concurrency. Over the next fifteen minutes, we will explore how to analyze design pressures in stateful concurrent systems."
+        "text": "Welcome to today's lecture on Testing Coordination. This session is part of the CS 5254b course on Object-Oriented Systems Under Concurrency. Over the next fifteen minutes, we will explore how to analyze design pressures in stateful concurrent systems."
       }
     ]
   },

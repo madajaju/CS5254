@@ -1,4 +1,4 @@
-# CS 5891b — Lecture Plan (Object-Oriented Systems Under Concurrency)
+# CS 5254b — Lecture Plan (Object-Oriented Systems Under Concurrency)
 
 This document outlines the lecture sequence for the course.  
 Each week includes **4–6 focused lectures (~15 minutes each)** designed to:

@@ -1,7 +1,7 @@
 ﻿# Failure is Normal
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 13
 - Lecture: Failure is Normal
 - Duration: 15 minutes

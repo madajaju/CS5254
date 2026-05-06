@@ -13,7 +13,7 @@ Dr. Darren Pulsipher
 
 == Course Overview
 
-- Course: CS 5891b
+- Course: CS 5254b
 - Prerequisites: OOP, Stateful Objects
 - Duration: 15 minutes
 - Assignment: A1 - Object Model Under Concurrency

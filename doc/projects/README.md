@@ -1,6 +1,6 @@
-# CS 5891b Project Domains
+# CS 5254b Project Domains
 
-This package contains structured project domain definitions for **CS 5891b – Object-Oriented Systems Under Concurrency**.
+This package contains structured project domain definitions for **CS 5254b – Object-Oriented Systems Under Concurrency**.
 
 Each project domain includes an `index.md` file describing:
 

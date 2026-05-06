@@ -15,7 +15,7 @@
     "dialogue": [
       {
         "role": "teacher",
-        "text": "Let's start with an overview of the course. This week, we are continuing in CS 5891b, focusing on object-oriented systems under concurrency. Today's lecture will take about 15 minutes, and remember, it's essential to have a good grasp of prior subjects such as object state and concurrency pressure."
+        "text": "Let's start with an overview of the course. This week, we are continuing in CS 5254b, focusing on object-oriented systems under concurrency. Today's lecture will take about 15 minutes, and remember, it's essential to have a good grasp of prior subjects such as object state and concurrency pressure."
       },
       {
         "role": "student",

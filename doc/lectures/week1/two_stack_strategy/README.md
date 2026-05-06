@@ -3,7 +3,7 @@
 ## Video: https://youtu.be/MikyU_TYp8E
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 1
 - Lecture: Two-Stack Strategy
 - Duration: 15 minutes

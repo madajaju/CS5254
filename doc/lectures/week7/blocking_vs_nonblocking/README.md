@@ -1,7 +1,7 @@
 ﻿# Blocking vs. Non-Blocking Coordination
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 7
 - Lecture: Blocking vs. Non-Blocking Coordination
 - Duration: 15 minutes

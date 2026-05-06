@@ -8,8 +8,8 @@ const { spawnSync } = require("node:child_process");
 const ROOT = path.resolve(__dirname, "..");
 const DEFAULT_DOC_DIR = path.resolve(ROOT, "doc");
 const DEFAULT_OUTPUT_DIR = path.resolve(ROOT, ".output", "brightspace");
-const DEFAULT_GITHUB_BASE_URL = "https://github.com/madajaju/CS5891/";
-const COURSE_TITLE = "CS 5891b - Object-Oriented Systems Under Concurrency";
+const DEFAULT_GITHUB_BASE_URL = "https://github.com/madajaju/CS5254/";
+const COURSE_TITLE = "CS 5254b - Object-Oriented Systems Under Concurrency";
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
@@ -21,7 +21,7 @@ async function main() {
   const outputDir = path.resolve(args.output || DEFAULT_OUTPUT_DIR);
   const githubBaseUrl = normalizeBaseUrl(args["github-base-url"] || DEFAULT_GITHUB_BASE_URL);
   const packageDir = path.join(outputDir, "package");
-  const zipPath = path.join(outputDir, "cs5891-brightspace-import.zip");
+  const zipPath = path.join(outputDir, "cs5254-brightspace-import.zip");
 
   await recreateDir(packageDir);
 
@@ -67,7 +67,7 @@ Options:
 
 Output:
   .output/brightspace/package/
-  .output/brightspace/cs5891-brightspace-import.zip
+  .output/brightspace/cs5254-brightspace-import.zip
 
 The ZIP is an IMS Content Package with imsmanifest.xml at the root.`);
 }
@@ -337,7 +337,7 @@ function renderManifest(pages) {
   const organizations = renderOrganizationItems(pages);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<manifest identifier="cs5891_brightspace_import" version="1.0"
+<manifest identifier="cs5254_brightspace_import" version="1.0"
   xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
   xmlns:imsmd="http://www.imsglobal.org/xsd/imsmd_v1p2"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -353,8 +353,8 @@ function renderManifest(pages) {
       </imsmd:general>
     </imsmd:lom>
   </metadata>
-  <organizations default="org_cs5891">
-    <organization identifier="org_cs5891" structure="hierarchical">
+  <organizations default="org_cs5254">
+    <organization identifier="org_cs5254" structure="hierarchical">
       <title>${escapeXml(COURSE_TITLE)}</title>
       <item identifier="item_index" identifierref="res_index">
         <title>Course Home</title>

@@ -2,7 +2,7 @@
 
 ## Video: https://youtu.be/ywsOMy4n8g4
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 1
 - Lecture: Environment and Repo Structure
 - Duration: 15 minutes

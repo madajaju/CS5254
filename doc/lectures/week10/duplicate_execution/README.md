@@ -1,7 +1,7 @@
 ﻿# Duplicate Execution
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 10
 - Lecture: Duplicate Execution
 - Duration: 15 minutes

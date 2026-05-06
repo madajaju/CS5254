@@ -1,7 +1,7 @@
 ﻿# AI Coordination Designs: Critique & Validation
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 7
 - Lecture: AI Coordination Designs: Critique & Validation
 - Duration: 15 minutes

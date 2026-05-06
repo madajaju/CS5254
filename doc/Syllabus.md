@@ -1,6 +1,6 @@
 # Vanderbilt University – School of Engineering
 
-## CS 5891b – Object-Oriented Systems Under Concurrency
+## CS 5254b – Object-Oriented Systems Under Concurrency
 
 **Instructor:** Dr. Darren Pulsipher  
 **Meeting Time:** Thursdays, 5:00–6:15 PM CT (Online via Zoom)  

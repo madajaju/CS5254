@@ -1,7 +1,7 @@
 ﻿# Workflow Design Example
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 5
 - Lecture: Workflow Design Example
 - Duration: 15 minutes

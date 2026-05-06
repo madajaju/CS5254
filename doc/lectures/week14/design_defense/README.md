@@ -1,7 +1,7 @@
 ﻿# Defending Your Design
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 14
 - Lecture: Defending Your Design
 - Duration: 15 minutes

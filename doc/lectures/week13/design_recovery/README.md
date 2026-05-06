@@ -1,7 +1,7 @@
 ﻿# Designing for Recovery
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 13
 - Lecture: Designing for Recovery
 - Duration: 15 minutes

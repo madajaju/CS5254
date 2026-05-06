@@ -15,7 +15,7 @@
     "dialogue": [
       {
         "role": "teacher",
-        "text": "Let's start with an overview of the course details. This lecture is part of CS 5891b, focused on Object-Oriented Systems Under Concurrency. We are currently in week nine, and this lecture will last approximately 15 minutes. Ensure you are familiar with previous discussions about object state, concurrency pressure, structured evidence, and the Integrity Packet reasoning."
+        "text": "Let's start with an overview of the course details. This lecture is part of CS 5254b, focused on Object-Oriented Systems Under Concurrency. We are currently in week nine, and this lecture will last approximately 15 minutes. Ensure you are familiar with previous discussions about object state, concurrency pressure, structured evidence, and the Integrity Packet reasoning."
       }
     ]
   },

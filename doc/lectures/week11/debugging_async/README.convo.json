@@ -15,7 +15,7 @@
     "dialogue": [
       {
         "role": "teacher",
-        "text": "In this lecture, we will cover the context of our course, specifically Week 11 of CS 5891b. We'll discuss the design pressures in async systems and what prior knowledge you should have, such as object state and concurrency pressure. Lastly, I'll point out how this ties into our upcoming assignment, A3."
+        "text": "In this lecture, we will cover the context of our course, specifically Week 11 of CS 5254b. We'll discuss the design pressures in async systems and what prior knowledge you should have, such as object state and concurrency pressure. Lastly, I'll point out how this ties into our upcoming assignment, A3."
       }
     ]
   },

@@ -15,7 +15,7 @@
     "dialogue": [
       {
         "role": "teacher",
-        "text": "This course, CS 5891b, focuses on Object-Oriented Systems Under Concurrency. In our first week, we'll be diving deeper into concurrency concepts, and this lecture will last about 15 minutes. Make sure you're familiar with basic programming principles, runtime concepts, and object-oriented design as we embark on this journey."
+        "text": "This course, CS 5254b, focuses on Object-Oriented Systems Under Concurrency. In our first week, we'll be diving deeper into concurrency concepts, and this lecture will last about 15 minutes. Make sure you're familiar with basic programming principles, runtime concepts, and object-oriented design as we embark on this journey."
       }
     ]
   },

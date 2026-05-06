@@ -3,7 +3,7 @@
 ## Video: https://youtu.be/g7cvA0jWNRo
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 1
 - Lecture: The Integrity Packet
 - Duration: 15 minutes

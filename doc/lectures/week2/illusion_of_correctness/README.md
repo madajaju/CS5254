@@ -1,7 +1,7 @@
 ﻿# The Illusion of Correctness
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 2
 - Lecture: The Illusion of Correctness
 - Duration: 15 minutes

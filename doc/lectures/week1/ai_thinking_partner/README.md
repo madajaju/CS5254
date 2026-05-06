@@ -3,7 +3,7 @@
 
 ## Video: https://youtu.be/ci1Gn0JF8HE
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 1
 - Lecture: AI as a Thinking Partner in Software Development
 - Duration: 15 minutes

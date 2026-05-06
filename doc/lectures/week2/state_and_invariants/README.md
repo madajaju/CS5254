@@ -1,7 +1,7 @@
 ﻿# State & Invariants
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 2
 - Lecture: State & Invariants
 - Duration: 15 minutes

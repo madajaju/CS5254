@@ -15,7 +15,7 @@
     "dialogue": [
       {
         "role": "teacher",
-        "text": "In this course, CS 5891b, our focus is on Object-Oriented Systems Under Concurrency. This first week’s lecture will last approximately 15 minutes, and it's essential that you have a basic understanding of Git, command-line execution, package managers, and a well-set up editor or IDE as prerequisites for our discussions."
+        "text": "In this course, CS 5254b, our focus is on Object-Oriented Systems Under Concurrency. This first week’s lecture will last approximately 15 minutes, and it's essential that you have a basic understanding of Git, command-line execution, package managers, and a well-set up editor or IDE as prerequisites for our discussions."
       }
     ]
   },

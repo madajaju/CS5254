@@ -2,7 +2,7 @@
 
 ## Video: https://youtu.be/OamJDTaJU8M
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 1
 - Lecture: Course Model: Design Under Pressure
 - Duration: 15 minutes

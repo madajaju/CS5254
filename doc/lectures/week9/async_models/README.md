@@ -1,7 +1,7 @@
 ﻿# Async Models Across Languages
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 9
 - Lecture: Async Models Across Languages
 - Duration: 15 minutes

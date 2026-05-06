@@ -1,7 +1,7 @@
 ﻿# Retries, Compensation, Dead Letter Queues
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 13
 - Lecture: Retries, Compensation, Dead Letter Queues
 - Duration: 15 minutes

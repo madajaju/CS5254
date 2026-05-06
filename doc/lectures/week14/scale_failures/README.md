@@ -1,7 +1,7 @@
 ﻿# Where Systems Break at Scale
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 14
 - Lecture: Where Systems Break at Scale
 - Duration: 15 minutes

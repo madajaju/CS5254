@@ -5,7 +5,7 @@
     "dialogue": [
       {
         "role": "teacher",
-        "text": "Welcome to today's lecture on Midterm Preparation: How to Think, Not Memorize. This session is part of the course CS 5891b, focusing on Object-Oriented Systems Under Concurrency. We'll spend the next 15 minutes diving deep into how to analyze and design systems under concurrent constraints."
+        "text": "Welcome to today's lecture on Midterm Preparation: How to Think, Not Memorize. This session is part of the course CS 5254b, focusing on Object-Oriented Systems Under Concurrency. We'll spend the next 15 minutes diving deep into how to analyze and design systems under concurrent constraints."
       }
     ]
   },

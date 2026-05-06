@@ -5,7 +5,7 @@
     "dialogue": [
       {
         "role": "teacher",
-        "text": "Welcome to our lecture on what makes a good system for this course, CS 5891b, focusing on object-oriented systems under concurrency. In this lecture, we will cover essential criteria to evaluate and select project domains that possess sufficient complexity while being manageable within a semester."
+        "text": "Welcome to our lecture on what makes a good system for this course, CS 5254b, focusing on object-oriented systems under concurrency. In this lecture, we will cover essential criteria to evaluate and select project domains that possess sufficient complexity while being manageable within a semester."
       }
     ]
   },

@@ -1,7 +1,7 @@
 ﻿# AI Final Review: What Was Learned?
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 14
 - Lecture: AI Final Review: What Was Learned?
 - Duration: 15 minutes

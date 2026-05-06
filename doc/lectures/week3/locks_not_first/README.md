@@ -1,7 +1,7 @@
 ﻿# Why Locks Are Not the First Answer
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 3
 - Lecture: Why Locks Are Not the First Answer
 - Duration: 15 minutes

@@ -3,7 +3,7 @@
 ## Video: https://youtu.be/ovQMw-76VQU
 
 ## Metadata
-- Course: CS 5891b - Object-Oriented Systems Under Concurrency
+- Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 1
 - Lecture: What Makes a Good System for This Course
 - Duration: 15 minutes
