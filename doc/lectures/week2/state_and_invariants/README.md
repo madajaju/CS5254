@@ -1,5 +1,7 @@
 ﻿# State & Invariants
 
+
+## Video: https://youtu.be/NoySSu0VIDM
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 2

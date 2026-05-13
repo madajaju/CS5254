@@ -1,7 +1,6 @@
 ﻿# What Makes a Good System for This Course
 
 ## Video: https://youtu.be/ovQMw-76VQU
-
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 1

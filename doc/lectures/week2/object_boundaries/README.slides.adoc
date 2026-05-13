@@ -145,6 +145,7 @@ system emits side effect
 * Proves invalid interleavings are rejected or recovered with evidence.
 
 == Trade-Off Analysis
+[.stretch]
 [cols="1,1,1,1", options="header"]
 |===
 | Approach | Strengths | Weaknesses | When to Use

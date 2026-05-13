@@ -1,7 +1,6 @@
 ﻿# Two-Stack Strategy
 
 ## Video: https://youtu.be/MikyU_TYp8E
-
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 1

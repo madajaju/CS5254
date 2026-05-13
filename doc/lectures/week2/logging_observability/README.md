@@ -1,5 +1,7 @@
 ﻿# Structured Logging & Observability
 
+
+## Video: https://youtu.be/9eum4eYBuBc
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 2

@@ -9,7 +9,7 @@
     "build:pdf": "node generate-pdf.js",
     "build:video": "node generate-video.js ../doc/lectures/week2",
     "build:brightspace": "node generateBrightspace.js",
-    "upload:videos": "node uploadVideo.js --credentials youtube.creds.json",
+    "upload:videos": "node uploadVideo.js --credentials youtube.creds.json --week-dir ../doc/lectures/week2",
     "build:lectures:custom": "node buildLectures.js ./lectures ./lectureBuild.md",
     "start": "npm run build:lectures"
   },

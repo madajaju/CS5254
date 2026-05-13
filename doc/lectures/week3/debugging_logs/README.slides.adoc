@@ -117,6 +117,7 @@ system emits side effect
 ** Detection: Logs need operation IDs and timestamps
 
 == Trade-Off Analysis
+[.stretch]
 [cols="1,1,1,1", options="header"]
 |===
 | Approach | Strengths | Weaknesses | When to Use

@@ -1,7 +1,6 @@
 ﻿# The Integrity Packet
 
 ## Video: https://youtu.be/g7cvA0jWNRo
-
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 1

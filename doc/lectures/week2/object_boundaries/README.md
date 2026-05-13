@@ -1,5 +1,7 @@
 ﻿# Object Boundaries & Responsibilities
 
+
+## Video: https://youtu.be/bNcQYedtq6o
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 2

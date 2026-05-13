@@ -77,7 +77,7 @@ function parseArgs(argv) {
 
     return {
         target: positional[0] || '../doc',
-        apiKey: positional[1] || process.env.ELEVEN_LABS_API_KEY || '',
+        apiKey: positional[1] || process.env.ELEVENLABS_API_KEY || '',
         ...options,
     };
 }

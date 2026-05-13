@@ -139,6 +139,7 @@ M --> T
   * How to correct: Capture structured evidence linked to the design claim.
 
 == Trade-Off Analysis
+[.stretch]
 [cols="1,1,1,1", options="header"]
 |===
 | Approach | Strengths | Weaknesses | When to Use

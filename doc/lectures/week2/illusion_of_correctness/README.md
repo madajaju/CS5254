@@ -1,5 +1,7 @@
 ﻿# The Illusion of Correctness
 
+
+## Video: https://youtu.be/PnXLd-W7TmU
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 2

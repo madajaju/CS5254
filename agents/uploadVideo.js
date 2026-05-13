@@ -11,7 +11,7 @@ const SCOPES = [
   "https://www.googleapis.com/auth/youtube.upload",
 ];
 
-const DEFAULT_WEEK_DIR = path.resolve(__dirname, "../doc/lectures/week1");
+const DEFAULT_WEEK_DIR = path.resolve(__dirname, "../doc/lectures/week2");
 
 function parseArgs(argv) {
   const args = {};
@@ -113,10 +113,10 @@ function upsertVideoUrl(readmePath, videoUrl) {
   const lines = normalized.split("\n");
   const titleIndex = lines.findIndex((line) => /^#\s+/.test(line));
   if (titleIndex === -1) {
-    throw new Error(`README has no top-level title: ${readmePath}`);
+    lines.splice(2 , 0, "", `## Video: ${videoUrl}`);
+  } else {
+    lines.splice(titleIndex + 1, 0, "", `## Video: ${videoUrl}`);
   }
-
-  lines.splice(titleIndex + 1, 0, "", `## Video: ${videoUrl}`);
   return lines.join("\n").replace(/\n/g, eol);
 }
 

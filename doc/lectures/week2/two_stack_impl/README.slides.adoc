@@ -118,6 +118,7 @@ C --> D
 * Ensures temporal validity of operations.
 
 == Evidence Flow
+[.stretch]
 [cols="1,1,1,1", options="header"]
 |===
 | Claim | Evidence | Review Question | Decision
@@ -131,6 +132,7 @@ C --> D
 * Symptom: Fix changes behavior without baseline comparison.
 
 == Trade-Off Analysis
+[.stretch]
 [cols="1,1,1,1", options="header"]
 |===
 | Approach | Strengths | Weaknesses | When to Use

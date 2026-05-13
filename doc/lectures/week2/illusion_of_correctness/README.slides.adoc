@@ -176,6 +176,7 @@ B --> R : attempts transition
 ----
 
 == State Transition Model
+[.stretch]
 [cols="1,1", options="header"]
 |===
 | States | Transitions 
@@ -219,6 +220,7 @@ A --> C
 ** Detection: A reviewer cannot reconstruct the failure.
 
 == Trade-Off Analysis
+[.stretch]
 [cols="1,1,1", options="header"]
 |===
 | Approach | Strengths | Weaknesses 

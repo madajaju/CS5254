@@ -1,5 +1,7 @@
 ﻿# Two-Stack Implementation Strategy
 
+
+## Video: https://youtu.be/qv9QCXiW4Wo
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 2

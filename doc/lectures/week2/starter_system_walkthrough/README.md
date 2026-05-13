@@ -1,5 +1,7 @@
 ﻿# Starter System Walkthrough
 
+
+## Video: https://youtu.be/aQJ7aa9l-_s
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 2

@@ -119,6 +119,7 @@ C --> E : proves invariant handled
 * Symptom: Fix changes behavior; not compared to baseline.
 
 == Trade-Off Analysis
+[.stretch]
 [cols="1,1,1,1", options="header"]
 |===
 | Approach | Strengths | Weaknesses | When to Use |
