@@ -1,5 +1,7 @@
 ﻿# How to Force Failure
 
+
+## Video: https://youtu.be/xjfPal_MEcM
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 3

@@ -1,4 +1,4 @@
-= Race Conditions Step-by-Step
+﻿= Race Conditions Step-by-Step
 Dr. Darren Pulsipher
 :revealjs_theme: white
 :revealjs_slideNumber: true
@@ -19,6 +19,71 @@ Dr. Darren Pulsipher
 * Design corrections preserving invariants
 * Defend approaches in Integrity Packet
 
+
+== Learning Objectives Visual
+
+[plantuml, target=race_conditions_1_learning_objectives_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Race Conditions concept" as C
+rectangle "Hidden assumption" as H
+rectangle "Failure evidence" as F
+rectangle "Invariant" as I
+database "Integrity Packet" as P
+C -> H
+H -> F
+F --> I : explains
+I --> P : defended
+@enduml
+----
 == Opening Narrative
 
 A project appears correct during demonstrations.
@@ -26,6 +91,71 @@ A project appears correct during demonstrations.
 * Once under pressure, hidden assumptions emerge.
 * Key analysis needed: What must the engineer defend before trusting results?
 
+
+== Opening Narrative Visual
+
+[plantuml, target=race_conditions_2_opening_narrative_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Race Conditions demo" as Demo
+rectangle "Concurrent pressure" as Load
+rectangle "Assumption exposed" as Assumption
+rectangle "Design question" as Question
+database "Evidence needed" as Evidence
+Demo -> Load
+Load --> Assumption : changes timing
+Assumption -> Question
+Question --> Evidence : before trust
+@enduml
+----
 == Core Concept: Timeline Analysis
 
 * Definition: Mapping operations (Read, Modify, Write) across threads.
@@ -34,6 +164,69 @@ A project appears correct during demonstrations.
 * Failure Mode: Duplicate work, stale state, blocked progress.
 * Design Implication: Expose invariant, log transitions, validate tests.
 
+
+== Core Concept: Timeline Analysis Visual
+
+[plantuml, target=race_conditions_3_core_concept_timeline_anal, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Thread A" as A
+participant "Shared state" as S
+participant "Thread B" as B
+A --> S : read
+B --> S : read before A writes
+A --> S : modify write
+B --> S : modify write
+note over S: Timeline explains the race
+@enduml
+----
 == Core Concept: Lost Update
 
 * Definition: Two threads overwriting each other's changes.
@@ -42,6 +235,69 @@ A project appears correct during demonstrations.
 * Failure Mode: Duplicate work, stale state, blocked progress.
 * Design Implication: Expose invariant, log transitions, validate tests.
 
+
+== Core Concept: Lost Update Visual
+
+[plantuml, target=race_conditions_4_core_concept_lost_update_v, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Worker A" as A
+participant "Counter=7" as C
+participant "Worker B" as B
+A --> C : read 7
+B --> C : read 7
+A --> C : write 8
+B --> C : write 8
+note over C: One increment disappeared
+@enduml
+----
 == Core Concept: Check-Then-Act
 
 * Definition: Condition checked may change by action time.
@@ -50,6 +306,68 @@ A project appears correct during demonstrations.
 * Failure Mode: Duplicate work, stale state, blocked progress.
 * Design Implication: Expose invariant, log transitions, validate tests.
 
+
+== Core Concept: Check-Then-Act Visual
+
+[plantuml, target=race_conditions_5_core_concept_check_then_ac, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Thread A" as A
+participant "Queue" as Q
+participant "Thread B" as B
+A --> Q : check not empty
+B --> Q : remove item
+A --> Q : act on missing item
+note over Q: Condition changed between check and act
+@enduml
+----
 == Core Concept: System Invariant
 
 * Definition: Condition that must remain true in executions.
@@ -58,6 +376,67 @@ A project appears correct during demonstrations.
 * Failure Mode: Duplicate work, stale state, blocked progress.
 * Design Implication: Expose invariant, log transitions, validate tests.
 
+
+== Core Concept: System Invariant Visual
+
+[plantuml, target=race_conditions_6_core_concept_system_invari, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+[*] --> Available
+Available --> Claimed : claim once
+Claimed --> Done : complete
+Available --> DoubleClaimed : second claim wins race
+DoubleClaimed --> [*] : invalid
+Done --> [*]
+@enduml
+----
 == Core Concept: Failure Mode
 
 * Definition: Repeatable violation of invariant or lost progress.
@@ -66,28 +445,131 @@ A project appears correct during demonstrations.
 * Failure Mode: Duplicate work, stale state, blocked progress.
 * Design Implication: Expose invariant, log transitions, validate tests.
 
-== System Architecture View
 
-[plantuml, target=architecture_view, format=svg, width=80%]
+== Core Concept: Failure Mode Visual
+
+[plantuml, target=race_conditions_7_core_concept_failure_mode_, format=svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 skinparam shadowing false
 left to right direction
 
-rectangle "Race Conditions Step-by-Step" as Topic
-rectangle "Timeline Analysis" as A
-rectangle "Lost Update" as B
-rectangle "Check-Then-Act" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Overlapping reads" as R
+rectangle "Independent decisions" as D
+rectangle "Conflicting writes" as W
+rectangle "Stale result" as S
+R -> D
+D -> W
+W -> S
+@enduml
+----
+== System Architecture View
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+[plantuml, target=race_conditions_8_system_architecture_view, format=svg, width=80%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "User request" as U
+rectangle "Concurrent workers" as W
+database "Contested record" as R
+rectangle "Race window" as X
+database "Timeline evidence" as E
+U -> W
+W --> R : read modify write
+R -> X
+X -> E
 @enduml
 ----
 
@@ -102,26 +584,347 @@ D --> A : refine
 
 * **Visual Mapping**: Vertical timeline mapping threads.
 
+
+== Worked Example Visual
+
+[plantuml, target=race_conditions_9_worked_example_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Podcast request A" as A
+participant "Episode row" as E
+participant "Podcast request B" as B
+A --> E : read ready
+B --> E : read ready
+A --> E : publish
+B --> E : publish stale copy
+note over E: Domain story grounds the race
+@enduml
+----
+== Lost Update Timeline
+
+[plantuml, target=race_conditions_10_lost_update_timeline, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Thread A" as A
+participant "Value x=10" as X
+participant "Thread B" as B
+A --> X : read 10
+B --> X : read 10
+A --> X : write 11
+B --> X : write 9
+note over X: Last writer erases the first update
+@enduml
+----
+
 == Failure Scenario
 
 * Overlapping execution can lead to stale state or executions.
 * Not just a syntax bug; mismatch between design assumptions and execution.
 
+
+== Failure Scenario Visual
+
+[plantuml, target=race_conditions_11_failure_scenario_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Request A" as A
+participant "Episode status" as E
+participant "Request B" as B
+A --> E : sees pending
+B --> E : sees pending
+A --> E : publishes
+B --> E : publishes again
+note over E: Race creates duplicate side effect
+@enduml
+----
 == Corrected Design Direction
 
 * Name the invariant, make transitions observable.
 * Implement correctness controls: version checks, idempotency keys, state-machine guards.
 
+
+== Corrected Design Direction Visual
+
+[plantuml, target=race_conditions_12_corrected_design_directio, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Read expected version" as R
+rectangle "Attempt compare-and-set" as C
+rectangle "Single winner" as W
+rectangle "Loser retries or aborts" as L
+database "Trace" as T
+R -> C
+C -> W
+C -> L
+W --> T : committed
+L --> T : rejected
+@enduml
+----
+== Design Pattern Selection Visual
+
+[plantuml, target=race_conditions_13_design_pattern_selection_, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Race Conditions signal" as S
+rectangle "Invariant risk" as I
+rectangle "Pattern choice" as P
+rectangle "Trade-off" as T
+rectangle "Evidence" as E
+S -> I
+I --> P : selects
+P -> T : introduces
+T --> E : validate
+@enduml
+----
+
 == Trade-Off Analysis
 
-[cols="1,1,1,1", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
 | Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | Initial implementation comparison
-| Guarded state transition | Protects core invariant | Requires careful modeling | Workflow steps and reservations
-| Explicit coordination | Makes dependencies visible | Can introduce deadlock | Multi-object workflows
-| Idempotent design | Handles duplicate work | Needs deduplication control | Queues, retries, external calls
-| Observability-first design | Strong evidence for review | Adds instrumentation work | Assignments needing proof
+| Baseline | Easy to explain | Hides timing | Initial comparison
+| Guarded transition | Protects invariant | Needs modeling | Reservations
+| Coordination | Visible dependencies | Deadlock risk | Multi-object flows
+| Idempotency | Handles duplicates | Needs keys | Queues, retries
+| Observability | Review evidence | Adds logging | Proof needed
 |===
 
 == Practical Application
@@ -135,12 +938,142 @@ Tomorrow morning:
 * Capture before/after evidence when applying fixes.
 * Update Integrity Packet with validation.
 
+
+== Practical Application Visual
+
+[plantuml, target=race_conditions_14_practical_application_vis, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Race Conditions invariant" as I
+rectangle "Sequential pass" as S
+rectangle "Pressure test" as P
+rectangle "Operation IDs" as L
+rectangle "Before / after" as B
+I -> S
+S -> P
+P --> L : instrument
+L --> B : compare
+@enduml
+----
 == Assignment Integration
 
 Connect this lecture to [A1](../../../assignments/A1/index.md).
 
 * Mastery demonstrated via evidence: runnable commands, structured logs, failure reproduction, Integrity Packet explanation.
 
+
+== Assignment Integration Visual
+
+[plantuml, target=race_conditions_15_assignment_integration_vi, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Race Conditions object" as O
+rectangle "Workflow transition" as W
+rectangle "Failure reproduction" as F
+database "Logs / traces" as L
+database "A1 Integrity Packet" as A1
+O -> W
+W -> F
+F --> L : captures
+L --> A1 : evidence
+@enduml
+----
 == Discussion
 
 1. What invariant is most relevant here?
@@ -158,6 +1091,71 @@ Race conditions are a critical reflection on system correctness under execution 
 * Connect concepts to invariants and observable behavior.
 * Mature designs require explanation, validation, and repair with evidence.
 
+
+== Summary Visual
+
+[plantuml, target=race_conditions_16_summary_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Race Conditions" as Topic
+rectangle "Assumption" as A
+rectangle "Pressure" as P
+rectangle "Invariant" as I
+rectangle "Evidence" as E
+Topic -> A
+A --> P : challenged by
+P -> I : must preserve
+I --> E : proven with
+@enduml
+----
 == Further Reading
 
 * Search: "Race Conditions Step-by-Step distributed systems failure mode"

@@ -226,7 +226,17 @@ A strong lecture deck should alternate between:
 * correction
 * evidence
 
-At least 45-60% of content slides MUST be diagram-only PlantUML slides. If fewer than 45% of content slides are diagram-only PlantUML slides, the deck is incomplete.
+At least 45-60% of the `==` slides MUST be diagram-only PlantUML slides. If fewer than 45% of the `==` slides are diagram-only PlantUML slides, the deck is incomplete.
+
+This is not optional. Do not create a deck with only one or two diagrams.
+
+Before returning, count:
+
+* total `==` slides
+* diagram-only PlantUML slides
+* diagram ratio = diagram-only PlantUML slides / total `==` slides
+
+If the ratio is below 45%, add or split concept slides until the ratio is at least 45%.
 
 ---
 
@@ -282,7 +292,7 @@ Failure slides should feel:
 
 # Required Visuals [TARGET]
 
-Aim for at least 50% of slides to be diagram-only PlantUML slides.
+Aim for 50% of `==` slides to be diagram-only PlantUML slides.
 
 This is a strong generation target, not a reason to create bad slides.
 If a table, code sample, or discussion question is clearly better for a slide, keep it.
@@ -290,10 +300,12 @@ But whenever a concept can be shown visually, prefer a separate PlantUML slide o
 
 Practical target:
 
-* Create 12-16 slides for a 15-minute lecture.
-* Use at least 6 diagram-only PlantUML slides when possible.
+* Create 22-32 `==` slides for a 15-minute lecture when the lecture has enough concepts.
+* Use 10-16 diagram-only PlantUML slides when possible.
 * Pair major text concepts with a separate diagram-only slide.
 * Show each failure scenario as a diagram-only slide unless code is essential.
+* If you create a concept slide, usually create the next slide as its diagram.
+* If the deck has only one PlantUML diagram, the deck is invalid.
 
 Use diagrams for:
 
@@ -309,10 +321,64 @@ Use diagrams for:
 
 Must Use:
 
-[plantuml, target=name, format=svg, width=80%]
+[plantuml, target=name, format=svg, width=100%]
 ----
 @startuml
-...
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+
+rectangle "Actor A" as A
+rectangle "Shared state" as S
+rectangle "Evidence log" as E
+
+A --> S : contested write
+S --> E : record transition
 @enduml
 ----
 
@@ -322,7 +388,15 @@ Rules:
 * short labels
 * clear arrows
 * readable on 16:9
-* avoid styling complexity
+* use `width=100%` on every PlantUML block
+* use `skinparam BackgroundColor #123456` so PlantUML images match the slide background
+* use white `DefaultFontColor` and `ArrowColor` so text outside boxes and relationship lines are visible
+* use `ArrowFontColor #ffd166`, `ArrowFontStyle bold`, and `ArrowFontSize 16` so relationship labels stand out
+* use white shape backgrounds, black shape text, and `BorderColor #123456` for rectangle/database/state/activity/note boxes
+* for sequence diagrams, include the `skinparam participant` and `skinparam sequence` blocks exactly as shown so participant boxes and lifelines have strong contrast
+* when an arrow has a label, use a longer arrow such as `A --> B : label`; do NOT use short labeled arrows like `A -> B : label`
+* use directional arrows such as `-right->` and `-down->` when that improves a 16:9 layout
+* avoid unnecessary styling beyond the required readability settings above
 
 ---
 
@@ -351,7 +425,8 @@ Tables must use valid AsciiDoc table syntax, never Markdown table syntax.
 
 Use this exact structure for a 4-column table:
 
-[cols="1,1,1,1", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
 | Approach | Strength | Weakness | Use
 | Baseline | Simple | Hides timing | First version
@@ -361,12 +436,13 @@ Use this exact structure for a 4-column table:
 
 Table rules:
 
-* Put `[cols="1,1,1,1", options="header"]` immediately before `|===`.
+* Put `[.stretch]` immediately before the table attributes.
+* Put `[cols="1,1,1,1", options="header", width="100%"]` immediately before `|===`.
 * Open and close every table with `|===`.
 * Do NOT use Markdown separator rows such as `|---|---|`.
 * Do NOT use Markdown-style tables.
 * Do NOT put bullets, PlantUML, source blocks, columns, or prose on a table slide.
-* Keep table cells short so the table fits on 16:9.
+* Keep table cells short so the table fills but still fits on 16:9.
 
 ---
 
@@ -466,6 +542,8 @@ Ensure:
 * visuals carry meaning
 * failure scenarios are included
 * pacing aligns with a 15-minute lecture
+* 45-60% of `==` slides are diagram-only PlantUML slides
+* every major concept that can benefit from a diagram has a separate diagram-only slide
 * every slide uses exactly one primary layout
 * no slide combines bullets with PlantUML, source blocks, or tables
 * all nested bullets start at column 1

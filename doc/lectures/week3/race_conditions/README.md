@@ -1,5 +1,7 @@
 ﻿# Race Conditions Step-by-Step
 
+
+## Video: https://youtu.be/9QxtkToU4vk
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 3

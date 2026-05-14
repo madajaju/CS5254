@@ -29,6 +29,16 @@
   },
   {
     "slide": 3,
+    "topic": "Course Overview Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Course Overview. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 4,
     "topic": "Learning Objectives",
     "dialogue": [
       {
@@ -46,7 +56,17 @@
     ]
   },
   {
-    "slide": 4,
+    "slide": 5,
+    "topic": "Learning Objectives Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram summarizes the path through the lecture: start with the core concept, expose the hidden assumption, connect it to failure evidence, and end with an invariant that can be defended in the Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 6,
     "topic": "Opening Narrative",
     "dialogue": [
       {
@@ -64,7 +84,17 @@
     ]
   },
   {
-    "slide": 5,
+    "slide": 7,
+    "topic": "Opening Narrative Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram turns the opening story into a reasoning path. A simple demonstration looks correct, but concurrency pressure exposes assumptions that must be checked with evidence before the result can be trusted."
+      }
+    ]
+  },
+  {
+    "slide": 8,
     "topic": "Core Concept: Mutable Shared State",
     "dialogue": [
       {
@@ -82,7 +112,17 @@
     ]
   },
   {
-    "slide": 6,
+    "slide": 9,
+    "topic": "Core Concept: Mutable Shared State Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Core Concept: Mutable Shared State. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 10,
     "topic": "Core Concept: Thread Safety",
     "dialogue": [
       {
@@ -100,7 +140,17 @@
     ]
   },
   {
-    "slide": 7,
+    "slide": 11,
+    "topic": "Core Concept: Thread Safety Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Core Concept: Thread Safety. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 12,
     "topic": "Core Concept: State Leakage",
     "dialogue": [
       {
@@ -118,7 +168,17 @@
     ]
   },
   {
-    "slide": 8,
+    "slide": 13,
+    "topic": "Core Concept: State Leakage Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Core Concept: State Leakage. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 14,
     "topic": "Core Concept: System Invariant",
     "dialogue": [
       {
@@ -136,7 +196,17 @@
     ]
   },
   {
-    "slide": 9,
+    "slide": 15,
+    "topic": "Core Concept: System Invariant Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Core Concept: System Invariant. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 16,
     "topic": "Core Concept: Failure Mode",
     "dialogue": [
       {
@@ -154,7 +224,17 @@
     ]
   },
   {
-    "slide": 10,
+    "slide": 17,
+    "topic": "Core Concept: Failure Mode Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This failure-mode diagram highlights the path from a plausible execution to a broken invariant. Use it to identify which assumption fails and what evidence would prove the failure is real."
+      }
+    ]
+  },
+  {
+    "slide": 18,
     "topic": "System Architecture View",
     "dialogue": [
       {
@@ -172,7 +252,7 @@
     ]
   },
   {
-    "slide": 11,
+    "slide": 19,
     "topic": "Worked Example: Problem Setup",
     "dialogue": [
       {
@@ -190,7 +270,37 @@
     ]
   },
   {
-    "slide": 12,
+    "slide": 20,
+    "topic": "Worked Example: Problem Setup Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This worked-example diagram grounds the concept in the project domain. Follow the object or workflow through the diagram and notice where concurrent timing can change what the system appears to guarantee."
+      }
+    ]
+  },
+  {
+    "slide": 21,
+    "topic": "Shared vs Local State",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This slide separates local state from shared state. Local variables live within one thread of execution and are usually easier to reason about. Shared heap objects cross execution boundaries, so they need ownership rules, invariants, or coordination before we can trust updates under pressure."
+      }
+    ]
+  },
+  {
+    "slide": 22,
+    "topic": "Ownership Boundary Pattern Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This boundary diagram shows why ownership matters. Calls enter through one coordinating component, which protects private state and records each decision so the invariant can be defended."
+      }
+    ]
+  },
+  {
+    "slide": 23,
     "topic": "Naive Implementation",
     "dialogue": [
       {
@@ -208,7 +318,27 @@
     ]
   },
   {
-    "slide": 13,
+    "slide": 24,
+    "topic": "Naive Execution Flow",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The naive execution flow assumes the shared value remains current between read and write. That assumption is fragile because another thread can change the object in the middle. By naming this flow explicitly, we can identify where ownership, version checks, or guarded transitions must be added."
+      }
+    ]
+  },
+  {
+    "slide": 25,
+    "topic": "Naive Execution Flow Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram exposes the naive execution assumption. It shows a clean read, decision, write, and side effect path, then invites us to ask what happens when another worker enters the path at the same time."
+      }
+    ]
+  },
+  {
+    "slide": 26,
     "topic": "Failure Scenario",
     "dialogue": [
       {
@@ -226,7 +356,17 @@
     ]
   },
   {
-    "slide": 14,
+    "slide": 27,
+    "topic": "Failure Scenario Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This failure-scenario diagram shows the concrete overlap that creates risk. The diagram is meant to make the timing visible so the bug is understood as a design mismatch, not just a code mistake."
+      }
+    ]
+  },
+  {
+    "slide": 28,
     "topic": "Corrected Design Direction",
     "dialogue": [
       {
@@ -244,7 +384,17 @@
     ]
   },
   {
-    "slide": 15,
+    "slide": 29,
+    "topic": "Corrected Design Direction Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram shows how the design moves from hoping execution is ordered to checking and recording the transition. The safer design either accepts, rejects, retries, or records the outcome with evidence."
+      }
+    ]
+  },
+  {
+    "slide": 30,
     "topic": "Why Is Improved Design Safer?",
     "dialogue": [
       {
@@ -262,7 +412,17 @@
     ]
   },
   {
-    "slide": 16,
+    "slide": 31,
+    "topic": "Why Is Improved Design Safer? Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram shows how the design moves from hoping execution is ordered to checking and recording the transition. The safer design either accepts, rejects, retries, or records the outcome with evidence."
+      }
+    ]
+  },
+  {
+    "slide": 32,
     "topic": "Failure Modes & Anti-Patterns",
     "dialogue": [
       {
@@ -280,7 +440,27 @@
     ]
   },
   {
-    "slide": 17,
+    "slide": 33,
+    "topic": "Failure Modes & Anti-Patterns Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This failure-mode diagram highlights the path from a plausible execution to a broken invariant. Use it to identify which assumption fails and what evidence would prove the failure is real."
+      }
+    ]
+  },
+  {
+    "slide": 34,
+    "topic": "Design Pattern Selection Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This pattern-selection diagram connects the observed symptom to an invariant risk, then to a design pattern and its trade-off. The pattern is justified only when it protects the property the system needs."
+      }
+    ]
+  },
+  {
+    "slide": 35,
     "topic": "Trade-Off Analysis",
     "dialogue": [
       {
@@ -298,7 +478,7 @@
     ]
   },
   {
-    "slide": 18,
+    "slide": 36,
     "topic": "Practical Application",
     "dialogue": [
       {
@@ -316,7 +496,17 @@
     ]
   },
   {
-    "slide": 19,
+    "slide": 37,
+    "topic": "Practical Application Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This practical-application diagram shows the workflow students should follow: name the invariant, run a sequential case, add pressure, instrument the behavior, and compare the before-and-after evidence."
+      }
+    ]
+  },
+  {
+    "slide": 38,
     "topic": "Assignment Integration",
     "dialogue": [
       {
@@ -334,7 +524,17 @@
     ]
   },
   {
-    "slide": 20,
+    "slide": 39,
+    "topic": "Assignment Integration Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram connects the lecture to A1. The project object, workflow transition, reproduced failure, and supporting logs should all feed into the Integrity Packet explanation."
+      }
+    ]
+  },
+  {
+    "slide": 40,
     "topic": "Validation Questions",
     "dialogue": [
       {
@@ -352,7 +552,17 @@
     ]
   },
   {
-    "slide": 21,
+    "slide": 41,
+    "topic": "Validation Questions Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This validation diagram shows how to test a design claim. Start with the claim, state the invariant, run the pressure case, inspect the trace, and decide whether the evidence supports the design."
+      }
+    ]
+  },
+  {
+    "slide": 42,
     "topic": "Summary",
     "dialogue": [
       {
@@ -370,7 +580,17 @@
     ]
   },
   {
-    "slide": 22,
+    "slide": 43,
+    "topic": "Summary Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This summary diagram reinforces the lecture's main reasoning chain: identify the assumption, apply pressure, preserve the invariant, and support the conclusion with observable evidence."
+      }
+    ]
+  },
+  {
+    "slide": 44,
     "topic": "Further Reading",
     "dialogue": [
       {
@@ -384,7 +604,7 @@
     ]
   },
   {
-    "slide": 23,
+    "slide": 45,
     "topic": "Discussion",
     "dialogue": [
       {

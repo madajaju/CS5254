@@ -1,4 +1,4 @@
-= What is Concurrency Really?
+﻿= What is Concurrency Really?
 Dr. Darren Pulsipher
 :revealjs_theme: white
 :revealjs_slideNumber: true
@@ -17,6 +17,71 @@ Dr. Darren Pulsipher
 * Concurrency raises hidden assumptions
 * Analyze and defend before trusting results
 
+
+== Opening Narrative Visual
+
+[plantuml, target=what_is_concurrency_1_opening_narrative_visu, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "What Is Concurrency demo" as Demo
+rectangle "Concurrent pressure" as Load
+rectangle "Assumption exposed" as Assumption
+rectangle "Design question" as Question
+database "Evidence needed" as Evidence
+Demo -> Load
+Load --> Assumption : changes timing
+Assumption -> Question
+Question --> Evidence : before trust
+@enduml
+----
 == Core Concepts
 
 * Interleaving
@@ -25,6 +90,70 @@ Dr. Darren Pulsipher
 ** Failure Mode: Duplicate work, stale state
 ** Design Implication: Expose invariants, log transitions
 
+
+== Core Concepts Visual
+
+[plantuml, target=what_is_concurrency_2_core_concepts_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Thread A" as A
+participant "Single CPU" as CPU
+participant "Thread B" as B
+A --> CPU : run slice
+CPU --> A : save point
+B --> CPU : run slice
+CPU --> B : save point
+A --> CPU : resume later
+note over CPU: Progress is interleaved, not simultaneous
+@enduml
+----
 == Core Concepts (continued)
 
 * Parallelism
@@ -33,6 +162,72 @@ Dr. Darren Pulsipher
 ** Failure Mode: Duplicate work, stale state
 ** Design Implication: Expose invariants, log transitions
 
+
+== Core Concepts (continued) Visual
+
+[plantuml, target=what_is_concurrency_3_core_concepts_continue, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Core 1" as C1
+rectangle "Core 2" as C2
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+database "Shared object" as S
+C1 -> A
+C2 -> B
+A --> S : write
+B --> S : write
+S --> S : ordering still matters
+@enduml
+----
 == Core Concepts (continued)
 
 * Context Switching
@@ -41,6 +236,71 @@ Dr. Darren Pulsipher
 ** Failure Mode: Duplicate work, stale state
 ** Design Implication: Expose invariants, log transitions
 
+
+== Core Concepts (continued) Visual
+
+[plantuml, target=what_is_concurrency_4_core_concepts_continue, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+state "Running A" as A
+state "Save registers" as Save
+state "Ready queue" as Q
+state "Restore B" as Restore
+state "Running B" as B
+A --> Save
+Save --> Q
+Q --> Restore
+Restore --> B
+B --> Q : preempted
+@enduml
+----
 == Core Concepts (continued)
 
 * Non-Determinism
@@ -49,6 +309,71 @@ Dr. Darren Pulsipher
 ** Failure Mode: Duplicate work, stale state
 ** Design Implication: Expose invariants, log transitions
 
+
+== Core Concepts (continued) Visual
+
+[plantuml, target=what_is_concurrency_5_core_concepts_continue, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Same input" as I
+rectangle "Schedule A first" as A
+rectangle "Schedule B first" as B
+rectangle "Outcome 1" as O1
+rectangle "Outcome 2" as O2
+I -> A
+I -> B
+A --> O1 : legal interleaving
+B --> O2 : different result
+@enduml
+----
 == Core Concepts (continued)
 
 * System Invariant
@@ -57,28 +382,130 @@ Dr. Darren Pulsipher
 ** Failure Mode: Duplicate work, stale state
 ** Design Implication: Expose invariants, log transitions
 
-== System / Architecture View
 
-[plantuml, target=architecture_view, format=svg, width=80%]
+== Core Concepts (continued) Visual
+
+[plantuml, target=what_is_concurrency_6_core_concepts_continue, format=svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+[*] --> Idle
+Idle --> Reserved : claim work
+Reserved --> Completed : finish once
+Reserved --> Failed : error path
+Failed --> Idle : retry allowed
+Completed --> [*]
+Reserved --> Reserved : duplicate claim rejected
+@enduml
+----
+== System / Architecture View
+
+[plantuml, target=what_is_concurrency_7_system_architecture_vi, format=svg, width=80%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 skinparam shadowing false
 left to right direction
 
-rectangle "What is Concurrency Really?" as Topic
-rectangle "Interleaving" as A
-rectangle "Parallelism" as B
-rectangle "Context Switching" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
-
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+rectangle "Scheduler" as S
+rectangle "Worker pool" as W
+database "Shared state" as D
+rectangle "Invariant guard" as G
+database "Trace log" as L
+S -> W
+W --> G : request transition
+G --> D : valid update
+G --> L : record decision
 @enduml
 ----
 
@@ -90,6 +517,134 @@ D --> A : refine
 * Race Condition
 ** Two threads read, increment, write, losing increments
 
+
+== Worked Example Visual
+
+[plantuml, target=what_is_concurrency_8_worked_example_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Worker A" as A
+participant "Episode" as E
+participant "Worker B" as B
+A --> E : read status=ready
+B --> E : read status=ready
+A --> E : mark processing
+B --> E : duplicate mark
+note over E: Race condition is visible in the timeline
+@enduml
+----
+== Interleaving vs Parallelism
+
+[plantuml, target=what_is_concurrency_9_interleaving_vs_parall, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Interleaving" as I
+rectangle "One CPU, sliced time" as IS
+rectangle "Parallelism" as P
+rectangle "Multiple cores, same time" as PS
+database "Shared state risk" as R
+I -> IS
+P -> PS
+IS --> R : ordering matters
+PS --> R : simultaneous access
+@enduml
+----
+
 == Naive Implementation Model
 
 * Assumes single operation in order
@@ -99,51 +654,567 @@ D --> A : refine
 ** System applies transition
 ** System emits side effect
 
+
+== Naive Implementation Model Visual
+
+[plantuml, target=what_is_concurrency_10_naive_implementation_, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Controller" as C
+rectangle "Service method" as S
+database "Current state" as D
+rectangle "Assumed order" as O
+rectangle "No pressure proof" as N
+C -> S
+S -> D
+D --> O : assumes fresh read
+O -> N
+@enduml
+----
 == Failure Scenario
 
 * Overlapping execution or partial failure risks
 * Stale state or late arrivals can occur
 * Mismatch between assumption and execution model
 
+
+== Failure Scenario Visual
+
+[plantuml, target=what_is_concurrency_11_failure_scenario_visu, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Request 1" as R1
+participant "Shared row" as Row
+participant "Request 2" as R2
+R1 --> Row : check available
+R2 --> Row : check available
+R1 --> Row : update
+R2 --> Row : late update
+note over Row: Assumption and execution disagree
+@enduml
+----
 == Improved Design Direction
 
 * Name invariant and ensure observable transitions
 * Add controls: version checks, idempotency
 * Focus on proactive orchestration and recovery
 
+
+== Improved Design Direction Visual
+
+[plantuml, target=what_is_concurrency_12_improved_design_direc, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Transition request" as R
+rectangle "Version check" as V
+rectangle "Idempotency key" as K
+rectangle "State-machine guard" as G
+database "Observable result" as O
+R -> V
+V -> K
+K -> G
+G --> O : accept or reject
+@enduml
+----
 == Why Improved Design Is Safer
 
 * Shifts focus from hope to proof
 * Ensures invalid interleavings are contained or recovered
 
+
+== Why Improved Design Is Safer Visual
+
+[plantuml, target=what_is_concurrency_13_why_improved_design_i, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Invalid interleaving" as Bad
+rectangle "Guard detects" as Guard
+rectangle "Reject" as Reject
+rectangle "Retry" as Retry
+database "Evidence trail" as Log
+Bad -> Guard
+Guard -> Reject
+Guard -> Retry
+Reject --> Log : reason
+Retry --> Log : attempt
+@enduml
+----
 == Failure Modes
 
 * Symptom: Passes happy-path demonstration
 ** Avoids conditions exposing design weakness
 * Correction: Add failure-focused tests.
 
+
+== Failure Modes Visual
+
+[plantuml, target=what_is_concurrency_14_failure_modes_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "What Is Concurrency happy path" as H
+rectangle "Pressure untested" as P
+rectangle "Hidden race" as R
+rectangle "Failure-focused test" as F
+H -> P
+P -> R
+R --> F : expose
+@enduml
+----
 == Failure Modes (continued)
 
 * Symptom: Names tool but not property
 ** Focus on mechanisms over invariants
 * Correction: State invariant then select mechanism.
 
+
+== Failure Modes (continued) Visual
+
+[plantuml, target=what_is_concurrency_15_failure_modes_continu, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "What Is Concurrency tool claim" as Tool
+rectangle "Property missing" as Prop
+rectangle "Invariant absent" as Inv
+rectangle "Correction" as Fix
+Tool --> Prop : not enough
+Prop -> Inv
+Inv --> Fix : state first
+@enduml
+----
 == Failure Modes (continued)
 
 * Symptom: Vague evidence
 ** Logs lack structure or detail
 * Correction: Link evidence to design claims.
 
+
+== Failure Modes (continued) Visual
+
+[plantuml, target=what_is_concurrency_16_failure_modes_continu, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "What Is Concurrency vague evidence" as V
+rectangle "Unlinked log line" as L
+rectangle "Unsupported claim" as C
+rectangle "Trace with IDs" as T
+rectangle "Defensible claim" as D
+V -> L
+L -> C
+C --> T : replace with
+T --> D : supports
+@enduml
+----
+== Design Pattern Selection Visual
+
+[plantuml, target=what_is_concurrency_17_design_pattern_select, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "What Is Concurrency signal" as S
+rectangle "Invariant risk" as I
+rectangle "Pattern choice" as P
+rectangle "Trade-off" as T
+rectangle "Evidence" as E
+S -> I
+I --> P : selects
+P --> T : introduces
+T --> E : validate
+@enduml
+----
+
 == Trade-Off Analysis
 
-[cols="1,1,1,1", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
 | Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides pressure assumptions | First implementation
-| Guarded transition | Protects core invariant | Requires modeling | Status changes
-| Explicit coordination | Makes dependencies clear | Can introduce bottlenecks | Multi-object workflows
-| Idempotent design | Handles duplicates | Requires deduplication | Queues, retries
-| Observability-first | Strong evidence | Adds instrumentation | Assignments requiring defense
+| Baseline | Easy to explain | Hides timing | First pass
+| Guarded transition | Protects invariant | Needs modeling | Status changes
+| Coordination | Makes order clear | Can bottleneck | Multi-object flows
+| Idempotency | Handles duplicates | Needs keys | Queues, retries
+| Observability | Strong evidence | Adds logging | Design defense
 |===
 
 == Practical Application
@@ -153,12 +1224,142 @@ D --> A : refine
 * Write pressure scenario to expose failure
 * Capture before/after evidence
 
+
+== Practical Application Visual
+
+[plantuml, target=what_is_concurrency_18_practical_application, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "What Is Concurrency invariant" as I
+rectangle "Sequential pass" as S
+rectangle "Pressure test" as P
+rectangle "Operation IDs" as L
+rectangle "Before / after" as B
+I -> S
+S -> P
+P --> L : instrument
+L --> B : compare
+@enduml
+----
 == Assignment Integration
 
 * Connect concepts to A1
 * Show relevant object, workflow, or failure
 * Provide structured evidence and Integrity Packet defense
 
+
+== Assignment Integration Visual
+
+[plantuml, target=what_is_concurrency_19_assignment_integratio, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "What Is Concurrency object" as O
+rectangle "Workflow transition" as W
+rectangle "Failure reproduction" as F
+database "Logs / traces" as L
+database "A1 Integrity Packet" as A1
+O -> W
+W -> F
+F --> L : captures
+L --> A1 : evidence
+@enduml
+----
 == Validation Questions
 
 1. What invariant most relevant?
@@ -169,11 +1370,140 @@ D --> A : refine
 6. How would failure appear in different stacks?
 7. What to record in Integrity Packet?
 
+
+== Validation Questions Visual
+
+[plantuml, target=what_is_concurrency_20_validation_questions_, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "What Is Concurrency claim" as C
+rectangle "Invariant named" as I
+rectangle "Pressure case" as P
+rectangle "Observed trace" as T
+rectangle "Decision" as D
+C --> I : what must hold
+I -> P
+P -> T
+T --> D : supports or refutes
+@enduml
+----
 == Summary
 
 * Reason about concurrency to ensure correctness
 * Connect concepts to observables, behaviors, and trade-offs
 
+
+== Summary Visual
+
+[plantuml, target=what_is_concurrency_21_summary_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+rectangle "What Is Concurrency" as Topic
+rectangle "Assumption" as A
+rectangle "Pressure" as P
+rectangle "Invariant" as I
+rectangle "Evidence" as E
+Topic -> A
+A --> P : challenged by
+P --> I : must preserve
+I --> E : proven with
+@enduml
+----
 == Further Reading
 
 * Search: "What is Concurrency Really? distributed systems failure mode"

@@ -21,6 +21,16 @@
   },
   {
     "slide": 3,
+    "topic": "Learning Objectives Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram summarizes the path through the lecture: start with the core concept, expose the hidden assumption, connect it to failure evidence, and end with an invariant that can be defended in the Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 4,
     "topic": "Opening Narrative",
     "dialogue": [
       {
@@ -30,7 +40,17 @@
     ]
   },
   {
-    "slide": 4,
+    "slide": 5,
+    "topic": "Opening Narrative Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram turns the opening story into a reasoning path. A simple demonstration looks correct, but concurrency pressure exposes assumptions that must be checked with evidence before the result can be trusted."
+      }
+    ]
+  },
+  {
+    "slide": 6,
     "topic": "Core Concept: Timeline Analysis",
     "dialogue": [
       {
@@ -40,7 +60,17 @@
     ]
   },
   {
-    "slide": 5,
+    "slide": 7,
+    "topic": "Core Concept: Timeline Analysis Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Core Concept: Timeline Analysis. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 8,
     "topic": "Core Concept: Lost Update",
     "dialogue": [
       {
@@ -50,7 +80,17 @@
     ]
   },
   {
-    "slide": 6,
+    "slide": 9,
+    "topic": "Core Concept: Lost Update Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This timeline makes the lost update visible. Two actors read overlapping state, compute from stale information, and write results that erase or duplicate work."
+      }
+    ]
+  },
+  {
+    "slide": 10,
     "topic": "Core Concept: Check-Then-Act",
     "dialogue": [
       {
@@ -60,7 +100,17 @@
     ]
   },
   {
-    "slide": 7,
+    "slide": 11,
+    "topic": "Core Concept: Check-Then-Act Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Core Concept: Check-Then-Act. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 12,
     "topic": "Core Concept: System Invariant",
     "dialogue": [
       {
@@ -70,7 +120,17 @@
     ]
   },
   {
-    "slide": 8,
+    "slide": 13,
+    "topic": "Core Concept: System Invariant Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Core Concept: System Invariant. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 14,
     "topic": "Core Concept: Failure Mode",
     "dialogue": [
       {
@@ -80,7 +140,17 @@
     ]
   },
   {
-    "slide": 9,
+    "slide": 15,
+    "topic": "Core Concept: Failure Mode Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This failure-mode diagram highlights the path from a plausible execution to a broken invariant. Use it to identify which assumption fails and what evidence would prove the failure is real."
+      }
+    ]
+  },
+  {
+    "slide": 16,
     "topic": "System Architecture View",
     "dialogue": [
       {
@@ -90,7 +160,7 @@
     ]
   },
   {
-    "slide": 10,
+    "slide": 17,
     "topic": "Worked Example",
     "dialogue": [
       {
@@ -100,7 +170,27 @@
     ]
   },
   {
-    "slide": 11,
+    "slide": 18,
+    "topic": "Worked Example Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This worked-example diagram grounds the concept in the project domain. Follow the object or workflow through the diagram and notice where concurrent timing can change what the system appears to guarantee."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Lost Update Timeline",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The lost update timeline shows why race conditions are easier to understand as ordered events. Two threads can both read a value, compute from the same stale observation, and then write results that erase one another. The diagram makes the lost work visible instead of treating the bug as mysterious."
+      }
+    ]
+  },
+  {
+    "slide": 20,
     "topic": "Failure Scenario",
     "dialogue": [
       {
@@ -110,7 +200,17 @@
     ]
   },
   {
-    "slide": 12,
+    "slide": 21,
+    "topic": "Failure Scenario Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This failure-scenario diagram shows the concrete overlap that creates risk. The diagram is meant to make the timing visible so the bug is understood as a design mismatch, not just a code mistake."
+      }
+    ]
+  },
+  {
+    "slide": 22,
     "topic": "Corrected Design Direction",
     "dialogue": [
       {
@@ -120,7 +220,27 @@
     ]
   },
   {
-    "slide": 13,
+    "slide": 23,
+    "topic": "Corrected Design Direction Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram shows how the design moves from hoping execution is ordered to checking and recording the transition. The safer design either accepts, rejects, retries, or records the outcome with evidence."
+      }
+    ]
+  },
+  {
+    "slide": 24,
+    "topic": "Design Pattern Selection Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This pattern-selection diagram connects the observed symptom to an invariant risk, then to a design pattern and its trade-off. The pattern is justified only when it protects the property the system needs."
+      }
+    ]
+  },
+  {
+    "slide": 25,
     "topic": "Trade-Off Analysis",
     "dialogue": [
       {
@@ -130,7 +250,7 @@
     ]
   },
   {
-    "slide": 14,
+    "slide": 26,
     "topic": "Practical Application",
     "dialogue": [
       {
@@ -140,7 +260,17 @@
     ]
   },
   {
-    "slide": 15,
+    "slide": 27,
+    "topic": "Practical Application Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This practical-application diagram shows the workflow students should follow: name the invariant, run a sequential case, add pressure, instrument the behavior, and compare the before-and-after evidence."
+      }
+    ]
+  },
+  {
+    "slide": 28,
     "topic": "Assignment Integration",
     "dialogue": [
       {
@@ -150,7 +280,17 @@
     ]
   },
   {
-    "slide": 16,
+    "slide": 29,
+    "topic": "Assignment Integration Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram connects the lecture to A1. The project object, workflow transition, reproduced failure, and supporting logs should all feed into the Integrity Packet explanation."
+      }
+    ]
+  },
+  {
+    "slide": 30,
     "topic": "Discussion",
     "dialogue": [
       {
@@ -160,7 +300,7 @@
     ]
   },
   {
-    "slide": 17,
+    "slide": 31,
     "topic": "Summary",
     "dialogue": [
       {
@@ -170,7 +310,17 @@
     ]
   },
   {
-    "slide": 18,
+    "slide": 32,
+    "topic": "Summary Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This summary diagram reinforces the lecture's main reasoning chain: identify the assumption, apply pressure, preserve the invariant, and support the conclusion with observable evidence."
+      }
+    ]
+  },
+  {
+    "slide": 33,
     "topic": "Further Reading",
     "dialogue": [
       {

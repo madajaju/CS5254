@@ -1,4 +1,4 @@
-= Debugging Concurrency with Logs
+﻿= Debugging Concurrency with Logs
 Dr. Darren Pulsipher
 :revealjs_theme: white
 :revealjs_slideNumber: true
@@ -18,11 +18,141 @@ Dr. Darren Pulsipher
 * Design corrections preserving relevant invariants
 * Defend chosen approaches in Integrity Packet
 
+
+== Learning Objectives Visual
+
+[plantuml, target=debugging_logs_1_learning_objectives_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Debugging Logs concept" as C
+rectangle "Hidden assumption" as H
+rectangle "Failure evidence" as F
+rectangle "Invariant" as I
+database "Integrity Packet" as P
+C -> H
+H -> F
+F --> I : explains
+I --> P : defended
+@enduml
+----
 == Opening Narrative
 * Course project appears correct during demo
 * Concurrency or operational pressure exposes hidden assumptions
 * Analyze and defend before trusting results
 
+
+== Opening Narrative Visual
+
+[plantuml, target=debugging_logs_2_opening_narrative_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Debugging Logs demo" as Demo
+rectangle "Concurrent pressure" as Load
+rectangle "Assumption exposed" as Assumption
+rectangle "Design question" as Question
+database "Evidence needed" as Evidence
+Demo -> Load
+Load --> Assumption : changes timing
+Assumption -> Question
+Question --> Evidence : before trust
+@enduml
+----
 == Interleaved Log Analysis
 * Definition: A method for validating concurrent behavior
 * Importance: Ensures system reliability under pressure
@@ -30,6 +160,69 @@ Dr. Darren Pulsipher
 * Failure Mode: Can result in duplicate work or misleading evidence
 * Design Implication: Log transitions and validate tests
 
+
+== Interleaved Log Analysis Visual
+
+[plantuml, target=debugging_logs_3_interleaved_log_analysis_vi, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Worker A" as A
+participant "Log stream" as L
+participant "Worker B" as B
+A --> L : op=42 read DRAFT
+B --> L : op=77 read DRAFT
+A --> L : op=42 write PROCESSING
+B --> L : op=77 write PROCESSING
+note over L: Sort by entity and timestamp, then test invariant
+@enduml
+----
 == System Invariant
 * Definition: A condition maintaining truth across executions
 * Importance: Key to trusting systems under concurrency
@@ -37,6 +230,67 @@ Dr. Darren Pulsipher
 * Failure Mode: Leads to blocked progress and stale states
 * Design Implication: Log transitions to validate behavior
 
+
+== System Invariant Visual
+
+[plantuml, target=debugging_logs_4_system_invariant_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+[*] --> Draft
+Draft --> Processing : reserve once
+Processing --> Cleaned : finish
+Draft --> DuplicateProcessing : second reservation
+DuplicateProcessing --> [*] : invalid trace
+Cleaned --> [*]
+@enduml
+----
 == Failure Mode
 * Definition: Repeatable system violations of invariants
 * Importance: Highlights conditions for trust in the system
@@ -44,6 +298,69 @@ Dr. Darren Pulsipher
 * Failure Mode: Causes duplicate work or blocked workflows
 * Design Implication: Log critical transitions for validation
 
+
+== Failure Mode Visual
+
+[plantuml, target=debugging_logs_5_failure_mode_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+database "Log lines" as L
+rectangle "Same entity ID" as E
+rectangle "Two start events" as S
+rectangle "Invariant violation" as V
+L -> E
+E --> S : grouped by
+S -> V
+@enduml
+----
 == Design Trade-Off
 * Definition: Choices between competing qualities
 * Importance: Reveals priorities in system design
@@ -51,26 +368,132 @@ Dr. Darren Pulsipher
 * Failure Mode: May lead to hidden issues in execution
 * Design Implication: Log transitions, validate workings
 
-== System Architecture View
-[plantuml, target=architecture, format=svg, width=80%]
+
+== Design Trade-Off Visual
+
+[plantuml, target=debugging_logs_6_design_trade_off_visual, format=svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 skinparam shadowing false
+top to bottom direction
 
-rectangle "Debugging Concurrency with Logs" as Topic
-rectangle "Interleaved Log Analysis" as A
-rectangle "System Invariant" as B
-rectangle "Failure Mode" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Debugging Logs choice" as D
+rectangle "Correctness" as C
+rectangle "Throughput" as T
+rectangle "Simplicity" as S
+rectangle "Observability" as O
+C --> D : required
+T --> D : cost
+S --> D : maintain-\nability
+O --> D : evidence
+@enduml
+----
+== System Architecture View
+[plantuml, target=debugging_logs_7_system_architecture_view, format=svg, width=80%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+rectangle "Application code" as A
+database "Structured logger" as L
+rectangle "Correlation fields" as C
+database "Trace store" as T
+rectangle "Invariant checker" as I
+A -> L : emits\ntransition
+L --> C
+C -> T : searchable\nevents
+T --> I
 @enduml
 ----
 
@@ -82,15 +505,214 @@ D --> A : refine
 ** `12:00:00.006 [Thread-2] Updating status to PROCESSING`
 * Analysis: Validates read before update conflict
 
+
+== Worked Example Visual
+
+[plantuml, target=debugging_logs_8_worked_example_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+database "Podcast logs" as L
+rectangle "episodeId" as E
+rectangle "read before update" as R
+rectangle "two workers" as W
+rectangle "conflict explained" as C
+L -> E
+E -> R
+R --> W
+W --> C
+@enduml
+----
+== Log Correlation Path
+[plantuml, target=debugging_logs_9_log_correlation_path, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+database "Raw events" as R
+rectangle "operationId" as O
+rectangle "entityId" as E
+rectangle "ordered timeline" as T
+rectangle "invariant verdict" as V
+R --> O
+R --> E
+O -> T : correlate
+E -> T : group
+T --> V
+@enduml
+----
+
 == Naive Implementation
 * Assumption: Operation occurs once, in order
 * Execution model: Hidden in method behavior
+
+== Naive Execution Flow
+
 ```text
 actor performs operation
 system reads current state
 system applies transition
 system emits side effect
 ```
+
+== Naive Execution Flow Visual
+
+[plantuml, target=debugging_logs_10_naive_execution_flow_visua, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Method called" as M
+rectangle "No operation ID" as N
+rectangle "No before state" as B
+database "Ambiguous log" as L
+rectangle "Cannot prove ordering" as C
+M -> N
+M -> B
+N -> L
+B -> L
+L -> C
+@enduml
+----
 
 == Failure Scenario
 * Overlapping execution leads to:
@@ -99,14 +721,207 @@ system emits side effect
 ** Workflow becoming stuck
 * Not just a syntax bug; breaks the design assumption
 
+
+== Failure Scenario Visual
+
+[plantuml, target=debugging_logs_11_failure_scenario_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Failure Scenario" as C
+rectangle "Pressure" as P
+rectangle "Invariant" as I
+rectangle "Observable evidence" as E
+C -> P
+P -> I
+I -> E
+@enduml
+----
 == Corrected Design Direction
 * Name the invariant and make transitions observable
 * Controls for correctness: Version checks, idempotency, coordination, retries
 
+
+== Corrected Design Direction Visual
+
+[plantuml, target=debugging_logs_12_corrected_design_direction, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Before state" as B
+rectangle "Decision" as D
+rectangle "After state" as A
+database "Correlation ID" as C
+rectangle "Replayable transition" as R
+B -> D
+D -> A
+D --> C : tagged with
+C -> R
+@enduml
+----
 == Why Safer Design?
 * Moves from assumption of execution order to proof of valid interleavings
 * Ensures invalid scenarios are rejected or recoverable
 
+
+== Why Safer Design? Visual
+
+[plantuml, target=debugging_logs_13_why_safer_design_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Assumed order" as H
+rectangle "Observed order" as O
+rectangle "Rejected transition" as R
+database "Reason code" as L
+rectangle "Recoverable path" as P
+H --> O : checked against
+O -> R
+R --> L : logged
+L -> P
+@enduml
+----
 == Failure Modes
 * Symptom: Single happy-path demonstration passes
 ** Test does not simulate real pressure or timing
@@ -116,16 +931,144 @@ system emits side effect
 * Symptom: Vague evidence fails to support claims
 ** Detection: Logs need operation IDs and timestamps
 
+
+== Failure Modes Visual
+
+[plantuml, target=debugging_logs_14_failure_modes_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Debugging Logs tool claim" as Tool
+rectangle "Property missing" as Prop
+rectangle "Invariant absent" as Inv
+rectangle "Correction" as Fix
+Tool --> Prop : not enough
+Prop -> Inv
+Inv --> Fix : state first
+@enduml
+----
+== Design Pattern Selection Visual
+
+[plantuml, target=debugging_logs_15_design_pattern_selection_v, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Debugging Logs signal" as S
+rectangle "Invariant risk" as I
+rectangle "Pattern choice" as P
+rectangle "Trade-off" as T
+rectangle "Evidence" as E
+S -> I
+I --> P : selects
+P --> T : introduces
+T --> E : validate
+@enduml
+----
+
 == Trade-Off Analysis
 [.stretch]
-[cols="1,1,1,1", options="header"]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
 | Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
-| Guarded state transition | Protects invariants | Careful state modeling needed | Status changes
-| Explicit coordination | Visible dependencies | Risk of deadlock | Multi-object workflows
-| Idempotent design | Handles duplicates | Requires deduplication | Queues and retries
-| Observability-first | Strong review evidence | Adds instrumentation | Failure proof requirements
+| Baseline | Easy to explain | Hides timing | First pass
+| Guarded transition | Protects invariant | Needs modeling | Status changes
+| Coordination | Visible dependencies | Deadlock risk | Multi-object flows
+| Idempotency | Handles duplicates | Needs keys | Queues, retries
+| Observability | Review evidence | Adds logging | Failure proof
 |===
 
 == Practical Application
@@ -135,11 +1078,141 @@ system emits side effect
 * Add operation IDs to logs
 * Capture evidence for validation post-fix
 
+
+== Practical Application Visual
+
+[plantuml, target=debugging_logs_16_practical_application_visu, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Debugging Logs invariant" as I
+rectangle "Sequential pass" as S
+rectangle "Pressure test" as P
+rectangle "Operation IDs" as L
+rectangle "Before / after" as B
+I -> S
+S -> P
+P --> L : instrument
+L --> B : compare
+@enduml
+----
 == Assignment Integration
 * Connect to [A1](../../../assignments/A1/index.md)
 * Show relevant object, workflow, or failure mechanism
 * Demonstrate mastery with structured evidence
 
+
+== Assignment Integration Visual
+
+[plantuml, target=debugging_logs_17_assignment_integration_vis, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Debugging Logs object" as O
+rectangle "Workflow transition" as W
+rectangle "Failure reproduction" as F
+database "Logs / traces" as L
+database "A1 Integrity Packet" as A1
+O -> W
+W -> F
+F --> L : captures
+L --> A1 : evidence
+@enduml
+----
 == Validation Questions
 1. What invariant is relevant to this lecture?
 2. What hidden assumption could mislead the design?
@@ -149,11 +1222,141 @@ system emits side effect
 6. How does the issue differ across implementation stacks?
 7. What to record in Integrity Packet for defense?
 
+
+== Validation Questions Visual
+
+[plantuml, target=debugging_logs_18_validation_questions_visua, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Debugging Logs claim" as C
+rectangle "Invariant named" as I
+rectangle "Pressure case" as P
+rectangle "Observed trace" as T
+rectangle "Decision" as D
+C --> I : what must hold
+I -> P
+P -> T
+T --> D : supports or refutes
+@enduml
+----
 == Summary
 * Central insight: Logs help reason about concurrency correctness
 * Connect concepts to invariants and evidence
 * Mature design requires proof, stress, and validation
 
+
+== Summary Visual
+
+[plantuml, target=debugging_logs_19_summary_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Debugging Logs" as Topic
+rectangle "Assumption" as A
+rectangle "Pressure" as P
+rectangle "Invariant" as I
+rectangle "Evidence" as E
+Topic -> A
+A --> P : challenged by
+P --> I : must preserve
+I --> E : proven with
+@enduml
+----
 == Discussion
 * What are common failures in your experience with concurrency?
 * How do design decisions impact system reliability?

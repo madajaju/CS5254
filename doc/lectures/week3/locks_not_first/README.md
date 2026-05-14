@@ -1,5 +1,7 @@
 ﻿# Why Locks Are Not the First Answer
 
+
+## Video: https://youtu.be/Yg5jAPQHPTw
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 3

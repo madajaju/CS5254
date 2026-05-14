@@ -21,6 +21,16 @@
   },
   {
     "slide": 3,
+    "topic": "Learning Objectives Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram summarizes the path through the lecture: start with the core concept, expose the hidden assumption, connect it to failure evidence, and end with an invariant that can be defended in the Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 4,
     "topic": "Opening Narrative",
     "dialogue": [
       {
@@ -30,7 +40,17 @@
     ]
   },
   {
-    "slide": 4,
+    "slide": 5,
+    "topic": "Opening Narrative Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram turns the opening story into a reasoning path. A simple demonstration looks correct, but concurrency pressure exposes assumptions that must be checked with evidence before the result can be trusted."
+      }
+    ]
+  },
+  {
+    "slide": 6,
     "topic": "Interleaved Log Analysis",
     "dialogue": [
       {
@@ -40,7 +60,17 @@
     ]
   },
   {
-    "slide": 5,
+    "slide": 7,
+    "topic": "Interleaved Log Analysis Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Interleaved Log Analysis. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 8,
     "topic": "System Invariant",
     "dialogue": [
       {
@@ -50,7 +80,17 @@
     ]
   },
   {
-    "slide": 6,
+    "slide": 9,
+    "topic": "System Invariant Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports System Invariant. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 10,
     "topic": "Failure Mode",
     "dialogue": [
       {
@@ -60,7 +100,17 @@
     ]
   },
   {
-    "slide": 7,
+    "slide": 11,
+    "topic": "Failure Mode Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This failure-mode diagram highlights the path from a plausible execution to a broken invariant. Use it to identify which assumption fails and what evidence would prove the failure is real."
+      }
+    ]
+  },
+  {
+    "slide": 12,
     "topic": "Design Trade-Off",
     "dialogue": [
       {
@@ -70,7 +120,17 @@
     ]
   },
   {
-    "slide": 8,
+    "slide": 13,
+    "topic": "Design Trade-Off Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Design Trade-Off. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 14,
     "topic": "System Architecture View",
     "dialogue": [
       {
@@ -80,7 +140,7 @@
     ]
   },
   {
-    "slide": 9,
+    "slide": 15,
     "topic": "Worked Example",
     "dialogue": [
       {
@@ -90,7 +150,27 @@
     ]
   },
   {
-    "slide": 10,
+    "slide": 16,
+    "topic": "Worked Example Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This worked-example diagram grounds the concept in the project domain. Follow the object or workflow through the diagram and notice where concurrent timing can change what the system appears to guarantee."
+      }
+    ]
+  },
+  {
+    "slide": 17,
+    "topic": "Log Correlation Path",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The log correlation path shows how raw log lines become useful evidence. We start by tagging each operation and entity, then group related events into a single timeline. Once the timeline is ordered, we can test whether the invariant held or whether the trace exposes a concurrency failure."
+      }
+    ]
+  },
+  {
+    "slide": 18,
     "topic": "Naive Implementation",
     "dialogue": [
       {
@@ -100,7 +180,27 @@
     ]
   },
   {
-    "slide": 11,
+    "slide": 19,
+    "topic": "Naive Execution Flow",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This naive execution flow makes the hidden assumption visible. The code reads state, decides what to do, updates the object, and emits a side effect as if no other worker can interfere. Under concurrency, that linear story is exactly what we need to challenge with logs."
+      }
+    ]
+  },
+  {
+    "slide": 20,
+    "topic": "Naive Execution Flow Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram exposes the naive execution assumption. It shows a clean read, decision, write, and side effect path, then invites us to ask what happens when another worker enters the path at the same time."
+      }
+    ]
+  },
+  {
+    "slide": 21,
     "topic": "Failure Scenario",
     "dialogue": [
       {
@@ -110,7 +210,17 @@
     ]
   },
   {
-    "slide": 12,
+    "slide": 22,
+    "topic": "Failure Scenario Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This failure-scenario diagram shows the concrete overlap that creates risk. The diagram is meant to make the timing visible so the bug is understood as a design mismatch, not just a code mistake."
+      }
+    ]
+  },
+  {
+    "slide": 23,
     "topic": "Corrected Design Direction",
     "dialogue": [
       {
@@ -120,7 +230,17 @@
     ]
   },
   {
-    "slide": 13,
+    "slide": 24,
+    "topic": "Corrected Design Direction Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram shows how the design moves from hoping execution is ordered to checking and recording the transition. The safer design either accepts, rejects, retries, or records the outcome with evidence."
+      }
+    ]
+  },
+  {
+    "slide": 25,
     "topic": "Why Safer Design?",
     "dialogue": [
       {
@@ -130,7 +250,17 @@
     ]
   },
   {
-    "slide": 14,
+    "slide": 26,
+    "topic": "Why Safer Design? Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram shows how the design moves from hoping execution is ordered to checking and recording the transition. The safer design either accepts, rejects, retries, or records the outcome with evidence."
+      }
+    ]
+  },
+  {
+    "slide": 27,
     "topic": "Failure Modes",
     "dialogue": [
       {
@@ -140,7 +270,27 @@
     ]
   },
   {
-    "slide": 15,
+    "slide": 28,
+    "topic": "Failure Modes Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This failure-mode diagram highlights the path from a plausible execution to a broken invariant. Use it to identify which assumption fails and what evidence would prove the failure is real."
+      }
+    ]
+  },
+  {
+    "slide": 29,
+    "topic": "Design Pattern Selection Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This pattern-selection diagram connects the observed symptom to an invariant risk, then to a design pattern and its trade-off. The pattern is justified only when it protects the property the system needs."
+      }
+    ]
+  },
+  {
+    "slide": 30,
     "topic": "Trade-Off Analysis",
     "dialogue": [
       {
@@ -150,7 +300,7 @@
     ]
   },
   {
-    "slide": 16,
+    "slide": 31,
     "topic": "Practical Application",
     "dialogue": [
       {
@@ -160,7 +310,17 @@
     ]
   },
   {
-    "slide": 17,
+    "slide": 32,
+    "topic": "Practical Application Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This practical-application diagram shows the workflow students should follow: name the invariant, run a sequential case, add pressure, instrument the behavior, and compare the before-and-after evidence."
+      }
+    ]
+  },
+  {
+    "slide": 33,
     "topic": "Assignment Integration",
     "dialogue": [
       {
@@ -170,7 +330,17 @@
     ]
   },
   {
-    "slide": 18,
+    "slide": 34,
+    "topic": "Assignment Integration Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram connects the lecture to A1. The project object, workflow transition, reproduced failure, and supporting logs should all feed into the Integrity Packet explanation."
+      }
+    ]
+  },
+  {
+    "slide": 35,
     "topic": "Validation Questions",
     "dialogue": [
       {
@@ -180,7 +350,17 @@
     ]
   },
   {
-    "slide": 19,
+    "slide": 36,
+    "topic": "Validation Questions Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This validation diagram shows how to test a design claim. Start with the claim, state the invariant, run the pressure case, inspect the trace, and decide whether the evidence supports the design."
+      }
+    ]
+  },
+  {
+    "slide": 37,
     "topic": "Summary",
     "dialogue": [
       {
@@ -190,7 +370,17 @@
     ]
   },
   {
-    "slide": 20,
+    "slide": 38,
+    "topic": "Summary Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This summary diagram reinforces the lecture's main reasoning chain: identify the assumption, apply pressure, preserve the invariant, and support the conclusion with observable evidence."
+      }
+    ]
+  },
+  {
+    "slide": 39,
     "topic": "Discussion",
     "dialogue": [
       {

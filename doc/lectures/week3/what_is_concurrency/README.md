@@ -1,5 +1,7 @@
 ﻿# What is Concurrency Really?
 
+
+## Video: https://youtu.be/bUNIjtSpo7w
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 3

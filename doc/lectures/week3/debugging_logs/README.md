@@ -1,5 +1,7 @@
 ﻿# Debugging Concurrency with Logs
 
+
+## Video: https://youtu.be/RpZEPDeVx6E
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 3

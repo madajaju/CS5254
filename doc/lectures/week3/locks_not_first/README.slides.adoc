@@ -1,4 +1,4 @@
-= Why Locks Are Not the First Answer
+﻿= Why Locks Are Not the First Answer
 Dr. Darren Pulsipher
 :revealjs_theme: white
 :revealjs_slideNumber: true
@@ -19,12 +19,142 @@ Dr. Darren Pulsipher
 * Design control maintaining invariants
 * Defend approach in Integrity Packet
 
+
+== Learning Objectives Visual
+
+[plantuml, target=locks_not_first_1_learning_objectives_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Locks Not First concept" as C
+rectangle "Hidden assumption" as H
+rectangle "Failure evidence" as F
+rectangle "Invariant" as I
+database "Integrity Packet" as P
+C -> H
+H -> F
+F ---> I : explains
+I ---> P : defended
+@enduml
+----
 == Opening Narrative
 
 * Course project appears correct
 * Concurrency introduces assumptions
 * Analyze and defend design results
 
+
+== Opening Narrative Visual
+
+[plantuml, target=locks_not_first_2_opening_narrative_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Locks Not First demo" as Demo
+rectangle "Concurrent pressure" as Load
+rectangle "Assumption exposed" as Assumption
+rectangle "Design question" as Question
+database "Evidence needed" as Evidence
+Demo -> Load
+Load ---> Assumption : changes\ntiming
+Assumption -> Question
+Question ---> Evidence : before\ntrust
+@enduml
+----
 == Locking as a Patch
 
 * Definition: adding synchronizations
@@ -33,6 +163,69 @@ Dr. Darren Pulsipher
 * Failure: produces duplicates, stale state
 * Implication: expose invariant, log transitions
 
+
+== Locking as a Patch Visual
+
+[plantuml, target=locks_not_first_3_locking_as_a_patch_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Observed race" as R
+rectangle "Add lock everywhere" as L
+rectangle "Contention grows" as C
+rectangle "Boundary still unclear" as B
+R -> L
+L -> C
+C --> B
+@enduml
+----
 == Coordination Boundary
 
 * Definition: agreement on ordering/ownership
@@ -41,6 +234,70 @@ Dr. Darren Pulsipher
 * Failure: produces duplicates, stale state
 * Implication: expose invariant, log transitions
 
+
+== Coordination Boundary Visual
+
+[plantuml, target=locks_not_first_4_coordination_boundary_visu, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor #ff8844
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+rectangle "Callers" as C
+rectangle "Boundary owner" as O
+database "Protected state" as S
+rectangle "Ordering rule" as R
+database "Audit trail" as A
+C -down-> O : command
+O -down-> R : applies
+R --> S : single\npath
+O -down-> A : records
+@enduml
+----
 == Progress Guarantee
 
 * Definition: work completion instead of stall
@@ -49,6 +306,71 @@ Dr. Darren Pulsipher
 * Failure: produces duplicates, stale state
 * Implication: expose invariant, log transitions
 
+
+== Progress Guarantee Visual
+
+[plantuml, target=locks_not_first_5_progress_guarantee_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+state "Waiting" as W
+state "Can acquire" as A
+state "Completes" as C
+state "Times out" as T
+state "Retries" as R
+W --> A
+A --> C
+W --> T
+T --> R
+R --> A
+@enduml
+----
 == Contention
 
 * Definition: competition for resources
@@ -57,28 +379,133 @@ Dr. Darren Pulsipher
 * Failure: produces duplicates, stale state
 * Implication: expose invariant, log transitions
 
-== System View
 
-[plantuml, target=system_view, format=svg, width=80%]
+== Contention Visual
+
+[plantuml, target=locks_not_first_6_contention_visual, format=svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 skinparam shadowing false
 left to right direction
 
-rectangle "Why Locks Are Not the First Answer" as Topic
-rectangle "Locking as a Patch" as A
-rectangle "Coordination Boundary" as B
-rectangle "Progress Guarantee" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Worker C" as C
+rectangle "Single lock" as L
+database "Shared resource" as S
+A --> L : waits
+B --> L : waits
+C --> L : waits
+L ---> S : one at\na time
+@enduml
+----
+== System View
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+[plantuml, target=locks_not_first_7_system_view, format=svg, width=80%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Domain command" as D
+rectangle "Coordination boundary" as B
+rectangle "Lock scope" as L
+database "State" as S
+database "Metrics" as M
+D -> B
+B ---> L : chooses\nminimal\nscope
+L ----> S : protects
+B -right-> M : observes contention
 @enduml
 ----
 
@@ -89,6 +516,137 @@ D --> A : refine
 * Naive model: order, current state
 * Failure: stale state or late execution
 * Improved design: name invariant, observable transitions
+
+
+== Worked Example Visual
+
+[plantuml, target=locks_not_first_8_worked_example_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Immutable asset" as I
+rectangle "Metadata update" as M
+rectangle "Global lock" as G
+rectangle "Fine-grained lock" as F
+rectangle "Throughput trade-off" as T
+I -> M
+M -> G
+M -> F
+G ---> T : simple\nslow
+F ---> T : complex\nfaster
+@enduml
+----
+== Choose Boundary Before Lock
+
+[plantuml, target=locks_not_first_9_choose_boundary_before_loc, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Shared thing" as S
+rectangle "Who owns change?" as O
+rectangle "Where is order decided?" as R
+rectangle "Smallest lock scope" as L
+database "Evidence point" as E
+S -> O
+O -> R
+R -> L
+L -> E
+@enduml
+----
 
 == Failure Modes
 
@@ -112,16 +670,145 @@ D --> A : refine
   * How to detect: no before/after workload
   * How to correct: maintain failing test cases
 
+
+== Failure Modes Visual
+
+[plantuml, target=locks_not_first_10_failure_modes_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Locks Not First tool claim" as Tool
+rectangle "Property missing" as Prop
+rectangle "Invariant absent" as Inv
+rectangle "Correction" as Fix
+Tool ---> Prop : not\nenough
+Prop -> Inv
+Inv ---> Fix : state\nfirst
+@enduml
+----
+== Design Pattern Selection Visual
+
+[plantuml, target=locks_not_first_11_design_pattern_selection_, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Locks Not First signal" as S
+rectangle "Invariant risk" as I
+rectangle "Pattern choice" as P
+rectangle "Trade-off" as T
+rectangle "Evidence" as E
+S -> I
+I ---> P : selects
+P -right--> T : introduces
+T -right-> E : validate
+@enduml
+----
+
 == Trade-Off Analysis
 
-[cols="1,1,1,1", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
 | Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy implementation | Hides timing assumptions | First iteration
-| Guarded transition | Protects invariant | Requires modeling | State changes
-| Coordination | Makes dependencies visible | May cause bottlenecks | Object workflows
-| Idempotent design | Handles duplicates | Needs keys for control | Queues, retries
-| Observability-first | Solid evidence | Increases instrumentation | Failure proof requirements
+| Baseline | Easy to build | Hides timing | First pass
+| Guarded transition | Protects invariant | Needs modeling | State changes
+| Coordination | Visible order | Bottleneck risk | Object workflows
+| Idempotency | Handles duplicates | Needs keys | Queues, retries
+| Observability | Solid evidence | Adds logging | Failure proof
 |===
 
 == Practical Application
@@ -135,6 +822,71 @@ Tomorrow morning:
 * Capture before/after evidence of fixes
 * Update Integrity Packet with assumptions
 
+
+== Practical Application Visual
+
+[plantuml, target=locks_not_first_12_practical_application_vis, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Locks Not First invariant" as I
+rectangle "Sequential pass" as S
+rectangle "Pressure test" as P
+rectangle "Operation IDs" as L
+rectangle "Before / after" as B
+I --> S
+S --> P
+P -> L : instrument
+L -> B : compare
+@enduml
+----
 == Assignment Integration
 
 Support [A1](../../../assignments/A1/index.md):
@@ -143,6 +895,71 @@ Support [A1](../../../assignments/A1/index.md):
 * Show relevant object or failure mechanism
 * Evidence: runnable commands, logs, diagrams
 
+
+== Assignment Integration Visual
+
+[plantuml, target=locks_not_first_13_assignment_integration_vi, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Locks Not First object" as O
+rectangle "Workflow transition" as W
+rectangle "Failure reproduction" as F
+database "Logs / traces" as L
+database "A1 Integrity Packet" as A1
+O --> W
+W --> F
+F -> L : captures
+L -> A1 : evidence
+@enduml
+----
 == Validation Questions
 
 1. What invariant is most relevant?
@@ -153,12 +970,142 @@ Support [A1](../../../assignments/A1/index.md):
 6. How does this issue appear in implementations?
 7. What to record in Integrity Packet?
 
+
+== Validation Questions Visual
+
+[plantuml, target=locks_not_first_14_validation_questions_visu, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Locks Not First claim" as C
+rectangle "Invariant named" as I
+rectangle "Pressure case" as P
+rectangle "Observed trace" as T
+rectangle "Decision" as D
+C -> I : what must hold
+I --> P
+P --> T
+T -> D : supports or refutes
+@enduml
+----
 == Summary
 
 * Locks are not just vocabulary
 * Connect concepts to invariants and evidence
 * Design must be explainable and validated
 
+
+== Summary Visual
+
+[plantuml, target=locks_not_first_15_summary_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Locks Not First" as Topic
+rectangle "Assumption" as A
+rectangle "Pressure" as P
+rectangle "Invariant" as I
+rectangle "Evidence" as E
+Topic --> A
+A -> P : challenged by
+P -> I : must preserve
+I -> E : proven with
+@enduml
+----
 == Discussion
 
 * How do hidden assumptions affect design?

@@ -1,5 +1,7 @@
 ﻿# Shared State is the Problem
 
+
+## Video: https://youtu.be/FgVjDb8R4Mo
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 3

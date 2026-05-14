@@ -21,6 +21,16 @@
   },
   {
     "slide": 3,
+    "topic": "Learning Objectives Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram summarizes the path through the lecture: start with the core concept, expose the hidden assumption, connect it to failure evidence, and end with an invariant that can be defended in the Integrity Packet."
+      }
+    ]
+  },
+  {
+    "slide": 4,
     "topic": "Opening Narrative",
     "dialogue": [
       {
@@ -38,7 +48,17 @@
     ]
   },
   {
-    "slide": 4,
+    "slide": 5,
+    "topic": "Opening Narrative Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram turns the opening story into a reasoning path. A simple demonstration looks correct, but concurrency pressure exposes assumptions that must be checked with evidence before the result can be trusted."
+      }
+    ]
+  },
+  {
+    "slide": 6,
     "topic": "Deterministic vs. Probabilistic Failure",
     "dialogue": [
       {
@@ -56,7 +76,17 @@
     ]
   },
   {
-    "slide": 5,
+    "slide": 7,
+    "topic": "Deterministic vs. Probabilistic Failure Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Deterministic vs. Probabilistic Failure. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 8,
     "topic": "Sleep Injection",
     "dialogue": [
       {
@@ -74,7 +104,17 @@
     ]
   },
   {
-    "slide": 6,
+    "slide": 9,
+    "topic": "Sleep Injection Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Sleep Injection. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 10,
     "topic": "Concurrent Test Harness",
     "dialogue": [
       {
@@ -92,7 +132,17 @@
     ]
   },
   {
-    "slide": 7,
+    "slide": 11,
+    "topic": "Concurrent Test Harness Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Concurrent Test Harness. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 12,
     "topic": "Repeatability",
     "dialogue": [
       {
@@ -110,7 +160,17 @@
     ]
   },
   {
-    "slide": 8,
+    "slide": 13,
+    "topic": "Repeatability Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Repeatability. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 14,
     "topic": "AI-Assisted Hypothesis",
     "dialogue": [
       {
@@ -128,7 +188,17 @@
     ]
   },
   {
-    "slide": 9,
+    "slide": 15,
+    "topic": "AI-Assisted Hypothesis Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports AI-Assisted Hypothesis. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 16,
     "topic": "System Architecture View",
     "dialogue": [
       {
@@ -146,7 +216,7 @@
     ]
   },
   {
-    "slide": 10,
+    "slide": 17,
     "topic": "Worked Example: Problem Setup",
     "dialogue": [
       {
@@ -164,7 +234,27 @@
     ]
   },
   {
-    "slide": 11,
+    "slide": 18,
+    "topic": "Worked Example: Problem Setup Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This worked-example diagram grounds the concept in the project domain. Follow the object or workflow through the diagram and notice where concurrent timing can change what the system appears to guarantee."
+      }
+    ]
+  },
+  {
+    "slide": 19,
+    "topic": "Failure Harness Shape",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "The failure harness gives us a controlled way to make rare timing bugs repeatable. We vary thread count, delay windows, and target objects so that pressure is intentional rather than accidental. The goal is not to prove the system fails randomly, but to create evidence that validates or refutes the design."
+      }
+    ]
+  },
+  {
+    "slide": 20,
     "topic": "Naive Implementation",
     "dialogue": [
       {
@@ -182,7 +272,17 @@
     ]
   },
   {
-    "slide": 12,
+    "slide": 21,
+    "topic": "Naive Implementation Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram supports Naive Implementation. Read it as a map of the concept: where pressure enters, which invariant is at risk, and what evidence would make the design claim defensible."
+      }
+    ]
+  },
+  {
+    "slide": 22,
     "topic": "Failure Scenario",
     "dialogue": [
       {
@@ -200,7 +300,17 @@
     ]
   },
   {
-    "slide": 13,
+    "slide": 23,
+    "topic": "Failure Scenario Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This failure-scenario diagram shows the concrete overlap that creates risk. The diagram is meant to make the timing visible so the bug is understood as a design mismatch, not just a code mistake."
+      }
+    ]
+  },
+  {
+    "slide": 24,
     "topic": "Improved Design Direction",
     "dialogue": [
       {
@@ -218,7 +328,17 @@
     ]
   },
   {
-    "slide": 14,
+    "slide": 25,
+    "topic": "Improved Design Direction Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram shows how the design moves from hoping execution is ordered to checking and recording the transition. The safer design either accepts, rejects, retries, or records the outcome with evidence."
+      }
+    ]
+  },
+  {
+    "slide": 26,
     "topic": "Why Improved Design Is Safer",
     "dialogue": [
       {
@@ -236,7 +356,17 @@
     ]
   },
   {
-    "slide": 15,
+    "slide": 27,
+    "topic": "Why Improved Design Is Safer Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram shows how the design moves from hoping execution is ordered to checking and recording the transition. The safer design either accepts, rejects, retries, or records the outcome with evidence."
+      }
+    ]
+  },
+  {
+    "slide": 28,
     "topic": "Failure Modes and Anti-Patterns",
     "dialogue": [
       {
@@ -254,7 +384,27 @@
     ]
   },
   {
-    "slide": 16,
+    "slide": 29,
+    "topic": "Failure Modes and Anti-Patterns Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This failure-mode diagram highlights the path from a plausible execution to a broken invariant. Use it to identify which assumption fails and what evidence would prove the failure is real."
+      }
+    ]
+  },
+  {
+    "slide": 30,
+    "topic": "Design Pattern Selection Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This pattern-selection diagram connects the observed symptom to an invariant risk, then to a design pattern and its trade-off. The pattern is justified only when it protects the property the system needs."
+      }
+    ]
+  },
+  {
+    "slide": 31,
     "topic": "Trade-Off Analysis",
     "dialogue": [
       {
@@ -272,7 +422,7 @@
     ]
   },
   {
-    "slide": 17,
+    "slide": 32,
     "topic": "Practical Application",
     "dialogue": [
       {
@@ -290,7 +440,17 @@
     ]
   },
   {
-    "slide": 18,
+    "slide": 33,
+    "topic": "Practical Application Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This practical-application diagram shows the workflow students should follow: name the invariant, run a sequential case, add pressure, instrument the behavior, and compare the before-and-after evidence."
+      }
+    ]
+  },
+  {
+    "slide": 34,
     "topic": "Assignment Integration",
     "dialogue": [
       {
@@ -308,7 +468,17 @@
     ]
   },
   {
-    "slide": 19,
+    "slide": 35,
+    "topic": "Assignment Integration Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This diagram connects the lecture to A1. The project object, workflow transition, reproduced failure, and supporting logs should all feed into the Integrity Packet explanation."
+      }
+    ]
+  },
+  {
+    "slide": 36,
     "topic": "Validation Questions",
     "dialogue": [
       {
@@ -326,7 +496,17 @@
     ]
   },
   {
-    "slide": 20,
+    "slide": 37,
+    "topic": "Validation Questions Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This validation diagram shows how to test a design claim. Start with the claim, state the invariant, run the pressure case, inspect the trace, and decide whether the evidence supports the design."
+      }
+    ]
+  },
+  {
+    "slide": 38,
     "topic": "Summary",
     "dialogue": [
       {
@@ -344,7 +524,17 @@
     ]
   },
   {
-    "slide": 21,
+    "slide": 39,
+    "topic": "Summary Visual",
+    "dialogue": [
+      {
+        "role": "teacher",
+        "text": "This summary diagram reinforces the lecture's main reasoning chain: identify the assumption, apply pressure, preserve the invariant, and support the conclusion with observable evidence."
+      }
+    ]
+  },
+  {
+    "slide": 40,
     "topic": "Further Reading",
     "dialogue": [
       {
@@ -362,7 +552,7 @@
     ]
   },
   {
-    "slide": 22,
+    "slide": 41,
     "topic": "Discussion",
     "dialogue": [
       {

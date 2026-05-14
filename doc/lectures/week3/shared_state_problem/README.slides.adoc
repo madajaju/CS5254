@@ -1,4 +1,4 @@
-= Shared State is the Problem
+﻿= Shared State is the Problem
 Dr. Darren Pulsipher
 :revealjs_theme: white
 :revealjs_slideNumber: true
@@ -13,7 +13,7 @@ Dr. Darren Pulsipher
 
 == Course Overview
 
-* Course: CS 5254b – Object-Oriented Systems Under Concurrency
+* Course: CS 5254b â€“ Object-Oriented Systems Under Concurrency
 * Week: 3
 * Duration: 15 minutes
 * Prerequisites: 
@@ -23,6 +23,69 @@ Dr. Darren Pulsipher
   * Integrity Packet reasoning
 * Assignment: [A1](../../../assignments/A1/index.md)
 
+
+== Course Overview Visual
+
+[plantuml, target=shared_state_problem_1_course_overview_visua, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Object state" as O
+rectangle "Concurrency pressure" as P
+rectangle "Structured evidence" as E
+database "A1 reasoning" as A
+O -> P
+P --> E : reveal behavior
+E --> A : supports
+@enduml
+----
 == Learning Objectives
 
 * Analyze design pressure of shared state issues.
@@ -31,12 +94,142 @@ Dr. Darren Pulsipher
 * Design corrections that preserve relevant invariants.
 * Defend approach in Integrity Packet aligned to A1.
 
+
+== Learning Objectives Visual
+
+[plantuml, target=shared_state_problem_2_learning_objectives_v, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Shared State Problem concept" as C
+rectangle "Hidden assumption" as H
+rectangle "Failure evidence" as F
+rectangle "Invariant" as I
+database "Integrity Packet" as P
+C -> H
+H -> F
+F --> I : explains
+I --> P : defended
+@enduml
+----
 == Opening Narrative
 
 * Project appears correct in simple tests.
 * Concurrency introduces hidden assumptions about Mutable Shared State.
 * What must engineers analyze before trusting results?
 
+
+== Opening Narrative Visual
+
+[plantuml, target=shared_state_problem_3_opening_narrative_vis, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Shared State Problem demo" as Demo
+rectangle "Concurrent pressure" as Load
+rectangle "Assumption exposed" as Assumption
+rectangle "Design question" as Question
+database "Evidence needed" as Evidence
+Demo -> Load
+Load --> Assumption : changes timing
+Assumption -> Question
+Question --> Evidence : before trust
+@enduml
+----
 == Core Concept: Mutable Shared State
 
 * Definition: Data accessed by multiple threads.
@@ -54,6 +247,71 @@ Dr. Darren Pulsipher
   * Misleading evidence
 * Design Implication: Expose invariant, log transition, validate behavior.
 
+
+== Core Concept: Mutable Shared State Visual
+
+[plantuml, target=shared_state_problem_4_core_concept_mutable_, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Thread A" as A
+rectangle "Thread B" as B
+database "Mutable collection" as M
+rectangle "No single owner" as N
+rectangle "Duplicate / stale risk" as R
+A --> M : reads writes
+B --> M : reads writes
+M -> N
+N -> R
+@enduml
+----
 == Core Concept: Thread Safety
 
 * Definition: Ensures correct behavior when accessed by multiple threads.
@@ -62,6 +320,71 @@ Dr. Darren Pulsipher
 * Failure Mode: Same as Mutable Shared State.
 * Design Implication: Expose invariant, log transition, validate behavior.
 
+
+== Core Concept: Thread Safety Visual
+
+[plantuml, target=shared_state_problem_5_core_concept_thread_s, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "External caller" as C
+rectangle "Public method" as M
+rectangle "Invariant check" as I
+database "Private state" as S
+rectangle "Valid result" as R
+C -> M
+M -> I
+I --> S : guarded update
+S -> R
+@enduml
+----
 == Core Concept: State Leakage
 
 * Definition: Internal data structure modification by external threads.
@@ -70,6 +393,71 @@ Dr. Darren Pulsipher
 * Failure Mode: Same as Mutable Shared State.
 * Design Implication: Expose invariant, log transition, validate behavior.
 
+
+== Core Concept: State Leakage Visual
+
+[plantuml, target=shared_state_problem_6_core_concept_state_le, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Object" as O
+database "Internal list" as L
+rectangle "Getter returns reference" as G
+rectangle "External thread mutates" as X
+rectangle "Invariant bypassed" as B
+O -> L
+O --> G : exposes
+G -> X
+X -> B
+@enduml
+----
 == Core Concept: System Invariant
 
 * Definition: Condition true across valid executions.
@@ -78,6 +466,67 @@ Dr. Darren Pulsipher
 * Failure Mode: Same as Mutable Shared State.
 * Design Implication: Expose invariant, log transition, validate behavior.
 
+
+== Core Concept: System Invariant Visual
+
+[plantuml, target=shared_state_problem_7_core_concept_system_i, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+[*] --> StockAvailable
+StockAvailable --> Reserved : reserve if count > 0
+Reserved --> Purchased : decrement once
+Purchased --> [*]
+StockAvailable --> Oversold : two decrements
+Oversold --> [*] : invalid
+@enduml
+----
 == Core Concept: Failure Mode
 
 * Definition: System violating invariant or losing progress.
@@ -86,28 +535,131 @@ Dr. Darren Pulsipher
 * Failure Mode: Same as Mutable Shared State.
 * Design Implication: Expose invariant, log transition, validate behavior.
 
-== System Architecture View
 
-[plantuml, target=architecture, format=svg, width=80%]
+== Core Concept: Failure Mode Visual
+
+[plantuml, target=shared_state_problem_8_core_concept_failure_, format=svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Buyer A" as A
+participant "Inventory count=1" as I
+participant "Buyer B" as B
+A --> I : read 1
+B --> I : read 1
+A --> I : write 0
+B --> I : write 0 after selling
+note over I: Two purchases used one unit
+@enduml
+----
+== System Architecture View
+
+[plantuml, target=shared_state_problem_9_system_architecture_v, format=svg, width=80%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 skinparam shadowing false
 left to right direction
 
-rectangle "Shared State is the Problem" as Topic
-rectangle "Mutable Shared State" as A
-rectangle "Thread Safety" as B
-rectangle "State Leakage" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
-
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+rectangle "UI / API" as API
+rectangle "Domain service" as S
+rectangle "Ownership boundary" as O
+database "State store" as DB
+database "Audit log" as L
+API -> S
+S --> O : command
+O --> DB : guarded write
+O --> L : transition
 @enduml
 ----
 
@@ -115,20 +667,280 @@ D --> A : refine
 
 * **Podcast Domain**: 
   * *Unsafe*: global `static List<Episode> allEpisodes` accessed by multiple workers.
-  * *Safe*: local `List<Asset> localAssets` within one worker’s execution.
+  * *Safe*: local `List<Asset> localAssets` within one workerâ€™s execution.
 * **Inventory System**: shared `Integer count` decremented by purchase threads.
+
+
+== Worked Example: Problem Setup Visual
+
+[plantuml, target=shared_state_problem_10_worked_example_probl, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Purchase A" as A
+participant "Inventory" as Inv
+participant "Purchase B" as B
+A --> Inv : check count
+B --> Inv : check count
+A --> Inv : decrement
+B --> Inv : decrement
+note over Inv: Shared Integer count is the contested object
+@enduml
+----
+== Shared vs Local State
+
+[plantuml, target=shared_state_problem_11_shared_vs_local_stat, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Thread local variable" as L1
+rectangle "Thread A stack" as A
+rectangle "Thread B stack" as B
+database "Shared heap object" as H
+A -> L1
+B -> H
+A --> H : coordinated access needed
+B --> H : coordinated access needed
+@enduml
+----
+
+== Ownership Boundary Pattern Visual
+
+[plantuml, target=shared_state_problem_12_ownership_boundary_p, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Caller A" as A
+rectangle "Caller B" as B
+rectangle "Owner component" as O
+database "Private state" as S
+database "Decision log" as L
+A --> O : command
+B --> O : command
+O --> S : serializes change
+O --> L : emits result
+@enduml
+----
 
 == Naive Implementation
 
 A naive design assumes:
 * Operation happens once, in order, with current state.
 * Assumption often invisible.
+
+== Naive Execution Flow
+
 ```
 actor performs operation
 system reads current state
 system applies transition
 system emits side effect
 ```
+
+== Naive Execution Flow Visual
+
+[plantuml, target=shared_state_problem_13_naive_execution_flow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Read count" as R
+rectangle "Assume unchanged" as A
+rectangle "Decrement" as D
+database "Shared count" as S
+rectangle "No compare" as N
+R -> A
+A -> D
+D --> S : write
+S -> N
+@enduml
+----
 
 == Failure Scenario
 
@@ -138,6 +950,69 @@ system emits side effect
   * Workflow left stuck.
 * Failure is a mismatch between assumption and execution.
 
+
+== Failure Scenario Visual
+
+[plantuml, target=shared_state_problem_14_failure_scenario_vis, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Purchase A" as A
+participant "Shared inventory" as I
+participant "Purchase B" as B
+A --> I : reserve item
+B --> I : reserve same item
+A --> I : confirm
+B --> I : confirm duplicate
+note over I: Shared state lets two paths believe they own it
+@enduml
+----
 == Corrected Design Direction
 
 * Name the invariant.
@@ -148,11 +1023,142 @@ system emits side effect
   * State-machine guards
   * Explicit coordination
 
+
+== Corrected Design Direction Visual
+
+[plantuml, target=shared_state_problem_15_corrected_design_dir, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Command" as C
+rectangle "Owner validates invariant" as O
+rectangle "Atomic transition" as T
+database "Event log" as L
+rectangle "Rejected duplicate" as R
+C -> O
+O -> T
+O -> R
+T --> L : accepted
+R --> L : rejected
+@enduml
+----
 == Why Is Improved Design Safer?
 
 * Changes focus from hoping for correct execution to:
   * Proving invalid interleavings are rejected or recovered with evidence.
 
+
+== Why Is Improved Design Safer? Visual
+
+[plantuml, target=shared_state_problem_16_why_is_improved_desi, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Hope state is fresh" as H
+rectangle "Prove transition" as P
+rectangle "Compare expected version" as V
+rectangle "Reject stale command" as R
+database "Traceable outcome" as T
+H --> P : replaced by
+P -> V
+V -> R
+R -> T
+@enduml
+----
 == Failure Modes & Anti-Patterns
 
 * Symptom: System passes single happy-path test.
@@ -164,16 +1170,145 @@ system emits side effect
 * Symptom: Fix changes behavior without comparison.
   * **Detection**: No before/after repeatable scenario.
 
+
+== Failure Modes & Anti-Patterns Visual
+
+[plantuml, target=shared_state_problem_17_failure_modes_anti_p, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Shared State Problem tool claim" as Tool
+rectangle "Property missing" as Prop
+rectangle "Invariant absent" as Inv
+rectangle "Correction" as Fix
+Tool --> Prop : not enough
+Prop -> Inv
+Inv --> Fix : state first
+@enduml
+----
+== Design Pattern Selection Visual
+
+[plantuml, target=shared_state_problem_18_design_pattern_selec, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Shared State Problem signal" as S
+rectangle "Invariant risk" as I
+rectangle "Pattern choice" as P
+rectangle "Trade-off" as T
+rectangle "Evidence" as E
+S -> I
+I --> P : selects
+P --> T : introduces
+T --> E : validate
+@enduml
+----
+
 == Trade-Off Analysis
 
-[cols="1,1,1,1", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
 | Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | Initial implementation
-| Guarded transition | Protects core invariant | Requires careful modeling | Status changes
-| Explicit coordination | Makes dependencies visible | May introduce deadlocks | Complex workflows
-| Idempotent design | Handles duplicates | Requires side-effect control | Queues, retries
-| Observability-first | Provides strong evidence | Needs instrumentation | Failure proof
+| Baseline | Easy to explain | Hides timing | Initial pass
+| Guarded transition | Protects invariant | Needs modeling | Status changes
+| Coordination | Visible dependencies | Deadlock risk | Complex flows
+| Idempotency | Handles duplicates | Controls effects | Queues, retries
+| Observability | Strong evidence | Adds logging | Failure proof
 |===
 
 == Practical Application
@@ -185,11 +1320,141 @@ system emits side effect
 * Capture before/after evidence during fixes.
 * Update Integrity Packet with assumptions and validation.
 
+
+== Practical Application Visual
+
+[plantuml, target=shared_state_problem_19_practical_applicatio, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Shared State Problem invariant" as I
+rectangle "Sequential pass" as S
+rectangle "Pressure test" as P
+rectangle "Operation IDs" as L
+rectangle "Before / after" as B
+I -> S
+S -> P
+P --> L : instrument
+L --> B : compare
+@enduml
+----
 == Assignment Integration
 
 * Supports [A1](../../../assignments/A1/index.md).
 * Connect concepts to semester project with relevant evidence: logs, diagrams, failure reproduction.
 
+
+== Assignment Integration Visual
+
+[plantuml, target=shared_state_problem_20_assignment_integrati, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Shared State Problem object" as O
+rectangle "Workflow transition" as W
+rectangle "Failure reproduction" as F
+database "Logs / traces" as L
+database "A1 Integrity Packet" as A1
+O -> W
+W -> F
+F --> L : captures
+L --> A1 : evidence
+@enduml
+----
 == Validation Questions
 
 1. Identify the relevant invariant for this lecture.
@@ -200,12 +1465,142 @@ system emits side effect
 6. How would the issue appear in your two implementation stacks?
 7. What to record in Integrity Packet?
 
+
+== Validation Questions Visual
+
+[plantuml, target=shared_state_problem_21_validation_questions, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Shared State Problem claim" as C
+rectangle "Invariant named" as I
+rectangle "Pressure case" as P
+rectangle "Observed trace" as T
+rectangle "Decision" as D
+C --> I : what must hold
+I -> P
+P -> T
+T --> D : supports or refutes
+@enduml
+----
 == Summary
 
 * Shared state: A lens for system correctness under execution.
 * Task: Connect concepts to invariants and defensible design trade-offs.
 * A mature design proves observable behavior and validates evidence.
 
+
+== Summary Visual
+
+[plantuml, target=shared_state_problem_22_summary_visual, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Shared State Problem" as Topic
+rectangle "Assumption" as A
+rectangle "Pressure" as P
+rectangle "Invariant" as I
+rectangle "Evidence" as E
+Topic -> A
+A --> P : challenged by
+P -> I : must preserve
+I --> E : proven with
+@enduml
+----
 == Further Reading
 
 * Search: "Shared State is the Problem distributed systems failure mode"
