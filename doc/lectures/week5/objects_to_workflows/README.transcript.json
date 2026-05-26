@@ -2,111 +2,141 @@
   {
     "slide": 1,
     "topic": "From Objects to Workflows",
-    "text": "Welcome to today's lecture on 'From Objects to Workflows.' In this session, we will dive deep into understanding how systems maintain correctness under concurrency and the pressures of real-world conditions."
+    "text": "Welcome everyone. Today we are moving from reasoning about individual objects to reasoning about workflows. The key idea here is that an object can look correct in isolation while the system built around it is still unsafe. Once concurrency, retries, delayed callbacks, or multiple workers appear, correctness depends on how objects coordinate across a larger life cycle. By the end, you should be able to name the invariant your workflow must preserve, identify the hidden assumption in the baseline design, and defend your design response with evidence in A2."
   },
   {
     "slide": 2,
-    "topic": "Learning Objectives",
-    "text": "We have several learning objectives for this lecture. First, we will analyze the design pressure workflows introduce. Next, we will diagnose any hidden assumptions within systems. We will then evaluate failure evidence using logs and traces, design controls that preserve invariants, and finally, we will discuss how to defend our design choices in the Integrity Packet."
+    "topic": "Lecture Focus",
+    "text": "The focus today is the shift from local object behavior to cross-object coordination. A single object method might update state correctly, but a workflow asks a harder question: did the whole sequence preserve the rule we care about? We will look at coordination assumptions, invariants across concurrent steps, and the kind of evidence that lets a reviewer reconstruct what happened. This matters directly for A2 because your design defense should not just say that the system works; it should show why the workflow remains correct under pressure."
   },
   {
     "slide": 3,
-    "topic": "Opening Narrative",
-    "text": "Imagine working on a course project that seems to run perfectly during initial demonstrations. However, once we introduce operational pressure or concurrency, it inevitably fails. This raises a crucial question: What must we analyze and defend to ensure our systems can be trusted under these conditions?"
+    "topic": "From Objects to Workflows",
+    "text": "Think of a local object state change as the smallest unit of reasoning. An operation changes that state, but in a real system that operation often participates in a larger workflow stage. That workflow crosses a coordination boundary, and at that boundary the system invariant is at risk. The protected property is not just that one method ran successfully; it is that the workflow as a whole did not violate ordering, uniqueness, visibility, or progress. This is where professional engineering judgment begins: you need to know which local action can endanger a global guarantee."
   },
   {
     "slide": 4,
-    "topic": "Core Concept: Coordination",
-    "text": "Let's explore the concept of coordination. Coordination refers to managing dependencies between multiple objects so that we can achieve a higher-level goal. Its importance cannot be overstated; we must make these dependencies explicit before we can trust our systems under pressure. If we fail to do so, it can lead to issues like duplicate work or stale state, underscoring the need to expose relevant invariants and logging critical transitions."
+    "topic": "Core Question",
+    "text": "The core question is: why can a demo pass while the design is still unsafe? Usually the answer is that the demo avoids the pressure condition. It runs once, in a clean order, with current state, and no delayed or duplicated work. A common mistake is to treat that as proof. Instead, ask what the workflow assumes about order, uniqueness, and visibility. Then ask what evidence would let someone reconstruct the exact transition where the invariant was either preserved or violated."
   },
   {
     "slide": 5,
-    "topic": "Core Concept: Workflow",
-    "text": "Next, we define workflow as a sequence of operations where the output of one often becomes the input for another. Just as with coordination, we need to understand the mechanisms involved, such as object state and timing. If we overlook these aspects, we might find ourselves producing duplicate work or encountering other failures, necessitating our design to clearly expose invariants and validate behavior through logging."
+    "topic": "Coordination Loop",
+    "text": "A workflow repeatedly detects needed work, assigns responsibility, performs a step, records the transition, and checks the invariant before looking for the next dependency. The important actors are the worker or component doing the step, the entity whose state is changing, and the evidence trail that records the transition. The design property being tested is whether progress and correctness survive the loop. If the transition is not recorded clearly, the system may appear to move forward while hiding stale state, duplicate work, or a missing prerequisite."
   },
   {
     "slide": 6,
-    "topic": "Core Concept: Life-cycle Management",
-    "text": "Life-cycle management is crucial as it involves tracking the overall progress of entities as they pass through various states across components. Like before, if we do not make these transitions explicit, we risk facing duplicate work and stale states, making it important to expose relevant invariants and log any critical transitions."
+    "topic": "Key Terms",
+    "text": "Let's define the vocabulary we will use. Coordination means managing dependencies between objects to achieve a higher-level goal. A workflow is a sequence of dependent stages. Life-cycle management means tracking an entity as it moves through states across components. A system invariant is a condition that must remain true in every valid execution. A failure mode is a repeatable way the system violates that invariant or loses progress. Notice the word repeatable: for this course, vague suspicion is not enough. We want evidence that can be reproduced and defended."
   },
   {
     "slide": 7,
-    "topic": "Core Concept: System Invariant",
-    "text": "A system invariant is a condition that must always be true for all valid executions. It's important to expose these conditions; neglecting to do so might lead to significant failures, echoing the same themes of exposing invariants and validating behavior through proper logging."
+    "topic": "Production Pipeline",
+    "text": "Imagine a podcast production pipeline. Uploading an episode is not the same as publishing it. The episode may need ingestion, cleanup, transcription, and a publishing decision before it becomes visible to the audience. Each stage depends on a previous fact being true. The invariant might be that an episode is not published until the media is normalized and the transcript is ready. This example matters because it forces us to stop thinking only about the Episode object and start thinking about the life cycle that crosses several components."
   },
   {
     "slide": 8,
-    "topic": "Core Concept: Failure Mode",
-    "text": "Understanding failure modes is essential, as these represent repeatable ways in which our system can violate invariants or lose progress. Just like the previous concepts, if we do not make these modes explicit, we may find ourselves dealing with serious discrepancies, highlighting the importance of logging transitions and validating designs."
+    "topic": "Order Workflow Example",
+    "text": "Now consider order fulfillment. A single order crosses inventory, payment, and shipping, and each service owns only part of the truth. Inventory knows whether stock was reserved. Payment knows whether money was captured. Shipping knows whether a shipment was emitted. The order workflow needs explicit state because no single service can safely infer the whole story by itself. The critical rule is that shipping should happen only after prerequisites are confirmed, and stale or duplicate transitions must be rejected rather than quietly accepted."
   },
   {
     "slide": 9,
-    "topic": "System / Architecture View",
-    "text": "Now, let's look at a system architecture view that encapsulates these concepts. It illustrates how moving from objects to workflows connects various components such as coordination, workflow, life-cycle management, validation evidence, and design decisions. This holistic view prompts us to consider whether our relevant invariant is still upheld under various pressures."
+    "topic": "Normal Interaction",
+    "text": "In the happy path, the Order API creates order-42, the coordinator reserves inventory, payment is captured, and shipping is requested. The actors are the API, the workflow coordinator, inventory, payment, and shipping. The assumption in this clean interaction is that each reply arrives in the expected order and is observed by the coordinator before the next step begins. This normal path is useful as a baseline, but it is not enough evidence. It does not test delayed callbacks, retries, worker overlap, or partial failure."
   },
   {
     "slide": 10,
-    "topic": "Worked Example: Problem Setup",
-    "text": "To ground our understanding, let’s examine two practical examples. In the podcast domain, we transition from a simple operation of updating an episode to managing a production pipeline that coordinates various objects like ingestion and transcription. Similarly, in order fulfillment, we coordinate multiple components like inventory management and payment processing. These examples illustrate how complex workflows require careful coordination."
+    "topic": "State Transition Model",
+    "text": "The order life cycle can be described as states: created, reserved, paid, ready to ship, shipped, and sometimes compensating. The protected invariant is that an order is shipped only after inventory is reserved and payment is captured, and those side effects happen exactly once. The state model gives us a place to put guards. Instead of letting any component jump directly to shipping, we require the workflow to pass through valid transitions. The trade-off is that we now have more state modeling to maintain, but we gain a clear basis for correctness."
   },
   {
     "slide": 11,
-    "topic": "Naive Implementation",
-    "text": "A common naive implementation often assumes that all operations occur sequentially with a current state. We might picture the actor performing an operation, the system reading the current state, applying a transition, and emitting a side effect. This assumption can be dangerous because it's typically invisible in the code, especially when method names sound intuitive."
+    "topic": "Invariant",
+    "text": "The invariant is the rule the workflow must not break. Here, an order ships only after inventory is reserved and payment is captured. Payment capture and shipment emission should each happen exactly once. Every transition should also be logged with the order ID. A common mistake is to say, \"we use a queue\" or \"we use a lock\" before saying what property the mechanism protects. Start with the invariant. Then select the mechanism that protects it, and collect evidence that proves the mechanism worked."
   },
   {
     "slide": 12,
-    "topic": "Failure Scenario",
-    "text": "In scenarios where operations overlap, are delayed, or when retries occur, the assumptions break down. An operation might operate with stale state or execute multiple times. These situations often lead to workflows that become stuck, revealing the significant gap between our naive models and actual behavior."
+    "topic": "Invariant Gate",
+    "text": "The invariant gate is the point where the workflow decides whether it is safe to move forward. The two required facts are reservation confirmed and payment confirmed. The transition to ready to ship is allowed only when both facts are true. If one fact is missing, the workflow should reject the transition or wait rather than guessing. The protected property is prerequisite ordering. The mechanism is a guard near the transition. The trade-off is that the system now needs reliable workflow metadata and a clear way to handle missing or late information."
   },
   {
     "slide": 13,
-    "topic": "Improved Design Direction",
-    "text": "To improve our design, we should explicitly name the invariant, make transitions observable, and add controls such as version checks and idempotency keys. Doing this will help us ensure that our workflows are robust against the types of challenges that can arise in real systems."
+    "topic": "Hidden Assumption",
+    "text": "This is the uncomfortable part: a sequential test can look perfectly correct while proving very little. One clean run often hides the assumption that the operation happens once, in order, with current state. Under concurrent pressure, overlap appears and that assumption breaks. The engineer or reviewer might observe a stuck order, duplicate payment, or shipment without a visible prerequisite in the log. The failure was hidden because the baseline never challenged timing, ordering, or visibility. In your evidence, you need to capture the run that exposes the assumption."
   },
   {
     "slide": 14,
-    "topic": "Why Improved Design Is Safer",
-    "text": "The improved design approach transitions from mere hope that workflows execute correctly to actually proving that invalid interleavings are either rejected or can be recovered from. This focus on correctness under various execution scenarios makes our designs significantly safer."
+    "topic": "Naive Mental Model",
+    "text": "The naive mental model is simple: an actor performs an operation, the system reads current state, applies a transition, and emits a side effect. That model is not wrong for a single-threaded demonstration, but it is incomplete for a concurrent workflow. What if the state is stale? What if the same command is retried? What if the side effect succeeds but the log write fails? This four-line model is useful because it reveals exactly where pressure can enter: reading, transitioning, and emitting side effects."
   },
   {
     "slide": 15,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "Let’s consider common anti-patterns that reveal failure modes. For instance, a system might pass a simple happy-path demonstration because the tests avoid conditions that introduce timing or pressure, highlighting the importance of adding rigorous failure-focused tests."
+    "topic": "Failure Interleaving",
+    "text": "Here is a concrete failure path. Coordinator T1 acquires the inventory lock. At the same time, payment callback T2 acquires the payment lock. T1 then waits for payment status, while T2 waits for inventory status. Each actor is holding something the other needs. The violated design property is progress: the workflow cannot move forward even though both components are active. An operator may see order-42 stuck indefinitely, with logs that stop after partial confirmations. This is why we capture wait information, transition logs, and correlation IDs."
   },
   {
     "slide": 16,
-    "topic": "Trade-Off Analysis",
-    "text": "Here, we analyze various approaches, noting their strengths and weaknesses. For example, a simple baseline implementation is easy to explain but often hides timing assumptions. In contrast, an explicit coordination approach reveals dependencies but might introduce bottlenecks. Understanding these trade-offs is essential for making informed architectural decisions."
+    "topic": "Deadlock Wait Graph",
+    "text": "The wait graph makes the deadlock explicit. T1 holds the inventory lock and waits for the payment lock. T2 holds the payment lock and waits for the inventory lock. The cycle is the failure. The hidden assumption in the baseline was that locks would be acquired in a harmless order or that the callbacks would not overlap. A design response might be ordered lock acquisition, timeouts, or avoiding holding one dependency while waiting for another. The trade-off is that coordination becomes more explicit and may add latency or recovery complexity."
   },
   {
     "slide": 17,
-    "topic": "Practical Application",
-    "text": "In applying these concepts, I encourage you to identify the invariant most relevant to the workflows in your own projects. Create a sequential scenario expected to succeed alongside a pressure scenario to uncover potential failures. Ensure your logs capture important identifiers and always document assumptions and risks in your Integrity Packet."
+    "topic": "Duplicate Retry Failure",
+    "text": "Now imagine a queue delivering a payment capture command to Worker A, then redelivering the same command to Worker B after a timeout or acknowledgement problem. Both workers call the payment API, and the order log records two side effects. For the customer, this could mean two charges. For the operator, it might look like two successful captures rather than an obvious exception. The protected property is exactly-once payment effect, or at least exactly-once observable capture for an order. A likely mechanism is an idempotency key or deduplication guard, but that requires extra state and careful evidence."
   },
   {
     "slide": 18,
-    "topic": "Assignment Integration",
-    "text": "As you work on your assignments, particularly A2, connect these lecture concepts with your project. Show the relevant objects, workflows, and failure or recovery mechanisms in your domain, and support your arguments with concrete evidence and thorough documentation."
+    "topic": "Failure Evidence",
+    "text": "When you report a workflow failure, the evidence must let someone reconstruct it. Use one correlation ID per workflow instance, and log the entity ID, operation ID, state, and timestamp. Preserve the failing workload so you can compare before and after runs. The key is to show the exact transition that violated the invariant. If the claim is duplicate payment, show the two capture attempts tied to the same order and operation. If the claim is a stuck workflow, show the last valid state and what each actor was waiting for."
   },
   {
     "slide": 19,
-    "topic": "Validation Questions",
-    "text": "Reflect on the following validation questions: What invariant is most relevant to workflows? What hidden assumptions render baseline designs seem correct? How would you elicit repeatable failures? And which design mechanisms would you prioritize in your solutions? These questions are vital for your understanding and application of the material."
+    "topic": "Design Response Map",
+    "text": "A good design response starts with the observed failure, not with a favorite tool. First name the invariant the failure violates. Then place a guarded transition where the invariant can be broken. If retries or duplicate delivery are involved, make the side effect idempotent. Finally, produce structured evidence showing the corrected behavior. The protected property might be prerequisite ordering, exactly-once side effects, or workflow progress. The trade-off is that you add metadata, checks, and sometimes recovery paths, so the fix is not free."
   },
   {
     "slide": 20,
-    "topic": "Summary",
-    "text": "In summary, the journey from objects to workflows is critical for engineers. It's not just about terminology but a profound way to reason about system correctness under real-world conditions. Always connect your design to invariants, make behaviors observable, and understand the trade-offs inherent in your decisions."
+    "topic": "Baseline Versus Corrected",
+    "text": "The baseline assumes ordered execution, trusts current state, and often logs only vague success. That may be enough for a demo, but not for a design defense. The corrected version checks prerequisites, rejects invalid transitions, and logs evidence. The important comparison is before and after under the same workload. Do not just say the new version is better. Show that the old version fails under pressure, then show that the corrected version preserves the invariant or fails safely with a clear reason."
   },
   {
     "slide": 21,
-    "topic": "Further Reading",
-    "text": "For those interested in delving deeper, I recommend exploring topics such as distributed systems failure modes, concurrency design trade-offs, and structured logging. These areas will enrich your understanding and application of today's material."
+    "topic": "Trade-Off Analysis",
+    "text": "Each approach has a cost. A simple baseline is easy to explain and useful as a comparison point, but it hides timing assumptions. A guarded transition protects the invariant directly, but requires careful state modeling. Explicit coordination makes dependencies visible, but can introduce bottlenecks or deadlocks. Retry-safe design handles duplicate work, but needs idempotency keys or deduplication. A professional answer does not pretend one mechanism is universally best. It explains why the chosen mechanism protects the property at risk and what trade-off it introduces."
   },
   {
     "slide": 22,
-    "topic": "Discussion",
-    "text": "As we wrap up, let’s engage in a discussion. How can we systematically identify hidden assumptions in our designs? What practical strategies can you propose to ensure that our systems are robust under concurrency? I look forward to your thoughts and insights."
+    "topic": "Guard Placement",
+    "text": "The guard belongs as close as possible to the transition that can violate the invariant. An incoming command should include the identifiers needed to trace it. The system loads the current workflow state, validates the requested transition against known facts, and then either commits the state and side effect or rejects the command with a reason. The protected property is that invalid interleavings do not silently pass. The trade-off is added validation and possibly more rejected or delayed work, but that is better than corrupting the workflow."
+  },
+  {
+    "slide": 23,
+    "topic": "Practical Application",
+    "text": "For your own project, start tomorrow by identifying the workflow invariant. Then write one sequential scenario that should succeed and one pressure scenario that might expose the failure. Add operation IDs and entity IDs before running the pressure test, because evidence added after the fact is often too vague. If you apply a fix, capture before and after behavior using the same workload. Finally, record remaining risk. The goal is not to claim perfection; the goal is to show disciplined reasoning about correctness under pressure."
+  },
+  {
+    "slide": 24,
+    "topic": "Evidence Flow",
+    "text": "Your claim might be, \"this workflow is safe under duplicate delivery\" or \"shipping cannot occur before payment.\" That claim must be challenged by a pressure test. The pressure test produces structured logs, and those logs allow you to reconstruct a state trace. The reviewable conclusion is only as strong as that chain. This matters for professional judgment because reviewers should not have to trust your memory or your intention. They should be able to inspect the evidence and see why the invariant held or where it failed."
+  },
+  {
+    "slide": 25,
+    "topic": "Integrity Packet Connection",
+    "text": "In the Integrity Packet, state the hidden assumption first. Then name the invariant or progress property. Show the failing evidence, explain the design mechanism, compare the corrected run, and document trade-offs and remaining risk. This is the bridge between implementation and design defense. A strong packet does not merely say, \"we fixed it with a lock\" or \"we added a queue.\" It says what property was at risk, how the mechanism protects that property, and what evidence supports the conclusion."
+  },
+  {
+    "slide": 26,
+    "topic": "A2 Defense Loop",
+    "text": "For A2, connect this lecture to your actual project workflow. Identify a workflow in your domain, define the invariant, reproduce a failure or pressure scenario, choose a design response, and defend it in the Integrity Packet. Then use what you learn to refine the workflow. During oral assessment, be ready to answer concretely: what did you test, what artifact proves it, and what trade-off did you accept? The expected artifact may be a command, log excerpt, state trace, diagram, or before-and-after run."
+  },
+  {
+    "slide": 27,
+    "topic": "Interview Questions",
+    "text": "Let's pause here and use these as design-defense questions. What invariant matters most in your workflow? Which assumption makes the baseline appear correct? How can you force the failure repeatedly? What evidence proves the failure occurred? And what trade-off does your fix introduce? If you cannot answer these questions yet, that is useful information. It means the next step is not more code; the next step is clarifying the property, the pressure scenario, and the evidence you need to collect."
+  },
+  {
+    "slide": 28,
+    "topic": "Summary",
+    "text": "The central insight is that objects often hide local state changes, while workflows expose cross-object dependencies. Concurrency turns unstated assumptions into failure modes. Correct designs guard critical transitions, and mature designs are explained, stressed, repaired, and validated with evidence. As you work on A2, remember that the goal is not just to build a happy path. The goal is to show that your workflow preserves its invariant under realistic execution, and to defend that claim with artifacts a reviewer can inspect."
   }
 ]

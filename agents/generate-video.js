@@ -146,17 +146,17 @@ function ensureRevealHtml(lectureDirectory) {
 
     fs.mkdirSync(outputDirectory, {recursive: true});
 
-    if (fs.existsSync(htmlPath)) {
+    const customCssSource = path.resolve(__dirname, 'custom.css');
+    if (!fs.existsSync(slidesPath)) {
+        die(`Missing ${SLIDES_ADOC}: ${lectureDirectory}`);
+    }
+
+    if (isGeneratedFileFresh(htmlPath, [slidesPath, customCssSource])) {
         return htmlPath;
     }
 
-    const customCssSource = path.resolve(__dirname, 'custom.css');
     if (fs.existsSync(customCssSource)) {
         fs.copyFileSync(customCssSource, path.join(outputDirectory, 'custom.css'));
-    }
-
-    if (!fs.existsSync(slidesPath)) {
-        die(`Missing ${SLIDES_ADOC}: ${lectureDirectory}`);
     }
 
     run('docker', [
@@ -180,6 +180,17 @@ function ensureRevealHtml(lectureDirectory) {
     return htmlPath;
 }
 
+function isGeneratedFileFresh(outputPath, sourcePaths) {
+    if (!fs.existsSync(outputPath)) {
+        return false;
+    }
+
+    const outputMtime = fs.statSync(outputPath).mtimeMs;
+    return sourcePaths
+        .filter(sourcePath => fs.existsSync(sourcePath))
+        .every(sourcePath => fs.statSync(sourcePath).mtimeMs <= outputMtime);
+}
+
 function outputVideoPath(lectureDirectory, outputOverride) {
     return outputOverride
         ? path.resolve(outputOverride)
@@ -200,15 +211,20 @@ function shouldBuildVideo(outputVideo) {
     };
 }
 
-function captureSlidePngs(lectureDirectory) {
+function captureSlidePngs(lectureDirectory, expectedSlideCount) {
     const outputDirectory = path.join(lectureDirectory, OUTPUT_DIR);
     const htmlPath = ensureRevealHtml(lectureDirectory);
     const fileUrl = `file:///${htmlPath.replace(/\\/g, '/')}`;
     const existingPngFiles = existingSlidePngs(outputDirectory);
 
-    if (existingPngFiles.length > 0) {
+    if (existingPngFiles.length === expectedSlideCount && existingPngFiles.every(file => isGeneratedFileFresh(file, [htmlPath]))) {
         console.log(`Reusing ${existingPngFiles.length} existing slide PNG(s).`);
         return existingPngFiles;
+    }
+
+    if (existingPngFiles.length > 0) {
+        console.log(`Regenerating slide PNGs because existing screenshots do not match the current deck.`);
+        removeGeneratedSlidePngs(outputDirectory);
     }
 
     run('npx', [
@@ -228,7 +244,17 @@ function captureSlidePngs(lectureDirectory) {
         die(`No slide PNGs were generated in: ${outputDirectory}`);
     }
 
+    if (pngFiles.length !== expectedSlideCount) {
+        die(`Rendered slide count ${pngFiles.length} does not match slide deck count ${expectedSlideCount}: ${lectureDirectory}`);
+    }
+
     return pngFiles;
+}
+
+function removeGeneratedSlidePngs(outputDirectory) {
+    for (const file of existingSlidePngs(outputDirectory)) {
+        fs.unlinkSync(file);
+    }
 }
 
 function existingSlidePngs(outputDirectory) {
@@ -260,6 +286,46 @@ function conversationPath(lectureDirectory) {
     die(`Missing ${CONVO_JSON}: ${lectureDirectory}`);
 }
 
+function slideOutline(lectureDirectory) {
+    const slidesPath = path.join(lectureDirectory, SLIDES_ADOC);
+    const slidesContent = fs.readFileSync(slidesPath, 'utf8');
+    return slidesContent
+        .split(/\r?\n/)
+        .filter(line => /^= [^=]|^== [^=]/.test(line))
+        .map((line, index) => ({
+            slide: index + 1,
+            topic: line.replace(/^=+\s+/, '').trim(),
+        }));
+}
+
+function validateConversation(conversation, outline, sourceConversationPath) {
+    if (!Array.isArray(conversation)) {
+        die(`${path.basename(sourceConversationPath)} must contain a JSON array.`);
+    }
+
+    if (conversation.length !== outline.length) {
+        die(`${path.basename(sourceConversationPath)} has ${conversation.length} entries, but ${SLIDES_ADOC} has ${outline.length} slides.`);
+    }
+
+    for (let index = 0; index < outline.length; index += 1) {
+        const entry = conversation[index];
+        const expected = outline[index];
+
+        if (!entry || typeof entry !== 'object') {
+            die(`Conversation entry ${index + 1} must be an object.`);
+        }
+        if (entry.slide !== expected.slide) {
+            die(`Conversation entry ${index + 1} has slide ${entry.slide}; expected ${expected.slide}.`);
+        }
+        if (entry.topic !== expected.topic) {
+            die(`Conversation entry ${index + 1} topic "${entry.topic}" does not match slide topic "${expected.topic}".`);
+        }
+        if (!Array.isArray(entry.dialogue) || entry.dialogue.length === 0) {
+            die(`Conversation entry ${index + 1} must contain a non-empty dialogue array.`);
+        }
+    }
+}
+
 function buildConvoForSlide(slide, studentVoiceId) {
     return slide.dialogue.map(entry => ({
         voiceId: entry.role === 'student' ? studentVoiceId : teacherVoiceId,
@@ -281,7 +347,10 @@ function generateAudioFiles(lectureDirectory, apiKey, studentVoice) {
     const audioDirectory = path.join(lectureDirectory, AUDIO_DIR);
     const sourceConversationPath = conversationPath(lectureDirectory);
     const conversation = JSON.parse(fs.readFileSync(sourceConversationPath, 'utf8'));
+    const outline = slideOutline(lectureDirectory);
     const audioFiles = [];
+
+    validateConversation(conversation, outline, sourceConversationPath);
 
     fs.mkdirSync(outputDirectory, {recursive: true});
     fs.mkdirSync(audioDirectory, {recursive: true});
@@ -333,7 +402,7 @@ function generateAudioFiles(lectureDirectory, apiKey, studentVoice) {
 
 function createVideoSegments(lectureDirectory, pngFiles, audioFiles) {
     const segmentsDirectory = path.join(lectureDirectory, SEGMENTS_DIR);
-    const pairCount = Math.min(pngFiles.length, audioFiles.length);
+    const pairCount = pngFiles.length;
     const segmentFiles = [];
 
     if (pairCount === 0) {
@@ -341,7 +410,7 @@ function createVideoSegments(lectureDirectory, pngFiles, audioFiles) {
     }
 
     if (pngFiles.length !== audioFiles.length) {
-        console.warn(`WARNING: ${path.basename(lectureDirectory)} has ${pngFiles.length} PNG(s) and ${audioFiles.length} audio file(s). Using ${pairCount} pair(s).`);
+        die(`${path.basename(lectureDirectory)} has ${pngFiles.length} PNG(s) and ${audioFiles.length} audio file(s). Refusing to create a misaligned video.`);
     }
 
     fs.mkdirSync(segmentsDirectory, {recursive: true});
@@ -423,7 +492,8 @@ function generateLectureVideo(lectureDirectory, apiKey, studentVoice, outputOver
 
     console.log(`Building video: ${buildDecision.reason}`);
 
-    const pngFiles = captureSlidePngs(lectureDirectory);
+    const outline = slideOutline(lectureDirectory);
+    const pngFiles = captureSlidePngs(lectureDirectory, outline.length);
     const audioFiles = generateAudioFiles(lectureDirectory, apiKey, studentVoice);
     const segmentFiles = createVideoSegments(lectureDirectory, pngFiles, audioFiles);
     const outputVideo = concatenateSegments(lectureDirectory, segmentFiles, outputOverride);

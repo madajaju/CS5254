@@ -1,12 +1,11 @@
 ﻿# Coordination Patterns
 
+
+## Video: https://youtu.be/GQJZ7kKIDsE
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
-- Week: 5
 - Lecture: Coordination Patterns
-- Duration: 15 minutes
 - Prerequisites: Prior lectures on object state, concurrency pressure, structured evidence, and Integrity Packet reasoning
-- Assignment Alignment: [A2](../../../assignments/A2/index.md)
 
 ## Learning Objectives
 - Analyze the design pressure represented by coordination patterns in a stateful concurrent system.

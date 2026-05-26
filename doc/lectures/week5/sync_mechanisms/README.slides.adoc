@@ -1,4 +1,4 @@
-= Synchronization Mechanisms
+= Lecture Title
 Dr. Darren Pulsipher
 :revealjs_theme: white
 :revealjs_slideNumber: true
@@ -11,188 +11,981 @@ Dr. Darren Pulsipher
 :icons: font
 :stem:
 
-== Learning Objectives
+== Why Synchronize
 
-* Analyze synchronization mechanisms in concurrent systems
-* Diagnose hidden assumptions under pressure
-* Evaluate failure evidence (logs, traces)
-* Design corrections preserving invariants
-* Defend approach in Integrity Packet and A2
+* Sequential demos lie
+* Timing creates design pressure
+* Shared state needs protection
+* Progress must be defended
+* Evidence must reconstruct behavior
 
-== Opening Narrative
+== Pressure Loop
 
-* Project appears correct in demo
-* Hidden assumption exposed by concurrency
-* What must the engineer analyze and defend?
-
-== Locks & Mutexes
-
-* Definition: Prevent simultaneous access
-* Importance: Identify explicit conditions for trust
-* Mechanism: Object state, workflow timing, behavior
-* Failure mode: Duplicate work, stale state
-* Design implication: Log transitions, validate behavior
-
-== Signals & Condition Variables
-
-* Definition: Thread wakes another on condition (notify()/wait())
-* Importance: Identify explicit conditions for trust
-* Mechanism: Object state, workflow timing, behavior
-* Failure mode: Duplicate work, stale state
-* Design implication: Log transitions, validate behavior
-
-== Queues
-
-* Definition: Buffer for passing work between producers/consumers
-* Importance: Identify explicit conditions for trust
-* Mechanism: Object state, workflow timing, behavior
-* Failure mode: Duplicate work, stale state
-* Design implication: Log transitions, validate behavior
-
-== Futures & Promises
-
-* Definition: Objects for results of unfinished async operations
-* Importance: Identify explicit conditions for trust
-* Mechanism: Object state, workflow timing, behavior
-* Failure mode: Duplicate work, stale state
-* Design implication: Log transitions, validate behavior
-
-== System Invariant
-
-* Definition: Condition must remain true across executions
-* Importance: Identify explicit conditions for trust
-* Mechanism: Object state, workflow timing, behavior
-* Failure mode: Duplicate work, stale state
-* Design implication: Log transitions, validate behavior
-
-== System Architecture View
-
-[plantuml, target=system_architecture, format=svg, width=80%]
+[plantuml, target=pressure-loop, format=svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 skinparam shadowing false
+skinparam linetype ortho
 left to right direction
 
-rectangle "Synchronization Mechanisms" as Topic
-rectangle "Locks & Mutexes" as A
-rectangle "Signals & Condition Variables" as B
-rectangle "Queues" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Happy path" as H
+rectangle "Concurrency pressure" as P
+rectangle "Failure evidence" as E
+rectangle "Design control" as C
+rectangle "Integrity Packet" as I
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+H --> P : expose assumption
+P --> E : capture trace
+E --> C : choose mechanism
+C --> I : defend tradeoff
+I --> H : refine
 @enduml
 ----
 
-== Worked Example Introduction
+== Hidden Assumption
 
-* Podcast Domain: Signal between `AudioProcessor` and `TranscriptGenerator`
-* Queue for `CleaningJob` by `AudioCleaner`
-* Order System: Semaphore for payment processing requests
+* “It works once”
+* “Events arrive in order”
+* “State is current”
+* “Side effects happen once”
+* “Waiting eventually ends”
 
-== Naive Implementation
+== Happy Path
 
-actor performs operation
-system reads current state
-system applies transition
-system emits side effect
+[plantuml, target=happy-path, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
 
-== Failure Scenario
+participant "Actor" as A
+participant "System" as S
+participant "State" as T
+participant "Side effect" as X
 
-* Overlapping execution can lead to:
-  * Stale state
-  * Duplicate execution
-  * Workflow gets stuck
+A --> S : request
+S --> T : read current
+S --> T : write transition
+S --> X : emit once
+@enduml
+----
 
-== Improved Design Direction
+== Locks Mutexes
 
+* Prevent simultaneous access
+* Protect a small critical section
+* Guard an invariant, not a method name
+* Risk: blocking, deadlock, hidden serialization
+
+== Lock Timeline
+
+[plantuml, target=lock-timeline, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+
+participant "Thread A" as A
+participant "Mutex" as M
+participant "Shared state" as S
+participant "Thread B" as B
+
+A --> M : acquire
+A --> S : update safely
+B --> M : waits
+A --> M : release
+B --> M : acquire
+@enduml
+----
+
+== Deadlock Trap
+
+[plantuml, target=deadlock-trap, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+
+rectangle "Coordinator" as C
+rectangle "Inventory lock" as I
+rectangle "Payment callback" as P
+rectangle "Payment lock" as L
+rectangle "Order stuck" as S
+
+C --> I : holds
+C --> L : waits
+P --> L : holds
+P --> I : waits
+I --> S : no progress
+@enduml
+----
+
+== Signals Conditions
+
+* Wait until a condition becomes true
+* Wake another thread intentionally
+* Always re-check the condition
+* Risk: lost wakeup, spurious wakeup, stuck workflow
+
+== Wait Condition
+
+[plantuml, target=wait-condition, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+
+participant "AudioProcessor" as A
+participant "Condition" as C
+participant "TranscriptWorker" as T
+participant "Audio state" as S
+
+T --> C : wait while not ingested
+A --> S : mark ingested
+A --> C : notify
+T --> S : re-check state
+T --> S : generate transcript
+@enduml
+----
+
+== Lost Wakeup
+
+[plantuml, target=lost-wakeup, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+
+participant "Producer" as P
+participant "Condition" as C
+participant "Consumer" as K
+participant "Job state" as S
+
+P --> S : ready=true
+P --> C : notify early
+K --> C : wait later
+K --> S : never rechecked
+K --> K : stuck
+@enduml
+----
+
+== Queues
+
+* Decouple producers from consumers
+* Preserve work handoff
+* Absorb rate mismatch
+* Risk: duplicates, starvation, unbounded backlog
+
+== Queue Flow
+
+[plantuml, target=queue-flow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+
+rectangle "Podcast API" as A
+rectangle "CleaningJob" as J
+rectangle "Work queue" as Q
+rectangle "AudioCleaner" as C
+rectangle "Clean file" as F
+
+A --> J : create
+J --> Q : enqueue
+Q --> C : claim
+C --> F : produce
+@enduml
+----
+
+== Backlog Failure
+
+[plantuml, target=backlog-failure, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+
+rectangle "Fast producers" as P
+rectangle "Unbounded queue" as Q
+rectangle "Slow workers" as W
+rectangle "Delayed users" as U
+rectangle "Misleading success" as M
+
+P --> Q : flood
+Q --> W : drain slowly
+Q --> U : stale status
+U --> M : sees accepted
+M --> Q : hidden failure
+@enduml
+----
+
+== Futures Promises
+
+* Represent a result not ready yet
+* Separate starting work from consuming result
+* Compose async workflows
+* Risk: blocked wait, failed future, missing timeout
+
+== Future Timeline
+
+[plantuml, target=future-timeline, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+
+participant "Caller" as C
+participant "Future" as F
+participant "Worker" as W
+participant "Result" as R
+
+C --> W : start async
+W --> F : promise result
+C --> F : continue
+W --> R : compute
+F --> C : complete or fail
+@enduml
+----
+
+== System Invariant
+
+* Condition true across all valid executions
+* Names the protected property
+* Survives interleavings
+* Drives tests and logging
+* Comes before mechanism choice
+
+== State Guard
+
+[plantuml, target=state-guard, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+
+state "CREATED" as C
+state "RESERVED" as R
+state "PAID" as P
+state "READY" as Y
+state "SHIPPED" as S
+state "COMPENSATING" as X
+
+C --> R : inventory hold
+R --> P : payment capture
+P --> Y : prerequisites observed
+Y --> S : ship once
+R --> X : payment failed
+@enduml
+----
+
+== Order Example
+
+* Order `42`
+* Reserve inventory
+* Capture payment
+* Ship only after both
+* Correlate every transition
+
+== Order Workflow
+
+[plantuml, target=order-workflow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+
+participant "Order API" as A
+participant "Coordinator" as C
+participant "Inventory" as I
+participant "Payment" as P
+participant "Shipping" as S
+
+A --> C : create order-42
+C --> I : reserve
+I --> C : reserved
+C --> P : capture
+P --> C : paid
+C --> S : ship
+@enduml
+----
+
+== Controls
+
+* Ordered lock acquisition
+* State-machine guards
+* Idempotency keys
+* Bounded queues
+* Timeouts and compensation
+* Structured transition logs
+
+== Correction Pattern
+
+[plantuml, target=correction-pattern, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+
+rectangle "Baseline action" as B
+rectangle "Named invariant" as I
+rectangle "Guarded transition" as G
+rectangle "Evidence log" as E
+rectangle "Recovery path" as R
+
+B --> I : reveal assumption
+I --> G : reject invalid move
+G --> E : record decision
+G --> R : timeout or compensate
+E --> I : prove behavior
+@enduml
+----
+
+== Tradeoffs
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+| Approach | Strength | Weakness | Use
+| Baseline | Simple | Hides timing | First version
+| Guarded state | Protects invariant | Needs modeling | Workflow steps
+| Coordination | Makes order visible | Can block | Shared resources
+| Retry-safe | Handles duplicates | Needs keys | Queues, calls
+| Observed | Strong evidence | Adds logging | Design defense
+|===
+
+== Evidence Needed
+
+* Correlation ID
+* Entity ID
+* State before and after
+* Lock or wait event
+* Timing and worker identity
+* Before/after test run
+
+== Evidence Flow
+
+[plantuml, target=evidence-flow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+
+rectangle "Claim" as C
+rectangle "Pressure test" as T
+database "Structured logs" as L
+rectangle "Failure trace" as F
+rectangle "Design decision" as D
+rectangle "Review question" as R
+
+C --> T : what must hold?
+T --> L : capture run
+L --> F : reconstruct
+F --> D : choose control
+D --> R : defend tradeoff
+@enduml
+----
+
+== A2 Connection
+
+* Identify one synchronization pressure
 * Name the invariant
-* Make transitions observable
-* Introduce appropriate correctness controls:
-  * Version checks
-  * Idempotency keys
-  * State-machine guards
-
-== Why Improved Design Is Safer
-
-* Ensures invalid interleavings are rejected, contained or recovered
-
-== Failure Modes and Anti-Patterns
-
-* Symptom: Passes happy-path demo
-  * Detection: Add concurrent actors
-  * Correction: Add failure-focused tests
-
-* Symptom: Names tool but not design property
-  * Detection: Ask which invariant is protected
-  * Correction: State invariant first, then mechanism
-
-* Symptom: Vague evidence
-  * Detection: Reviewer can't reconstruct failure
-  * Correction: Capture structured evidence
-
-* Symptom: Fix changes behavior, but no baseline comparison
-  * Detection: No before/after run
-  * Correction: Preserve failing test and rerun 
-
-== Trade-Off Analysis
-
-[cols="1,1,1,1", options="header"]
-|===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy implementation | Hides timing assumptions | First implementation
-| Guarded transition | Protects invariant | Needs careful modeling | Status changes
-| Explicit coordination | Makes dependencies visible | Introduces waiting | Multi-object workflows
-| Idempotent design | Handles duplicate work | Requires control | Queues, retries
-| Observability-first | Provides strong evidence | Adds instrumentation | Assignments requiring proof
-|===
-
-== Practical Application
-
-* Identify relevant invariant
-* Write sequential scenario to succeed
-* Write pressure scenario to expose failure
-* Add IDs to logs before running pressure scenario
-* Capture before/after evidence for any fix
-* Update Integrity Packet with assumption and evidence
-
-== Assignment Integration
-
-* Connect lecture concepts to project
-* Show relevant object, event, and recovery mechanism
-* Mastery through concrete evidence and defense in Integrity Packet
-
-== Validation Questions
-
-1. Relevant invariant for this lecture?
-2. Hidden assumption in baseline design?
-3. Force the failure in a repeatable test?
-4. Evidence proving the failure?
-5. Chosen design mechanism and introduced trade-off?
-6. Issue appearance across implementation stacks?
-7. Integrity Packet records to defend conclusion?
-
-== Summary
-
-* Synchronization mechanisms reason about system correctness
-* Connect concepts to invariants and observable behavior
-* Design must be explainable, stress-tested, and validated
-
-== Further Reading
-
-* "Synchronization Mechanisms distributed systems failure mode"
-* "Synchronization Mechanisms concurrency design tradeoffs"
-* About structured logging and correlation IDs
-* Invariants in stateful object-oriented systems
-* Coordination patterns, deadlocks, and progress guarantees
+* Reproduce the failure
+* Apply one control
+* Submit evidence, not confidence
+* Record remaining risk
 
 == Discussion
 
-* What hidden assumptions could lead to design failures?
-* How can logging be improved to capture meaningful evidence?
+* Which invariant would fail first in your project?
+* What evidence would convince a skeptical reviewer?

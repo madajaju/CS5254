@@ -2,106 +2,151 @@
   {
     "slide": 1,
     "topic": "Fixing Concurrency Patterns",
-    "text": "Welcome everyone to our lecture on fixing concurrency patterns. Today, we will delve into how concurrency impacts our system designs and how we can better understand these pressures to create effective solutions."
+    "text": "Welcome everyone. Today we are talking about fixing concurrency patterns, not just naming them. The key idea here is that a system can look correct in a simple demo and still be unsafe once two workers, retries, delays, or shared state enter the picture. Our job as engineers is to identify the property that must remain true, expose the failure under pressure, choose a correction, and produce evidence strong enough to defend in the Integrity Packet."
   },
   {
     "slide": 2,
-    "topic": "Learning Objectives",
-    "text": "By the end of this lecture, you should be able to analyze the pressure that arises from fixing concurrency patterns, diagnose hidden assumptions in your systems, and evaluate the evidence of failures. Additionally, you will learn how to design corrections that maintain crucial invariants and defend your approach in the Integrity Packet."
+    "topic": "Lecture Goals",
+    "text": "By the end of this lecture, you should be able to explain why a sequential demonstration can be misleading, name the invariant that concurrency threatens, and reproduce a failure with overlapping execution. We will also connect fixes like locks, immutability, message passing, and atomic operations to actual design evidence. For A1, this means you should not simply say, \"I used a lock.\" You should be able to say what the lock protects, how you forced the failure, what evidence you captured, and what trade-off your correction introduced."
   },
   {
     "slide": 3,
-    "topic": "Opening Narrative",
-    "text": "Let’s start with an important narrative. A system might seem correct in a simple demonstration, but when we introduce concurrency, hidden assumptions can surface. It’s crucial for engineers to analyze what is truly happening in these cases before placing any trust in the results."
+    "topic": "Concurrency Pressure View",
+    "text": "The key idea here is that the happy path is not enough. A demo may work because the timing is gentle: one request arrives, one state transition happens, and the log looks clean. Once we add concurrency pressure, such as overlapping workers or delayed writes, hidden assumptions become visible. Those assumptions threaten an invariant, and that risk must be tested with design evidence. This matters professionally because correctness is not whether the code ran once; correctness is whether the required property survives realistic execution."
   },
   {
     "slide": 4,
-    "topic": "Core Concept: Locks",
-    "text": "Let’s discuss locks, specifically mutual exclusion. The key idea is that we need to ensure only one thread can access a particular section of code at a time. This is important because without clearly defining this condition, we cannot trust our system's behavior under concurrent pressure."
+    "topic": "Hidden Assumption",
+    "text": "A common mistake is trusting the name of a method. A method called publish, claim, reserve, or process can sound atomic even when internally it does a read, a check, a write, and a side effect as separate steps. Sequential tests often hide this because there is no overlap. Under concurrency, two actors can both read the same old state before either write commits. If the logs only show the final state, the losing worker may disappear from the story. The system is not correct because the demo passed; it is correct only if the invariant still holds."
   },
   {
     "slide": 5,
-    "topic": "Core Concept: Immutability",
-    "text": "Immutability is another vital concept. By designing objects whose state cannot change once created, we inherently make them thread-safe. This clarity must also be maintained under pressure to ensure our system performs correctly without introducing hidden bugs."
+    "topic": "Baseline Interaction",
+    "text": "Imagine Worker A asking the episode service to process an episode. The service reads the episode record, sees DRAFT, writes PROCESSING, and accepts the request. In isolation, this interaction looks perfectly reasonable. The actor is Worker A, the boundary is the episode service, and the state lives in the episode record. The hidden assumption is that nobody else can observe or modify the record between the read and the write. That assumption is exactly what we need to challenge before trusting the design."
   },
   {
     "slide": 6,
-    "topic": "Core Concept: Message Passing",
-    "text": "Next, we explore message passing, where threads communicate by sending data instead of sharing memory. This technique reduces unexpected side effects that commonly arise from shared states, which is particularly important to maintain stability under concurrent workloads."
+    "topic": "Core Patterns",
+    "text": "There are several patterns we can use to repair or control concurrency risk. Locks protect a critical section by allowing one thread through at a time. Immutability removes shared mutation by creating stable values. Message passing avoids shared ownership by routing work through actors or channels. Atomicity combines check and update so no other actor can split them apart. But the most important concept is the invariant. The mechanism is useful only if it protects the condition that must remain true."
   },
   {
     "slide": 7,
-    "topic": "Core Concept: Atomicity",
-    "text": "Atomicity ensures that operations appear to occur all at once or not at all. This notion is crucial since if we overlook atomicity, our systems can produce inconsistent state results, leading to blocked progress and duplicated efforts."
+    "topic": "Pattern Map",
+    "text": "Shared state is the pressure point. If multiple actors can touch the same state, we need some strategy for preserving correctness. A lock serializes access. An immutable value prevents old readers from seeing changing data. An actor or channel transfers ownership to a coordinator. An atomic operation combines steps that would otherwise be vulnerable. Each path is trying to protect the same kind of design property: the invariant. The professional judgment is choosing the simplest mechanism that protects the property and produces evidence reviewers can understand."
   },
   {
     "slide": 8,
-    "topic": "Core Concept: System Invariant",
-    "text": "Lastly, a system invariant is a condition that must remain true across valid executions. Recognizing these invariants is essential so that we can trust our systems even when they are stressed or under heavy operational loads."
+    "topic": "Locks",
+    "text": "A lock allows only one thread into a protected section at a time. That can be very effective, but only if we know what belongs inside the boundary. A common mistake is making the protected section either too large, which reduces parallelism, or too vague, which fails to protect the actual transition. Before choosing a lock, state the invariant. For the episode example, the invariant is that only one worker may own a transition for a given episode at a time. Your logs should show who entered, what decision was made, and whether another worker was rejected."
   },
   {
     "slide": 9,
-    "topic": "System / Architecture View",
-    "text": "This architecture view illustrates the relationships between the concepts we've discussed. Each concept connects to others, showing how addressing concurrency patterns requires a holistic view that links design decisions with validation evidence."
+    "topic": "Lock Boundary",
+    "text": "Here, Worker A reaches the lock boundary first, while Worker B has to wait. Inside the boundary, there is one owner of the critical transition: check the current status, validate that the transition is allowed, and write the new status. The protected property is that two workers cannot both claim the same episode transition. The mechanism is mutual exclusion. The trade-off is reduced parallelism around that protected entity. That trade-off may be acceptable for a single episode claim, but it would be dangerous to lock too broadly across unrelated work."
   },
   {
     "slide": 10,
-    "topic": "Worked Example: Problem Setup",
-    "text": "To put these concepts into practice, consider the podcast domain. We might implement locking using a `ReentrantLock` for operations like `episode.publish()`. Instead of modifying an existing `Episode` object, we could create a new one to ensure immutability and avoid shared memory pitfalls through message passing."
+    "topic": "Immutability",
+    "text": "Immutability takes a different approach. Instead of modifying an existing episode object, the transition function takes Episode version 1, with status DRAFT, and creates Episode version 2, with status PROCESSING. Old readers still see a stable old value. New readers see the new value once it is published. The protected property is stable state: readers are not watching an object change underneath them. This matters because it removes a whole class of shared mutation bugs, but it does not eliminate the need to coordinate who is allowed to publish the next version."
   },
   {
     "slide": 11,
-    "topic": "Naive Implementation",
-    "text": "A naive implementation might assume that operations execute sequentially and accurately reflect the current state. This can lead to serious issues in concurrent environments, where the same operation could be executed multiple times leading to unexpected behavior."
+    "topic": "Immutable Design",
+    "text": "In an immutable design, objects do not change after construction. Every state change creates a new value. That often makes reasoning easier because old values remain stable and can be safely shared between threads. The trade-off is that you may create more objects, and you now need version management or publication control. A common mistake is assuming immutability alone solves the whole workflow. It protects object state from mutation, but if two workers both create competing next versions, you still need a rule for which version is accepted."
   },
   {
     "slide": 12,
-    "topic": "Failure Scenario",
-    "text": "Under conditions such as overlapping execution and delayed deliveries, this naive design can observe stale states and cause workflows to freeze or misbehave. It's essential to recognize mismatches between design assumptions and actual execution paths."
+    "topic": "Message Passing",
+    "text": "Message passing avoids shared ownership by routing requests through a channel to an orchestrator. Worker A and Worker B do not directly update the episode state. Instead, they send ClaimEpisode messages. The orchestrator receives messages one at a time and applies or rejects transitions. The protected property is single ownership of the state transition. The mechanism is coordination through a channel or actor. The trade-off is that you may add queue latency and must handle ordering, backpressure, and failure of the orchestrator itself."
   },
   {
     "slide": 13,
-    "topic": "Improved Design Direction",
-    "text": "To improve the design, we should explicitly name our invariant and ensure our transitions are observable. Integrating controls like version checks and idempotency keys can help mitigate potential issues arising from shared resource contention."
+    "topic": "Atomicity",
+    "text": "Atomicity means the operation appears to happen all at once or not at all. In our example, reading the current state, validating that it is DRAFT, and writing PROCESSING cannot be split apart by another worker. The protected property is that no stale worker can sneak in between the check and the update. The mechanism might be compare-and-set, a versioned database update, or a synchronized transition method. The trade-off is that you usually have to express the transition more explicitly, including what happens to the losing request."
   },
   {
     "slide": 14,
-    "topic": "Why Improved Design Is Safer",
-    "text": "The improved design methodology shifts from relying on hope for workflow correctness to providing proofs of correctness. This proactive approach helps us reject invalid operation interleavings and reinforces system stability."
+    "topic": "System Invariant",
+    "text": "An invariant is a condition that must remain true across all valid executions. For the episode example, the invariant is simple: one worker owns a transition for a given episode at a time. This matters more than the mechanism name. A lock, queue, immutable value, or atomic update is only defensible if it protects that invariant. Your failing test should attack the invariant directly, and your fixed version should prove that stale or competing work is rejected rather than silently accepted."
   },
   {
     "slide": 15,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "Common failure modes can be identified by specific symptoms, such as passing initial happy-path tests that do not account for complex timing or ordering scenarios. To correct these, we need to introduce testing that challenges assumptions and targets invariants directly."
+    "topic": "Episode State Machine",
+    "text": "The episode workflow has several states: DRAFT, PROCESSING, READY_TO_PUBLISH, PUBLISHED, and FAILED. A worker claims the episode by moving it from DRAFT to PROCESSING. Processing completion moves it toward publication, while validation failure moves it to FAILED. An operator may retry by moving it back to DRAFT. The important design property is that each transition has rules. Concurrency bugs often happen when code treats the state machine as informal, rather than enforcing which actor may move from one state to another at a specific moment."
   },
   {
     "slide": 16,
-    "topic": "Trade-Off Analysis",
-    "text": "When analyzing design trade-offs, consider factors like strengths and weaknesses. For example, a simple baseline can be easy to understand but may overlook critical timing assumptions. On the other hand, more guarded state transitions require careful state modeling."
+    "topic": "Failure Setup",
+    "text": "Now let’s make the failure concrete. Episode 42 starts as DRAFT. Worker A checks the status and sees DRAFT. Before Worker A commits PROCESSING, Worker B also checks the same episode and also sees DRAFT. Now both workers believe they have permission to process the episode. The customer might observe duplicate processing, duplicate notifications, conflicting logs, or a final result that hides which worker actually won. The failure was hidden in the baseline because there was only one actor and no delay between read and write."
   },
   {
     "slide": 17,
-    "topic": "Practical Application",
-    "text": "For practical application, start by identifying the invariant most pertinent to your concurrency patterns. Next, write both a successful sequential scenario and a pressure scenario to ensure your designs hold up under different conditions. Be sure to log all relevant operation and entity IDs."
+    "topic": "Race Interleaving",
+    "text": "This is the uncomfortable interleaving we want students to be able to reproduce. Worker A reads DRAFT. Worker B then reads DRAFT before Worker A writes. Worker A writes PROCESSING, and Worker B also writes PROCESSING. Both workers acted based on a state that was true when they read it but no longer safe by the time they wrote. The violated invariant is that only one worker may own the transition. Evidence should include the worker IDs, the episode ID, the previous state, the new state, timestamps, and the outcome for each attempt."
   },
   {
     "slide": 18,
-    "topic": "Assignment Integration",
-    "text": "This lecture's themes tie directly to your upcoming assignments. You’ll need to connect your understanding of these concurrency concepts to your project by identifying relevant objects, workflows, and mechanisms to illustrate how they operate in your specific domain."
+    "topic": "Pressure Test Sketch",
+    "text": "A pressure test should force the bad timing instead of hoping it appears randomly. Reset episode 42 to DRAFT, start two workers, add a delay after the read, wait for both workers, and assert that exactly one claim was accepted. Repeat that many times because concurrency bugs are often timing-sensitive. The goal is not just to make the test fail once. The goal is to create a repeatable scenario that proves the baseline is unsafe and later proves the fix actually protects the invariant."
   },
   {
     "slide": 19,
-    "topic": "Validation & Interview Questions",
-    "text": "As we wrap up, consider these validation questions. Think about what invariants are essential, how hidden assumptions could mislead the design, where failures can be provoked in tests, and which design mechanisms you might implement first. Reflect on how these concepts will manifest in your projects."
+    "topic": "Evidence Fields",
+    "text": "Evidence needs structure. An operation ID groups one attempt. A worker ID tells us which actor made the request. The episode ID scopes the protected entity, so we know the invariant being tested. The outcome tells us whether the attempt was accepted or rejected. A reviewer should be able to reconstruct the story from the evidence: two workers competed for episode 42, one transition was accepted, and the stale attempt was rejected. Vague logs like \"processing started\" are not enough for an Integrity Packet."
   },
   {
     "slide": 20,
-    "topic": "Summary",
-    "text": "In summary, fixing concurrency patterns is integral to maintaining system correctness. Our engineering efforts must focus on ensuring our designs are not only sound but also demonstrably validated under stress, ultimately supporting defensible trade-offs."
+    "topic": "Design Options",
+    "text": "There is no single universal fix. A lock is simple and useful when one object must be protected, but it can become a bottleneck. Immutable values give stable snapshots, especially when reads dominate writes, but publishing the new value still needs control. An actor queue gives clear ownership, but it adds queue latency. Compare-and-set is a direct atomic guard, but it requires an expected state or version. The design decision should name both the protected property and the cost of protecting it."
   },
   {
     "slide": 21,
-    "topic": "Further Reading",
-    "text": "For those looking to dive deeper, I suggest exploring topics like fixing concurrency patterns in distributed systems and trade-offs in concurrency design, as well as concepts surrounding structured logging and invariants in object-oriented systems."
+    "topic": "Baseline and Fix",
+    "text": "The baseline splits the check and write. That split allows two workers to pass the check, and duplicate work may be hidden if the final state simply says PROCESSING. The corrected design makes the claim atomic. One worker succeeds, and the losing worker is explicitly rejected. The protected property is the single-owner transition. The mechanism might vary, but the evidence must show both decisions. This before-and-after comparison is crucial: without preserving the failing baseline, you cannot prove that the fix addressed the original failure."
+  },
+  {
+    "slide": 22,
+    "topic": "Guarded Transition",
+    "text": "In a guarded transition, the worker request carries an expected state, such as DRAFT. The atomic guard validates the expectation and writes the new state as one indivisible action. If the current state is still DRAFT, the transition commits to PROCESSING. If the state has already changed, the request is rejected as a stale claim. The protected property is that stale workers cannot overwrite or duplicate the transition. The trade-off is more explicit transition code and the need to handle rejection as a normal outcome."
+  },
+  {
+    "slide": 23,
+    "topic": "Single Owner Queue",
+    "text": "A single-owner queue protects the transition by routing competing commands to one owner. Worker A and Worker B enqueue claim requests, but the episode owner processes them in order. The first valid command transitions the episode state, and later competing commands can be rejected. The protected property is serialized ownership of the episode state. The mechanism is message passing through a queue. The trade-off is queue latency and operational responsibility for ordering, retries, and backpressure."
+  },
+  {
+    "slide": 24,
+    "topic": "Idempotent Side Effects",
+    "text": "Idempotency is especially important when retries or external calls are involved. A retry request carries an idempotency key. The system checks a deduplication store. If the key already exists, it returns the existing result instead of repeating the side effect. If the key is new, the side effect is allowed and recorded. The protected property is that duplicate requests do not produce duplicate external consequences. The trade-off is that you must manage keys, storage, expiration, and the boundary between internal state and external effects."
+  },
+  {
+    "slide": 25,
+    "topic": "Failure Modes",
+    "text": "Several anti-patterns show up repeatedly. Happy-path tests avoid the pressure condition, so the bug stays hidden. Tool-first explanations say \"we used a lock\" without naming the protected property. Logs omit entity IDs or transition outcomes, so the reviewer cannot reconstruct the failure. Fixes are applied without comparison to the failing baseline. And trade-offs are hidden instead of defended. In A1, these weaknesses directly damage the Integrity Packet because they turn a design claim into an unsupported assertion."
+  },
+  {
+    "slide": 26,
+    "topic": "Anti-Pattern Map",
+    "text": "A single successful demo can start a chain of weak evidence. If there is no pressure test, the timing assumption remains hidden. Without pressure, the logs may never capture the competing actors or the rejected transition. Without useful logs, the fix cannot be compared to the failure. And without that comparison, the Integrity Packet becomes weak. This matters because professional review is not based on confidence; it is based on reconstructable evidence."
+  },
+  {
+    "slide": 27,
+    "topic": "Integrity Packet",
+    "text": "For the Integrity Packet, you should state the invariant, describe the hidden assumption, preserve the failing scenario, and show before-and-after evidence. Then explain the mechanism you chose and name the remaining risk. For example, if you choose compare-and-set, say that it protects the DRAFT-to-PROCESSING transition by rejecting stale claims, but it requires version handling and explicit rejection logic. The goal is not to claim the design is perfect. The goal is to show that you understand what is protected, how you tested it, and what risk remains."
+  },
+  {
+    "slide": 28,
+    "topic": "Evidence Flow",
+    "text": "A strong design defense starts with a claim, such as \"only one worker can claim an episode.\" Then a pressure test targets that invariant. Structured logs collect the evidence. Before-and-after comparison shows that the original design failed and the corrected design changed the outcome. That comparison justifies the design decision, and the decision becomes part of the Integrity Packet. This flow keeps the work disciplined: claim, test, evidence, comparison, decision, defense."
+  },
+  {
+    "slide": 29,
+    "topic": "Interview Prompts",
+    "text": "Let’s pause here and treat these as oral assessment prompts. If I ask what invariant is protected, you should answer in domain language, not tool language. If I ask what assumption made the baseline appear correct, you should identify the missing overlap or timing pressure. If I ask which log line proves the losing worker was rejected, you should be able to point to a specific operation ID, worker ID, episode ID, and outcome. These are the questions that turn implementation work into a defensible design explanation."
+  },
+  {
+    "slide": 30,
+    "topic": "Summary Model",
+    "text": "The summary is that concurrency patterns are not just vocabulary. A pattern should clarify a named invariant. That invariant should be stressed with a repeatable failure. The failure should guide a targeted fix. The fix should produce reviewable evidence. And the evidence may refine your understanding of the pattern. This is the engineering loop we want for A1: explain the assumption, break the baseline, repair the design, and defend the result with concrete evidence."
   }
 ]

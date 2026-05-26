@@ -1,188 +1,528 @@
 = AI-Generated Designs: Common Flaws
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Introduction
+== Learning Objectives
 
-* AI-generated designs can appear correct
-* Hidden flaws emerge under pressure
-* Importance of design accountability
-* How to use AI outputs safely
+* Diagnose hidden assumptions in AI-generated concurrent designs
+* Identify invariants before choosing mechanisms
+* Force failures with repeatable pressure scenarios
+* Evaluate evidence from logs, traces, and interleavings
+* Defend a correction in the Integrity Packet
 
-== Core Concept: Thread-Safety Hallucinations
+== Core Claim
 
-* Definition: Misleading thread-safety claims
-* Why it matters: Trust under pressure
-* Mechanisms: Object state, timing, worker behavior
-* Failure: Stale state, duplicate work, blocked progress
-* Implication: Expose invariant, log transitions
+* AI output can be a useful draft
+* AI output is not correctness evidence
+* Concurrent pressure exposes assumptions that sequential examples hide
+* A design is mature only when its invariant survives bad timing
+* A1 rewards evidence-backed reasoning, not tool confidence
 
-== Core Concept: Missing Edge Cases
+== Design Pressure Loop
 
-* Definition: Ignoring high-contention scenarios
-* Why it matters: Trust must be explicit
-* Mechanisms: Object state, timing, queues
-* Failure: Duplicate work, stale state, blocked progress
-* Implication: Expose invariant, log transitions
-
-== Core Concept: Complexity Overload
-
-* Definition: Overly complex solutions suggested
-* Why it matters: Simplicity is key under pressure
-* Mechanisms: Object state, timing, queues
-* Failure: Overhead leads to design flaws
-* Implication: Expose invariant, log transitions
-
-== Core Concept: Assumed Atomicity
-
-* Definition: Misunderstanding atomic operations
-* Why it matters: Must define atomic conditions
-* Mechanisms: Object state, timing, coordination
-* Failure: Mismatched assumptions in execution
-* Implication: Expose invariant, log transitions
-
-== Core Concept: AI-Assisted Hypothesis
-
-* Definition: Generated designs require validation
-* Why it matters: Must ensure correctness
-* Mechanisms: Object state, timing, coordination
-* Failure: Misleading paths without strict checks
-* Implication: Expose invariant, log transitions
-
-== System Architecture View
-
-[plantuml, target=architecture, format=svg, width=80%]
+[plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
 skinparam shadowing false
-left to right direction
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 
-rectangle "AI-Generated Designs: Common Flaws" as Topic
-rectangle "Thread-Safety Hallucinations" as A
-rectangle "Missing Edge Cases" as B
-rectangle "Complexity Overload" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "AI draft" as AI
+rectangle "Hidden assumption" as H
+rectangle "Concurrent pressure" as P
+rectangle "Failure evidence" as E
+rectangle "Design response" as D
+rectangle "Integrity Packet" as I
 
-Topic -left-> A
-A -left-> B
-B -left-> C
-C -left-> V
-V -left-> D
-D -down-> A : refine
+AI -> H : inspect
+H -> P : stress
+P --> E : observe
+E --> D : repair
+D --> I : defend
+I --> H : refine
 @enduml
 ----
 
-== Example Setup
+== Common Flaws
 
-* Podcast Domain
-* Request for "safe status update"
-* Incorrectly generated code with risks
-* Key focus: observable state transition principles
+* Thread-safety hallucinations
+* Missing edge cases
+* Complexity overload
+* Assumed atomicity
+* Unsupported claims about correctness
+* Vague evidence that cannot be replayed
 
-== Naive Implementation
+== Thread-Safety Hallucination
 
-* Assumes a singular operation in order
-* Flawed sequential assumption
-* Invisible state mismatches
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
 
-== Failure Scenario
+rectangle "Uses volatile" as V
+rectangle "Sounds safe" as S
+rectangle "Check then write" as C
+rectangle "Race still exists" as R
+rectangle "Invariant unprotected" as I
 
-* Overlapping execution pitfalls
-* Outcomes: stale state, interference, stalled workflows
-* Not just syntax bugs: deeper design flaws exposed
+V -> S : creates confidence
+S --> C : hides split operation
+C -> R : overlaps
+R --> I : violates
+@enduml
+----
 
-== Improved Design Direction
+== Missing Edge Cases
 
-* Define the invariant clearly
-* Make transitions observable
-* Add correctness checks (e.g., version checks)
-* Focus on evidence-based design
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
 
-== Why Improved Design Is Safer
+rectangle "Happy path" as H
+rectangle "Two workers" as W
+rectangle "Retry" as R
+rectangle "Delayed message" as D
+rectangle "Partial failure" as P
+rectangle "Unreviewed risk" as U
 
-* Moves from assumptions to proof
-* Prevents invalid interleavings
-* Protects workflow integrity with evidence
+H --> W : ignored
+H --> R : ignored
+H --> D : ignored
+H --> P : ignored
+W --> U : exposes
+R --> U : exposes
+D --> U : exposes
+P --> U : exposes
+@enduml
+----
 
-== Failure Modes & Anti-Patterns
+== Complexity Overload
 
-* Symptom: Happy-path tests pass
-  * Cause: Avoids pressure conditions
-  * Detect: Use diverse tests
-  * Correct: Add failure-focused tests
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
 
-* Symptom: Tool names without properties
-  * Cause: Failing to state invariants
-  * Detect: Inquire about invariant protection
-  * Correct: State invariant first
+rectangle "Simple local state" as L
+rectangle "AI suggests large framework" as F
+rectangle "More moving parts" as M
+rectangle "Harder evidence" as E
+rectangle "Unclear protected property" as U
 
-* Symptom: Vague evidence for claims
-  * Cause: Lack of detailed logs
-  * Detect: Poor reconstruction of failures
-  * Correct: Capture structured evidence
+L --> F : overfits
+F -> M : adds
+M --> E : complicates
+E -> U : obscures
+@enduml
+----
 
-* Symptom: Fixes change behavior in isolation
-  * Cause: History of repeatable failures lost
-  * Detect: No baseline comparisons
-  * Correct: Preserve failing tests
+== Assumed Atomicity
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "One function" as F
+rectangle "Read status" as R
+rectangle "Decide transition" as D
+rectangle "Write status" as W
+rectangle "Not one atomic step" as N
+
+F --> R : contains
+R --> D : computes
+D -> W : applies
+R --> N : can interleave
+W --> N : can race
+@enduml
+----
+
+== Worked Example Setup
+
+* Domain object is episode-42
+* Initial state is DRAFT
+* Worker A and Worker B both try to start processing
+* AI claims the method is safe because a concurrent collection is used
+* Required invariant is one owner per episode transition
+
+== System Interaction
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+participant "Worker A" as A
+participant "Episode Record" as R
+participant "Worker B" as B
+
+A --> R : read DRAFT
+B --> R : read DRAFT
+A --> R : write PROCESSING
+B --> R : write PROCESSING
+@enduml
+----
+
+== Episode State Machine
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam state {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+[*] --> DRAFT
+DRAFT --> PROCESSING : claim episode
+PROCESSING --> READY_TO_PUBLISH : assets complete
+READY_TO_PUBLISH --> PUBLISHED : publish succeeds
+PROCESSING --> FAILED : processing error
+FAILED --> DRAFT : retry allowed
+@enduml
+----
+
+== Naive Mental Model
+
+[source,text]
+----
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+reviewer sees one clean path
+----
+
+== Failure Interleaving
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+participant "Worker A" as A
+participant "Episode Record" as R
+participant "Worker B" as B
+
+A --> R : check status equals DRAFT
+B --> R : check status equals DRAFT
+A --> R : start processing job
+B --> R : start processing job
+A --> R : write PROCESSING
+B --> R : write PROCESSING
+@enduml
+----
+
+== Failure Evidence
+
+* The failure is not syntax
+* The failure is a mismatch with the execution model
+* Required log fields are worker ID, episode ID, previous state, new state, and time
+* Repeat the test until the interleaving is visible
+* Preserve the failing run for before and after comparison
+
+== Failure Outcome
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Worker A owns transition" as A
+rectangle "Worker B also owns transition" as B
+rectangle "Duplicate processing" as D
+rectangle "Ambiguous final log" as L
+rectangle "Invariant broken" as I
+
+A --> D : starts job
+B --> D : starts job
+D -> L : hides winner
+L -> I : cannot defend
+@enduml
+----
+
+== Design Response
+
+* Name the invariant first
+* Protect the state transition directly
+* Reject stale or competing claims
+* Log accepted and rejected transitions
+* Keep the simplest mechanism that produces reviewable evidence
+
+== Guarded Transition
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Worker claim" as C
+rectangle "Expected state DRAFT" as E
+rectangle "Atomic compare and set" as CAS
+rectangle "Accepted owner" as A
+rectangle "Rejected competitor" as R
+rectangle "Structured log" as L
+
+C --> E : supplies
+E -> CAS : guards
+CAS --> A : one succeeds
+CAS -> R : stale claim fails
+A -> L : record
+R --> L : record
+@enduml
+----
+
+== Evidence Flow
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Claim" as C
+rectangle "Pressure test" as T
+rectangle "Structured logs" as L
+rectangle "Observed rejection" as R
+rectangle "Design decision" as D
+rectangle "Remaining risk" as K
+
+C -> T : validate
+T --> L : capture
+L -> R : prove
+R --> D : support
+D -> K : disclose
+@enduml
+----
 
 == Trade-Off Analysis
 
-[cols="1,1,1,1", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | Initial comparison point
-| Guarded transition | Protects core invariant | Requires careful modeling | Status changes or workflows
-| Explicit coordination | Makes dependencies visible | May introduce wait issues | Complex workflows needing order
-| Idempotent design | Handles duplicates | Needs deduplication | Queues, retries, async scenarios
-| Observability-first | Strong evidence generation | Adds instrumentation work | Requires design defense
+|Approach |Strengths |Weaknesses |When to Use
+
+|Simple baseline
+|Easy to explain
+|Hides timing assumptions
+|Initial comparison point
+
+|Guarded transition
+|Protects invariant directly
+|Requires state modeling
+|Status and workflow changes
+
+|Explicit coordination
+|Makes ordering visible
+|Can create bottlenecks
+|Multi-object workflows
+
+|Idempotent design
+|Handles duplicate attempts
+|Needs keys and deduplication
+|Retries and external calls
+
+|Observability first
+|Supports review
+|Adds instrumentation work
+|Integrity Packet evidence
 |===
 
-== Practical Application
+== Practical Checklist
 
-* Identify the core invariant in designs
-* Write sequential and pressure scenarios
-* Log operation IDs pre-execution
-* Record evidence of fixes applied
+* Identify the invariant or progress property
+* Write one sequential success scenario
+* Write one pressure scenario
+* Add operation IDs and entity IDs before testing
+* Capture before and after evidence
+* Record the assumption, validation, and remaining risk
 
-== Assignment Connection
+== Assignment Integration
 
-* Relate lecture to [A1](../../../assignments/A1/index.md)
-* Show invariants and mechanisms in project
-* Include evidence: logs, behavior, explanations
+* Connect the flaw to your A1 project domain
+* Show the object, workflow, event, or recovery mechanism
+* Include runnable evidence, not just explanation
+* Compare the baseline with the corrected design
+* Defend the trade-off in the Integrity Packet
 
-== Validation Questions
+== Integrity Packet Map
 
-1. Identify key invariants relevant to this topic.
-2. Discuss hidden assumptions in baseline design.
-3. Describe how to force a failure scenario.
-4. Identify evidence for failure occurrence.
-5. Which design mechanism would you prioritize?
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
 
-== Discussion
+rectangle "AI suggestion" as AI
+rectangle "Assumption" as A
+rectangle "Invariant" as I
+rectangle "Failure test" as F
+rectangle "Evidence" as E
+rectangle "Decision" as D
+rectangle "Risk" as R
 
-* How should engineers validate AI-generated designs?
-* What are the essential trade-offs when choosing mechanisms?
+AI -> A : extract
+A --> I : clarify
+I -> F : target
+F --> E : produce
+E -> D : justify
+D --> R : disclose
+@enduml
+----
+
+== Interview Questions
+
+* What invariant matters most here?
+* What hidden assumption made the baseline appear correct?
+* How would you force the failure repeatably?
+* What log line proves the losing worker was rejected?
+* What trade-off does your chosen mechanism introduce?
 
 == Summary
 
-* AI-generated designs bring risks of unseen flaws
-* Core insights center on invariants and observable behavior
-* Justify design maturity with robust evaluations and clear evidence
-
-== Further Reading
-
-* Search: "AI-Generated Designs and Failure Modes"
-* Explore: Structured logging and correlation ID best practices
-* Investigate: Invariants in object-oriented systems
+* AI-generated designs are hypotheses
+* Concurrency turns hidden assumptions into failures
+* Correctness depends on protected invariants
+* Evidence must be replayable and reviewable
+* The Integrity Packet connects the claim, test, decision, and risk

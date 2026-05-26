@@ -1,193 +1,645 @@
 = Coordination Patterns
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
 == Course Context
 
-* Course: CS 5254b
-* Week: 5
-* Duration: 15 minutes
-* Prerequisites: 
-** Object state
-** Concurrency pressure
-** Structured evidence
-** Integrity Packet reasoning
-
-== Assignment Alignment
-
-* [A2](../../../assignments/A2/index.md)
+* Course: CS 5254b Object-Oriented Systems Under Concurrency
+* Lecture: Coordination Patterns
+* Prerequisites: object state, concurrency pressure, structured evidence
 
 == Learning Objectives
 
-* Analyze design pressure in concurrent systems
-* Diagnose hidden assumptions creating perceived correctness
-* Evaluate failure evidence using logs, traces
-* Design corrections that maintain invariants
-* Defend approach in Integrity Packet
+* Analyze coordination pressure in a stateful concurrent system.
+* Diagnose hidden assumptions behind a correct-looking baseline.
+* Evaluate failure evidence from logs, traces, interleavings, or tests.
+* Design a control that preserves the relevant invariant.
+* Defend the approach in the Integrity Packet.
 
 == Opening Narrative
 
-* Components wait on each other
-* Logs show activity, no completion
-* Local code appears reasonable
-* Coordination contract is incomplete
-* Design rule for observable progress?
+* Two components wait for each other to make progress.
+* Logs show activity, but the workflow never completes.
+* Each method looks locally reasonable.
+* The coordination contract is incomplete.
+* The design question is: what rule makes progress observable?
 
-== Coordination Boundary
+== System Pressure Map
 
-* Definition: Where objects agree on ordering or progress
-* Importance: Must be explicit before trust under pressure
-* Mechanism: State, timing, worker behavior
-* Failure Mode: Duplicate work, stale state, blocked progress
-* Design Implication: Expose invariant, log transitions
-
-== Progress Guarantee
-
-* Definition: Work completes eventually
-* Importance: Must be explicit before trust under pressure
-* Mechanism: State, timing, worker behavior
-* Failure Mode: Duplicate work, stale state, blocked progress
-* Design Implication: Expose invariant, log transitions
-
-== Contention
-
-* Definition: Competition for shared resources
-* Importance: Must be explicit before trust under pressure
-* Mechanism: State, timing, worker behavior
-* Failure Mode: Duplicate work, stale state, blocked progress
-* Design Implication: Expose invariant, log transitions
-
-== System / Architecture View
-
-[plantuml, target=system_architecture, format=svg, width=80%]
+[plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
 skinparam shadowing false
-left to right direction
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 
 rectangle "Coordination Patterns" as Topic
-rectangle "Coordination Boundary" as A
-rectangle "Progress Guarantee" as B
-rectangle "Contention" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Boundary" as Boundary
+rectangle "Progress" as Progress
+rectangle "Contention" as Contention
+rectangle "Evidence" as Evidence
+rectangle "Decision" as Decision
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+Topic --> Boundary : exposes
+Boundary --> Progress : requires
+Progress --> Contention : stressed by
+Contention -left-> Evidence : observed through
+Evidence --> Decision : supports
+Decision --> Boundary : refines
 @enduml
 ----
 
-== Problem Setup
+== Coordination Boundary
 
-* Centralized examples
-* Assumptions of single operation execution
-* Invisible assumptions in correct-sounding names
+* A coordination boundary is where independent objects must agree.
+* The agreement may involve ordering, ownership, visibility, or progress.
+* The boundary is often invisible in sequential code.
+* Under concurrency, the boundary becomes a design obligation.
+* Name the invariant before choosing the mechanism.
 
-== Naive Implementation
+== Coordination Boundary Diagram
 
-* Actor performs operations
-* System reads current state
-* System applies transition
-* System emits side effect
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 
-== Failure Scenario
+rectangle "Object A\nlocal state" as A
+rectangle "Boundary\nshared rule" as B
+rectangle "Object C\nlocal state" as C
+rectangle "Invariant\nmust remain true" as I
 
-* Overlapping execution can yield stale state or executed twice
-* Mismatch between design assumption and execution model
+A --> B : requests transition
+C --> B : reports condition
+B --> I : protects
+@enduml
+----
 
-== Improved Design Direction
+== Progress Guarantee
 
-* Name the invariant, make transitions observable
-* Introduce controls: 
-** Version checks
-** Idempotency keys
-** State-machine guards
-** Explicit coordination
-** Backoff retries
+* A progress guarantee says work eventually completes.
+* It prevents workflows from waiting forever without explanation.
+* It must be observable in state, logs, or test output.
+* Timeouts, retries, guards, and compensation may support progress.
+* The guarantee must include its trade-off.
 
-== Why Improved Design Is Safer
+== Progress Guarantee Diagram
 
-* Shifts from hoping order executes
-* Proves that invalid interleavings are contained
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
 
-== Failure Modes and Anti-Patterns
+rectangle "Work accepted" as A
+rectangle "Preconditions checked" as B
+rectangle "Transition attempted" as C
+rectangle "Completion or recovery" as D
+rectangle "Observable evidence" as E
 
-* Single happy-path demonstration passes
-** Why: Test avoids timing or pressure conditions
-** Detect: Repeat runs or stress conditions
-** Correct: Add failure-focused tests
+A --> B : starts
+B -> C : permits
+C --> D : resolves
+D -> E : records
+@enduml
+----
 
-* Tool focus over design property
-** Why: Focus on mechanisms before invariants
-** Detect: Ask invariant protection
-** Correct: State invariant first, choose mechanism
+== Contention
 
-* Evidence lacks detail
-** Why: Logs lack IDs or transitions
-** Detect: Reviewer cannot reconstruct failure
-** Correct: Capture structured evidence
+* Contention is competition for a shared object, lock, resource, or signal.
+* Contention changes timing without changing source code.
+* A passing happy path may hide contention failure.
+* The failure may appear as duplicate work, stale state, or blocked progress.
+* Evidence must show the pressure condition.
 
-* Fix changes behavior not compared to baseline
-** Why: Failure was non-repeatable
-** Detect: Run with same workload
-** Correct: Maintain failing test for redesign
+== Contention Map
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Worker 1" as W1
+rectangle "Worker 2" as W2
+rectangle "Shared order" as O
+rectangle "Inventory lock" as I
+rectangle "Payment lock" as P
+
+W1 --> O : updates
+W2 --> O : updates
+W1 --> I : waits for
+W2 --> P : waits for
+I --> P : ordering risk
+@enduml
+----
+
+== Normal Interaction
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+
+participant "Order API" as API
+participant "Coordinator" as C
+participant "Inventory" as I
+participant "Payment" as P
+participant "Shipping" as S
+
+API --> C : create order-42
+C --> I : reserve inventory
+I --> C : reservation confirmed
+C --> P : capture payment
+P --> C : payment confirmed
+C --> S : ship order
+@enduml
+----
+
+== State Transition Model
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam state {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+
+[*] --> CREATED : order created
+CREATED -> RESERVED : inventory hold succeeds
+RESERVED -> PAID : payment capture succeeds
+PAID --> READY_TO_SHIP : prerequisites observed
+READY_TO_SHIP --> SHIPPED : shipment emitted once
+PAID --> COMPENSATING : prerequisite fails
+COMPENSATING --> [*] : recovery recorded
+SHIPPED --> [*] : complete
+@enduml
+----
+
+== Hidden Assumptions
+
+* The operation happens once.
+* The operation happens in request order.
+* The object state is current when read.
+* A callback means the whole workflow is ready.
+* A log line means the transition is safe.
+* A single successful run proves correctness.
+
+== Happy Path Assumption
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Read current state" as R
+rectangle "Apply transition" as T
+rectangle "Emit side effect" as S
+rectangle "Pass sequential test" as P
+rectangle "Assumption hidden" as H
+
+R --> T : appears valid
+T -> S : appears ordered
+S --> P : succeeds once
+P -> H : masks pressure
+@enduml
+----
+
+== Failure Interleaving
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "T1 Coordinator" as T1
+rectangle "Inventory lock" as IL
+rectangle "Payment lock" as PL
+rectangle "T2 Callback" as T2
+rectangle "Stuck order" as O
+
+T1 --> IL : holds
+T1 --> PL : waits for
+T2 --> PL : holds
+T2 --> IL : waits for
+IL --> O : progress blocked
+PL --> O : progress blocked
+@enduml
+----
+
+== Deadlock Sequence
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+
+participant "Coordinator" as C
+participant "Inventory" as I
+participant "Payment" as P
+participant "Callback" as B
+
+C --> I : acquire inventory lock
+B --> P : acquire payment lock
+C --> P : wait for payment status
+B --> I : wait for inventory status
+C --> B : no progress visible
+@enduml
+----
+
+== Out-of-Order Callback
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+
+participant "Payment" as P
+participant "Coordinator" as C
+participant "Inventory" as I
+participant "Order State" as O
+
+P --> C : payment confirmed early
+C --> O : reads inventory missing
+I --> C : reservation confirmed late
+C --> O : state order ambiguous
+O --> C : invariant needs guard
+@enduml
+----
+
+== Duplicate Retry
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Worker attempt 1" as W1
+rectangle "Worker attempt 2" as W2
+rectangle "Shipment side effect" as S
+rectangle "No idempotency key" as N
+rectangle "Duplicate shipment" as D
+
+W1 --> S : emits
+W2 --> S : emits again
+S -> N : lacks dedupe
+N --> D : violates exactly once
+@enduml
+----
+
+== Evidence to Collect
+
+* Use correlation IDs for each order and operation.
+* Log state before and after each transition.
+* Capture wait relationships when locks or resources are involved.
+* Preserve the failing workload as a repeatable test.
+* Compare before and after behavior using the same scenario.
+* Link evidence directly to the invariant.
+
+== Evidence Flow
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Claim" as C
+rectangle "Pressure test" as T
+rectangle "Structured logs" as L
+rectangle "Timeline" as TL
+rectangle "Design decision" as D
+rectangle "Remaining risk" as R
+
+C -> T : challenged by
+T --> L : produces
+L -> TL : reconstructs
+TL --> D : justifies
+D -> R : documents
+@enduml
+----
+
+== Design Response
+
+* State the protected property first.
+* Put the guard close to the transition that can violate it.
+* Use ordered acquisition when multiple locks are unavoidable.
+* Add timeout and compensation when waiting can become indefinite.
+* Make duplicate work safe with idempotency or deduplication.
+* Record the trade-off in the Integrity Packet.
+
+== Guarded Transition
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam state {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+[*] --> PAID : payment confirmed
+PAID -> READY_TO_SHIP : reservation present
+PAID -> WAITING_FOR_RESERVATION : reservation missing
+WAITING_FOR_RESERVATION --> READY_TO_SHIP : reservation arrives
+READY_TO_SHIP --> SHIPPED : idempotency key accepted
+SHIPPED --> [*] : shipment recorded
+@enduml
+----
+
+== Ordered Acquisition
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "All workers" as W
+rectangle "Acquire inventory first" as I
+rectangle "Acquire payment second" as P
+rectangle "Apply transition" as T
+rectangle "Release in reverse" as R
+
+W -> I : follows rule
+I --> P : fixed order
+P -> T : safe section
+T --> R : exits
+@enduml
+----
+
+== Timeout and Compensation
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam state {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+[*] --> WAITING : prerequisite requested
+WAITING --> READY : prerequisite received
+WAITING -> TIMED_OUT : deadline reached
+TIMED_OUT -> COMPENSATING : release reserved resources
+COMPENSATING -> REVIEWABLE : evidence recorded
+READY -> COMPLETE : workflow finishes
+COMPLETE -> [*] : done
+REVIEWABLE -> [*] : manual or automated recovery
+@enduml
+----
 
 == Trade-Off Analysis
 
-[cols="1,1,1,1", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to implement | Hides timing assumptions | First implementation
-| Guarded transition | Protects invariant | Needs careful modeling | Status changes, workflows
-| Explicit coordination | Makes dependencies visible | Risk of deadlock | Multi-object workflows
-| Retry-safe design | Handles duplicates | Needs deduplication | Queues, external calls
-| Observability design | Produces strong evidence | Adds instrumentation | Assignments requiring proof
+|Approach |Strengths |Weaknesses |When to Use
+
+|Simple baseline
+|Easy to explain
+|Hides pressure assumptions
+|Initial comparison point
+
+|Guarded transition
+|Protects the invariant directly
+|Requires state modeling
+|Workflow status changes
+
+|Explicit coordination
+|Makes dependencies visible
+|Can create bottlenecks
+|Multi-object ordering
+
+|Retry-safe design
+|Handles duplicate delivery
+|Requires deduplication
+|Queues and external calls
+
+|Observability-first
+|Supports review evidence
+|Adds instrumentation work
+|A2 design defense
 |===
 
-== Practical Application
+== Repeatable Pressure Test
 
-* Identify relevant invariant or progress property
-* Write sequential scenario expected to succeed
-* Write pressure scenario to expose failure
-* Add IDs to logs before running pressure scenario
-* Capture evidence before/after fix
-* Update Integrity Packet: assumption, evidence
+[source,text]
+----
+scenario: order-42 coordination pressure
+given: inventory callback delay is 500 ms
+and: payment callback delay is 10 ms
+and: two workers process the same order
+when: both workers run the shipping transition
+then: order state must become SHIPPED once
+and: logs must show reservation confirmed before shipment
+and: duplicate shipment attempts must be rejected
+----
 
-== Assignment Integration
+== Tomorrow Morning
 
-* Connect lecture concepts to semester project
-* Show relevant object, workflow, or failure mechanism
-* Mastery via evidence: 
-** runnable commands
-** structured logs
-** before/after behavior
+* Identify the invariant or progress property.
+* Write one sequential scenario that should succeed.
+* Write one pressure scenario that could expose the failure.
+* Add operation IDs and entity IDs to logs.
+* Capture before and after evidence if you apply a fix.
+* Update the Integrity Packet with risks and trade-offs.
 
-== Validation Questions
+== A2 Integrity Packet Map
 
-1. What invariant or progress property matters?
-2. What hidden assumption makes baseline correct?
-3. How to force failure in repeatable test?
-4. What evidence proves failure occurred?
-5. Which mechanism first, and what trade-off?
-6. How does issue appear in your stacks?
-7. What to record in Integrity Packet?
+[plantuml,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Assumption" as A
+rectangle "Invariant" as I
+rectangle "Failure evidence" as F
+rectangle "Design control" as D
+rectangle "Validation result" as V
+rectangle "Remaining risk" as R
+
+A -> I : clarified as
+I --> F : challenged by
+F -> D : motivates
+D --> V : tested by
+V -> R : leaves
+@enduml
+----
 
 == Summary
 
-* Coordination patterns reason about system correctness
-* Connect concepts to invariants, behavior, and trade-offs
-* A design is mature when it can be explained, stressed, and validated
+* Coordination patterns expose where objects must agree.
+* Happy-path execution can hide ordering and progress assumptions.
+* The key question is which invariant must remain true under pressure.
+* A mature design rejects, contains, or recovers from invalid interleavings.
+* A defensible answer connects mechanism, evidence, trade-off, and risk.

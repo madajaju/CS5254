@@ -2,101 +2,111 @@
   {
     "slide": 1,
     "topic": "Object Ownership & Thread Confinement",
-    "text": "Welcome everyone to this lecture on Object Ownership & Thread Confinement. Today, we're going to explore how these concepts relate to building trust in our systems, especially when concurrency is involved."
+    "text": "Welcome everyone. In this lecture, we are looking at object ownership and thread confinement as design tools for concurrent object-oriented systems. The key idea here is that an object is not just a bundle of data and methods; under concurrency, it also has an ownership boundary. We need to know which thread, worker, or component is allowed to touch it, when ownership changes hands, and what invariant must remain true while that happens. This matters for A1 because you will not only show that your project runs; you will defend why your design remains trustworthy under pressure."
   },
   {
     "slide": 2,
-    "topic": "Opening Narrative",
-    "text": "Let's start with a scenario. Imagine you have a project that appears to behave correctly in a simple demonstration. However, when you introduce concurrency, ambivalence, or operational pressure, hidden assumptions about Thread Confinement may come to light. It's crucial to analyze these assumptions and be prepared to defend your conclusions in order to trust the outcomes you achieve."
+    "topic": "Why this lecture matters",
+    "text": "A common mistake is trusting a sequential demo too much. If one actor performs one operation at a time, the system can look perfectly correct while hiding an unsafe ownership assumption. Thread confinement asks a very concrete question: who is allowed to access this object right now? Before choosing a lock, a queue, a retry mechanism, or a framework feature, we first need to name the invariant. Then we need evidence that the invariant survives pressure. For A1, that means your explanation must connect the design choice to logs, tests, and observed behavior, not just to a successful run."
   },
   {
     "slide": 3,
-    "topic": "Thread Confinement",
-    "text": "Thread Confinement is the practice of restricting an object's access to a single thread. This is pivotal for establishing trust in our system under pressure. It manifests through aspects like object state and worker behavior. If we neglect this principle, we risk producing duplicates, dealing with stale data, or encountering blocked progress. To mitigate these risks, we need to log critical transitions and validate our workflows with thorough testing."
+    "topic": "Ownership Pressure Map",
+    "text": "Think of ownership as the starting point for a chain of reasoning. If an object is owned by a particular thread or worker, thread confinement restricts access to that object. That restriction is supposed to protect an invariant, such as only one worker may transition an episode at a time. Pressure then challenges that invariant through overlapping execution, retries, delays, or competing workers. The professional move is to make the invariant observable, gather evidence, and use that evidence to justify a design decision. This matters because good engineering judgment is not just choosing a mechanism; it is showing what property the mechanism protects."
   },
   {
     "slide": 4,
-    "topic": "System Invariant",
-    "text": "Now, let's delve into the concept of a System Invariant. This is a condition that must hold true across all valid executions of our system. Identifying and maintaining these invariants is essential for system reliability under pressure. Ignoring them can lead to misleading evidence and potentially halt progress. Therefore, our design should always emphasize the invariants and properly log the transitions that occur."
+    "topic": "Learning Objectives",
+    "text": "By the end of this lecture, you should be able to analyze where ownership and confinement pressure appears in a stateful concurrent system. You should also be able to identify the hidden assumption in a baseline design, especially the assumption that only one actor is operating at a time. We will focus on evidence: logs, traces, interleavings, and repeatable tests. Finally, you should be able to propose a correction that protects the invariant and explain the trade-off in your Integrity Packet."
   },
   {
     "slide": 5,
-    "topic": "Failure Mode",
-    "text": "A Failure Mode is essentially a repeatable way that the system can violate an invariant or lose progress. The importance of understanding this concept is clear: if we don't make these failure modes explicit, we can't trust our systems during demanding conditions. Failure modes can result in duplicated efforts, stale states, or even blocked progress, so it's crucial to log these transitions and validate our system's behavior."
+    "topic": "Hidden Assumption Loop",
+    "text": "The hidden assumption loop is uncomfortable because it starts with success. A sequential demo passes, so the system appears correct. That success hides the assumption that there is only one actor, or that operations happen in a clean order. Then concurrency pressure arrives: two workers, a retry, a delayed message, or a partial failure. Suddenly the invariant is violated. At that point, vague confidence is not enough. We need visible evidence that lets us revise the assumption and redesign the boundary. The important lesson is that a passing happy path can be the thing that conceals the real defect."
   },
   {
     "slide": 6,
-    "topic": "Design Trade-Off",
-    "text": "Moving on to Design Trade-Offs, this refers to the deliberate choices we make between competing qualities in our systems, like simplicity versus safety or throughput versus debuggability. It's vital to make these choices explicit, as they directly affect the system's ability to handle pressure. Ignoring trade-offs can lead to misleading evidence about the system's stability. Therefore, just like before, we must ensure we log transitions and validate behavior."
+    "topic": "Core Vocabulary",
+    "text": "Let’s ground the vocabulary. Thread confinement asks who may access the object. The risk is shared mutation without control, so useful evidence includes thread IDs and object IDs. A system invariant asks what must remain true across valid executions; evidence should capture before and after state. A failure mode asks how pressure can break the design, and the evidence should include a repeatable bad interleaving. A design trade-off asks what quality we exchanged. For example, we may accept less parallelism in order to protect a state transition. A common mistake is naming a tool before naming the property it protects."
   },
   {
     "slide": 7,
-    "topic": "System Architecture View",
-    "text": "Here, we have a depiction of the relationship between Object Ownership and Thread Confinement. This view highlights how these concepts interconnect with various system components like system invariants, failure modes, and validation evidence. Remember, we need to consider not just if the code runs once, but if it maintains its integrity under various conditions like timing and load."
+    "topic": "Happy Path Mental Model",
+    "text": "The happy path mental model is simple: an actor calls an operation, the system reads the current state, applies a transition, emits a side effect, and the demo passes. This is not wrong as a first model, but it is incomplete. It quietly assumes that the state remains current between the read and the transition, and that the side effect happens only once. Under concurrency, those assumptions may fail. This matters because the method name may sound atomic, while the actual execution is split into several vulnerable steps."
   },
   {
     "slide": 8,
-    "topic": "Worked Example: Podcast Domain",
-    "text": "Let's look at a practical example in the podcasting domain. In this scenario, a Cleaner thread exclusively owns an AudioAsset while performing cleaning. Once that task is complete, it hands off the asset to a Publisher thread, clearing its own reference afterward. This demonstrates effective confinement and ownership transfer, and a similar principle can be applied to queue-based ownership."
+    "topic": "Naive Pseudocode",
+    "text": "This pseudocode is intentionally plain because the danger is conceptual, not syntactic. The actor performs an operation, the system reads state, applies a transition, emits a side effect, and the test observes the final result. In a single-threaded test, that may be enough. But imagine two workers executing this same sequence at nearly the same time. Both can read the same old state before either writes the new state. If the test only checks the final result, it may miss the duplicate side effect or fail to reveal which worker actually owned the transition."
   },
   {
     "slide": 9,
-    "topic": "Naive Implementation Model",
-    "text": "When we consider a naive implementation, it typically assumes that operations are conducted once, in order and with the current state. A common pattern is when an actor performs an operation, the system reads the current state, applies a transition, and finally emits a side effect. This assumption can often be hidden within the code, making it seem correct until cases of concurrency arise."
+    "topic": "Podcast Ownership Handoff",
+    "text": "Imagine a podcast system where a cleaner thread processes an AudioAsset. While cleaning is happening, the cleaner owns that asset, and no other thread should have a usable reference to mutate it. When cleaning is complete, ownership is handed off to the publisher thread, and the cleaner clears its own reference. The protected property is exclusive access during a workflow step. The mechanism is confinement plus a deliberate handoff. The trade-off is that we must be disciplined about references and lifecycle boundaries; otherwise the handoff is only a story, not a guarantee."
   },
   {
     "slide": 10,
-    "topic": "Failure Scenario",
-    "text": "However, issues arise in scenarios where we encounter delays, retries, or overlapping executions. Under these circumstances, the same operation may observe stale state or even execute multiple times. This discrepancy highlights a mismatch between our design assumptions and the actual execution model, which can lead to significant problems."
+    "topic": "Queue Ownership Boundary",
+    "text": "A queue can act as an ownership boundary. The producer creates or prepares an object, then transfers the reference into the queue. Once the consumer receives it, the consumer becomes the owner. The invariant is that only the current owner mutates the object. This can be a clean design because it avoids shared mutation, but it is not free. The queue may become a bottleneck, ordering must be understood, and the code must not keep hidden references that allow the producer to keep modifying the object after transfer."
   },
   {
     "slide": 11,
-    "topic": "Improved Design Direction",
-    "text": "To enhance our design, we can focus on clearly naming the invariant and making transitions observable. This could involve implementing version checks, employing idempotency keys, and utilizing state-machine guards or explicit coordination mechanisms. These elements significantly elevate our ability to manage complexity and maintain system integrity."
+    "topic": "State Transition Invariant",
+    "text": "Now let’s use an episode workflow. An episode starts in DRAFT, then moves to PROCESSING when a worker claims it. After processing, it becomes READY_TO_PUBLISH, then PUBLISHED if the publish side effect succeeds. It may also move from PROCESSING to FAILED if validation or processing fails. The invariant we care about is: only one worker may own a state transition for a given episode at a time. This is the center of the argument. If that invariant is vague, every later design choice becomes vague too."
   },
   {
     "slide": 12,
-    "topic": "Why the Design Is Safer",
-    "text": "The reason why the improved design is more robust is that it transitions our focus from merely trusting that the workflow will execute as intended to providing evidence that invalid interleavings are either rejected, contained, or recoverable. This evidence-based validation helps us build confidence in our designs."
+    "topic": "Failure Interleaving",
+    "text": "Here is the failure made concrete. Worker A reads episode 42 as DRAFT. Before Worker A writes PROCESSING, Worker B also reads episode 42 as DRAFT. Now both workers believe they are allowed to claim the episode. Worker A writes PROCESSING and starts a job. Worker B also writes PROCESSING and starts a duplicate job. From an operator’s perspective, this is frustrating: the final status might look normal, but the system has done duplicate work, produced confusing logs, or triggered duplicate side effects. The happy path hid the gap between checking the state and updating the state."
   },
   {
     "slide": 13,
-    "topic": "Anti-Patterns: System Weaknesses",
-    "text": "Let's discuss some common anti-patterns that reveal weaknesses in our systems. A significant symptom is passing a single happy-path test. This can occur when tests avoid necessary timing, ordering, or pressure conditions. It’s critical to detect such weaknesses by running concurrent actors or stress tests and to rectify this by adding tests that focus on failure modes."
+    "topic": "What Evidence Must Show",
+    "text": "When you capture evidence, it must let a reviewer reconstruct what happened. We need to know which worker or thread acted, which entity was touched, what previous state was observed, what new state was attempted, and whether the operation won or lost. We also need to know whether the behavior repeats under the same test. A vague log message like \"started processing\" is not enough. A useful log line includes the worker ID, episode ID, previous state, attempted state, timestamp, and outcome."
   },
   {
     "slide": 14,
-    "topic": "Failure Modes Continued",
-    "text": "Other symptoms might include focusing on tools instead of on design properties, or where the evidence gathered is too vague to substantiate claims. It's essential to first articulate what invariant is being protected before selecting mechanisms. Moreover, without structured logs, it becomes challenging to reconstruct failures, therefore ensure evidence capture is linked directly to design claims."
+    "topic": "Evidence Flow",
+    "text": "The evidence flow starts with a claim. For example: our design prevents two workers from claiming the same episode. That claim predicts what should happen in a pressure test. The pressure test produces structured logs. Those logs allow us to reconstruct the interleaving. The observed interleaving then justifies a design decision, and the Integrity Packet records the reasoning. This matters because the packet is not just a write-up after the fact; it is where your claim, test, evidence, decision, and remaining risk are tied together."
   },
   {
     "slide": 15,
-    "topic": "Trade-Off Analysis Table",
-    "text": "In this table, we analyze various approaches. Each approach has its strengths, weaknesses, and the contexts in which they should be utilized. For instance, a simple baseline is easy to understand and implement but often hides crucial timing assumptions, making it suitable for initial comparison. In contrast, approaches like explicit coordination might make dependencies more apparent but could also introduce performance bottlenecks."
+    "topic": "Design Response Options",
+    "text": "There are several reasonable responses, and each protects a slightly different property. An atomic compare-and-set protects a single transition winner by making the check and update one indivisible operation. A synchronized transition allows one thread into a critical section at a time, but may create contention. A single-owner queue serializes work so one consumer owns the object, but it can reduce throughput. An idempotency key protects against duplicate side effects during retries, but requires key storage and lookup. The key is to choose the simplest mechanism that protects the invariant and produces reviewable evidence."
   },
   {
     "slide": 16,
-    "topic": "Practical Application",
-    "text": "To put theory into practice, start by identifying the invariant most relevant to object ownership and thread confinement. Then, craft both a sequential scenario, which should succeed, and a pressure scenario, which could potentially expose failure points. Don’t forget to enhance your logs with operation IDs and capture before-and-after evidence when you implement fixes."
+    "topic": "Corrected Guarded Transition",
+    "text": "In the corrected version, Worker A attempts a guarded transition from DRAFT to PROCESSING and is accepted. Worker A then starts the processing job. Worker B later attempts the same transition based on the stale expectation that the episode is still DRAFT, and the guarded record rejects it. The protected property is single ownership of the episode transition. The mechanism is an atomic or guarded update. The trade-off is more explicit transition logic and possibly less freedom for concurrent access, but now the losing worker is visible instead of silently starting duplicate work."
   },
   {
     "slide": 17,
-    "topic": "Assignment Integration",
-    "text": "This lecture directly supports your assignment, A1. You are expected to integrate the concepts we've discussed today into your semester project. Focus on demonstrating your understanding of relevant objects, workflows, events, failures, or recovery mechanisms in your specific domain."
+    "topic": "Single-Owner Queue Response",
+    "text": "Another correction is to route competing requests through a single-owner queue. Many requesters can enqueue claims, but one owner worker processes them one at a time for the episode state machine. The protected property is serialized ownership of the transition. The mechanism is confinement by queue ownership: once the worker receives the item, it owns the transition decision. The trade-off is potential bottlenecking and more queue management. This is a good fit when the work can be serialized cleanly and when the logs record each claim, decision, and result."
   },
   {
     "slide": 18,
-    "topic": "Validation and Interview Questions",
-    "text": "As we wrap up, consider some critical validation questions. What invariant or progress property is the most relevant to this lecture? What hidden assumption might cause the baseline design to seem correct? Think about how you would enact failure in a repeatable test and what type of evidence would confirm that failure occurred."
+    "topic": "Trade-Off Comparison",
+    "text": "Let’s compare the options honestly. The simple baseline is easy to explain, and that makes it useful as an initial comparison point, but it hides timing assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes ordering visible, but can block progress or introduce deadlock risk if poorly designed. Observability-first design supports your A1 defense, but it adds instrumentation work. A mature design explanation does not pretend the fix is free. It says what property is protected and what cost was accepted."
   },
   {
     "slide": 19,
-    "topic": "Summary",
-    "text": "In summary, understanding object ownership and thread confinement allows us to assess the correctness of our systems under realistic execution conditions. The key takeaway is that we must connect these concepts to the observable behavior and defensible trade-offs in our designs. A design is only truly complete when we can validate it with robust evidence."
+    "topic": "Failure Anti-Patterns",
+    "text": "These are the patterns to avoid. Passing one demo is not proof of concurrency safety. Naming a tool, like a lock or a queue, is not enough unless you name the invariant it protects. Logs that omit entity IDs are usually too weak to support a design claim. Another common mistake is deleting or forgetting the failing test after the redesign, which prevents a before-and-after comparison. Finally, do not claim safety without repeatable pressure evidence. Your reviewer should be able to see both the failure and the reason the correction addresses it."
   },
   {
     "slide": 20,
-    "topic": "Discussion",
-    "text": "To conclude, let's open the floor to discussion. What hidden assumptions might exist in your own projects? How do you go about evaluating evidence from test failures? I'm eager to hear your insights."
+    "topic": "A1 Integrity Packet",
+    "text": "For A1, your Integrity Packet should make the reasoning explicit. Start with the assumption: for example, the baseline assumes only one worker claims an episode at a time. Then state the invariant that must hold. Design a failure test that targets that invariant, capture observed evidence, and explain the correction. Finally, record the remaining risk. Maybe the transition is protected, but external publishing still needs idempotency. The goal is not to claim perfection; the goal is to demonstrate that you can reason from assumption to evidence to design decision."
+  },
+  {
+    "slide": 21,
+    "topic": "Interview Checks",
+    "text": "These questions are the kind of checks you should be ready to answer orally. What object is confined, and who owns it? What invariant would overlapping execution violate? How would you force the bad interleaving in a repeatable way? What exact log line proves the losing worker was rejected? What trade-off did your correction introduce? And what remains risky after the fix? If you can answer these clearly, you are moving from implementation description to design defense."
+  },
+  {
+    "slide": 22,
+    "topic": "Summary",
+    "text": "The central insight is that object ownership is a correctness boundary. Thread confinement only works when access is actually restricted, not merely hoped for. The invariant is the center of the argument, pressure tests reveal hidden assumptions, and evidence turns a design claim into something defensible. As you work on A1, look for the object, workflow, event, or state transition where ownership matters. Then show how you stressed it, what you observed, what you changed, and what trade-off remains."
   }
 ]

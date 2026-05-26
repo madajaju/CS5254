@@ -2,106 +2,146 @@
   {
     "slide": 1,
     "topic": "Ordering Constraints",
-    "text": "Welcome everyone to today's lecture on Ordering Constraints. We will discuss how these constraints impact object-oriented systems under concurrency, and how they relate to design assumptions, system integrity, and project assignments."
+    "text": "Welcome everyone. In this lecture, we are focusing on ordering constraints: the rules that say one thing must happen before another, or that several things must be complete before a workflow can safely move forward. The key idea here is that code can look correct when it runs once in a clean sequence, but fail when messages arrive late, workers overlap, retries happen, or different services observe state at different times."
   },
   {
     "slide": 2,
-    "topic": "Introduction",
-    "text": "Let's start with some key insights on ordering constraints. Understanding these constraints is crucial when we deal with concurrency, as they highlight the importance of making design assumptions visible. We will also connect these concepts to your upcoming assignment, A2."
+    "topic": "Course Context",
+    "text": "This is Week 5 of CS 5254b, and we are continuing our work on object-oriented systems under concurrency. Ordering constraints connect directly to A2 because your Integrity Packet needs more than a working happy path. You need to explain what must remain true, how concurrency threatens it, and what evidence supports your design decision."
   },
   {
     "slide": 3,
-    "topic": "Opening Scenario",
-    "text": "Imagine a publish event that occurs before an approval event. This scenario reveals a hidden assumption: the belief that delivery order correlates with logical order. When this assumption fails, the outcome can be a corrupted workflow or even rejection, leading us to the challenge of reconciling time with causality."
+    "topic": "Learning Objectives",
+    "text": "By the end of this lecture, you should be able to identify ordering pressure in a stateful system, explain the hidden assumptions that make a baseline look correct, and evaluate evidence from logs, traces, interleavings, or tests. Most importantly, you should be able to choose a design control that protects a named invariant and defend the trade-off in your Integrity Packet."
   },
   {
     "slide": 4,
-    "topic": "Sequential Dependencies",
-    "text": "Now, let's delve into sequential dependencies. This concept indicates that Step B requires the output from Step A. It's vital to make this dependency explicit if we want to maintain trust under pressures such as timing or loads. If ignored, a system can end up duplicating work or working with stale state."
+    "topic": "Ordering Pressure Model",
+    "text": "The key idea here is that ordering bugs usually begin as hidden assumptions. We assume events arrive in the order they were sent, or that a worker sees the latest state, or that a retry will not duplicate a side effect. Concurrency pressure stresses that assumption, puts an invariant at risk, and forces us to collect evidence. A professional design replaces the guess with an explicit control, such as a guard, state machine rule, idempotency key, or coordination mechanism."
   },
   {
     "slide": 5,
-    "topic": "Parallel Steps",
-    "text": "Next, we examine parallel steps. These are instances where Steps C and D can occur simultaneously, but we must ensure they both finish before proceeding to Step E. As with sequential dependencies, we must document these dependencies to prevent undesirable outcomes like blocked progress."
+    "topic": "Opening Narrative",
+    "text": "Imagine a publish event arrives before the approval event it depends on. The producer did the right thing and sent approval first, then publish. But the service processes the first message it observes, and now it either rejects a valid workflow or corrupts the state. The uncomfortable part is that nobody necessarily wrote the events in the wrong order. The failure comes from assuming that delivery order and logical order are the same thing."
   },
   {
     "slide": 6,
-    "topic": "Pre-conditions & Post-conditions",
-    "text": "Pre-conditions and post-conditions are also key elements. They define the necessary state before a stage starts and the state guaranteed once it finishes. Once again, we must make these states clear to maintain system reliability under pressure."
+    "topic": "Time and Causality Diverge",
+    "text": "Here we separate physical arrival time from logical dependency. The producer emits approval and then publish, but the queue delivers publish first. The publish handler sees a missing prerequisite and has to decide what to do. Should it fail, wait, retry, or record that the workflow is not ready? This matters because distributed and concurrent systems often preserve neither the order you intended nor the order your sequential test happened to observe."
   },
   {
     "slide": 7,
-    "topic": "Gating",
-    "text": "Gating refers to controlling a workflow until specific criteria are met, such as an ApprovalGate. Understanding and implementing gating is essential as it helps maintain system integrity while ensuring that required conditions are satisfied before proceeding."
+    "topic": "Hidden Assumption",
+    "text": "Sequential code can make ordering look obvious. If one method calls another method, we naturally read that as a safe sequence. But under concurrent execution, observation order becomes unstable. Correctness depends on logical prerequisites, not on who happened to arrive first. A common mistake is to say, the event should already be there, instead of stating the actual precondition: what state must already be true before this transition is allowed?"
   },
   {
     "slide": 8,
-    "topic": "AI-Assisted Hypothesis",
-    "text": "The AI-Assisted Hypothesis involves generating designs that must be validated prior to adoption. This awareness is crucial to avoiding pitfalls that can arise when hidden assumptions go unexamined."
+    "topic": "Sequential Dependency",
+    "text": "A sequential dependency means Step B requires something produced by Step A. For example, you cannot generate show notes until the transcript exists, and you cannot ship an order before payment and inventory have been handled. The protected property is that the consuming step only runs after the prerequisite is valid and visible. The engineering question is: where is that dependency enforced, and what evidence proves it was enforced?"
   },
   {
     "slide": 9,
-    "topic": "System Architecture",
-    "text": "Taking a look at our system architecture, we see that ordering constraints connect various domains of dependencies, validations, and design decisions. The focus here is on whether the relevant invariants hold when the system faces changes in timing, loads, or coordination complexities."
+    "topic": "Parallel Join",
+    "text": "Not every ordering constraint is a simple line. Sometimes two steps can happen in parallel, but both must finish before the next step starts. In the podcast example, cleaned audio and show notes may be produced independently, but publishing requires both. The join condition is the important design object here. If you only check whichever result arrives first, you can release work too early and create a failure that the happy path never exposed."
   },
   {
     "slide": 10,
-    "topic": "Worked Example Setup",
-    "text": "To ground our discussion, let's consider a worked example based in the podcasting domain. Here, generating show notes cannot occur until the transcript is ready, and you can't publish until both audio and notes are complete. In the context of an order system, remember that you cannot ship items that haven't been paid for."
+    "topic": "Preconditions and Postconditions",
+    "text": "Preconditions and postconditions turn vague timing assumptions into checkable rules. A precondition says what must already exist before a stage starts. A postcondition says what the system guarantees after the stage finishes. This matters because a transition without a condition is hard to defend under pressure. In your design review, you want to be able to say exactly what state allowed the workflow to move forward."
   },
   {
     "slide": 11,
-    "topic": "Naive Implementation",
-    "text": "Many designs operate under naive assumptions that a process can happen once, in order, and based on the current state. The typical flow identifies actors performing operations and the system's state that reads current conditions, applies transitions, and emits side effects."
+    "topic": "Gate Model",
+    "text": "A gate prevents work from proceeding until the required proof is visible and valid. Think of an ApprovalGate or a ReadyToShip gate. Incoming work requests a transition, the gate checks the prerequisites, and then the system either proceeds or records that the request must wait or be rejected. The protected property is ordering correctness. The trade-off is that gates add state, decisions, and failure paths that must be maintained and tested."
   },
   {
     "slide": 12,
-    "topic": "Failure Scenario",
-    "text": "However, in real-world scenarios, overlapping executions can lead to stale state observations and even duplicate processes. This underscores a significant mismatch between our design assumptions and the execution reality."
+    "topic": "Architecture View",
+    "text": "Ordering constraints should not be treated as isolated vocabulary. Sequential dependencies, parallel joins, preconditions, and postconditions all feed into validation evidence, and that evidence supports a design decision. Then the design decision may refine the dependency model. This loop matters because the goal is not just to make code run once. The goal is to preserve the relevant invariant when timing, load, retries, and coordination complexity change."
   },
   {
     "slide": 13,
-    "topic": "Improved Design Direction",
-    "text": "So, what can we do to rectify these issues? Firstly, we need to explicitly name the invariants in our design. Second, we should make transitions observable, and implement controls such as version checks, idempotency keys, and state-machine guards to ensure consistency."
+    "topic": "Worked Example",
+    "text": "Let’s ground this in two domains. In a podcast workflow, show notes require a transcript, and publishing requires both cleaned audio and show notes. In an order system, shipping requires payment and inventory reservation. The baseline implementation may pass when the workflow runs once in the expected order. The pressure case asks what happens when the system observes those facts in a different order, or observes one fact late."
   },
   {
     "slide": 14,
-    "topic": "Why Improved Design is Safer",
-    "text": "These improvements change our approach from merely hoping for order to proving invalid interleavings will be rejected or properly managed. Capturing evidence during this process will lend credibility to our efforts."
+    "topic": "Normal Order Interaction",
+    "text": "In the normal interaction, the Order API creates an order, the coordinator reserves inventory, payment is captured, and then shipping runs after both prerequisites are confirmed. This is the happy path, and it is useful as a baseline. But it can hide the real design question: is shipping protected by an actual invariant, or is it merely placed after payment in one convenient execution trace?"
   },
   {
     "slide": 15,
-    "topic": "Failure Modes",
-    "text": "It's vital to learn how to recognize failure modes. For instance, if a system seems to pass happy-path tests, but fails under real stress, we should conduct stress testing and introduce concurrent runs to catch these hidden issues."
+    "topic": "Order State Model",
+    "text": "The order state model makes the workflow explicit. An order moves from created, to reserved, to paid, to ready to ship, and finally to shipped. There is also a compensating path when a prerequisite later fails. The important transition is into ready to ship, because that is where the system claims the prerequisites have been observed. This model gives us a place to attach guards, logs, tests, and review evidence."
   },
   {
     "slide": 16,
-    "topic": "Trade-Off Analysis",
-    "text": "In our analysis of trade-offs, several approaches reveal their strengths and weaknesses. A simple baseline offers ease of implementation, while a guarded state directly protects invariants but requires careful modeling. Each has its place depending on our specific requirements."
+    "topic": "Core Invariant",
+    "text": "The core invariant is simple to say but easy to violate: an order ships only after inventory is reserved, payment is captured, and the shipment side effect happens exactly once. That last phrase is important. Under retries, a system may eventually learn the correct state but still emit two shipments. So the invariant includes both prerequisite ordering and side-effect control."
   },
   {
     "slide": 17,
-    "topic": "Practical Application",
-    "text": "As we conclude the lecture, I encourage you to apply these concepts in your practice. Start by identifying the most relevant invariant, writing both a sequential and a pressure scenario, and using operation IDs in your logs to gather evidence."
+    "topic": "Out of Order Delivery",
+    "text": "Now make the failure concrete. Payment is confirmed, but a ship request reaches the shipping worker before the reservation event is visible to the coordinator. The worker asks whether the prerequisites are satisfied and gets an incomplete view. An operator might see a confusing trace: payment succeeded, shipping was attempted, inventory appears later, and the order is stuck or incorrectly rejected. The failure was hidden because the baseline assumed observation order matched workflow intent. The evidence to capture is the order timeline, correlation ID, prerequisite reads, and event delivery order."
   },
   {
     "slide": 18,
-    "topic": "Assignment Integration",
-    "text": "Make sure to connect these concepts to your semester project in assignment A2. Demonstrate your understanding through runnable commands, structured logs, and clear evidence in your Integrity Packet."
+    "topic": "Wait Graph Failure",
+    "text": "This is another uncomfortable failure path. The coordinator holds the inventory lock while waiting for payment status, and the payment callback holds the payment lock while waiting for inventory status. Each side owns what the other needs. From the outside, the customer sees an order that never completes. The engineer sees retries, timeouts, or threads waiting with no obvious syntax error. The invariant at risk is progress while preserving prerequisite order. Evidence should include a wait graph, lock ownership, timestamps, and the affected order ID."
   },
   {
     "slide": 19,
-    "topic": "Discussion Questions",
-    "text": "Let’s pause here for discussion. What invariant is most crucial to your work? Can you identify hidden assumptions in your designs? How would you structure tests to induce failure and capture evidence effectively?"
+    "topic": "Stuck Workflow",
+    "text": "A stuck workflow can be just as damaging as an incorrect shipment. The order reserves inventory, waits for payment, then the callback cannot see the reservation and retries the same loop until a timeout pushes the order into compensation. The customer may have paid, inventory may be held, and support may have no clear answer. This failure was hidden by the happy path because every prerequisite was visible at the right moment. Your Integrity Packet should preserve this failing scenario and explain what evidence proves the loop occurred."
   },
   {
     "slide": 20,
-    "topic": "Summary",
-    "text": "To summarize, ordering constraints are not just theoretical constructs; they are essential for reasoning about the integrity of our systems. Our main task as engineers is to articulate these concepts in terms of invariants, observable behaviors, and defensible trade-offs."
+    "topic": "Design Responses",
+    "text": "The protected property is that workflow progress and prerequisite ordering remain explicit under concurrent execution. State-machine guards reject invalid transitions. Ordered acquisition reduces the risk of lock cycles. Idempotency keys prevent duplicate side effects. Timeouts and compensation give the system a way to preserve progress evidence instead of hanging forever. None of these mechanisms is free: each adds modeling, metadata, or recovery behavior that must be maintained."
   },
   {
     "slide": 21,
-    "topic": "Further Reading",
-    "text": "Finally, for those who wish to delve deeper into these topics, I recommend looking up materials on ordering constraints in distributed systems, concurrency design trade-offs, and structured logging practices."
+    "topic": "Guarded Transition",
+    "text": "A guarded transition protects the invariant closest to the risky state change. When something requests ready to ship, the guard checks whether the order is both reserved and paid. If true, the state change commits and the proof is logged. If false, the system rejects or waits and records the reason. The trade-off is that you must model state explicitly and keep the guard logic consistent, but the benefit is a reviewable boundary where correctness is enforced."
+  },
+  {
+    "slide": 22,
+    "topic": "Idempotent Retry",
+    "text": "Retries are necessary in real systems, but they create duplicate-work risk. An idempotent retry protects the property that the shipment side effect occurs once. The retry message derives an idempotency key, such as order-42 shipment, checks a deduplication store, and either emits the shipment or returns the existing result. The trade-off is extra storage, key design, and side-effect tracking. But without it, a retry-safe workflow may still ship twice."
+  },
+  {
+    "slide": 23,
+    "topic": "Trade-Off Analysis",
+    "text": "A common mistake is to pick a tool before naming the property it protects. A simple baseline is easy to explain, but it hides timing assumptions. A guarded state transition protects the invariant directly, but requires explicit state modeling. Coordination makes dependencies visible, but can introduce waiting or bottlenecks. Idempotency handles retries and duplicates, but needs keys and deduplication. Observability-first design supports review, but adds instrumentation work. Your design defense should name both the benefit and the cost."
+  },
+  {
+    "slide": 24,
+    "topic": "Evidence Checklist",
+    "text": "For A2, vague evidence is not enough. You need a correlation ID for each workflow instance, entity IDs for state transitions, timestamps for prerequisite observations, and before-and-after test output if you apply a fix. A reviewer should be able to reconstruct what happened without guessing. The evidence should connect directly to the invariant: what state existed, what transition was requested, what decision was made, and why."
+  },
+  {
+    "slide": 25,
+    "topic": "Evidence Flow",
+    "text": "The evidence flow starts with a claim: ordering is handled correctly. A pressure test challenges that claim. Structured logs and traces let you reconstruct a state timeline. That timeline supports the design decision, and the design decision defends the original claim. This matters because professional engineering judgment depends on reproducible evidence, not confidence that the happy path looked fine once."
+  },
+  {
+    "slide": 26,
+    "topic": "A2 Integration",
+    "text": "For A2, choose an ordering-sensitive workflow in your own project. State the invariant before choosing a mechanism. Then preserve a failing or pressure scenario as repeatable evidence. Your artifact might include runnable commands, structured logs, a state timeline, a small diagram, or before-and-after output. In the oral assessment or design defense, you should be able to explain why the mechanism protects the invariant and what risk remains."
+  },
+  {
+    "slide": 27,
+    "topic": "Integrity Packet Loop",
+    "text": "The Integrity Packet should tell a complete reasoning story. Start with the assumption, such as events will be observed in logical order. Test that assumption and capture failure evidence. Use the failure to motivate a design control. Run validation again and record the remaining risk. This loop is important because it prevents you from presenting a fix as magic. You are showing what changed, why it helped, and what trade-off still exists."
+  },
+  {
+    "slide": 28,
+    "topic": "Interview Questions",
+    "text": "Let’s pause here and use these as design-defense prompts. What invariant is most relevant? What hidden assumption made the baseline appear correct? How would you force the failure repeatedly? What evidence proves it happened? Which mechanism would you choose first, and what trade-off does it introduce? Strong answers will connect a specific workflow, a specific failure, and a specific artifact of evidence."
+  },
+  {
+    "slide": 29,
+    "topic": "Summary Model",
+    "text": "The central insight is that an ordering constraint is not just a vocabulary term. It is a way to reason about whether a system remains correct under realistic execution. Name the invariant, create a pressure scenario, collect observable evidence, and use that evidence to justify a defensible design. A mature design is not merely one that runs once. It is one that can be explained, stressed, repaired, and validated."
   }
 ]

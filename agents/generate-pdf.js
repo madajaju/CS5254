@@ -39,7 +39,14 @@ async function generateRevealSlides(lectureDirectory) {
     const outputDirectory = path.join(lectureDirectory, '.output');
     const htmlPath = path.join(outputDirectory, 'README.slides.html');
 
-    if (fs.existsSync(htmlPath)) {
+    const customCssSource = path.resolve(__dirname, 'custom.css');
+
+    if (!fs.existsSync(slidesPath)) {
+        console.warn(`File was not found: ${slidesPath}`);
+        return;
+    }
+
+    if (isGeneratedFileFresh(htmlPath, [slidesPath, customCssSource])) {
         console.log(`Skipping Reveal.js HTML because output already exists: ${htmlPath}`);
         return;
     }
@@ -49,7 +56,6 @@ async function generateRevealSlides(lectureDirectory) {
         return;
     }
 
-    const customCssSource = path.resolve('custom.css');
     const customCssDestination = path.join(outputDirectory, 'custom.css');
 
     fs.mkdirSync(outputDirectory, { recursive: true });
@@ -83,6 +89,17 @@ async function generateRevealSlides(lectureDirectory) {
     } else {
         console.log(`✅  Reveal.js HTML created for ${slidesPath}`);
     }
+}
+
+function isGeneratedFileFresh(outputPath, sourcePaths) {
+    if (!fs.existsSync(outputPath)) {
+        return false;
+    }
+
+    const outputMtime = fs.statSync(outputPath).mtimeMs;
+    return sourcePaths
+        .filter(sourcePath => fs.existsSync(sourcePath))
+        .every(sourcePath => fs.statSync(sourcePath).mtimeMs <= outputMtime);
 }
 
 async function main() {

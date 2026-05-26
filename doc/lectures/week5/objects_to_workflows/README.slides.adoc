@@ -1,198 +1,581 @@
 = From Objects to Workflows
-Dr. Darren Pulsipher
-:revealjs_theme: white
+:revealjs_theme: black
 :revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
 :source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Learning Objectives
+== Lecture Focus
 
-* Analyze the design pressure of workflows
-* Diagnose hidden assumptions in systems
-* Evaluate failure evidence with logs and traces
-* Design controls preserving invariants
-* Defend design choices in the Integrity Packet
+* Move from single-object reasoning to workflow reasoning
+* Make coordination assumptions explicit
+* Protect invariants across concurrent steps
+* Use evidence to diagnose failures
+* Defend the design response in A2
 
-== Opening Narrative
+== From Objects to Workflows
 
-A course project runs correctly but fails under pressure.  
-**Key Question**: What must be analyzed and defended?
-
-== Core Concept: Coordination
-
-* Manages dependencies for higher goals
-* **Importance**: Explicit before trusting under pressure
-* Mechanisms: state, timing, behavior, queues
-* **Failure Mode**: Leads to duplicate work, stale state
-* **Design Implication**: Expose invariants, log transitions
-
-== Core Concept: Workflow
-
-* Defined as a sequence of operations
-* **Importance**: Explicit before trusting under pressure
-* Mechanisms: state, timing, behavior, queues
-* **Failure Mode**: Leads to duplicate work, stale state
-* **Design Implication**: Expose invariants, log transitions
-
-== Core Concept: Life-cycle Management
-
-* Tracks progress through multiple states
-* **Importance**: Explicit before trusting under pressure
-* Mechanisms: state, timing, behavior, queues
-* **Failure Mode**: Leads to duplicate work, stale state
-* **Design Implication**: Expose invariants, log transitions
-
-== Core Concept: System Invariant
-
-* Condition that must remain true for execution
-* **Importance**: Explicit before trusting under pressure
-* Mechanisms: state, timing, behavior, queues
-* **Failure Mode**: Leads to duplicate work, stale state
-* **Design Implication**: Expose invariants, log transitions
-
-== Core Concept: Failure Mode
-
-* Repeatable ways to violate invariants
-* **Importance**: Explicit before trusting under pressure
-* Mechanisms: state, timing, behavior, queues
-* **Failure Mode**: Leads to duplicate work, stale state
-* **Design Implication**: Expose invariants, log transitions
-
-== System / Architecture View
-
-[plantuml, target=architecture, format=svg, width=80%]
+[plantuml, objects-to-workflows, svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
 skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 left to right direction
 
-rectangle "From Objects to Workflows" as Topic
-rectangle "Coordination" as A
-rectangle "Workflow" as B
-rectangle "Life-cycle Management" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Object\nstate" as O
+rectangle "Operation" as Op
+rectangle "Workflow\nstage" as W
+rectangle "Coordination\nboundary" as C
+rectangle "System\ninvariant" as I
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+O --> Op : local change
+Op -> W : participates in
+W --> C : depends on
+C -> I : must preserve
 @enduml
 ----
 
-== Worked Example: Problem Setup
+== Core Question
 
-* **Podcast Domain**: Updating an Episode vs. Production Pipeline
-* **Order Fulfillment**: Coordination of InventoryManager, PaymentProcessor, ShippingDispatcher
+* The demo can pass while the design is unsafe
+* The hidden assumption is usually about order, uniqueness, or visibility
+* The workflow must expose what each step requires
+* The invariant must survive concurrency, retries, and delay
+* The evidence must reconstruct the critical transition
 
-== Naive Implementation
+== Coordination Loop
 
-Assumptions that operations are sequential and state is current:
-- Actor performs operation
-- System reads current state
-- System applies transition
-- System emits side effect
+[plantuml, coordination-loop, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 
-== Failure Scenario
+rectangle "Detect\nneeded work" as D
+rectangle "Assign\nresponsibility" as A
+rectangle "Perform\nstep" as P
+rectangle "Record\ntransition" as R
+rectangle "Check\ninvariant" as C
 
-Conditions like overlap or delay reveal issues: 
-- Operation observes stale state 
-- Executes twice or arrives late  
-- Workflow may become stuck
+D -> A : dependency found
+A --> P : worker selected
+P -left-> R : state changed
+R -left-> C : evidence emitted
+C -up-> D : next dependency
+@enduml
+----
 
-== Improved Design Direction
+== Key Terms
 
-* Name the invariant 
-* Make transitions observable
-* Add controls: version checks, idempotency, explicit coordination
+* Coordination manages dependencies between objects
+* Workflow is a sequence of dependent stages
+* Life-cycle management tracks entity progress across components
+* System invariant must hold across valid executions
+* Failure mode is a repeatable invariant or progress violation
 
-== Why Improved Design Is Safer
+== Production Pipeline
 
-* Moves from hoping to proving correctness under interleavings
-* Creates defenses against invalid operational scenarios
+[plantuml, production-pipeline, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
 
-== Failure Modes and Anti-Patterns
+rectangle "Episode\nuploaded" as U
+rectangle "Ingestion" as I
+rectangle "Cleanup" as C
+rectangle "Transcription" as T
+rectangle "Publishing" as P
+rectangle "Audience\nvisible" as V
 
-* **Symptom**: Passes a single happy-path demonstration  
-  * Why: Test avoids timing and pressure  
-  * Detect: Add concurrent actors, stress tests  
-  * Correct: Add failure-focused tests targeting invariant
+U -> I : file accepted
+I --> C : media normalized
+C -> T : audio ready
+T --> P : transcript ready
+P -> V : release allowed
+@enduml
+----
 
-* **Symptom**: Names a tool, not a design property  
-  * Why: Focus on tools over invariants  
-  * Detect: Ask about invariant protection  
-  * Correct: Write invariant first
+== Order Workflow Example
 
-* **Symptom**: Vague evidence lacks detail  
-  * Why: Logs miss critical identifiers  
-  * Detect: Reviewer's inability to reconstruct failure  
-  * Correct: Capture structured evidence linked to claims
+* A single order crosses inventory, payment, and shipping
+* Each service owns only part of the truth
+* The order life cycle needs explicit state
+* Shipping is allowed only after prerequisites are confirmed
+* The workflow must reject stale or duplicate transitions
 
-* **Symptom**: Changes behavior without comparison  
-  * Why: Failure not repeatable  
-  * Detect: No before/after testing  
-  * Correct: Keep and rerun failing tests
+== Normal Interaction
+
+[plantuml, normal-interaction, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam sequence {
+  ArrowColor white
+}
+participant "Order API" as API
+participant "Coordinator" as C
+participant "Inventory" as I
+participant "Payment" as P
+participant "Shipping" as S
+
+API --> C : create order-42
+C --> I : reserve inventory
+I --> C : reservation confirmed
+C --> P : capture payment
+P --> C : payment confirmed
+C --> S : request shipment
+S --> C : shipment recorded
+@enduml
+----
+
+== State Transition Model
+
+[plantuml, state-transition-model, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam state {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+[*] --> CREATED : order accepted
+CREATED -> RESERVED : inventory hold succeeds
+RESERVED --> PAID : payment capture succeeds
+PAID --> READY_TO_SHIP : prerequisites observed
+READY_TO_SHIP -> SHIPPED : shipment emitted
+RESERVED -> COMPENSATING : payment fails
+COMPENSATING --> [*] : recovery complete
+@enduml
+----
+
+== Invariant
+
+* An order ships only after inventory is reserved
+* An order ships only after payment is captured
+* Payment capture happens exactly once
+* Shipment emission happens exactly once
+* Every transition is logged with the order ID
+
+== Invariant Gate
+
+[plantuml, invariant-gate, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Reservation\nconfirmed" as R
+rectangle "Payment\nconfirmed" as P
+rectangle "Guard:\nall prerequisites" as G
+rectangle "Ready to\nship" as S
+rectangle "Reject or\nwait" as X
+
+R --> G : prerequisite
+P --> G : prerequisite
+G --> S : both true
+G --> X : missing fact
+@enduml
+----
+
+== Hidden Assumption
+
+[plantuml, hidden-assumption, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Sequential\ntest" as T
+rectangle "Looks\ncorrect" as L
+rectangle "Assumes\nsingle execution" as A
+rectangle "Concurrent\npressure" as P
+rectangle "Assumption\nbreaks" as B
+
+T --> L : one clean run
+L -> A : hidden model
+A --> P : not challenged
+P -> B : overlap appears
+@enduml
+----
+
+== Naive Mental Model
+
+[source,text]
+----
+actor performs operation
+system reads current state
+system applies transition
+system emits side effect
+----
+
+== Failure Interleaving
+
+[plantuml, failure-interleaving, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+participant "Coordinator T1" as T1
+participant "Inventory Lock" as IL
+participant "Payment Lock" as PL
+participant "Payment Callback T2" as T2
+
+T1 --> IL : acquire inventory lock
+T2 --> PL : acquire payment lock
+T1 --> PL : wait for payment status
+T2 --> IL : wait for inventory status
+@enduml
+----
+
+== Deadlock Wait Graph
+
+[plantuml, deadlock-wait-graph, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "T1:\nCoordinator" as T1
+rectangle "Inventory\nLock" as IL
+rectangle "Payment\nLock" as PL
+rectangle "T2:\nCallback" as T2
+
+T1 --> IL : holds
+T1 --> PL : waits for
+T2 --> PL : holds
+T2 --> IL : waits for
+@enduml
+----
+
+== Duplicate Retry Failure
+
+[plantuml, duplicate-retry-failure, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+participant "Queue" as Q
+participant "Worker A" as A
+participant "Worker B" as B
+participant "Payment API" as P
+participant "Order Log" as L
+
+Q --> A : deliver capture command
+Q --> B : redeliver same command
+A --> P : capture payment
+B --> P : capture payment
+P --> L : two side effects
+@enduml
+----
+
+== Failure Evidence
+
+* Use one correlation ID per workflow instance
+* Log entity ID, operation ID, state, and timestamp
+* Preserve the failing workload
+* Compare before and after runs
+* Show the exact transition that violated the invariant
+
+== Design Response Map
+
+[plantuml, design-response-map, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Observed\nfailure" as F
+rectangle "Named\ninvariant" as I
+rectangle "Guarded\ntransition" as G
+rectangle "Idempotent\nside effect" as D
+rectangle "Structured\nevidence" as E
+
+F -> I : explains
+I --> G : protects
+G -> D : controls retry
+D --> E : proves result
+@enduml
+----
+
+== Baseline Versus Corrected
+
+[.columns]
+[.column]
+* Baseline assumes ordered execution
+* Baseline trusts current state
+* Baseline logs vague success
+[.column]
+* Corrected checks prerequisites
+* Corrected rejects invalid transitions
+* Corrected logs evidence
 
 == Trade-Off Analysis
 
-[cols="3,3,3,3", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to implement | Hides timing assumptions | First implementation
-| Guarded state transition | Protects core invariant | Requires careful modeling | Status changes
-| Explicit coordination | Makes dependencies visible | Possible bottlenecks | Multi-object workflows
-| Idempotent design | Handles duplicates | Requires deduplication | Queues, retries
-| Observability-first design | Strong evidence | Adds instrumentation work | Assignments needing design defense
+|Approach |Strength |Weakness |Use
+
+|Simple baseline
+|Easy to explain
+|Hides timing assumptions
+|Initial comparison
+
+|Guarded transition
+|Protects invariant directly
+|Requires state modeling
+|Workflow status changes
+
+|Explicit coordination
+|Makes dependencies visible
+|Can bottleneck or deadlock
+|Multi-object ordering
+
+|Retry-safe design
+|Handles duplicates
+|Needs deduplication keys
+|Queues and external calls
 |===
+
+== Guard Placement
+
+[plantuml, guard-placement, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Incoming\ncommand" as C
+rectangle "Load current\nworkflow state" as S
+rectangle "Validate\ntransition" as V
+rectangle "Commit state\nand effect" as K
+rectangle "Reject with\nreason" as R
+
+C -> S : includes IDs
+S --> V : compare facts
+V --> K : allowed
+V --> R : unsafe
+@enduml
+----
 
 == Practical Application
 
-* Identify relevant invariant for workflows
-* Write one scenario expected to succeed
-* Write one scenario that could expose failure
-* Add operation and entity IDs to logs
-* Capture before/after evidence for fixes
-* Update Integrity Packet with assumptions and risks
+* Identify the workflow invariant
+* Write one sequential success scenario
+* Write one pressure scenario
+* Add operation IDs and entity IDs
+* Capture before and after evidence
+* Record remaining risk
 
-== Assignment Integration
+== Evidence Flow
 
-Connect concepts to [A2](../../../assignments/A2/index.md).  
-Demonstrate mastery with concrete evidence: 
-- runnable commands
-- structured logs
-- failure reproduction
-- design defense in Integrity Packet
+[plantuml, evidence-flow, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
 
-== Validation Questions
+rectangle "Claim:\nworkflow is safe" as C
+rectangle "Pressure\ntest" as T
+rectangle "Structured\nlogs" as L
+rectangle "State\ntrace" as S
+rectangle "Reviewable\nconclusion" as R
 
-1. What invariant is relevant to workflows?
-2. What hidden assumption allows the baseline design to seem correct?
-3. How would you force a repeatable failure?
-4. What evidence proves failure occurred?
-5. Which design mechanism would you choose first?
-6. How would the issue appear in different implementation stacks?
-7. What records would defend your conclusion in the Integrity Packet?
+C --> T : challenged by
+T -> L : produces
+L --> S : reconstructs
+S -> R : supports
+@enduml
+----
+
+== Integrity Packet Connection
+
+* State the hidden assumption
+* Name the invariant or progress property
+* Show the failing evidence
+* Explain the design mechanism
+* Compare the corrected run
+* Document trade-offs and remaining risk
+
+== A2 Defense Loop
+
+[plantuml, a2-defense-loop, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Project\nworkflow" as W
+rectangle "Invariant" as I
+rectangle "Failure\nreproduction" as F
+rectangle "Design\nresponse" as D
+rectangle "Integrity\nPacket" as P
+
+W -> I : define
+I --> F : test under pressure
+F --> D : motivates
+D -up-> P : defend
+P -left-> W : refine
+@enduml
+----
+
+== Interview Questions
+
+* What invariant matters most in your workflow?
+* Which assumption makes the baseline appear correct?
+* How can you force the failure repeatedly?
+* What evidence proves the failure occurred?
+* What trade-off does your fix introduce?
 
 == Summary
 
-From objects to workflows highlights the need for systems to remain correct under real conditions. Connect concepts to invariants, observable behavior, and design trade-offs. A mature design provides explanations, stress tests, and validation.
-
-== Further Reading
-
-* "From Objects to Workflows distributed systems failure mode"
-* "From Objects to Workflows concurrency design tradeoffs"
-* Topics in structured logging, coordination patterns, and invariants in systems
-
-== Discussion
-
-* How can hidden assumptions be systematically identified?
-* What strategies can you implement to ensure robust design under concurrency?
+* Objects hide local state changes
+* Workflows expose cross-object dependencies
+* Concurrency turns assumptions into failure modes
+* Correct designs guard critical transitions
+* Mature designs are explained, stressed, repaired, and validated

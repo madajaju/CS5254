@@ -1,5 +1,7 @@
 ﻿# Object Ownership & Thread Confinement
 
+
+## Video: https://youtu.be/NHrWmH6liKk
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 4

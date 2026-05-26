@@ -1,5 +1,7 @@
 ﻿# Tradeoffs
 
+
+## Video: https://youtu.be/V9ge-mAWy-Y
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 4

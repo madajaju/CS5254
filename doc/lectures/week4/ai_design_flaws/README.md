@@ -1,5 +1,7 @@
 ﻿# AI-Generated Designs: Common Flaws
 
+
+## Video: https://youtu.be/mo4WTsEW7Ts
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 4

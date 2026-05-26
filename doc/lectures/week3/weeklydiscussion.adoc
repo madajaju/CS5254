@@ -1,0 +1,187 @@
+= CS 5254 — Ownership, Concurrency, and Integrity
+:revealjs_theme: black
+:revealjs_slideNumber: true
+:source-highlighter: highlight.js
+:icons: font
+:revealjs_transition: slide
+
+== Concurrency Problems Are Ownership Problems
+
+[plantuml,slide1,svg]
+----
+@startuml
+title Concurrency Problems Are Ownership Problems
+
+skinparam shadowing false
+skinparam roundcorner 18
+
+[*] --> ConcurrentAccess
+
+state "Concurrent Actors\nWorker A\nWorker B\nAPI Request\nBackground Job" as ConcurrentAccess
+state "Shared Mutable State\nEnrollment Roster\nAircraft Registry\nOrder Book\nWorkflow Lifecycle" as SharedState
+state "Ownership Decision" as OwnershipDecision <<choice>>
+state "Owned Truth\nCourse\nAircraft\nBook\nContentPackage" as OwnedTruth
+state "Race Condition / Integrity Risk" as Risk
+state "Safe Update" as SafeUpdate
+
+ConcurrentAccess --> SharedState : multiple actors mutate
+SharedState --> OwnershipDecision
+
+OwnershipDecision --> OwnedTruth : clear owner exists
+OwnershipDecision --> Risk : no clear owner
+
+OwnedTruth --> SafeUpdate : validate + synchronize
+Risk --> SafeUpdate : add boundary, locks,\nserialization, or authority rules
+
+SafeUpdate --> [*]
+
+@enduml
+----
+
+[quote]
+____
+The hardest problem in concurrent systems is determining who owns truth when multiple things happen at once.
+____
+
+== Modules vs Objects
+
+[plantuml,slide2,svg]
+----
+@startuml
+title Modules vs Objects
+
+skinparam shadowing false
+skinparam roundcorner 18
+
+rectangle "MODULES\n\nOrganize code\nUtility functions\nProcedural flow\nShared access" as Modules
+
+rectangle "OBJECTS\n\nOwn state\nOwn lifecycle\nOwn invariants\nOwn authority" as Objects
+
+Modules -right-> Objects : better boundary thinking
+
+rectangle "BAD\n\nEnrollmentManager\nAircraftProcessor\nMatchingCoordinator\nWorkflowHandler" as Bad
+
+rectangle "GOOD\n\nCourse owns truth\nAircraft owns identity/state\nBook owns ordering\nContentPackage owns lifecycle" as Good
+
+Bad -right-> Good : move authority into objects
+
+@enduml
+----
+
+[quote]
+____
+If your system only has Managers, Coordinators, Processors, and Handlers, you probably have procedural decomposition instead of object-oriented design.
+____
+
+== Shared Mutable State
+
+[plantuml,slide3,svg]
+----
+@startuml
+title Shared Mutable State
+
+skinparam shadowing false
+skinparam roundcorner 18
+
+rectangle "Multiple Actors\n\nThreads\nWorkers\nServices\nQueues\nAPIs" as Actors
+
+rectangle "Shared Mutable State\n\nSeats Remaining\nAircraft Position\nOrder Book\nWorkflow Status\nAI Context" as State
+
+rectangle "Race Conditions\nOccur Here" as Race
+
+rectangle "Need\n\nOwnership\nSynchronization\nValidation\nOrdering Guarantees" as Need
+
+Actors --> State
+State --> Race
+Race --> Need
+
+@enduml
+----
+
+[quote]
+____
+Concurrency becomes difficult when multiple actors mutate shared state simultaneously.
+____
+
+== The Integrity Packet
+
+[plantuml,slide4,svg]
+----
+@startuml
+title The Integrity Packet
+
+skinparam shadowing false
+skinparam roundcorner 18
+
+rectangle "Weak Engineering Thinking\n\n\"I will test concurrency.\"" as Weak
+
+rectangle "Better Engineering Thinking\n\n\"I will stress test multiple workers.\"" as Better
+
+rectangle "Strong Operational Thinking\n\n\"No duplicate fills may occur\nunder concurrent load.\"" as Strong
+
+rectangle "AAOS Integrity Thinking\n\nClaim: FIFO ordering is guaranteed.\n\nEvidence: Concurrent stress tests\nmaintain deterministic ordering.\n\nEscalation: Ordering violation\ntriggers operational halt." as AAOS
+
+Weak --> Better
+Better --> Strong
+Strong --> AAOS
+
+@enduml
+----
+
+[quote]
+____
+Claims require evidence.
+____
+
+== AI and Concurrency
+
+[plantuml,slide5,svg]
+----
+@startuml
+title AI and Concurrency
+
+skinparam shadowing false
+skinparam roundcorner 18
+
+rectangle "AI Generates Syntax\n\nBoilerplate\nAPI calls\nTest scaffolding\nInitial implementations" as AI
+
+rectangle "Hidden System Behavior\n\nRace conditions\nOrdering guarantees\nDeadlocks\nPartial failure\nShared state corruption" as Hidden
+
+rectangle "AI Is Weak Here" as Weak
+
+rectangle "Engineers Own Correctness\n\nValidation\nOperational trust\nConcurrency reasoning\nFailure analysis" as Engineer
+
+AI --> Hidden
+Hidden --> Weak
+Weak --> Engineer
+
+@enduml
+----
+
+[quote]
+____
+AI can generate syntax. Engineers own correctness.
+____
+
+== Discussion Questions
+
+[%step]
+* What object owns authoritative state in your system?
+* What is the true concurrency boundary?
+* Which object is most likely to become a god object?
+* What failure would destroy trust in your system?
+* What operational claim requires evidence?
+
+== Closing Thought
+
+[quote]
+____
+Good concurrent systems are not built from threads first.
+
+They are built from:
+- ownership
+- authority
+- lifecycle boundaries
+- validation
+- operational trust
+____

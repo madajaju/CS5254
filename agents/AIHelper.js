@@ -143,7 +143,7 @@ async function _ask(messages) {
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
             const completion = await global.openai.chat.completions.create({
-                model: "gpt-4o-mini",
+                model: "gpt-5.4-mini",
                 messages: messages
             });
             return completion.choices[0].message.content;

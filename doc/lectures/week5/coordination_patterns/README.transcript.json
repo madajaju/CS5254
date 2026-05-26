@@ -2,101 +2,151 @@
   {
     "slide": 1,
     "topic": "Coordination Patterns",
-    "text": "Welcome everyone to our lecture on Coordination Patterns. Today, we'll explore how to analyze and design systems that maintain correctness under concurrency pressure."
+    "text": "Welcome everyone. Today we are looking at coordination patterns: the design rules that let independent objects make progress together under concurrency. The key idea here is that a method can look perfectly reasonable in isolation and still fail when timing, ordering, retries, or shared resources enter the picture. Our goal is not just to name tools like locks or queues. Our goal is to identify the property that must remain true, stress it, observe the failure, and defend the correction with evidence."
   },
   {
     "slide": 2,
     "topic": "Course Context",
-    "text": "As a reminder, this course is CS 5254b, and we're in week five of the semester. The focus is on coordination within object-oriented systems under concurrency. Today’s session is about fifteen minutes long, so let’s dive right in."
+    "text": "This lecture fits into our larger work on object-oriented systems under concurrency. You already have background in object state, concurrency pressure, and structured evidence. Today we connect those ideas to coordination: places where objects, workers, callbacks, or services must agree about order, ownership, or progress. This also connects directly to A2, because your design defense should explain not only what your system does, but how you know it remains correct when execution is not neatly sequential."
   },
   {
     "slide": 3,
-    "topic": "Assignment Alignment",
-    "text": "You should align the concepts from today's lecture with the upcoming assignment, A2. So, keep in mind how coordination patterns can be applied to your projects as we progress."
+    "topic": "Learning Objectives",
+    "text": "By the end of this lecture, you should be able to recognize coordination pressure in a stateful concurrent system, diagnose the hidden assumption that made a baseline look correct, and evaluate evidence from logs, traces, interleavings, or repeatable tests. You should also be able to propose a control, such as a guarded transition, ordered acquisition, timeout, retry strategy, or idempotency rule, and explain the trade-off. The important outcome is a defensible Integrity Packet: assumption, invariant, failure evidence, correction, validation, and remaining risk."
   },
   {
     "slide": 4,
-    "topic": "Learning Objectives",
-    "text": "By the end of this lecture, you should be able to analyze design pressures in concurrent systems, diagnose hidden assumptions, and evaluate evidence of failures. Importantly, you'll learn how to design effective corrections that maintain system invariants—essential for justifying your decisions in the Integrity Packet."
+    "topic": "Opening Narrative",
+    "text": "Imagine you are building an order workflow. Inventory is waiting for payment, payment is waiting for inventory, and every component is producing logs. From the outside, the system appears active, but the order never reaches completion. This is uncomfortable because no single method looks obviously wrong. The failure is in the missing coordination contract. The design question is: what explicit rule tells us when the workflow may advance, and what evidence proves that progress is actually happening?"
   },
   {
     "slide": 5,
-    "topic": "Opening Narrative",
-    "text": "Imagine a situation where two components are each waiting for the other to continue, resulting in a workflow that never reaches completion. Although the logs might show activity, the underlying coordination contract is incomplete. What's a design rule that would enable us to ensure observable progress?"
+    "topic": "System Pressure Map",
+    "text": "Think of coordination patterns as a chain of design pressure. First, the system exposes a boundary where separate objects must agree. That boundary requires a progress property: work should not wait forever without explanation. Progress is then stressed by contention, such as workers competing for locks, shared state, or signals. We observe that pressure through evidence, and the evidence should support a design decision. This matters because professional engineering judgment is not based on whether the code ran once. It is based on whether the invariant still holds when timing and load change."
   },
   {
     "slide": 6,
     "topic": "Coordination Boundary",
-    "text": "Let’s define the Coordination Boundary. This is where independent objects must agree on critical aspects such as ordering and progress. It’s vital because without laying this out explicitly, we cannot trust our system under pressure. Ignoring this boundary can lead to issues like duplicated work or blocked progress. Our design must expose the invariant and log critical transitions."
+    "text": "A coordination boundary is the point where independent objects must agree before the system can safely move forward. The agreement might be about ordering, ownership, visibility, or progress. A common mistake is that the boundary is invisible in sequential code. The method reads state, applies a transition, and passes a simple test, so we assume the design is safe. Under concurrency, that assumption becomes a design obligation. Before choosing a mechanism, name the invariant. For example: an order may ship only after inventory is reserved and payment is captured exactly once."
   },
   {
     "slide": 7,
-    "topic": "Progress Guarantee",
-    "text": "Next, we focus on the Progress Guarantee. This represents the assurance that work will complete eventually instead of getting stuck indefinitely. Just like before, we need to make this condition explicit to gain trust in our system during high-pressure scenarios. Failure to establish this can lead to similar issues, reinforcing the need for careful logging of transitions."
+    "topic": "Coordination Boundary Diagram",
+    "text": "Here, Object A and Object C each have local state, but neither local view is enough to protect the whole workflow. The shared boundary is where requests and reported conditions must be reconciled against a rule. The protected property is the invariant that must remain true across both objects. This matters because many concurrency bugs happen when each object is locally correct, but the combined transition is not. The engineering judgment is deciding where the shared rule belongs and how it will be observed."
   },
   {
     "slide": 8,
-    "topic": "Contention",
-    "text": "Now, let’s look at Contention, which refers to the competition for shared resources among concurrent actors. Similar to our previous concepts, this needs to be explicitly defined, or we risk unfriendly behaviors like stale states or duplicated operations. It’s essential for the design to clarify the invariant and document the transitions properly."
+    "topic": "Progress Guarantee",
+    "text": "A progress guarantee says that accepted work eventually completes, fails clearly, or moves into a recovery path. It is not enough to say the workflow is probably fine. If the system can wait forever, the design must explain how that wait is detected and resolved. Timeouts, retries, guards, and compensation can all support progress, but none of them are free. Each introduces a trade-off: more metadata, more recovery paths, possible duplicate attempts, or more operational complexity. The guarantee must be observable in state, logs, or test output."
   },
   {
     "slide": 9,
-    "topic": "System / Architecture View",
-    "text": "In this architecture view, we see how the different components interact. Coordination Patterns connect various aspects like Coordination Boundary, Progress Guarantee, and Contention. Our focus should be on ensuring that the observed invariants maintain under various execution conditions, rather than just checking if code runs once."
+    "topic": "Progress Guarantee Diagram",
+    "text": "The lifecycle starts when work is accepted. Preconditions are checked before a transition is attempted. Then the system must resolve into completion or recovery, and that resolution must leave observable evidence. The protected property is not simply that the happy path succeeds. The protected property is that the workflow does not disappear into an unexplained waiting state. This visual model matters because reviewers need to see where progress is promised, where it can fail, and what artifact proves the outcome."
   },
   {
     "slide": 10,
-    "topic": "Problem Setup",
-    "text": "Let’s discuss a Real World Problem Setup. We often make assumptions that operations will happen once and in order. These assumptions can be hidden within our code, disguised by seemingly correct methods and passing sequential tests. We need to uncover these hidden assumptions to improve our designs."
+    "topic": "Contention",
+    "text": "Contention is competition between concurrent actors for a shared object, lock, resource, or signal. The important point is that contention can change the behavior of the system without changing the source code. A single happy-path run might pass because no actor overlaps with another. Under pressure, the same design may produce duplicate work, stale reads, blocked progress, or misleading logs. Evidence must prove that the pressure condition actually occurred. Otherwise, a passing test only proves the system works when the hard part is absent."
   },
   {
     "slide": 11,
-    "topic": "Naive Implementation",
-    "text": "Consider a naive implementation where an actor performs an operation, and the system reads the current state to apply transitions. While this might look fine at first glance, it can lead to issues once we introduce concurrency, showing that the apparent correctness can be misleading."
+    "topic": "Contention Map",
+    "text": "Imagine two workers both updating the same order while also waiting on inventory and payment resources. The risk is not only that they touch the same data. The deeper risk is that they acquire or observe resources in incompatible orders. One worker may wait for inventory while another waits for payment, and the order state becomes the place where the failure is visible. The invariant being tested is whether the order can advance only when prerequisites are truly satisfied, even when workers overlap."
   },
   {
     "slide": 12,
-    "topic": "Failure Scenario",
-    "text": "In overlapping execution scenarios, we can run into problems like observing stale states or executing operations multiple times. This reveals a fundamental mismatch between our designs’ assumptions and the execution model, emphasizing the need to rethink our approach."
+    "topic": "Normal Interaction",
+    "text": "In the normal order workflow, the Order API creates order-42, the coordinator asks inventory to reserve stock, inventory confirms, payment is captured, payment confirms, and shipping is triggered. This is the story we usually tell first because it is easy to understand. But notice the hidden assumption: events arrive in the same order we requested them, and each confirmation means the rest of the workflow is ready. That may be true in a single clean run, but it is not a concurrency guarantee."
   },
   {
     "slide": 13,
-    "topic": "Improved Design Direction",
-    "text": "To improve our designs, it’s crucial to name the invariant explicitly and make transitions observable. Introducing robust controls, like version checks and idempotency keys, can significantly enhance our system's resilience against failures. Think about how we can implement explicit coordination and backoff retries to further secure our workflows."
+    "topic": "State Transition Model",
+    "text": "The order moves through states: created, reserved, paid, ready to ship, shipped, or compensating. The key invariant is that an order is shipped only after inventory is reserved and payment is captured, and the shipment happens exactly once. State modeling helps because it turns a vague workflow into explicit allowed transitions. A common mistake is to treat log messages as if they were state guarantees. A safer design records the transition and checks the prerequisites at the point where the state changes."
   },
   {
     "slide": 14,
-    "topic": "Why Improved Design Is Safer",
-    "text": "The benefit of improved design shifts the perspective from hoping our workflows execute as intended to proving that we can contain or recover from invalid interleavings. This approach is more systematic and reduces our reliance on luck."
+    "topic": "Hidden Assumptions",
+    "text": "These are the assumptions that often make a baseline look correct. We assume the operation happens once, in order, and against current state. We assume a callback means the whole workflow is ready. We assume a log line means the transition was safe. We assume one successful run proves correctness. Under concurrency, each assumption can fail. The professional move is to make the assumption visible, convert it into an invariant or progress property, and then design a test that can challenge it."
   },
   {
     "slide": 15,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "Let's examine common failure modes and anti-patterns. For example, when a system only passes a happy-path demonstration, it often reflects a test that hasn’t considered timing and pressure conditions. We can mitigate this by adding failure-focused tests that cover these scenarios."
+    "topic": "Happy Path Assumption",
+    "text": "The happy path reads current state, applies a transition, emits a side effect, and passes the sequential test. That sequence can be useful as a baseline, but it also masks pressure. The failure is hidden because there is no overlap, no delayed callback, no retry, and no stale observation. This is why the baseline should not be thrown away. Keep it as a comparison point, then add a pressure scenario that targets the invariant directly. The before-and-after comparison becomes evidence for the Integrity Packet."
   },
   {
     "slide": 16,
-    "topic": "Trade-Off Analysis",
-    "text": "In our trade-off analysis, we see various approaches with their strengths and weaknesses. For instance, while a simple baseline is easy to implement, it often hides timing assumptions, which can lead to hidden pitfalls during stress-testing. Each strategy has its place, and it’s crucial to choose wisely based on the specific context."
+    "topic": "Failure Interleaving",
+    "text": "Now make the failure concrete. The coordinator holds the inventory lock and waits for payment. At the same time, a callback holds the payment lock and waits for inventory. Both pieces of code may look reasonable locally, but together they block progress. The operator sees an order that never finishes, or a workflow with missing prerequisite evidence. The hidden problem is inconsistent coordination across boundaries. Students should capture a wait graph, a state timeline, and correlated logs that prove where progress stopped."
   },
   {
     "slide": 17,
-    "topic": "Practical Application",
-    "text": "As you prepare for practical applications of these concepts, identify the invariant most relevant to your coordination patterns. Write a sequential scenario you expect to succeed and a pressure scenario that could expose a failure. Make sure to log operation and entity IDs to capture evidence effectively."
+    "topic": "Deadlock Sequence",
+    "text": "In this deadlock sequence, the coordinator acquires inventory first, while the callback acquires payment first. Then each side asks for the resource held by the other. Nothing has crashed, but no useful progress is visible. This is one of the most uncomfortable concurrency failures because the system may look alive: threads exist, logs may still appear, and dashboards may not show a simple exception. The evidence should identify who holds what, who waits for what, and which order or operation ID is affected."
   },
   {
     "slide": 18,
-    "topic": "Assignment Integration",
-    "text": "Remember, this lecture's ideas tie directly to your semester projects. Show how the concepts of coordination patterns apply to your domain, and substantiate your mastery with concrete evidence, including runnable commands and structured logs."
+    "topic": "Out-of-Order Callback",
+    "text": "Another failure path is an out-of-order callback. Payment may confirm before inventory reservation is visible. If the coordinator treats that callback as permission to move forward, the order state becomes ambiguous. Should the order be ready to ship, waiting for reservation, or rejected? The protected property is prerequisite ordering: shipping is allowed only after both payment and reservation are confirmed. The design response is a guard near the transition, not a vague hope that callbacks arrive in a convenient order."
   },
   {
     "slide": 19,
-    "topic": "Validation Questions",
-    "text": "To wrap up, consider these validation questions. What invariant matters most here? What hidden assumptions could make a baseline design appear correct? How do you force a failure in a repeatable test? These questions help clarify your understanding and application of today’s concepts."
+    "topic": "Duplicate Retry",
+    "text": "Retries introduce a different kind of pressure. Suppose two worker attempts both reach the shipment side effect. Without an idempotency key or deduplication rule, both attempts may emit a shipment. From the customer's perspective, this could mean two packages, two charges, or two irreversible external calls. The baseline hides this because it only runs once. The evidence should include operation IDs, shipment IDs, and logs showing that the second attempt was either rejected or safely recognized as a duplicate."
   },
   {
     "slide": 20,
+    "topic": "Evidence to Collect",
+    "text": "For coordination failures, vague evidence is not enough. Use correlation IDs for each order and operation. Log the state before and after each transition. If locks or resources are involved, capture wait relationships. Preserve the failing workload so the scenario can be rerun. Then compare before and after behavior using the same pressure condition. The key is to link evidence directly to the invariant. A reviewer should be able to reconstruct what happened without trusting your intuition."
+  },
+  {
+    "slide": 21,
+    "topic": "Evidence Flow",
+    "text": "Start with a claim, such as: this workflow preserves prerequisite ordering and progress under pressure. Then challenge that claim with a pressure test. The test produces structured logs, and those logs should reconstruct a timeline. The timeline justifies a design decision, and the design decision still leaves some remaining risk. This flow is important for the Integrity Packet because it prevents unsupported claims. You are not just saying you fixed it; you are showing the path from assumption to evidence to decision."
+  },
+  {
+    "slide": 22,
+    "topic": "Design Response",
+    "text": "A good design response starts by stating the protected property. For example: an order may ship only after reservation and payment are both confirmed, and shipment must happen once. Then place the guard close to the transition that can violate that property. If multiple locks are unavoidable, use ordered acquisition. If waiting can become indefinite, add timeout and compensation. If duplicate work is possible, use idempotency or deduplication. The trade-off is real: more state, more metadata, more recovery logic, and more cases to test."
+  },
+  {
+    "slide": 23,
+    "topic": "Guarded Transition",
+    "text": "A guarded transition protects the workflow by refusing to advance unless the required state is present. If payment arrives before reservation, the order does not jump directly to ready to ship. It moves into a waiting-for-reservation state. When reservation arrives, the workflow can safely continue. Shipment then requires an accepted idempotency key, so duplicate attempts do not create duplicate side effects. The trade-off is that the state model becomes more explicit and must be maintained carefully."
+  },
+  {
+    "slide": 24,
+    "topic": "Ordered Acquisition",
+    "text": "Ordered acquisition protects against deadlock by requiring every worker to acquire shared resources in the same order. For example, everyone acquires inventory first and payment second, then releases in reverse. The protected property is progress: workers should not form a cycle where each holds what the other needs. The mechanism is simple to describe, but the trade-off is discipline. Every code path must follow the rule, and exceptions or future changes can reintroduce the risk if the rule is not documented and tested."
+  },
+  {
+    "slide": 25,
+    "topic": "Timeout and Compensation",
+    "text": "Timeout and compensation protect workflows from waiting forever. If a prerequisite arrives, the workflow proceeds. If the deadline is reached, the system moves to a timed-out state, releases reserved resources, records evidence, and enters a reviewable recovery path. The protected property is observable progress, not guaranteed success. The trade-off is that compensation adds complexity. You must decide what can be safely undone, what needs manual review, and what evidence proves the system handled the failure responsibly."
+  },
+  {
+    "slide": 26,
+    "topic": "Trade-Off Analysis",
+    "text": "There is no universal best coordination mechanism. A simple baseline is easy to explain, but it hides pressure assumptions. Guarded transitions protect invariants directly, but require careful state modeling. Explicit coordination makes dependencies visible, but can create bottlenecks or deadlocks. Retry-safe design handles duplicate delivery, but requires keys or deduplication. Observability-first design supports review and A2 defense, but adds instrumentation work. The important habit is to name the property first and then choose the mechanism with its cost."
+  },
+  {
+    "slide": 27,
+    "topic": "Repeatable Pressure Test",
+    "text": "This example test turns the coordination problem into something repeatable. Inventory is delayed, payment arrives quickly, and two workers process the same order. The expected result is precise: the order becomes shipped once, logs prove reservation was confirmed before shipment, and duplicate shipment attempts are rejected. This is much stronger than saying the workflow seems fine. For A2, this is the kind of artifact that supports oral assessment because you can explain the scenario, run it, and connect the output to your invariant."
+  },
+  {
+    "slide": 28,
+    "topic": "Tomorrow Morning",
+    "text": "Here is the practical checklist. Identify the invariant or progress property in your own project. Write one sequential scenario that should succeed, and one pressure scenario that could expose the failure. Add operation IDs and entity IDs to your logs before running the pressure scenario. If you apply a fix, keep the original failing workload and rerun it. Then update your Integrity Packet with the assumption, evidence, validation result, trade-off, and remaining risk."
+  },
+  {
+    "slide": 29,
+    "topic": "A2 Integrity Packet Map",
+    "text": "For A2, your Integrity Packet should connect the reasoning chain. Start with the assumption your baseline made. Clarify it as an invariant or progress property. Challenge that invariant with failure evidence. Use the evidence to motivate a design control. Validate the control with a repeatable result. Finally, document remaining risk. This is exactly the structure you should be prepared to defend orally: what could go wrong, how you made it happen, what you changed, and how you know the change helped."
+  },
+  {
+    "slide": 30,
     "topic": "Summary",
-    "text": "In conclusion, coordination patterns are not just concepts; they give us a framework to assess whether a system remains correct under realistic execution. Our goal as engineers is to connect these concepts to observable behaviors and defensible trade-offs in design."
+    "text": "The central insight is that coordination patterns expose where objects must agree under realistic execution. Happy-path behavior can hide ordering, ownership, visibility, and progress assumptions. A mature design does not merely hope that the intended interleaving occurs. It rejects invalid interleavings, contains them, or recovers from them with evidence. For your work, keep connecting mechanism, invariant, evidence, trade-off, and risk. That is what turns a working demo into a defensible concurrent design."
   }
 ]

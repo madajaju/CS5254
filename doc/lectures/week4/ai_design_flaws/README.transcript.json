@@ -2,106 +2,126 @@
   {
     "slide": 1,
     "topic": "AI-Generated Designs: Common Flaws",
-    "text": "Welcome to our lecture on AI-Generated Designs: Common Flaws. Today, we're going to explore how AI-generated designs can seem correct at first glance but may hide significant flaws, particularly under concurrent pressures. We'll discuss accountability in design and how to effectively use AI's outputs without compromising correctness."
+    "text": "Welcome everyone. The key idea for today is that AI-generated designs can be useful starting points, but they are not proof of correctness. In concurrent systems, confident-looking code can hide timing assumptions, missing state guards, and vague evidence. Our job as engineers is to treat the AI answer as a hypothesis, put it under pressure, and decide whether the invariant still holds."
   },
   {
     "slide": 2,
-    "topic": "Introduction",
-    "text": "Let's start by considering the main points. AI-generated designs can appear flawlessly correct, but hidden flaws often emerge under pressure. It's crucial to understand the importance of design accountability and how engineers can safely utilize AI outputs without losing sight of their responsibility for correctness."
+    "topic": "Learning Objectives",
+    "text": "By the end of this lecture, you should be able to inspect an AI-generated concurrent design and ask: what assumption is being made here? Before choosing a lock, queue, atomic variable, or framework, we want to identify the invariant that must remain true. Then we will force failure with repeatable pressure scenarios, evaluate concrete evidence from logs and interleavings, and explain the correction clearly in the Integrity Packet."
   },
   {
     "slide": 3,
-    "topic": "Core Concept: Thread-Safety Hallucinations",
-    "text": "Our first core concept is Thread-Safety Hallucinations. This refers to the misleading claims of thread-safety often found in AI-generated code. What's critical here is acknowledging that just because the code uses terms like 'volatile' or 'atomic,' it doesn't necessarily mean it's safe. Trusting that code under pressure requires clear understanding and validation of the relevant invariants."
+    "topic": "Core Claim",
+    "text": "The core claim is simple but important: AI output is a draft, not evidence. A generated answer may be syntactically correct and still unsafe under concurrent pressure. Sequential examples often hide the exact timing problem that will break the system in production. A design becomes mature only when we can demonstrate that its invariant survives bad timing, retries, overlapping workers, or partial failure."
   },
   {
     "slide": 4,
-    "topic": "Core Concept: Missing Edge Cases",
-    "text": "Now, let's discuss Missing Edge Cases. AI often overlooks scenarios involving high contention, network partitions, and partial failures. This oversight is significant because explicit acknowledgment of these edge cases is necessary for our systems to handle pressure effectively. The implication here is clear: we must understand and expose our invariants and log the transitions in our workflows."
+    "topic": "Design Pressure Loop",
+    "text": "Think of AI-assisted design as a loop. We start with an AI draft, then inspect it for hidden assumptions. Next we stress those assumptions with concurrent pressure, observe failure evidence, and use that evidence to choose a design response. Finally, we defend the decision in the Integrity Packet and refine our assumptions. This matters because professional engineering judgment is not about trusting the first answer; it is about connecting claims to evidence."
   },
   {
     "slide": 5,
-    "topic": "Core Concept: Complexity Overload",
-    "text": "Next, we have Complexity Overload. AI can sometimes suggest overly complicated solutions, such as a full Distributed Lock Manager for a straightforward problem. It's essential to recognize that simplicity is key when under pressure. Thus, we must ensure that our designs expose the necessary invariants and allow for proper logging of state transitions."
+    "topic": "Common Flaws",
+    "text": "Several flaws appear repeatedly in AI-generated designs. A common mistake is accepting a thread-safety claim because the code uses a safe-sounding term like volatile, atomic, or concurrent. Another is ignoring edge cases such as two workers, retries, delayed messages, or partial failure. AI may also overcomplicate a simple local state problem with unnecessary infrastructure. The deeper issue is often unsupported correctness: the explanation sounds plausible, but there is no replayable evidence."
   },
   {
     "slide": 6,
-    "topic": "Core Concept: Assumed Atomicity",
-    "text": "Moving on to Assumed Atomicity, this concept revolves around the misconception that a series of operations, like Check, Read, and Write, can be treated as atomic just because they appear in one function. To maintain trust in our system under pressure, we must clearly define what conditions make these operations atomic and ensure we expose the invariants and log critical transitions appropriately."
+    "topic": "Thread-Safety Hallucination",
+    "text": "A thread-safety hallucination happens when the design sounds safe but the protected property is not actually protected. For example, using volatile may make a value visible, but it does not automatically make a check-then-write sequence atomic. Imagine a worker reads a status, decides it can proceed, and then writes a new status. If another worker overlaps that sequence, the race still exists. The invariant is unprotected even though the vocabulary sounded reassuring."
   },
   {
     "slide": 7,
-    "topic": "Core Concept: AI-Assisted Hypothesis",
-    "text": "Finally, let's address the AI-Assisted Hypothesis. When we receive a design or explanation from AI, it’s crucial that we validate it before adopting it outright. If we fail to rigorously check these outputs, we risk endangering our designs by following misleading pathways. Hence, we need constant vigilance to expose invariants and support our designs with solid evidence."
+    "topic": "Missing Edge Cases",
+    "text": "AI-generated examples often demonstrate the happy path and skip the cases that actually reveal the design problem. Two workers may act at the same time. A retry may arrive after the first attempt partly succeeded. A delayed message may be processed after the object has moved to another state. A partial failure may leave the workflow stuck. These cases matter because they turn an invisible assumption into an observable risk."
   },
   {
     "slide": 8,
-    "topic": "System Architecture View",
-    "text": "Here's a system architecture view illustrating the interconnectedness of the concepts we've discussed. The flow starts from our main topic of AI-generated designs' common flaws, branching into areas such as thread-safety hallucinations, missing edge cases, and complexity overload. Understanding how these concepts are related aids us in establishing a clearer picture of the systemic challenges we face."
+    "topic": "Complexity Overload",
+    "text": "The opposite failure is complexity overload. Sometimes AI suggests a large framework, a distributed lock manager, or a heavy coordination layer for what is really a local state transition problem. More machinery can make the system harder to understand and harder to validate. The protected property may become less clear, not more clear. A good correction should be strong enough to protect the invariant, but not so complex that the evidence becomes impossible to review."
   },
   {
     "slide": 9,
-    "topic": "Example Setup",
-    "text": "For our example setup, consider a scenario in the podcast domain. Suppose you request AI for a 'safe status update' and receive code that looks correct but involves significant risks. This highlights the key focus on observable state transformations, reminding us to examine the practical implications of our designs as generated by AI."
+    "topic": "Assumed Atomicity",
+    "text": "Assumed atomicity is one of the most important flaws in concurrent design. Just because read, decide, and write appear inside one function does not mean they execute as one indivisible step. Another thread can interleave between the read and the write. The system may pass every sequential test and still fail when two actors arrive at the same boundary. The question to ask is: which operation is truly atomic, and what prevents another actor from slipping in between?"
   },
   {
     "slide": 10,
-    "topic": "Naive Implementation",
-    "text": "When we look at naive implementations, they often make the assumption that operations occur in a straightforward order. This assumption is not only flawed but can lead to invisible mismatches in state because the method names might sound correct, misleading us into believing that everything functions properly under concurrent conditions."
+    "topic": "Worked Example Setup",
+    "text": "Let’s ground this in a podcast-style domain. We have an episode record, episode-42, starting in the DRAFT state. Worker A and Worker B both try to start processing it. The AI-generated answer claims the method is safe because it uses a concurrent collection. But the required invariant is stricter than safe storage: only one worker may own the transition for a given episode at a time."
   },
   {
     "slide": 11,
-    "topic": "Failure Scenario",
-    "text": "In failure scenarios, we find overlapping executions can lead to stale states or stalled workflows. It's crucial to realize that these issues go beyond simple syntax errors; they expose deeper design flaws resulting from mismatches between our assumptions and actual execution. This understanding can drive us towards improvements."
+    "topic": "System Interaction",
+    "text": "Here the actors are Worker A, Worker B, and the shared episode record. Worker A reads episode-42 as DRAFT. Before Worker A commits the transition, Worker B also reads DRAFT. Then both workers write PROCESSING. The boundary being tested is the transition from reading state to claiming ownership. This matters because the collection may support concurrent access while the workflow still allows two competing owners."
   },
   {
     "slide": 12,
-    "topic": "Improved Design Direction",
-    "text": "To address the failures we've identified, we should focus on defining the invariant clearly, making transitions observable, and implementing correctness checks such as version checks. Our goal is to shift towards evidence-based design that not only seeks to handle successful outcomes but also anticipates potential failures."
+    "topic": "Episode State Machine",
+    "text": "The episode has a state machine: DRAFT, PROCESSING, READY_TO_PUBLISH, PUBLISHED, and FAILED. A worker claims the episode by moving it from DRAFT to PROCESSING. Later, completed assets move it to READY_TO_PUBLISH, and publishing moves it to PUBLISHED. The protected invariant is that only one worker may own a state transition for the episode at a time. State machines help us name the legal transitions instead of relying on informal method names."
   },
   {
     "slide": 13,
-    "topic": "Why Improved Design Is Safer",
-    "text": "Improved designs enhance safety by moving from reliance on assumptions to proving that our workflows execute in the intended order. By preventing invalid interleavings and enforcing correctness, we maintain workflow integrity backed by solid evidence."
+    "topic": "Naive Mental Model",
+    "text": "The naive mental model is clean and misleading. An actor performs an operation, the system reads current state, applies a transition, emits a side effect, and the reviewer sees one neat path. That is exactly why the bug can survive a demo. The model assumes order, freshness, and exclusivity, but none of those properties has been proven. A sequential test confirms only the easy case."
   },
   {
     "slide": 14,
-    "topic": "Failure Modes & Anti-Patterns",
-    "text": "Now, let's examine some failure modes and anti-patterns. For example, one symptom is when a system passes happy-path tests that avoid pressure conditions. To rectify this issue, we should expand our testing to include diverse scenarios that focus on failure conditions, ensuring we detect and correct vulnerabilities effectively."
+    "topic": "Failure Interleaving",
+    "text": "Now make the failure concrete. Worker A checks that the episode is DRAFT. Before Worker A writes PROCESSING, Worker B also checks and sees DRAFT. Both workers start processing jobs, and both eventually write PROCESSING. From an operator’s perspective, there may be duplicate work, duplicate side effects, or a final log that hides which worker actually won. The violated invariant is one owner per episode transition."
   },
   {
     "slide": 15,
-    "topic": "Trade-Off Analysis",
-    "text": "In our trade-off analysis, we explore different approaches to design. For instance, a simple baseline is easy to implement but may hide timing assumptions. In contrast, an explicit coordination approach improves visibility of dependencies but can introduce wait issues. It's essential to know when to apply each strategy to balance strengths and weaknesses."
+    "topic": "Failure Evidence",
+    "text": "The failure is not a syntax error. It is a mismatch between the design assumption and the execution model. To prove it, you need structured evidence: worker ID, episode ID, previous state, new state, timestamp, and ideally an operation or correlation ID. Run the pressure test repeatedly, possibly with an artificial delay between read and write, until the bad interleaving is visible. Preserve that failing run so you can compare it to the corrected version."
   },
   {
     "slide": 16,
-    "topic": "Practical Application",
-    "text": "For practical applications, start by identifying the core invariant relevant to your designs. Next, develop both a sequential and a pressure scenario to stress-test your system. Ensure you log operation and entity IDs before running the pressure scenario and keep evidence of any fixes you apply for validation."
+    "topic": "Failure Outcome",
+    "text": "This is the uncomfortable outcome: Worker A believes it owns the transition, and Worker B also believes it owns the transition. Duplicate processing starts. The final state may still say PROCESSING, so a shallow test might pass, but the history is wrong. The logs may be ambiguous enough that a reviewer cannot reconstruct what happened. That is exactly the kind of evidence gap the Integrity Packet is meant to expose."
   },
   {
     "slide": 17,
-    "topic": "Assignment Connection",
-    "text": "This lecture is directly aligned with your assignment A1. As you work on your semester project, you'll want to relate today’s concepts to your own examples. Show how the relevant invariants and mechanisms apply and back up your claims with evidence like structured logs, behavioral changes, and clear explanations."
+    "topic": "Design Response",
+    "text": "The correction starts by naming the invariant first: the episode state machine must reject stale or competing transitions. Then we protect the state transition directly. Possible mechanisms include atomic compare-and-set, a versioned update, a synchronized transition method, or a single-owner queue. The trade-off is real: we may reduce parallelism around that entity and add explicit transition code. But we gain a defensible boundary and reviewable evidence."
   },
   {
     "slide": 18,
-    "topic": "Validation Questions",
-    "text": "During the validation process, consider questions such as what key invariants are most relevant to our topic, and what hidden assumptions might make the baseline design appear correct. Additionally, think about how you would force failure scenarios to prove a point and the necessary evidence to support your observations."
+    "topic": "Guarded Transition",
+    "text": "In a guarded transition, the worker does not simply write PROCESSING. It supplies an expected state, such as DRAFT, and the system performs one atomic decision: change DRAFT to PROCESSING only if the current state is still DRAFT. One worker succeeds and becomes the accepted owner. The competitor is rejected as stale. Both outcomes should be logged. The protected property is exclusivity of ownership, and the cost is more explicit state handling."
   },
   {
     "slide": 19,
-    "topic": "Discussion",
-    "text": "Let's open the floor for discussion. How should engineers validate AI-generated designs? What essential trade-offs should be considered when selecting which mechanisms to use? I encourage everyone to share their thoughts and experiences as we navigate these complex issues together."
+    "topic": "Evidence Flow",
+    "text": "Evidence should follow the claim. If the claim is that the design handles competing workers, the pressure test must create competing workers. The logs must then prove what happened: one accepted transition and one rejected stale claim. That evidence supports the design decision, and the remaining risk still needs to be disclosed. This is the bridge from implementation to engineering defense."
   },
   {
     "slide": 20,
-    "topic": "Summary",
-    "text": "To summarize today’s lecture, we learned that AI-generated designs carry risks of unseen flaws. The core insights revolve around the importance of invariants and observable behaviors. A mature design must be justified through robust evaluations and clear evidence of its reliability under real-world conditions."
+    "topic": "Trade-Off Analysis",
+    "text": "There is no free fix. A simple baseline is easy to explain, but it hides timing assumptions. A guarded transition protects the invariant directly, but requires careful state modeling. Explicit coordination makes ordering visible, but can introduce bottlenecks or waiting. Idempotent design handles duplicate attempts, but needs keys and deduplication. Observability-first design supports review, but adds instrumentation work. Choose the smallest mechanism that protects the property and produces evidence."
   },
   {
     "slide": 21,
-    "topic": "Further Reading",
-    "text": "Finally, for those interested in delving deeper, I recommend searching for phrases like 'AI-Generated Designs and Failure Modes' or exploring the best practices for structured logging and correlation IDs. Investigating invariants in object-oriented systems will also deepen your understanding of this topic."
+    "topic": "Practical Checklist",
+    "text": "For practical work, start by identifying the invariant or progress property. Then write one sequential success scenario and one pressure scenario that might break the assumption. Add operation IDs and entity IDs before you run the test, because vague logs are almost impossible to defend later. If you apply a fix, capture before and after evidence using the same workload. Finally, record the assumption, validation, and remaining risk."
+  },
+  {
+    "slide": 22,
+    "topic": "Assignment Integration",
+    "text": "For A1, connect this flaw to your own project domain. Show the relevant object, workflow, event, failure, or recovery mechanism. You should produce runnable evidence, not just an explanation. That might include commands, structured logs, a failure reproduction, and a comparison between the baseline and corrected design. In oral assessment, be ready to defend the trade-off: what property did you protect, how did you protect it, and what did it cost?"
+  },
+  {
+    "slide": 23,
+    "topic": "Integrity Packet Map",
+    "text": "The Integrity Packet should trace the reasoning chain. Start with the AI suggestion, extract the assumption, clarify the invariant, design a failure test, collect evidence, justify the decision, and disclose the remaining risk. This structure prevents vague claims like, \"it is thread-safe now.\" Instead, you can say exactly which bad interleaving was tested, what the logs proved, and why the chosen mechanism is appropriate."
+  },
+  {
+    "slide": 24,
+    "topic": "Interview Questions",
+    "text": "Let’s pause here and think like reviewers. What invariant matters most in your design? What hidden assumption made the baseline appear correct? How would you force the failure repeatably? What log line proves that the losing worker was rejected? And what trade-off did your mechanism introduce? If you can answer those questions clearly, you are moving from tool confidence to evidence-backed engineering."
+  },
+  {
+    "slide": 25,
+    "topic": "Summary",
+    "text": "The main takeaway is that AI-generated designs are hypotheses. Concurrency turns hidden assumptions into concrete failures. Correctness depends on protected invariants, not confident wording or safe-sounding tools. Your evidence must be replayable and reviewable. The Integrity Packet connects the claim, the pressure test, the design decision, and the remaining risk, which is exactly how you defend a concurrent design professionally."
   }
 ]

@@ -1,5 +1,7 @@
 ﻿# Validating Fixes
 
+
+## Video: https://youtu.be/u9UisXnaLD4
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 4

@@ -1,112 +1,137 @@
 [
   {
     "slide": 1,
-    "topic": "Synchronization Mechanisms",
-    "text": "Welcome, everyone, to our lecture on Synchronization Mechanisms. Today, we'll explore how these concepts play a crucial role in ensuring the correctness of concurrent systems."
+    "topic": "Lecture Title",
+    "text": "Welcome everyone. Today we are talking about synchronization mechanisms: locks, condition variables, queues, futures, and the invariants they are supposed to protect. The key idea here is that synchronization is not just a programming technique. It is a design argument. Before we trust a concurrent system, we need to explain what property must remain true, what pressure could break it, and what evidence proves our design still works."
   },
   {
     "slide": 2,
-    "topic": "Learning Objectives",
-    "text": "Our primary goals for this session are to analyze synchronization mechanisms in concurrent systems, diagnose hidden assumptions that could lead to failures, and evaluate the evidence of these failures. We'll also talk about designing appropriate corrections while ensuring we preserve system invariants, along with how to effectively defend our approach in the Integrity Packet and in Assignment 2."
+    "topic": "Why Synchronize",
+    "text": "The key idea here is that sequential demonstrations are often misleading. A system can look perfectly correct when one actor performs one operation at a time. But once timing changes, two workers overlap, callbacks arrive late, or shared state is accessed concurrently, hidden assumptions become visible. Synchronization exists to protect shared state and to defend progress. We are not just trying to avoid crashes; we are trying to make sure the system does not duplicate work, ship too early, block forever, or produce logs that no one can reconstruct."
   },
   {
     "slide": 3,
-    "topic": "Opening Narrative",
-    "text": "Let’s set the stage: imagine a project that appears to function correctly during a simple demonstration. However, hidden assumptions get exposed when we introduce concurrency. We need to understand what an engineer must analyze and defend in such situations."
+    "topic": "Pressure Loop",
+    "text": "Think of synchronization as a loop of professional reasoning. We begin with the happy path, then introduce concurrency pressure that exposes an assumption. From there, we capture failure evidence: traces, logs, interleavings, or repeatable test output. Only then do we choose a design control, such as a lock, queue, guard, timeout, or retry-safe mechanism. Finally, we defend the trade-off in the Integrity Packet. This matters because a mechanism without evidence is just a guess, and evidence without a design decision does not improve the system."
   },
   {
     "slide": 4,
-    "topic": "Locks & Mutexes",
-    "text": "First, let's discuss Locks and Mutexes. These are fundamental tools that prevent simultaneous access to shared resources. Understanding this is crucial as it helps us identify the explicit conditions our systems need to meet to be trustworthy under pressure. If we fail to manage these correctly, we risk running into problems such as duplicate work or stale state, which could undermine our system’s reliability."
+    "topic": "Hidden Assumption",
+    "text": "A common mistake is believing that because something worked once, it is correct. Hidden assumptions sound innocent: events arrive in order, state is always current, side effects happen exactly once, and waiting eventually ends. Under concurrency, each of those can fail. A payment callback may arrive before inventory status is visible. A retry may emit the same side effect twice. A worker may wait forever because no one sends the signal it expects. Our job is to find these assumptions before customers, operators, or reviewers find them for us."
   },
   {
     "slide": 5,
-    "topic": "Signals & Condition Variables",
-    "text": "Next, we have Signals and Condition Variables. These mechanisms enable one thread to awaken another when a certain condition is satisfied. This is important to establish clear conditions that help your system perform reliably under pressure. Neglecting these can also lead to similar failure modes—duplicate actions or stale data—making it critical for our designs to log critical transitions and validate behaviors."
+    "topic": "Happy Path",
+    "text": "Imagine a simple workflow. An actor sends a request, the system reads current state, writes a transition, and emits a side effect once. In a sequential test, this is clean and believable. The problem is that the sequence quietly assumes no one else is changing the same state at the same time, that the read is still valid when the write occurs, and that the side effect cannot be duplicated. The invariant being tested is whether the transition remains valid across all executions, not just the one clean execution we happened to run."
   },
   {
     "slide": 6,
-    "topic": "Queues",
-    "text": "Now let’s talk about Queues. They serve as buffers to facilitate communication between producers and consumers, handling discrepancies in processing rates while maintaining order. Again, the key takeaway here is the importance of exposing these conditions to maintain trust in the system. Failing to do so can result in issues like duplicate operations or delays."
+    "topic": "Locks Mutexes",
+    "text": "Locks and mutexes prevent simultaneous access to a resource. But the important phrase is not 'lock the method.' The important phrase is 'protect the invariant.' A lock should usually cover a small critical section where shared state would otherwise be observed or modified inconsistently. The trade-off is that locks can introduce blocking, deadlock, and hidden serialization. So we use them deliberately: what state is protected, what transition is atomic, and what evidence proves the lock is doing useful work?"
   },
   {
     "slide": 7,
-    "topic": "Futures & Promises",
-    "text": "Futures and Promises are next. These represent outcomes of asynchronous operations that have yet to complete. Identifying these correctly is key to ensuring system integrity under load. Just as before, if not documented and handled correctly, they can lead to failure modes, like producing duplicate work or stale data. We must ensure that transitions are logged appropriately to track their behavior."
+    "topic": "Lock Timeline",
+    "text": "Here we have two threads competing for shared state through a mutex. Thread A acquires the mutex, updates the shared state safely, and releases it. Thread B must wait until the critical section is complete. The protected property is mutual exclusion: no two threads can perform the unsafe state transition at the same time. This matters because without that boundary, both threads might read the same old value and each believe its update is valid. The trade-off is waiting; safety improves, but throughput and responsiveness may suffer."
   },
   {
     "slide": 8,
-    "topic": "System Invariant",
-    "text": "The concept of a System Invariant is central to our discussions. It’s a condition that must hold true across all valid executions of a system. Recognizing and documenting these invariants is vital for maintaining trust in our systems. Failing to keep them intact can lead to severe errors, emphasizing the importance of rigorous validation."
+    "topic": "Deadlock Trap",
+    "text": "This is the uncomfortable version of locking. The coordinator holds the inventory lock and waits for the payment lock. At the same time, the payment callback holds the payment lock and waits for the inventory lock. From the operator's perspective, the order is just stuck. Nothing appears to be crashing, but nothing is making progress either. The happy path hid this because the locks were never acquired in conflicting order. Evidence should include a lock or wait graph, a correlation ID for the order, and timestamps showing both parties waiting on each other."
   },
   {
     "slide": 9,
-    "topic": "System Architecture View",
-    "text": "Here, we have a system architecture view of our synchronization mechanisms. This diagram illustrates how various components like Locks, Signals, Queues, and Validation Evidence feed into the design decisions we make. It emphasizes the interconnectedness of these elements and highlights the importance of maintaining the invariant as our system evolves."
+    "topic": "Signals Conditions",
+    "text": "Signals and condition variables are used when one thread needs to wait until a condition becomes true. For example, a transcript worker should not generate a transcript until audio ingestion has completed. The rule to remember is: always wait in terms of the condition, not merely the signal. Signals can be missed, delayed, or spurious. The protected property is that work begins only after the required state is actually true. The trade-off is that you now have to model and log that condition clearly."
   },
   {
     "slide": 10,
-    "topic": "Worked Example Introduction",
-    "text": "To make these concepts more tangible, let’s consider a worked example. In a podcasting domain, we have a Signal that allows the AudioProcessor to notify the TranscriptGenerator once an audio file is ingested. Additionally, we utilize a Queue for cleaning jobs that the AudioCleaner processes. And in an order processing system, a Semaphore is employed to manage the number of simultaneous payment requests."
+    "topic": "Wait Condition",
+    "text": "In this audio example, the transcript worker waits while the audio has not been ingested. The audio processor marks the audio state as ingested and notifies the condition. When the transcript worker wakes up, it re-checks the audio state before generating the transcript. That re-check is essential. The signal is not the truth; the state is the truth. This design protects the invariant that transcripts are generated only from ingested audio, and it gives us a state transition we can log and defend."
   },
   {
     "slide": 11,
-    "topic": "Naive Implementation",
-    "text": "In a naive implementation, we might assume that our operations occur once and in order with the current state. This mental model might look good on the surface, yet it can mask deeper issues within the code, as the underlying assumptions often remain invisible until something goes wrong."
+    "topic": "Lost Wakeup",
+    "text": "A lost wakeup is the kind of bug that makes engineers uncomfortable because the system may look idle rather than broken. The producer sets ready to true and sends a notification early. Later, the consumer begins waiting, but it never re-checks the job state, so it can wait forever even though the work was already ready. The baseline test hid the problem because the consumer probably started waiting before the producer notified. To prove this failure, capture the timing of the notify, the wait, and the state value that should have allowed progress."
   },
   {
     "slide": 12,
-    "topic": "Failure Scenario",
-    "text": "Under scenarios of overlapping executions or delayed deliveries, the system can suffer from various failure modes such as observing stale states or executing tasks multiple times. These aren’t just bugs; they signify a disconnect between our design assumptions and the actual execution model, highlighting a critical area of concern."
+    "topic": "Queues",
+    "text": "Queues decouple producers from consumers. A producer can hand off work without requiring the worker to be available at that exact moment. This helps absorb rate differences and gives us a natural place to preserve ordering or retry work. But queues do not magically make systems correct. They can introduce duplicates, starvation, unbounded backlog, and stale status. The invariant still matters: is each job claimed safely, processed at most once or idempotently, and reflected accurately to the user?"
   },
   {
     "slide": 13,
-    "topic": "Improved Design Direction",
-    "text": "To address these issues, we can adopt an improved design approach. This involves naming our invariants, making transitions observable, and implementing correctness controls like version checks, idempotency keys, and state-machine guards. Each of these additions empowers us to manage and track our system’s behavior more effectively."
+    "topic": "Queue Flow",
+    "text": "Imagine a podcast API creating a cleaning job. The job is placed on a work queue, an audio cleaner claims it, and a clean file is produced. The actors are separated by a queue boundary, which is useful because the API does not need to wait for the cleaner to finish. The design property being tested is reliable handoff: a job that is accepted should either be processed, retried, or surfaced as failed. This matters because the queue becomes part of the contract between the user-facing system and the background workers."
   },
   {
     "slide": 14,
-    "topic": "Why Improved Design Is Safer",
-    "text": "This safer design approach shifts our focus from merely hoping that operations execute correctly to actively proving that any invalid interleavings are either rejected or handled appropriately. This is crucial for maintaining the integrity and reliability of our systems."
+    "topic": "Backlog Failure",
+    "text": "Now make the queue uncomfortable. Fast producers flood an unbounded queue while slow workers drain it too slowly. Users see 'accepted' and assume progress, but their work may sit for minutes or hours. Operators may see no hard error, only rising latency and stale status. The happy path hid this because one job went through quickly. Evidence should include queue depth over time, worker identity, enqueue time, claim time, completion time, and the user-visible status. The correction might be bounded queues, backpressure, scaling, or clearer status, but none of those are free."
   },
   {
     "slide": 15,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "Now, let's discuss common failure modes and anti-patterns we might encounter. For instance, a system might pass a happy-path test without truly being reliable. We can detect such issues by introducing additional concurrent actors into our tests or stressful conditions and correct them by adding failure-focused tests to really push the boundaries of our design."
+    "topic": "Futures Promises",
+    "text": "Futures and promises represent results that are not ready yet. They separate starting work from consuming the result, which is powerful for asynchronous workflows. But a future is still a synchronization mechanism. If the caller blocks indefinitely, ignores failure, or omits a timeout, the system can hang or hide errors. The protected property is not just 'the async call returns eventually.' It is that completion, failure, timeout, and cancellation are all handled in a way the rest of the workflow can reason about."
   },
   {
     "slide": 16,
-    "topic": "Trade-Off Analysis",
-    "text": "In this slide, we perform a trade-off analysis of different synchronization approaches. Each approach has its strengths and weaknesses, and understanding these can help us make informed decisions about which mechanisms to employ in different situations. Consider when to use a simple baseline versus a more guarded state transition."
+    "topic": "Future Timeline",
+    "text": "A caller starts asynchronous work, the worker promises a result, and the caller continues rather than blocking immediately. Later, the worker computes the result and the future completes or fails. The important boundary is between starting the work and depending on its outcome. Professional judgment asks: what happens if the future fails, takes too long, or completes after the caller no longer needs it? The trade-off is complexity. We gain concurrency, but we must explicitly handle timeout, failure, and result consumption."
   },
   {
     "slide": 17,
-    "topic": "Practical Application",
-    "text": "Moving on to practical applications: tomorrow morning, I'd like you to identify the most relevant invariant for your synchronization mechanisms. Write out a sequential scenario that should succeed, and then create a pressure scenario that might expose potential failures. Also, make sure to add operation IDs and entity IDs to your logs before running your tests. This structured approach will significantly enhance your understanding and validation efforts."
+    "topic": "System Invariant",
+    "text": "The system invariant is the condition that must remain true across all valid executions. This comes before mechanism choice. If you start by saying 'we used a lock' or 'we used a queue,' a reviewer should ask, 'What property does that protect?' In the order example, an invariant might be: an order is shipped only after inventory is reserved and payment is captured exactly once. That sentence drives the tests, the logs, the design controls, and the Integrity Packet explanation."
   },
   {
     "slide": 18,
-    "topic": "Assignment Integration",
-    "text": "As we connect this lecture to our ongoing projects, consider how the concepts discussed relate to your work in Assignment 2. Showcase relevant objects, workflows, events, and mechanisms for recovery specific to your domain. Concrete evidence will be essential in demonstrating your mastery and defending your design choices in the Integrity Packet."
+    "topic": "State Guard",
+    "text": "This state model protects the order workflow. An order begins as created, moves to reserved when inventory is held, moves to paid when payment is captured, becomes ready only when prerequisites are observed, and ships once. If payment fails after reservation, the workflow moves into compensation. The protected property is prerequisite ordering plus exactly-once shipment. The mechanism is a state-machine guard: invalid transitions are rejected or redirected. The trade-off is more explicit workflow metadata and more recovery paths to maintain."
   },
   {
     "slide": 19,
-    "topic": "Validation Questions",
-    "text": "We will conclude with some validation questions to deepen your understanding. Reflect on what invariant or progress property matters most in this lecture, or consider what hidden assumptions might make the baseline design seem correct at first glance. These inquiries encourage you to think critically about your design choices."
+    "topic": "Order Example",
+    "text": "Let's ground this in order 42. The system reserves inventory, captures payment, and ships only after both prerequisites are satisfied. Every transition needs to be correlated, because otherwise we cannot reconstruct whether the workflow was correct under pressure. The common mistake is logging vague messages like 'payment done' or 'shipping started' without the order ID, previous state, next state, worker, or timestamp. For the Integrity Packet, you need evidence that a reviewer can follow without trusting your memory."
   },
   {
     "slide": 20,
-    "topic": "Summary",
-    "text": "In summary, today’s discussion has highlighted the importance of synchronization mechanisms in reasoning about system correctness. We’ve seen how vital it is to connect our mechanical designs to invariants and observable behavior. Remember, your designs should be explainable, stress-tested, and validated with solid evidence."
+    "topic": "Order Workflow",
+    "text": "In the normal order workflow, the Order API creates order-42, the coordinator reserves inventory, waits for confirmation, captures payment, waits for payment confirmation, and then requests shipping. The design assumption is that these observations occur in the intended order. Under pressure, callbacks can be delayed, workers can overlap, and state can be stale. The invariant is that shipping occurs only after both reservation and payment are visible in the order state. This is why correlation IDs and transition logs are not optional extras."
   },
   {
     "slide": 21,
-    "topic": "Further Reading",
-    "text": "For those interested in expanding their knowledge, I encourage you to explore further readings such as topics on synchronization mechanisms in distributed systems and concurrency design trade-offs. Additionally, structured logging, correlation IDs, and invariants in stateful systems are worth investigating."
+    "topic": "Controls",
+    "text": "These are possible controls, not magic words. Ordered lock acquisition protects against deadlock by making lock order consistent. State-machine guards reject invalid workflow transitions. Idempotency keys help duplicate requests become safe. Bounded queues prevent unbounded backlog and force backpressure decisions. Timeouts and compensation protect progress when a dependency fails. Structured transition logs produce evidence. Each mechanism protects a property and introduces a cost, so the design defense must name both."
   },
   {
     "slide": 22,
+    "topic": "Correction Pattern",
+    "text": "A good correction pattern starts with the baseline action and asks what assumption it revealed. Then we name the invariant, place a guard near the transition that can violate it, record the decision in evidence logs, and define a recovery path such as timeout or compensation. The protected property is correctness of the workflow transition under concurrent execution. The trade-off is additional state, logging, and failure-handling code. The fix is not free, but it gives us something much stronger than hope."
+  },
+  {
+    "slide": 23,
+    "topic": "Tradeoffs",
+    "text": "The trade-off table is a reminder that each approach has a place. A simple baseline is useful because it gives us a comparison point, but it hides timing assumptions. Guarded state transitions protect the invariant directly, but require careful modeling. Explicit coordination makes ordering visible, but can block or deadlock. Retry-safe design handles duplicates, but requires keys and side-effect control. Observability-first design gives strong review evidence, but adds instrumentation work. In your design defense, do not claim a mechanism is free."
+  },
+  {
+    "slide": 24,
+    "topic": "Evidence Needed",
+    "text": "For synchronization failures, vague evidence is almost useless. You need a correlation ID, an entity ID, the state before and after the transition, lock or wait events, timing, worker identity, and a before-and-after test run. The goal is that a skeptical reviewer can reconstruct what happened. If an order shipped too early, the evidence should show which worker moved it, what state it observed, what prerequisite was missing, and how the corrected design prevents that same transition."
+  },
+  {
+    "slide": 25,
+    "topic": "Evidence Flow",
+    "text": "The evidence flow begins with a claim: for example, the order workflow preserves prerequisites and progress under concurrency pressure. Then we run a pressure test and capture structured logs. Those logs should let us reconstruct the failure trace, not just see that something went wrong. From that trace, we choose a design decision and prepare for the review question: what exact state proves the workflow is allowed to move forward? This is exactly the reasoning the Integrity Packet should contain."
+  },
+  {
+    "slide": 26,
+    "topic": "A2 Connection",
+    "text": "For A2, you should identify one synchronization pressure in your own project. Name the invariant, reproduce the failure, apply one control, and submit evidence rather than confidence. The artifact might be a runnable command, structured logs, a before-and-after trace, a state diagram, or a short failure reproduction. You should also record remaining risk. In the oral assessment, be ready to explain why your chosen mechanism protects the property and what trade-off you accepted."
+  },
+  {
+    "slide": 27,
     "topic": "Discussion",
-    "text": "Lastly, let’s open the floor for discussion. What hidden assumptions do you think could lead to design failures in synchronization mechanisms? Also, how might we enhance our logging strategies to capture more meaningful evidence of system behavior? Your insights here are invaluable."
+    "text": "Let's pause here and connect this to your projects. Which invariant would fail first if two workers, two requests, or two callbacks overlapped? And what evidence would convince a skeptical reviewer that the failure really occurred and that your correction actually protects the system? Try to avoid answers that only name tools. Instead of saying 'I will use a lock,' say what state transition is unsafe, what property must remain true, and how your logs or tests will prove it."
   }
 ]

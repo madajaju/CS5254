@@ -1,12 +1,11 @@
 ﻿# Synchronization Mechanisms
 
+
+## Video: https://youtu.be/Ps6cxKqmR4s
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
-- Week: 5
 - Lecture: Synchronization Mechanisms
-- Duration: 15 minutes
 - Prerequisites: Prior lectures on object state, concurrency pressure, structured evidence, and Integrity Packet reasoning
-- Assignment Alignment: [A2](../../../assignments/A2/index.md)
 
 ## Learning Objectives
 - Analyze the design pressure represented by synchronization mechanisms in a stateful concurrent system.

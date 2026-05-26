@@ -1,196 +1,620 @@
 = Tradeoffs
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
+:revealjs_theme: black
 :source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Opening Narrative
+== Learning Objectives
 
-* Simple demonstration appears correct
-* Concurrency exposes hidden assumptions
-* Analyze performance vs. correctness
-* What must be defended before trusting results?
+* Analyze design pressure in a stateful concurrent system.
+* Diagnose hidden assumptions behind a passing demo.
+* Evaluate failure evidence from logs, traces, interleavings, or tests.
+* Design a correction that preserves the invariant.
+* Defend the decision in the Integrity Packet for A1.
 
-== Core Concepts
+== Opening Pressure
 
-*Performance vs. Correctness*
-- Global lock: 100% correct, 100x slower
-- Must be explicit under pressure
-- Failure: Duplicate work, stale state
-- Design: Expose invariant, log transitions
+* A project appears correct in a simple demonstration.
+* Concurrency, ambiguity, or operational pressure changes the execution model.
+* The hidden assumption is often about Performance vs. Correctness.
+* The engineer must identify what must remain true.
+* The design is trustworthy only when evidence supports the claim.
 
-== Core Concepts
+== Tradeoff Reasoning Loop
 
-*Complexity vs. Simplicity*
-- Immutability vs. memory usage
-- Needs clarity under pressure
-- Failure: Duplicate work, stale state
-- Design: Expose invariant, log transitions
-
-== Core Concepts
-
-*Throughput vs. Latency*
-- More requests/second could mean longer individual requests
-- Must clarify under pressure
-- Failure: Duplicate work, stale state
-- Design: Expose invariant, log transitions
-
-== Core Concepts
-
-*Maintenance Burden*
-- Complex logic hard to maintain
-- Must clarify assumptions
-- Failure: Duplicate work, stale state
-- Design: Expose invariant, log transitions
-
-== Core Concepts
-
-*System Invariant*
-- Must remain true in valid executions
-- Needs clarity under pressure
-- Failure: Duplicate work, stale state
-- Design: Expose invariant, log transitions
-
-== System Architecture
-
-[plantuml, target=tradeoffs, format=svg, width=80%]
+[plantuml, tradeoff-loop, svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
 skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 left to right direction
-
-rectangle "Tradeoffs" as Topic
-rectangle "Performance vs. Correctness" as A
-rectangle "Complexity vs. Simplicity" as B
-rectangle "Throughput vs. Latency" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
-
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+rectangle "Design\nPressure" as P
+rectangle "Invariant" as I
+rectangle "Evidence" as E
+rectangle "Mechanism" as M
+rectangle "Tradeoff" as T
+P -> I : name property
+I -> E : test pressure
+E -> M : choose control
+M -> T : accept cost
+T --> P : refine design
 @enduml
 ----
 
-== Worked Example
+== Core Question
 
-*Podcast Domain*
-- Global lock vs. per-episode locks
-- Per-episode: More concurrency, increased deadlock risk
+* Not whether the code can run once.
+* Not whether the happy path looks plausible.
+* Ask which invariant must survive pressure.
+* Ask what evidence proves the invariant survived.
+* Ask what cost the protection introduces.
 
-*Immutability Tradeoff*
-- New 10MB `Transcript` for each edit
-- Risk: Garbage collection issues
+== Tradeoff Map
 
-== Naive Implementation
-
-A naive design assumes:
-- Operation happens once, in order
-- Method name sounds correct
-- Sequential test passes
-
-== Failure Scenario
-
-*Under pressure:*
-- Overlapping execution, stale state
-- Same operation can observe stale state or execute twice
-
-== Improved Design Direction
-
-*Safer Design:*
-- Name the invariant
-- Make the transition observable
-- Add correctness controls: version checks, retries
-
-== Why Improved Design Is Safer
-
-*From hoping to proving:*
-- Reject invalid interleavings
-- Contain or recover failures using evidence
-
-== Failure Modes
-
-*Symptom: Passes happy-path test*
-- Detect: Add concurrent tests, logs
-- Correct: Add failure-focused test
-
-*Symptom: Names tools, not properties*
-- Detect: Ask which invariant is protected
-- Correct: State the invariant first
-
-== Failure Modes
-
-*Symptom: Vague evidence*
-- Detect: Reviewer cannot reconstruct failure
-- Correct: Capture structured evidence
-
-*Symptom: Fix isn't compared to baseline*
-- Detect: No before/after runs
-- Correct: Preserve failing tests
-
-== Trade-Off Analysis
-
-[cols="1,1,1,1", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain and implement | Hides timing assumptions | First implementation
-| Guarded state | Protects core invariant | Needs careful modeling | Status changes
-| Explicit coordination | Makes dependencies visible | Can introduce deadlock | Multi-object workflows
-| Idempotent design | Handles duplicates | Requires keys or side-effect control | Async workers
-| Observability design | Produces strong evidence | Adds instrumentation | Design defense
+|Tradeoff |Pressure |Common Risk |Evidence
+
+|Performance vs. Correctness
+|More concurrency
+|Duplicate or stale work
+|Rejected competing transition
+
+|Complexity vs. Simplicity
+|More mechanisms
+|Harder reasoning
+|Small explainable invariant
+
+|Throughput vs. Latency
+|More batching or queues
+|Slower individual request
+|Measured request timing
+
+|Maintenance Burden
+|Future changes
+|New race or deadlock
+|Clear transition log
 |===
 
-== Practical Application
+== Performance vs. Correctness
 
-*Tomorrow morning:*
-- Identify relevant invariant
-- Write one sequential scenario
-- Write one pressure scenario
-- Add IDs to logs
-- Capture evidence if applying fix
+[plantuml, performance-correctness, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+rectangle "Global Lock" as L
+rectangle "High Correctness" as C
+rectangle "Low Parallelism" as P
+rectangle "Concurrent Execution" as X
+rectangle "Higher Speed" as S
+rectangle "More Interleavings" as R
+L --> C : protects state
+L --> P : reduces speed
+X --> S : improves throughput
+X --> R : increases risk
+@enduml
+----
 
-== Assignment Integration
+== Complexity vs. Simplicity
 
-*Connect to [A1](../../../assignments/A1/index.md)*
-- Show relevant object, workflow, failure, or recovery
-- Include runnable commands, structured logs
+[plantuml, complexity-simplicity, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+rectangle "Immutable Model" as I
+rectangle "Simpler Reasoning" as SR
+rectangle "More Allocation" as MA
+rectangle "Mutable Model" as M
+rectangle "Lower Allocation" as LA
+rectangle "More Coordination" as MC
+I --> SR : fewer aliases
+I --> MA : copies state
+M --> LA : reuses objects
+M --> MC : needs guards
+@enduml
+----
 
-== Validation Questions
+== Throughput vs. Latency
 
-1. What invariant is most relevant?
-2. What hidden assumption makes design appear correct?
-3. How to force failure in a test?
-4. What evidence proves failure occurred?
-5. Which design mechanism to choose first?
-6. Differences in two implementation stacks?
-7. What to record in Integrity Packet?
+[plantuml, throughput-latency, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+rectangle "Queue" as Q
+rectangle "Batch Work" as B
+rectangle "More Requests\nper Second" as T
+rectangle "Request Waits\nLonger" as L
+rectangle "User Experience" as U
+Q --> B : groups work
+B --> T : raises throughput
+B -> L : adds delay
+L --> U : affects latency
+@enduml
+----
+
+== System Invariant
+
+* An invariant is a condition that must remain true across valid executions.
+* For the episode workflow, only one worker may own a transition at a time.
+* The invariant must be named before choosing a mechanism.
+* The test must apply pressure to the invariant.
+* The logs must show the transition and the rejected attempt.
+
+== Episode State Machine
+
+[plantuml, episode-state-machine, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam state {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+[*] --> DRAFT : create
+DRAFT --> PROCESSING : worker claims
+PROCESSING --> READY_TO_PUBLISH : assets complete
+READY_TO_PUBLISH --> PUBLISHED : publish succeeds
+PROCESSING --> FAILED : processing error
+FAILED --> DRAFT : repair and retry
+@enduml
+----
+
+== Podcast Setup
+
+* Domain object: Episode.
+* Shared record: episode-42.
+* Workers: Worker A and Worker B.
+* Baseline assumption: read, check, and update behave like one step.
+* Pressure: two workers overlap between read and write.
+
+== Normal Interaction
+
+[plantuml, normal-interaction, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+participant "Worker A" as A
+participant "Episode Store" as S
+participant "Episode Record" as R
+A --> S : read episode-42
+S --> R : load status
+R --> S : DRAFT
+S --> A : DRAFT
+A --> S : write PROCESSING
+S --> R : save transition
+R --> S : accepted
+S --> A : claim succeeded
+@enduml
+----
+
+== Failure Interleaving
+
+[plantuml, failure-interleaving, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+participant "Worker A" as A
+participant "Episode Store" as S
+participant "Worker B" as B
+A --> S : read DRAFT
+S --> A : DRAFT
+B --> S : read DRAFT before A writes
+S --> B : DRAFT
+A --> S : write PROCESSING
+S --> A : accepted
+B --> S : write PROCESSING
+S --> B : also appears accepted
+@enduml
+----
+
+== Failure Evidence
+
+* Repeat the pressure test many times.
+* Add delay between read and write.
+* Log worker ID, episode ID, previous state, new state, and timestamp.
+* Preserve the failing run as the baseline.
+* Compare the same run after the fix.
+
+== Race Root Cause
+
+[plantuml, race-root-cause, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+rectangle "Conceptual Step" as C
+rectangle "Read State" as R
+rectangle "Check State" as K
+rectangle "Write State" as W
+rectangle "Interleaving Gap" as G
+C --> R : split by execution
+R -> K : DRAFT observed
+K --> G : delay opens
+G -> W : stale write wins
+@enduml
+----
+
+== Mechanism Comparison
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Mechanism |Protects |Cost |Good Fit
+
+|Global lock
+|Whole store
+|Low parallelism
+|Small critical system
+
+|Per-episode lock
+|One episode
+|Lock management
+|Independent episodes
+
+|Versioned update
+|Expected state
+|Retry handling
+|Database-backed records
+
+|Single-owner queue
+|Serialized commands
+|Queue delay
+|Workflow ownership
+|===
+
+== Guarded Transition
+
+[plantuml, guarded-transition, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+rectangle "Request Claim" as Q
+rectangle "Guard" as G
+rectangle "Expected State\nDRAFT" as E
+rectangle "Current State" as C
+rectangle "Accept\nPROCESSING" as A
+rectangle "Reject\nStale Claim" as R
+Q --> G : enter transition
+G --> E : compare
+G --> C : inspect
+C --> A : matches
+C --> R : differs
+@enduml
+----
+
+== Versioned Update
+
+[plantuml, versioned-update, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+participant "Worker A" as A
+participant "Episode Store" as S
+participant "Worker B" as B
+A --> S : update if version 7
+S --> A : accepted version 8
+B --> S : update if version 7
+S --> B : rejected stale version
+B --> S : reread episode-42
+S --> B : PROCESSING version 8
+@enduml
+----
+
+== Single-Owner Queue
+
+[plantuml, single-owner-queue, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Episode Command Queue" as Q
+rectangle "Single Owner" as O
+rectangle "Episode State" as S
+A --> Q : submit claim
+B -> Q : submit claim
+Q -> O : serialize commands
+O --> S : apply one transition
+S -> O : return accepted or rejected
+@enduml
+----
+
+== Design Response
+
+* Name the protected property before naming the tool.
+* Choose the simplest mechanism that protects the transition.
+* Make rejection explicit, not silent.
+* Log enough detail for a reviewer to reconstruct the run.
+* State the tradeoff introduced by the control.
+
+== Baseline vs Corrected Path
+
+[plantuml, baseline-corrected-path, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+rectangle "Baseline\nRead DRAFT" as B1
+rectangle "Baseline\nWrite PROCESSING" as B2
+rectangle "Hidden Race" as R
+rectangle "Corrected\nRead DRAFT" as C1
+rectangle "Guarded\nCompare" as C2
+rectangle "Accept or Reject\nwith Evidence" as C3
+B1 --> B2 : assumes no overlap
+B2 --> R : duplicate claim possible
+C1 --> C2 : checks current state
+C2 --> C3 : protects invariant
+@enduml
+----
+
+== Structured Log Example
+
+[source,json]
+----
+{
+  "event": "episode.transition",
+  "episodeId": "episode-42",
+  "workerId": "worker-B",
+  "attemptId": "claim-8842",
+  "expectedState": "DRAFT",
+  "observedState": "PROCESSING",
+  "requestedState": "PROCESSING",
+  "result": "rejected-stale-transition",
+  "timestamp": "2026-05-20T14:05:31Z"
+}
+----
+
+== Evidence Flow
+
+[plantuml, evidence-flow, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+rectangle "Claim" as C
+rectangle "Pressure Test" as T
+rectangle "Structured Logs" as L
+rectangle "Before Run" as B
+rectangle "After Run" as A
+rectangle "Defensible Decision" as D
+C -> T : target invariant
+T -> L : capture facts
+L --> B : show failure
+L --> A : show protection
+B --> D : compare
+A --> D : justify
+@enduml
+----
+
+== A1 Deliverables
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Deliverable |What to Show |Evidence |Risk to Name
+
+|Invariant
+|Protected state property
+|State diagram or test
+|Ambiguous ownership
+
+|Failure
+|Repeatable bad interleaving
+|Logs or trace
+|Timing sensitivity
+
+|Fix
+|Chosen control
+|Before and after run
+|Performance cost
+
+|Integrity Packet
+|Design defense
+|Linked artifacts
+|Remaining tradeoff
+|===
+
+== Interview Questions
+
+* What invariant matters most in your design?
+* What hidden assumption made the baseline appear correct?
+* How did you force the failure repeatedly?
+* What log line proves the rejected transition?
+* What tradeoff did your correction introduce?
+* What remaining risk belongs in the Integrity Packet?
+
+== Integrity Packet Connection
+
+[plantuml, integrity-packet-connection, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+rectangle "Assumption" as A
+rectangle "Invariant" as I
+rectangle "Failure Evidence" as F
+rectangle "Design Control" as C
+rectangle "Validation Evidence" as V
+rectangle "Remaining Risk" as R
+A -> I : clarify
+I --> F : stress
+F -> C : motivate
+C --> V : verify
+V -> R : qualify
+@enduml
+----
 
 == Summary
 
-*Central Insight:*
-- Tradeoffs reasoning for system correctness
-- Connect to invariants and observable behavior
-- Prove, stress, and validate designs with evidence
-
-== Further Reading
-
-* Search: "Tradeoffs distributed systems failure mode"
-* "Tradeoffs concurrency design tradeoffs"
-* Structured logging and correlation IDs
-* Invariants in stateful systems
-
-== Discussion
-
-*How do hidden assumptions affect design?*
-*What tradeoffs have you encountered in your projects?*
+* Tradeoffs are design pressure, not vocabulary.
+* A passing demo can hide a false execution model.
+* Correctness depends on a named invariant.
+* Evidence must show what happened under pressure.
+* The final design must protect the property and disclose the cost.

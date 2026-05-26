@@ -1,12 +1,11 @@
 ﻿# From Objects to Workflows
 
+
+## Video: https://youtu.be/Mx8FrvtgsiY
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
-- Week: 5
 - Lecture: From Objects to Workflows
-- Duration: 15 minutes
 - Prerequisites: Prior lectures on object state, concurrency pressure, structured evidence, and Integrity Packet reasoning
-- Assignment Alignment: [A2](../../../assignments/A2/index.md)
 
 ## Learning Objectives
 - Analyze the design pressure represented by from objects to workflows in a stateful concurrent system.

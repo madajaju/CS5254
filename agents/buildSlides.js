@@ -371,11 +371,11 @@ async function transcriptCreator(readmeFile, transcriptSystemPrompt) {
         return false;
     }
 
-    const slideCount = countSlides(slidesContent);
+    const slideOutline = getSlideOutline(slidesContent);
 
     if (await fileExists(transcriptOutputFile)) {
         const existingTranscript = await readExistingJsonArray(transcriptOutputFile);
-        const existingValidationReason = getTranscriptValidationReason(existingTranscript, slideCount);
+        const existingValidationReason = getTranscriptValidationReason(existingTranscript, slideOutline);
         if (!existingValidationReason) {
             console.log(`Skipping transcript generation because valid output already exists: ${transcriptOutputFile}`);
             return true;
@@ -410,14 +410,14 @@ async function transcriptCreator(readmeFile, transcriptSystemPrompt) {
     ];
 
     let transcriptArray = await AIHelper.askForCode(messages);
-    let validationReason = getTranscriptValidationReason(transcriptArray, slideCount);
+    let validationReason = getTranscriptValidationReason(transcriptArray, slideOutline);
 
     for (let repairAttempt = 1; validationReason && repairAttempt <= MAX_JSON_SCHEMA_REPAIR_ATTEMPTS; repairAttempt++) {
         console.warn(`Repairing transcript JSON for ${transcriptOutputFile} because: ${validationReason}`);
         transcriptArray = await repairStructuredJson({
             kind: 'transcript',
             validationReason,
-            slideOutline: getSlideOutline(slidesContent),
+            slideOutline,
             currentJson: transcriptArray,
             sourceBlocks: [
                 ['Lecture README.md', readmeContent],
@@ -430,10 +430,10 @@ async function transcriptCreator(readmeFile, transcriptSystemPrompt) {
                 'Slide numbers and topics must match the slide outline exactly.'
             ]
         });
-        validationReason = getTranscriptValidationReason(transcriptArray, slideCount);
+        validationReason = getTranscriptValidationReason(transcriptArray, slideOutline);
     }
 
-    const finalTranscriptValidationReason = getTranscriptValidationReason(transcriptArray, slideCount);
+    const finalTranscriptValidationReason = getTranscriptValidationReason(transcriptArray, slideOutline);
     if (finalTranscriptValidationReason) {
         console.warn(`Writing best available transcript after ${MAX_JSON_SCHEMA_REPAIR_ATTEMPTS} repair attempt(s), even though validation still fails: ${transcriptOutputFile}`);
         console.warn(finalTranscriptValidationReason);
@@ -495,11 +495,11 @@ async function convoCreator(readmeFile, convoSystemPrompt) {
         return false;
     }
 
-    const slideCount = countSlides(slidesContent);
+    const slideOutline = getSlideOutline(slidesContent);
 
     if (await fileExists(convoOutputFile)) {
         const existingConvo = await readExistingJsonArray(convoOutputFile);
-        const existingValidationReason = getConversationValidationReason(existingConvo, slideCount);
+        const existingValidationReason = getConversationValidationReason(existingConvo, slideOutline);
         if (!existingValidationReason) {
             console.log(`Skipping convo generation because valid output already exists: ${convoOutputFile}`);
             return true;
@@ -545,13 +545,13 @@ async function convoCreator(readmeFile, convoSystemPrompt) {
         return false;
     }
 
-    let validationReason = getConversationValidationReason(convoData, slideCount);
+    let validationReason = getConversationValidationReason(convoData, slideOutline);
     for (let repairAttempt = 1; validationReason && repairAttempt <= MAX_JSON_SCHEMA_REPAIR_ATTEMPTS; repairAttempt++) {
         console.warn(`Repairing convo JSON for ${convoOutputFile} because: ${validationReason}`);
         convoData = await repairStructuredJson({
             kind: 'conversation',
             validationReason,
-            slideOutline: getSlideOutline(slidesContent),
+            slideOutline,
             currentJson: convoData,
             sourceBlocks: [
                 ['Lecture README.md', readmeContent],
@@ -566,10 +566,10 @@ async function convoCreator(readmeFile, convoSystemPrompt) {
                 'Slide numbers and topics must match the slide outline exactly.'
             ]
         });
-        validationReason = getConversationValidationReason(convoData, slideCount);
+        validationReason = getConversationValidationReason(convoData, slideOutline);
     }
 
-    const finalConversationValidationReason = getConversationValidationReason(convoData, slideCount);
+    const finalConversationValidationReason = getConversationValidationReason(convoData, slideOutline);
     if (finalConversationValidationReason) {
         console.warn(`Writing best available convo after ${MAX_JSON_SCHEMA_REPAIR_ATTEMPTS} repair attempt(s), even though validation still fails: ${convoOutputFile}`);
         console.warn(finalConversationValidationReason);
@@ -739,7 +739,7 @@ function validateSlides(slidesContent) {
         if (trimmed === '|===') {
             if (!inTableBlock) {
                 const previous = lines[index - 1]?.trim() || '';
-                if (!/^\[cols="[^"]+", options="header"\]$/.test(previous)) {
+                if (!/^\[cols="[^"]+", options="header"(?:, width="100%")?\]$/.test(previous)) {
                     return {
                         valid: false,
                         reason: `Line ${index + 1}: table blocks must be preceded by [cols="...", options="header"].`
@@ -983,8 +983,8 @@ function analyzeSlideContent(lines) {
     return analysis;
 }
 
-function validateTranscript(transcriptArray, slideCount, outputFile) {
-    const validationReason = getTranscriptValidationReason(transcriptArray, slideCount);
+function validateTranscript(transcriptArray, slideOutline, outputFile) {
+    const validationReason = getTranscriptValidationReason(transcriptArray, slideOutline);
     if (validationReason) {
         console.warn(`Skipping write because transcript is invalid: ${outputFile}`);
         console.warn(validationReason);
@@ -994,8 +994,8 @@ function validateTranscript(transcriptArray, slideCount, outputFile) {
     return true;
 }
 
-function validateConversation(convoData, slideCount, outputFile) {
-    const validationReason = getConversationValidationReason(convoData, slideCount);
+function validateConversation(convoData, slideOutline, outputFile) {
+    const validationReason = getConversationValidationReason(convoData, slideOutline);
     if (validationReason) {
         console.warn(`Skipping write because convo is invalid: ${outputFile}`);
         console.warn(validationReason);
@@ -1005,11 +1005,12 @@ function validateConversation(convoData, slideCount, outputFile) {
     return true;
 }
 
-function getTranscriptValidationReason(transcriptArray, slideCount) {
+function getTranscriptValidationReason(transcriptArray, slideOutline) {
     if (!Array.isArray(transcriptArray)) {
         return 'Transcript must be a JSON array.';
     }
 
+    const slideCount = slideOutline.length;
     if (transcriptArray.length !== slideCount) {
         return `Transcript count ${transcriptArray.length} does not match slide count ${slideCount}.`;
     }
@@ -1028,6 +1029,9 @@ function getTranscriptValidationReason(transcriptArray, slideCount) {
         if (typeof entry.topic !== 'string' || !entry.topic.trim()) {
             return `Transcript entry ${index + 1} must contain topic:string.`;
         }
+        if (entry.topic.trim() !== slideOutline[index].topic) {
+            return `Transcript entry ${index + 1} topic "${entry.topic}" does not match slide topic "${slideOutline[index].topic}".`;
+        }
         if (typeof entry.text !== 'string' || !entry.text.trim()) {
             return `Transcript entry ${index + 1} must contain text:string.`;
         }
@@ -1036,11 +1040,12 @@ function getTranscriptValidationReason(transcriptArray, slideCount) {
     return null;
 }
 
-function getConversationValidationReason(convoData, slideCount) {
+function getConversationValidationReason(convoData, slideOutline) {
     if (!Array.isArray(convoData)) {
         return 'Conversation must be a JSON array.';
     }
 
+    const slideCount = slideOutline.length;
     if (convoData.length !== slideCount) {
         return `Conversation count ${convoData.length} does not match slide count ${slideCount}.`;
     }
@@ -1058,6 +1063,9 @@ function getConversationValidationReason(convoData, slideCount) {
         }
         if (typeof entry.topic !== 'string' || !entry.topic.trim()) {
             return `Conversation entry ${index + 1} must contain topic:string.`;
+        }
+        if (entry.topic.trim() !== slideOutline[index].topic) {
+            return `Conversation entry ${index + 1} topic "${entry.topic}" does not match slide topic "${slideOutline[index].topic}".`;
         }
         if (!Array.isArray(entry.dialogue) || entry.dialogue.length === 0) {
             return `Conversation entry ${index + 1} must contain a non-empty dialogue array.`;

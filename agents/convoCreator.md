@@ -75,6 +75,20 @@ The conversation should not merely restate the transcript.
 
 It should create teaching friction.
 
+It should also feel like one continuous lecture, not isolated slide scripts.
+
+Each slide should connect naturally to the previous slide and prepare the next one when useful.
+Use short transition phrases that carry the argument forward, such as:
+
+- "Now that we have named the invariant..."
+- "That failure sets up the next design choice..."
+- "Before we choose the mechanism, notice the trade-off..."
+- "This is why the evidence matters..."
+- "So the next question is..."
+
+Do not force a transition into every dialogue item. Usually the first teacher line for a slide is the right place.
+The transition should refer to the previous idea, not to the slide mechanics. Avoid phrases such as "on the previous slide" or "on this slide."
+
 The student should ask questions that reveal realistic confusion, such as:
 
 - "Why did this pass the sequential test?"
@@ -92,23 +106,36 @@ The teacher should answer by connecting:
 - design response -> evidence
 - evidence -> Integrity Packet
 
+Across the full JSON array, preserve this teaching arc:
+
+1. Frame the problem.
+2. Expose the design pressure.
+3. Name the invariant or hidden assumption.
+4. Compare design responses.
+5. Identify the trade-off.
+6. Require evidence.
+7. Connect the result to the assignment or Integrity Packet.
+
 ## Slide-Type Guidance
 
 ### Title slides
-Use one strong teacher line that frames the premise.
+Use one strong teacher line that frames the premise and sets up the first concept.
 
 ### Concept slides
 Use teacher explanation plus one student clarification question when useful.
 The exchange should reveal why the concept matters in design work.
+Open by connecting the concept to the prior premise or failure whenever possible.
 
 ### Diagram slides
 Explain the system behavior represented by the visual without saying "the diagram shows" or "on this slide."
 The student should ask about actors, state, ordering, failure, or evidence.
+Treat diagram slides as the continuation of the prior idea, not a new topic reset.
 
 ### Failure slides
 Make the failure concrete.
 The student should notice the risk or ask why the baseline appeared correct.
 The teacher should name the invariant violation or hidden assumption.
+Use failure slides to pivot from "what happened" to "what must the design protect next."
 
 ### Code slides
 The teacher should explain the code path conversationally.
@@ -118,6 +145,7 @@ The student should ask about the unsafe assumption, edge case, or correction.
 The teacher should compare options.
 The student should ask which option to choose and under what constraints.
 The teacher should avoid presenting any option as universally best.
+Make the comparison feel like a consequence of the previous failure or correction.
 
 ### Assignment slides
 The teacher should connect the concept to what students must demonstrate.
@@ -140,6 +168,7 @@ Avoid:
 - repeating slide text verbatim
 - vague statements like "this is important"
 - shallow student questions
+- abrupt topic resets that ignore the previous slide
 
 Prefer:
 
@@ -148,6 +177,7 @@ Prefer:
 - design defense
 - trade-off awareness
 - evidence-based claims
+- smooth transitions that preserve the lecture thread
 
 ## Length
 
@@ -155,6 +185,7 @@ Prefer:
 - Use only teacher narration when student dialogue would feel forced.
 - Keep each dialogue item short enough for spoken delivery.
 - Do not create lengthy debates on every slide.
+- A transition sentence should be brief; do not add extra dialogue turns only to create continuity.
 
 ## Important
 

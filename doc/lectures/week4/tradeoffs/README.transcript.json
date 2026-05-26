@@ -2,111 +2,141 @@
   {
     "slide": 1,
     "topic": "Tradeoffs",
-    "text": "Welcome to this lecture on tradeoffs. Today, we will explore the hidden assumptions that can appear correct during simple demonstrations but may expose significant issues when faced with concurrency and pressure."
+    "text": "Welcome everyone. Today we are talking about tradeoffs in concurrent object-oriented systems. The key idea here is that design choices are rarely free. A global lock may make a workflow correct, but it may also make it painfully slow. More concurrency may improve performance, but it can expose races that were invisible in a simple demo. By the end of this lecture, I want you to think like a reviewer: what property must remain true, what pressure could break it, and what evidence proves your design still holds?"
   },
   {
     "slide": 2,
-    "topic": "Opening Narrative",
-    "text": "To start, let’s consider how a simple demonstration may seem correct at first glance. However, once we introduce concurrency, ambiguity, or operational pressure, we may uncover hidden assumptions regarding performance versus correctness. Our goal is to analyze what aspects must be defended before we can trust our results."
+    "topic": "Learning Objectives",
+    "text": "Our goal is to move beyond saying, \"this implementation works on my machine.\" We want to analyze the pressure created by concurrency, diagnose the hidden assumptions behind a passing demonstration, and evaluate evidence from logs, traces, interleavings, or repeatable tests. Most importantly, you should be able to choose a correction that protects a named invariant, and then defend that decision in your Integrity Packet for A1."
   },
   {
     "slide": 3,
-    "topic": "Core Concepts",
-    "text": "Let’s dive into our first core concept: performance versus correctness. A global lock guarantees correctness, but it can massively slow down operations. It’s crucial to expose this trade-off when the system is under pressure, as ignoring it can lead to issues like duplicate work or stale states."
+    "topic": "Opening Pressure",
+    "text": "Imagine you are building a course project that looks perfect during a short demo. One worker runs, one request arrives, one object changes state, and everything appears correct. Then two workers run at the same time, or a retry arrives late, or a queue changes the timing. Suddenly the design is being tested under a different execution model. The uncomfortable question is: what assumption made the original version look correct, and what must remain true even under pressure?"
   },
   {
     "slide": 4,
-    "topic": "Core Concepts",
-    "text": "Next, we’ll discuss complexity versus simplicity. Immutability may make reasoning easier, but it often requires more memory. Again, we need to clear up these assumptions under pressure to avoid failures like duplicate work. Therefore, exposing invariants and logging transitions remains vital."
+    "topic": "Tradeoff Reasoning Loop",
+    "text": "The reasoning process starts with design pressure. That pressure forces us to name an invariant, which is the property that must remain true across valid executions. Then we test that property under stress and collect evidence. Based on that evidence, we choose a mechanism, such as a lock, a version check, a queue, or an idempotency key. But every mechanism has a cost, so we must identify the tradeoff and refine the design. This loop matters because professional engineering is not just picking tools; it is connecting tools to properties and evidence."
   },
   {
     "slide": 5,
-    "topic": "Core Concepts",
-    "text": "Now, let’s examine throughput versus latency. Some modifications might enable your system to handle more requests per second but could increase the time it takes to process each request. This trade-off needs to be clearly understood as it can lead to significant issues in system behavior under pressure."
+    "topic": "Core Question",
+    "text": "The core question is not whether the code can run once. It is not even whether the happy path looks plausible. The real question is: which invariant must survive pressure? If two workers compete for the same episode, what exactly must not happen? Then we ask what evidence proves the invariant survived, and what cost we accepted to protect it. A common mistake is to jump straight to a mechanism, like \"I'll use a lock,\" before explaining what property the lock protects."
   },
   {
     "slide": 6,
-    "topic": "Core Concepts",
-    "text": "The next concept is the maintenance burden. If your locking logic becomes overly complex, future developers may struggle to maintain it, which raises the risk of introducing new bugs. We must clarify our assumptions around this trade-off to ensure system reliability."
+    "topic": "Tradeoff Map",
+    "text": "Here are several common tradeoffs you will encounter. Performance versus correctness appears when more concurrency creates more opportunities for stale or duplicate work. Complexity versus simplicity appears when a more powerful mechanism also becomes harder to reason about. Throughput versus latency appears when batching or queues increase total work handled per second but make individual requests wait longer. Maintenance burden appears when today’s clever synchronization becomes tomorrow’s race condition. For each tradeoff, you need evidence, not just an opinion."
   },
   {
     "slide": 7,
-    "topic": "Core Concepts",
-    "text": "Finally, let’s discuss the system invariant. This is a crucial condition that must hold true across all valid executions. We again see the importance of making these invariants clear under pressure, as failure to do so could lead to duplicate outputs or blocked progress."
+    "topic": "Performance vs. Correctness",
+    "text": "A global lock is a useful extreme case. It can protect shared state by allowing only one operation through at a time, so correctness may be easy to reason about. But the cost is low parallelism. Concurrent execution goes in the other direction: it can improve throughput, but it creates more interleavings, and those interleavings may violate assumptions in your object model. This matters because a design that is fast but occasionally wrong is not acceptable, and a design that is correct but unusably slow may also fail in practice."
   },
   {
     "slide": 8,
-    "topic": "System Architecture",
-    "text": "Here, we visualize the relationships between our concepts. Our primary focus is the trade-offs, which connect various facets like performance, complexity, and evidence of validation. The system must not only execute correctly once but maintain its invariance under varying conditions."
+    "topic": "Complexity vs. Simplicity",
+    "text": "Immutability is often simpler to reason about because fewer pieces of code can modify the same object in place. If a transcript object never changes, then readers do not have to worry about seeing it half-updated. But immutability can increase memory allocation, especially if each small edit creates a large new object. Mutable designs may use less memory, but then you need coordination around who can change the object and when. The protected property might be clarity of state, but the tradeoff might be allocation cost or coordination complexity."
   },
   {
     "slide": 9,
-    "topic": "Worked Example",
-    "text": "Let's engage with a worked example from the podcast domain. Should we use a global lock for the EpisodeStore, or individual locks for each episode? While per-episode locks allow more concurrency, they may also introduce deadlocks if multiple episodes need to be processed together. This highlights the complex decision-making required in system design."
+    "topic": "Throughput vs. Latency",
+    "text": "Queues and batching are classic examples of throughput versus latency. If work is grouped together, the system may handle more requests per second overall. But an individual request may wait longer before it is processed. That delay can change the user experience and can also affect correctness if timeouts, retries, or stale reads are involved. The key idea here is to measure the thing you claim to improve. If you claim higher throughput, show request rates. If latency gets worse, disclose that cost."
   },
   {
     "slide": 10,
-    "topic": "Naive Implementation",
-    "text": "A naive implementation assumes that operations occur once and in order. The method names may sound correct, and if a sequential test passes, it can give a false sense of security. However, it’s critical to be aware of these assumptions as they can lead to serious problems later."
+    "topic": "System Invariant",
+    "text": "An invariant is a condition that must remain true across all valid executions. In our episode workflow, the invariant is that only one worker may own a state transition for a given episode at a time. That statement needs to come before the mechanism. If you start with the mechanism, you may protect the wrong thing. Your test should apply pressure directly to the invariant, and your logs should make the transition visible, including the attempt that gets rejected."
   },
   {
     "slide": 11,
-    "topic": "Failure Scenario",
-    "text": "Imagine a scenario under pressure where overlapping operations could lead to stale state. The same operation might be executed twice due to retries or coordination failures. This exposure of the underlying assumptions underscores the need for rigorous testing."
+    "topic": "Episode State Machine",
+    "text": "Think of an episode as moving through a controlled workflow. It starts as DRAFT, then a worker claims it and moves it to PROCESSING. Once assets are complete, it becomes READY_TO_PUBLISH, and then publishing moves it to PUBLISHED. If processing fails, it can move to FAILED, and after repair it may return to DRAFT for another attempt. The invariant is about ownership of these transitions. If two workers both believe they moved the same episode from DRAFT to PROCESSING, the state machine has lost its authority."
   },
   {
     "slide": 12,
-    "topic": "Improved Design Direction",
-    "text": "To mitigate these issues, we can adopt a safer design approach. This involves naming the invariant, making transitions observable, and integrating a range of correctness controls such as version checks and idempotency strategies. These adjustments can drastically enhance the system's resilience."
+    "topic": "Podcast Setup",
+    "text": "Let’s make this concrete with a podcast domain. The domain object is an Episode, and the shared record is episode-42. Worker A and Worker B are both allowed to process work. The baseline assumption is that read, check, and update behave like one step. In sequential code, that feels reasonable. But under pressure, two workers can overlap between the read and the write. That tiny gap is where the race lives."
   },
   {
     "slide": 13,
-    "topic": "Why Improved Design Is Safer",
-    "text": "The revised design is safer because it shifts our mindset from merely hoping for successful execution to actively proving that invalid interactions are managed or corrected. This change fundamentally improves our trust in the system."
+    "topic": "Normal Interaction",
+    "text": "In the normal path, Worker A reads episode-42, sees that its status is DRAFT, and writes PROCESSING. The store saves the transition and reports that the claim succeeded. Nothing looks wrong here. In fact, this is why happy-path tests are dangerous: they confirm that the basic sequence can work, but they do not prove that the sequence is safe when another worker is acting at the same time."
   },
   {
     "slide": 14,
-    "topic": "Failure Modes",
-    "text": "Let’s consider some common failure modes. One symptom is when a system passes a happy-path test but subsequently fails under realistic pressure. This can be detected with concurrent tests and comprehensive logging, and it should be addressed by adding tests that focus on potential points of failure."
+    "topic": "Failure Interleaving",
+    "text": "Now the failure becomes concrete. Worker A reads DRAFT. Before Worker A writes PROCESSING, Worker B also reads DRAFT. Both workers believe they are allowed to claim the episode. Worker A writes PROCESSING and gets accepted. Then Worker B writes PROCESSING and may also appear accepted. The operator may now see two processing jobs for episode-42, or worse, a final log that hides which worker actually won. The hidden failure is that check and update were treated as one conceptual step, but execution split them apart."
   },
   {
     "slide": 15,
-    "topic": "Failure Modes",
-    "text": "Another issue arises when explanations focus on tools rather than the underlying design properties. We can detect this by identifying which invariant is being protected in our design and ensuring we articulate that clearly before selecting our mechanisms."
+    "topic": "Failure Evidence",
+    "text": "To prove this failure, we need repeatable evidence. Run the pressure test many times, and deliberately add a delay between read and write so the bad interleaving is easier to trigger. Log the worker ID, episode ID, previous state, new state, and timestamp. Preserve the failing run as the baseline. This is important for A1 because a reviewer should be able to reconstruct what happened without trusting your memory or your explanation."
   },
   {
     "slide": 16,
-    "topic": "Trade-Off Analysis",
-    "text": "Now let’s look at a trade-off analysis table. It summarizes various approaches we may adopt, outlining their strengths, weaknesses, and when to implement them. Consider, for instance, a simple baseline that is easy to implement but often conceals deeper timing assumptions."
+    "topic": "Race Root Cause",
+    "text": "The root cause is that one conceptual operation was actually several execution steps. The system reads state, checks that it is DRAFT, waits or gets interrupted, and later writes PROCESSING. That delay opens an interleaving gap. Another worker can change the world while the first worker is still acting on stale information. This matters because the method name may sound atomic, but the runtime behavior is not atomic unless you deliberately make it so."
   },
   {
     "slide": 17,
-    "topic": "Practical Application",
-    "text": "As we move towards practical application, think about how you can identify the invariant in your designs tomorrow. Write one sequential scenario that should succeed and one pressure scenario that could expose a failure. Make sure to incorporate identifiable operation IDs in your logs."
+    "topic": "Mechanism Comparison",
+    "text": "There are several possible mechanisms, and each protects a different boundary. A global lock protects the whole store but reduces parallelism. A per-episode lock protects one episode at a time, but now you must manage locks carefully. A versioned update protects the expected state or version, but you must handle retries and rejection. A single-owner queue serializes commands, but it introduces queue delay. The right answer depends on the invariant, the domain, and the cost you are willing to accept."
   },
   {
     "slide": 18,
-    "topic": "Assignment Integration",
-    "text": "This lecture is closely aligned with Assignment 1. You should connect the concepts we discussed to your semester project. This means demonstrating how the relevant objects, workflows, and failures operate in your context, supported by logs and runnable commands."
+    "topic": "Guarded Transition",
+    "text": "A guarded transition protects the episode state machine by comparing the expected state with the current state at the moment of transition. A worker can request a claim from DRAFT to PROCESSING, but the guard decides whether that request is still valid. If the current state matches, the transition is accepted. If the current state differs, the stale claim is rejected. The tradeoff is more explicit transition code, but the benefit is that invalid interleavings become visible instead of silently corrupting the workflow."
   },
   {
     "slide": 19,
-    "topic": "Validation Questions",
-    "text": "To further reinforce your understanding, consider these validation questions. What invariant is most relevant to what we've covered? What hidden assumptions could cause a design to appear correct? How would you approach forcing failures in tests?"
+    "topic": "Versioned Update",
+    "text": "A versioned update is a common database-backed way to protect the same property. Suppose Worker A and Worker B both read version 7. Worker A updates successfully, and the record becomes version 8. Worker B then tries to update based on version 7, but the store rejects it as stale. Worker B must reread and discover that the episode is already PROCESSING. The protected property is that only one claim based on a specific prior version can succeed. The cost is that the application must handle rejected updates and possible retries."
   },
   {
     "slide": 20,
-    "topic": "Summary",
-    "text": "In summary, our central insight today revolves around seeing trade-offs as a way to reason about system correctness under realistic execution conditions. A professional engineer must bridge the theory with observable behavior and provide proof of their design decisions."
+    "topic": "Single-Owner Queue",
+    "text": "Another design response is a single-owner queue. Worker A and Worker B do not directly mutate the episode state. Instead, they submit commands to a queue, and one owner processes those commands in order. This protects the invariant by serializing transitions for the episode. The tradeoff is that requests may wait in the queue, so latency can increase. This is often a good fit when workflow ownership is more important than maximum parallelism on a single entity."
   },
   {
     "slide": 21,
-    "topic": "Further Reading",
-    "text": "For those interested in diving deeper, consider searching topics like trade-offs in distributed systems and structured logging. These concepts will further enhance your understanding of how to manage invariants in stateful object-oriented systems."
+    "topic": "Design Response",
+    "text": "When you propose a fix, start by naming the protected property: only one worker may own the episode transition. Then choose the simplest mechanism that actually protects that property. Make rejection explicit, not silent. A losing worker should produce evidence that it was rejected because the state changed. Also state the tradeoff. If you use a lock, you may reduce parallelism. If you use a queue, you may increase delay. If you use version checks, you must handle retries."
   },
   {
     "slide": 22,
-    "topic": "Discussion",
-    "text": "As we conclude the lecture, I’d like to open the floor for discussion. How do hidden assumptions affect your design processes? I’m eager to hear the trade-offs you’ve encountered in your projects and how you’ve navigated them."
+    "topic": "Baseline vs Corrected Path",
+    "text": "The baseline path reads DRAFT and writes PROCESSING while assuming there is no overlap. That is where duplicate claims become possible. The corrected path still reads DRAFT, but it adds a guarded compare before accepting the transition. The important design property is that the system either accepts or rejects with evidence. This makes the failure reviewable. Instead of asking, \"Did the code probably work?\" we can ask, \"Which worker was accepted, which worker was rejected, and what log line proves it?\""
+  },
+  {
+    "slide": 23,
+    "topic": "Structured Log Example",
+    "text": "This structured log is the kind of evidence a reviewer can use. It names the event, the episode ID, the worker ID, and a specific attempt ID. It records the expected state, the observed state, the requested state, and the result. Here Worker B expected DRAFT, but observed PROCESSING, so the stale transition was rejected. That is exactly the evidence we want: not just that something happened, but why the system protected the invariant."
+  },
+  {
+    "slide": 24,
+    "topic": "Evidence Flow",
+    "text": "The evidence flow begins with a claim about the design. For example: the episode transition is safe under competing workers. Then you run a pressure test that targets that invariant. Structured logs capture the facts. The before run demonstrates the failure, and the after run demonstrates protection. The final decision becomes defensible because it compares the same workload before and after the correction. This is the difference between a belief and an engineering argument."
+  },
+  {
+    "slide": 25,
+    "topic": "A1 Deliverables",
+    "text": "For A1, you should demonstrate this reasoning in your own project domain. Show the invariant, such as a protected state property or ownership rule. Show the failure, ideally as a repeatable bad interleaving with logs or a trace. Show the fix, including before-and-after evidence. Then connect it in the Integrity Packet with linked artifacts and remaining risk. Do not hide the tradeoff. If the fix costs performance, latency, or simplicity, say so clearly."
+  },
+  {
+    "slide": 26,
+    "topic": "Interview Questions",
+    "text": "These are the kinds of questions you should be ready to answer orally. What invariant matters most in your design? What hidden assumption made the baseline appear correct? How did you force the failure repeatedly? What log line proves that a competing transition was rejected? And what tradeoff did your correction introduce? Let's pause here: if you cannot answer these questions, your design may still work by accident rather than by argument."
+  },
+  {
+    "slide": 27,
+    "topic": "Integrity Packet Connection",
+    "text": "The Integrity Packet should tell the story from assumption to evidence. Start with the assumption that made the baseline plausible. Clarify the invariant. Stress that invariant to produce failure evidence. Use that failure to motivate a design control. Then validate the control and name the remaining risk. This matters because the Integrity Packet is not just documentation; it is your design defense. It should let a reviewer understand what failed, why your fix is appropriate, and what cost remains."
+  },
+  {
+    "slide": 28,
+    "topic": "Summary",
+    "text": "The central insight is that tradeoffs are design pressure, not vocabulary. A passing demo can hide a false execution model. Correctness depends on a named invariant, and evidence must show what happened when the system was placed under pressure. A mature design protects the property, produces reviewable evidence, and discloses the cost of the protection. That is the standard you should apply to your A1 work and to your semester project."
   }
 ]

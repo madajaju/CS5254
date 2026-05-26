@@ -1,0 +1,533 @@
+= AI-Generated Designs: Common Flaws
+Dr. Darren Pulsipher
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:customcss: custom.css
+:source-highlighter: highlight.js
+:icons: font
+:stem:
+
+== Trust Boundary
+* AI output is a draft.
+* Correctness remains your responsibility.
+* Sequential examples hide pressure.
+* Evidence must survive concurrency.
+
+== Draft To Evidence
+[plantuml, target=ai-draft-evidence, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+rectangle "AI answer" as A
+rectangle "Assumption" as B
+rectangle "Pressure test" as C
+rectangle "Evidence" as D
+rectangle "Decision" as E
+
+A -down-> B : expose
+B -right-> C : stress
+C -down-> D : capture
+D -left-> E : defend
+@enduml
+----
+
+== Common Flaws
+* Thread-safety hallucinations
+* Missing edge cases
+* Complexity overload
+* Assumed atomicity
+* Weak validation evidence
+
+== Flaw Map
+[plantuml, target=ai-flaw-map, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+rectangle "Generated design" as G
+rectangle "Safe words" as W
+rectangle "Skipped edge" as E
+rectangle "Big mechanism" as M
+rectangle "Atomic myth" as A
+rectangle "Review risk" as R
+
+G --> W : claims
+G --> E : omits
+G -left-> M : overbuilds
+G --> A : assumes
+W --> R : misleads
+A --> R : breaks
+@enduml
+----
+
+== Atomicity Trap
+* One method is not one action.
+* Check, read, write can split.
+* Two workers can both look correct.
+* The invariant decides the truth.
+
+== Bad Interleaving
+[plantuml, target=ai-bad-interleaving, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+participant "Worker A" as A
+participant "Episode" as E
+participant "Worker B" as B
+
+A --> E : read DRAFT
+B --> E : read DRAFT
+A --> E : write PROCESSING
+B --> E : write PROCESSING
+E --> A : duplicate owner
+@enduml
+----
+
+== Edge Cases
+* High contention
+* Network delay
+* Retry after timeout
+* Partial side effect
+* Stale read
+
+== Missing Edge Path
+[plantuml, target=ai-missing-edge-path, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+rectangle "Happy path" as H
+rectangle "Delay" as D
+rectangle "Retry" as R
+rectangle "Duplicate side effect" as S
+rectangle "Weak log" as L
+
+H -down-> D : untested
+D -right-> R : timeout
+R --> S : repeats
+S -left-> L : unclear winner
+@enduml
+----
+
+== Complexity Check
+[.columns]
+--
+[.column]
+====
+*AI proposal*
+
+* Distributed lock
+* New framework
+* Many moving parts
+====
+
+[.column]
+====
+*Actual need*
+
+* One invariant
+* One transition
+* One test
+====
+--
+
+== Simpler Control
+[plantuml, target=ai-simpler-control, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+rectangle "Invariant" as I
+rectangle "Guarded transition" as G
+database "Episode row" as E
+rectangle "Conflict result" as C
+rectangle "Structured log" as L
+
+I -right-> G : defines
+G --> E : compare version
+E -left-> C : reject stale
+C --> L : record loser
+@enduml
+----
+
+== Evidence Standard
+* Worker ID
+* Episode ID
+* Previous state
+* New state
+* Version or token
+* Repeated run count
+
+== Review Flow
+[plantuml, target=ai-review-flow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+rectangle "Claim" as C
+rectangle "Pressure run" as P
+rectangle "Logs" as L
+rectangle "Invariant check" as I
+rectangle "Integrity Packet" as IP
+
+C -right-> P : test
+P --> L : produce
+L --> I : inspect
+I -left-> IP : defend
+@enduml
+----
+
+== Trade-Offs
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+| Approach | Strength | Weakness | Use
+| Accept draft | Fast start | Hides risk | Exploration
+| Guard transition | Protects invariant | More code | State changes
+| Add idempotency | Tolerates retry | Needs keys | Side effects
+| Pressure test | Reveals timing | Slower feedback | Design defense
+|===
+
+== Assignment Link
+[plantuml, target=ai-assignment-link, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+rectangle "AI hypothesis" as H
+rectangle "Failing scenario" as F
+rectangle "Before evidence" as B
+rectangle "After evidence" as A
+rectangle "Remaining risk" as R
+
+H -right-> F : test
+F --> B : preserve
+B --> A : compare
+A -left-> R : record
+@enduml
+----
+
+== Discussion
+* Which AI claim would you distrust first?
+* What evidence would make the design defensible?

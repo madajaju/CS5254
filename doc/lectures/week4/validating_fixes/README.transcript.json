@@ -2,111 +2,131 @@
   {
     "slide": 1,
     "topic": "Validating Fixes",
-    "text": "Welcome to our lecture on Validating Fixes. Today, we'll explore the critical notion of how to ensure that systems remain correct, especially under concurrent execution pressures."
+    "text": "Welcome everyone. Today we are talking about validating fixes, which is one of the most important habits in concurrent system design. A fix is not validated just because the code changed, and it is not validated because the demo works once. The key idea here is that we need to prove that the failure we found is actually gone, that the relevant invariant still holds under pressure, and that we can defend that claim with evidence."
   },
   {
     "slide": 2,
     "topic": "Learning Objectives",
-    "text": "In this session, we'll aim to analyze the design pressures that come with validating fixes, diagnose hidden assumptions that might mask system correctness, and evaluate failure evidence through various means like logs and traces. Additionally, we'll discuss how to design corrections that maintain essential invariants and how to defend our approaches in the Integrity Packet, linking back to our assignment."
+    "text": "By the end of this lecture, you should be able to look at a stateful concurrent system and ask, 'What pressure is this fix supposed to survive?' We will focus on hidden assumptions, repeatable failure evidence, and design corrections that protect invariants. This connects directly to your Integrity Packet and A1, because you will need to explain not only what you changed, but why the change is trustworthy."
   },
   {
     "slide": 3,
-    "topic": "Fix Verification",
-    "text": "Let's start by defining Fix Verification. This involves re-running a test that previously failed to ensure it passes this time. The significance here is that we need to establish clear conditions under which we can trust the system's reliability, particularly when under pressure. It’s crucial to ensure that our mechanism works effectively across different states and timings, as failure to do so can lead to issues like duplicate work or stale data."
+    "topic": "Central Question",
+    "text": "Imagine your project passes a simple demonstration. One request comes in, the state changes correctly, and everything looks fine. Then two workers arrive at almost the same time, or a retry happens, or an event is delayed. Suddenly the design assumption is exposed. The central question is: what evidence would convince a reviewer that your fix works reliably, not just accidentally? The goal is reliable preservation of the invariant."
   },
   {
     "slide": 4,
-    "topic": "Boundary Testing",
-    "text": "Boundary Testing is about pushing the system to its limits, such as testing with the maximum number of threads. This is essential because it highlights the conditions that need to be clear in order to trust system functioning under real-world pressures. Ignoring boundary testing can result in unforeseen errors similar to those seen in Fix Verification, such as duplicate or stale state issues."
+    "topic": "Concept Map",
+    "text": "The validation process is a loop, not a single step. We start by re-running the failing case, then we add pressure through boundary testing, then we check that ordinary behavior was not broken. After that, we collect evidence and use it to defend a design decision. If the evidence is unclear, we refine the fix and repeat. This matters because professional engineering judgment depends on traceable evidence, not confidence alone."
   },
   {
     "slide": 5,
-    "topic": "Sanity Checks",
-    "text": "Sanity Checks are vital to ensure that when we fix one issue, we do not inadvertently break another. This involves verifying that our solution for one race condition doesn’t compromise other sequential functionalities. Just like the previous concepts, it stresses the need for clear conditions that ensure we can trust the entire system when faced with concurrent pressures."
+    "topic": "Validation Loop",
+    "text": "The key idea here is to preserve the failing test. A common mistake is to fix the code and then throw away the scenario that exposed the problem. Instead, keep the same scenario, apply the fix, repeat the run under pressure, observe whether the invariant is preserved, and document the logs or traces. If the result is ambiguous, that is not a success yet. It means the validation loop needs another pass."
   },
   {
     "slide": 6,
-    "topic": "Proving Correctness",
-    "text": "Proving Correctness is highlighted by the use of logs to demonstrate that invariants are preserved, even under challenging conditions. This is a notable part of our validation process as it identifies the very fundamental assumptions we need to make explicit to trust our system's behavior."
+    "topic": "Fix Verification",
+    "text": "Fix verification means running the exact test that failed before and confirming that the same failure no longer appears. One clean run is not enough in concurrency, because timing can make a broken system look correct. You want repeated runs, before-and-after comparison, and a clear statement of the protected invariant. For example, in the podcast domain, if ten workers try to publish the same episode, validation means exactly one succeeds and the others are rejected in a reviewable way."
   },
   {
     "slide": 7,
-    "topic": "System Invariant",
-    "text": "A System Invariant is a condition that must always hold true across valid executions of the system. It is crucial to understand these invariants because they form the foundation upon which we build our trust in the system's correctness, especially when tested against concurrent execution scenarios."
+    "topic": "Pressure Setup",
+    "text": "Here we introduce two workers acting on the same episode record. Worker A and Worker B both start a publish attempt, and both initially read the episode as DRAFT. The important boundary is between reading state and claiming the transition. The invariant being tested is that only one worker may own the transition for a given episode at a time. This setup matters because it forces the design to confront overlapping execution instead of assuming sequential order."
   },
   {
     "slide": 8,
-    "topic": "System / Architecture View",
-    "text": "The architecture view we are considering represents the relationship among various aspects of our topic, emphasizing that validating fixes is linked to deeper evidence and design decisions. The real question isn't just whether the code runs correctly, but whether it reliably maintains norms when subjected to varying loads and concurrency."
+    "topic": "Baseline Interaction",
+    "text": "In the baseline path, a worker asks the episode service to publish episode-42. The service reads the status, sees DRAFT, sets the record to PROCESSING, and emits publish work. In a sequential run, this looks completely reasonable. The hidden assumption is that read, decision, update, and side effect behave like one uninterrupted action. Under concurrency, that assumption may not hold unless the design explicitly protects it."
   },
   {
     "slide": 9,
-    "topic": "Worked Example",
-    "text": "Let’s delve into an example from the podcast domain. Imagine we run 10 concurrent publishing attempts and validate by checking logs. Our aim is to confirm that one thread successfully published while nine encountered errors. This scenario provides practical insights into how we can validate fixes effectively."
+    "topic": "Failure Interleaving",
+    "text": "This is the uncomfortable version. Worker A checks the episode and sees DRAFT. Before A writes PROCESSING, Worker B also checks and sees DRAFT. Now both workers believe they are allowed to proceed. The customer might later see only one final status, but behind the scenes two processing jobs may have started. The failure was hidden in the happy path because the sequential test never created the timing gap. The evidence we need includes worker IDs, episode ID, previous state, attempted state, timestamps, and proof that duplicate work was started or rejected."
   },
   {
     "slide": 10,
-    "topic": "Problem Setup",
-    "text": "For our problem setup, we refer back to our podcast example and analyze how to validate that only one thread publishes successfully amidst nine failures. This situation serves to illustrate our validation methods."
+    "topic": "State Transition Model",
+    "text": "The episode workflow has states such as DRAFT, PROCESSING, READY_TO_PUBLISH, PUBLISHED, and FAILED. The protected property is that transitions must be valid and owned by only one actor at a time. For example, claiming an episode moves it from DRAFT to PROCESSING. Publishing should happen only after the episode is ready. This state model is important because it gives us something precise to validate. Without named states and allowed transitions, we cannot clearly say what correctness means."
   },
   {
     "slide": 11,
-    "topic": "Naive Implementation",
-    "text": "A naive implementation often assumes that operations will occur in a single ordered manner. While it may seem correct based on method names and sequential tests passing, these assumptions can lead to serious issues when concurrency is introduced."
+    "topic": "Hidden Assumption",
+    "text": "A common mistake is trusting the method name. A method called publishEpisode may sound atomic, but internally it may read the status, make a decision, update the record, and emit a side effect as separate steps. A sequential test hides that gap. Two workers can observe the same old state, and the final state may still look normal afterward. Validation must expose the gap, because the real failure may be duplicate work, not just an incorrect final value."
   },
   {
     "slide": 12,
-    "topic": "Failure Scenario",
-    "text": "We also need to consider failure scenarios. When operations execute concurrently, the system might encounter stale state issues or discrepancies between the design assumptions and the actual execution model, which can be problematic."
+    "topic": "Boundary Testing",
+    "text": "Boundary testing means increasing pressure until the design assumption is truly challenged. Start with one worker, then two, then perhaps ten. Add an artificial delay between read and write to widen the race window. Repeat the run enough times that you are not relying on luck. The invariant check is the finish line: did exactly one worker claim the transition, and were the competing attempts rejected or contained?"
   },
   {
     "slide": 13,
-    "topic": "Improved Design Direction",
-    "text": "To address these issues, we should strive for an improved design direction. This involves naming the invariant involved in our operations, making transitions observable and implementing necessary controls like version checks and idempotency keys to ensure correctness."
+    "topic": "Sanity Checks",
+    "text": "After fixing a concurrency bug, you still need to make sure you did not break ordinary behavior. Suppose the fix for Race Condition A adds a lock, a state guard, or a queue. That fix might accidentally break a sequential feature that used to work. Sanity checks protect against that. The trade-off is that validation takes more effort, but it prevents a narrow fix from becoming a new regression."
   },
   {
     "slide": 14,
-    "topic": "Why Improved Design Is Safer",
-    "text": "This improved approach mitigates risks by transitioning from a hope-based model to one that insists on proving invalid interleavings are rejected. This robustness is necessary for ensuring reliable system behavior."
+    "topic": "Evidence Requirements",
+    "text": "Evidence needs to be specific enough for someone else to reconstruct what happened. That means operation IDs, entity IDs, worker or thread IDs, previous and new states, and ordering information such as timestamps. A vague log line like 'published successfully' is not enough. You need before-and-after output from repeated pressure runs so a reviewer can see both the original failure and the corrected behavior."
   },
   {
     "slide": 15,
-    "topic": "Failure Modes & Anti-Patterns",
-    "text": "Now, let's explore common failure modes and anti-patterns. For example, when a system passes a simple demonstration, we must dig deeper to examine if that demo avoids the conditions that could expose weaknesses. Adding concurrency and structured logging can help detect these flaws."
+    "topic": "Evidence Flow",
+    "text": "Start with a claim, such as 'only one worker can claim an episode transition.' Then design a pressure test that targets that claim. The test produces structured logs, and those logs let you reconstruct the ordering of events. From there, you determine whether the invariant held. This matters because your proof should be reviewable. In the Integrity Packet, the evidence should support the conclusion directly rather than asking the reader to trust your interpretation."
   },
   {
     "slide": 16,
     "topic": "Trade-Off Analysis",
-    "text": "In analyzing various approaches, we find trade-offs to consider. For instance, a simple baseline is easy to implement but might hide important assumptions. Conversely, guarded state transitions directly protect invariants but require stringent modeling. Each choice comes with its context for best use."
+    "text": "Different approaches protect different properties and introduce different costs. A simple baseline is easy to explain, but it often hides timing assumptions. A guarded transition protects the invariant directly, but requires careful state modeling. Explicit coordination can make dependencies visible, but may introduce bottlenecks. Idempotent design handles duplicate requests, but requires keys and deduplication. The point is not to choose the most complicated mechanism. The point is to choose the simplest mechanism that protects the property you named."
   },
   {
     "slide": 17,
-    "topic": "Practical Application",
-    "text": "Moving towards practical application, I encourage you to identify an invariant relevant to validating fixes, write a successful sequential scenario, and importantly, capture before and after evidence during your tests. This exercise is integral in making our approaches concrete."
+    "topic": "Mechanism Choices",
+    "text": "Once the invariant is clear, you can choose a mechanism. Compare-and-set protects a single state owner by rejecting stale updates. A synchronized method creates a critical section, but reduces parallelism. A single-owner queue serializes handling for a specific entity, but introduces queue latency. An idempotency key prevents duplicate side effects, but requires storage and lookup logic. None of these fixes are free. Each one buys a protected property at the cost of some complexity, latency, or reduced concurrency."
   },
   {
     "slide": 18,
-    "topic": "Assignment Integration",
-    "text": "As you work on this lecture’s integration with assignment one, remember to connect the concepts we've discussed today back to your semester project. Illustrate how these principles of validating fixes pertain to your specific domain."
+    "topic": "Guarded Transition",
+    "text": "A guarded transition protects the property that only one worker can move episode-42 from DRAFT to PROCESSING. The mechanism is an atomic update: proceed only if the current state still matches the expected state. One worker wins and emits work. The losing worker is rejected because its view is stale. The trade-off is that the transition code becomes more explicit, and often more dependent on database or synchronization semantics. That cost is worthwhile when the state transition is the heart of correctness."
   },
   {
     "slide": 19,
-    "topic": "Validation & Interview Questions",
-    "text": "To wrap up the lecture, think about some validation and interview questions regarding invariants, hidden assumptions, and ways to force failures in repeatable tests. Reflecting on these aspects will deepen your understanding and prepare you for practical applications."
+    "topic": "Idempotent Design",
+    "text": "Idempotent design protects against duplicate side effects. A publish request carries an idempotency key, and the system checks whether that key has already been used. If it has, the existing result is returned instead of performing the side effect again. If it is new, the side effect happens and the result is stored. The trade-off is additional storage, key management, and careful definition of what counts as the same operation. This is especially useful with retries, queues, and external calls."
   },
   {
     "slide": 20,
-    "topic": "Summary",
-    "text": "In summary, we see that validating fixes involves rigorously attaching our design concepts to clear invariants and defensible trade-offs. This process ensures that our systems remain correct even when subjected to real operational conditions."
+    "topic": "Single-Owner Queue",
+    "text": "A single-owner queue protects an entity by serializing work for that entity. Worker A and Worker B can both submit requests, but the episode queue delivers those requests to one owner in order. That owner applies one state transition at a time. The protected property is ordered, exclusive mutation of the episode state. The trade-off is latency and possibly a bottleneck around popular entities. This design can be very clean when correctness depends more on ordering than on maximum parallelism."
   },
   {
     "slide": 21,
-    "topic": "Further Reading",
-    "text": "For those interested in delving deeper, consider exploring resources related to validating fixes in distributed systems and concurrency design trade-offs. Learning about structured logging and invariants can greatly enhance your understanding of these critical systems."
+    "topic": "Log Shape",
+    "text": "This is the kind of log record that supports validation. It names the event, operation ID, episode ID, worker ID, previous state, attempted state, result, and timestamp. For a successful fix, you want to see one accepted transition and one or more rejected stale attempts under pressure. The log is not just debugging decoration. It is the evidence that lets you defend the design decision in a review or oral assessment."
   },
   {
     "slide": 22,
-    "topic": "Discussion",
-    "text": "Now it's time to open up the floor for discussion. What do you find to be the key challenges in validating fixes? How does your understanding of failures influence your design decisions? Let’s share our thoughts and insights."
+    "topic": "Before And After",
+    "text": "Before the fix, two workers can read DRAFT and both start jobs. The final status might hide the damage, because both paths may eventually converge to a normal-looking state. After the fix, one worker claims the transition and the losing worker is rejected. The important improvement is not only the behavior; it is that the logs expose the behavior. Your validation story should compare the same workload before and after so the reviewer can see what changed."
+  },
+  {
+    "slide": 23,
+    "topic": "Integrity Packet Path",
+    "text": "For the Integrity Packet, organize the story as a path from assumption to evidence. First state the assumption, such as 'publish is effectively single-owner.' Then reproduce the failure that exposes the assumption. Next, explain the design response, such as compare-and-set, synchronization, idempotency, or a queue. Then provide validation evidence. Finally, name the remaining risk. This is important because a mature design defense does not pretend the fix eliminates all risk."
+  },
+  {
+    "slide": 24,
+    "topic": "A1 Application",
+    "text": "For A1, choose one object, workflow, or event path in your own project. State the invariant that must survive pressure. Then create one sequential success scenario and one pressure scenario that could expose a failure. Add structured evidence before you fix the problem so you can compare before and after behavior. The artifact you should produce is a validation story in the Integrity Packet, supported by commands, logs, traces, diagrams, or repeatable test output."
+  },
+  {
+    "slide": 25,
+    "topic": "Interview Questions",
+    "text": "Let's pause here and treat these as oral defense questions. If I ask what invariant matters, you should be able to answer in one precise sentence. If I ask what hidden assumption made the baseline look correct, you should point to the timing or ordering gap. If I ask how you forced the failure, you should describe the repeatable pressure test. And if I ask what trade-off your mechanism introduces, do not say 'none.' Every meaningful correctness mechanism has a cost."
+  },
+  {
+    "slide": 26,
+    "topic": "Summary Model",
+    "text": "The summary model is straightforward: the baseline appears correct, pressure exposes an assumption, the invariant is named, the fix protects the transition, and evidence validates the claim. The central insight is that validating fixes is not just rerunning the program. It is a disciplined process of explaining what must remain true, stressing the system, correcting the design, and proving the result with reviewable evidence."
   }
 ]

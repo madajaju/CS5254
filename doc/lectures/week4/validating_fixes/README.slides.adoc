@@ -1,178 +1,581 @@
 = Validating Fixes
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
 == Learning Objectives
 
-* Analyze design pressure of validating fixes
-* Diagnose hidden assumptions in system correctness
-* Evaluate failure evidence (logs, traces, etc.)
-* Design corrections preserving invariants
-* Defend approach in Integrity Packet and connect to A1
+* Analyze the pressure created by validating fixes in a stateful concurrent system.
+* Diagnose hidden assumptions that make a baseline appear correct.
+* Evaluate failure evidence using logs, traces, interleavings, or repeated tests.
+* Design a correction that preserves the relevant invariant.
+* Defend the chosen approach in the Integrity Packet.
+* Connect the validation story to A1 deliverables.
 
-== Fix Verification
+== Central Question
 
-* Definition: Re-run failed test to ensure it passes
-* Importance: Identifies explicit conditions for trust
-* Mechanism: Through state, timing, behavior, etc.
-* Failure mode: Duplicate work, stale state
-* Design implication: Expose invariants, log transitions
+* A project passes a simple demonstration.
+* Concurrency, ambiguity, or operational pressure is introduced.
+* A hidden assumption about fix verification is exposed.
+* The engineer must decide what evidence proves the fix.
+* The goal is not one clean run.
+* The goal is reliable preservation of the invariant.
 
-== Boundary Testing
+== Concept Map
 
-* Definition: Test system limits (e.g., max threads)
-* Importance: Identifies explicit conditions for trust
-* Mechanism: Through state, timing, behavior, etc.
-* Failure mode: Duplicate work, stale state
-* Design implication: Expose invariants, log transitions
-
-== Sanity Checks
-
-* Definition: Ensure fix for one issue didn’t break others
-* Importance: Identifies explicit conditions for trust
-* Mechanism: Through state, timing, behavior, etc.
-* Failure mode: Duplicate work, stale state
-* Design implication: Expose invariants, log transitions
-
-== Proving Correctness
-
-* Definition: Use logs to show invariants preserved
-* Importance: Identifies explicit conditions for trust
-* Mechanism: Through state, timing, behavior, etc.
-* Failure mode: Duplicate work, stale state
-* Design implication: Expose invariants, log transitions
-
-== System Invariant
-
-* Definition: Condition that must remain true in execution
-* Importance: Identifies explicit conditions for trust
-* Mechanism: Through state, timing, behavior, etc.
-* Failure mode: Duplicate work, stale state
-* Design implication: Expose invariants, log transitions
-
-== System / Architecture View
-
-[plantuml, target=architecture, format=svg, width=80%]
+[plantuml,concept-map,svg,width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
 skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
 left to right direction
 
 rectangle "Validating Fixes" as Topic
-rectangle "Fix Verification" as A
-rectangle "Boundary Testing" as B
-rectangle "Sanity Checks" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Fix Verification" as Fix
+rectangle "Boundary Testing" as Boundary
+rectangle "Sanity Checks" as Sanity
+rectangle "Validation Evidence" as Evidence
+rectangle "Design Decision" as Decision
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+Topic -> Fix : rerun failing case
+Fix -> Boundary : add pressure
+Boundary -> Sanity : check regressions
+Sanity --> Evidence : collect proof
+Evidence --> Decision : defend choice
+Decision --> Fix : refine
 @enduml
 ----
 
-== Worked Example
+== Validation Loop
 
-== Problem Setup
+[plantuml,validation-loop,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
 
-* Podcast Domain
-* Test: 10 concurrent publishing attempts
-* Validation: Logs show one success, nine failures
+rectangle "Preserve failing test" as A
+rectangle "Apply fix" as B
+rectangle "Repeat under pressure" as C
+rectangle "Observe invariant" as D
+rectangle "Document evidence" as E
 
-== Naive Implementation
+A -> B : same scenario
+B -> C : more runs
+C -> D : compare behavior
+D --> E : logs and traces
+E --> A : if unclear
+@enduml
+----
 
-* Operation occurs once, in order
-* Method name seems correct, passes sequential tests
+== Fix Verification
 
-== Failure Scenario
+* Re-run the exact test that previously failed.
+* Confirm the failure no longer appears reliably.
+* Keep the original failing scenario as a regression test.
+* Use repeated runs rather than one lucky execution.
+* Compare before and after evidence.
+* Explain which invariant is now protected.
 
-* Concurrently, can observe stale state
-* Failure: mismatch between design assumption and execution model
+== Pressure Setup
 
-== Improved Design Direction
+[plantuml,pressure-setup,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 
-* Name invariant, observe transitions, add controls
-* Use version checks, idempotency keys, state machine guards
+participant "Test Runner" as T
+participant "Worker A" as A
+participant "Worker B" as B
+participant "Episode Record" as R
 
-== Why Improved Design Is Safer
+T --> A : start publish attempt
+T --> B : start publish attempt
+A --> R : read DRAFT
+B --> R : read DRAFT
+@enduml
+----
 
-* Proves invalid interleavings are rejected or managed
+== Baseline Interaction
 
-== Failure Modes & Anti-Patterns
+[plantuml,baseline-interaction,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 
-* Symptom: System passes single demo
-  * Detection: Add concurrent actors, structured logs
-  * Correction: Maintain happy-path test, add failure-focused tests
+participant "Worker" as W
+participant "Episode Service" as S
+participant "Episode Record" as R
+participant "Publisher" as P
 
-* Symptom: Names tool, not design property
-  * Detection: Ask which invariant is protected
-  * Correction: Write invariant first, then select mechanism
+W --> S : publish episode-42
+S --> R : read status
+R --> S : DRAFT
+S --> R : set PROCESSING
+S --> P : emit publish work
+@enduml
+----
 
-* Symptom: Evidence is too vague
-  * Detection: Reviewer cannot reconstruct failure
-  * Correction: Capture structured evidence linking to claims
+== Failure Interleaving
 
-* Symptom: Fix not compared to baseline
-  * Detection: No repeatable failing scenario
-  * Correction: Preserve failing test and rerun post-redesign
+[plantuml,failure-interleaving,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+participant "Worker A" as A
+participant "Worker B" as B
+participant "Episode Record" as R
+participant "Publisher" as P
+
+A --> R : check DRAFT
+B --> R : check DRAFT
+A --> R : write PROCESSING
+B --> R : write PROCESSING
+A --> P : start job
+B --> P : start duplicate job
+@enduml
+----
+
+== State Transition Model
+
+[plantuml,state-transition-model,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam state {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+[*] --> DRAFT
+DRAFT --> PROCESSING : worker claims episode
+PROCESSING --> READY_TO_PUBLISH : processing completes
+READY_TO_PUBLISH --> PUBLISHED : publish succeeds
+PROCESSING --> FAILED : validation fails
+FAILED --> DRAFT : retry allowed
+@enduml
+----
+
+== Hidden Assumption
+
+* The method name sounds atomic.
+* The code actually performs separate steps.
+* A sequential test hides the timing gap.
+* Two workers can observe the same old state.
+* The final state may look normal while duplicate work happened.
+* Validation must expose the gap.
+
+== Boundary Testing
+
+[plantuml,boundary-testing,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+left to right direction
+
+rectangle "1 worker" as W1
+rectangle "2 workers" as W2
+rectangle "10 workers" as W10
+rectangle "Delay between read and write" as Delay
+rectangle "Repeated runs" as Runs
+rectangle "Invariant check" as Check
+
+W1 -> W2 : increase contention
+W2 --> W10 : reach limit
+W10 -> Delay : widen race window
+Delay --> Runs : remove luck
+Runs -> Check : verify result
+@enduml
+----
+
+== Sanity Checks
+
+[plantuml,sanity-checks,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "Race Condition A" as Race
+rectangle "Fix" as Fix
+rectangle "Sequential Feature B" as Seq
+rectangle "Regression Test" as Reg
+rectangle "Confidence" as Conf
+
+Race -> Fix : repair
+Fix -> Seq : may affect
+Seq -> Reg : verify
+Reg --> Conf : protect behavior
+@enduml
+----
+
+== Evidence Requirements
+
+* Include operation ID and entity ID.
+* Record worker or thread ID.
+* Capture previous state and new state.
+* Preserve timestamps or ordering markers.
+* Repeat the pressure scenario.
+* Compare before and after output.
+
+== Evidence Flow
+
+[plantuml,evidence-flow,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "Claim" as Claim
+rectangle "Pressure test" as Test
+rectangle "Structured logs" as Logs
+rectangle "Invariant result" as Result
+rectangle "Reviewable proof" as Proof
+
+Claim -> Test : define target
+Test --> Logs : produce trace
+Logs -> Result : reconstruct ordering
+Result --> Proof : support conclusion
+@enduml
+----
 
 == Trade-Off Analysis
 
-[cols="1,1,1,1", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to implement | Hides timing assumptions | First implementation
-| Guarded transition | Protects core invariant | Requires careful modeling | Reservations, publishing
-| Explicit coordination | Makes dependencies visible | Can introduce deadlock | Multi-object workflows
-| Idempotent design | Handles duplicates | Requires deduplication | Queues, async workers
-| Observability-first | Strong evidence | Adds instrumentation | Assignments requiring proof
+|Approach |Strengths |Weaknesses |When to Use
+|Simple baseline |Easy to explain |Hides timing assumptions |Initial comparison point
+|Guarded transition |Protects invariant directly |Requires state modeling |Status changes and reservations
+|Explicit coordination |Makes dependencies visible |Can create bottlenecks |Multi-object workflows
+|Idempotent design |Handles duplicates |Needs keys and deduplication |Queues and retries
 |===
 
-== Practical Application
+== Mechanism Choices
 
-* Identify relevant invariant for validating fixes
-* Write sequential scenario expected to succeed
-* Capture before/after evidence with IDs in logs
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Mechanism |Protects |Evidence |Trade-Off
+|Compare-and-set |Single state owner |Rejected stale update |Database-specific logic
+|Synchronized method |Critical section |One entry at a time |Lower parallelism
+|Single-owner queue |Ordered handling |Serialized event log |Queue latency
+|Idempotency key |Duplicate side effects |Key reuse record |More storage
+|===
 
-== Assignment Integration
+== Guarded Transition
 
-Connect the lecture concept to [A1](../../../assignments/A1/index.md) for a semester project.
+[plantuml,guarded-transition,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 
-== Validation & Interview Questions
+left to right direction
 
-1. Relevant invariant for this lecture?
-2. Hidden assumptions in baseline design?
-3. How to force failure in a repeatable test?
-4. What evidence proves failure occurred?
-5. Chosen design mechanism and trade-offs?
-6. How would the issue differ across implementations?
-7. What to record in Integrity Packet?
+rectangle "Read episode-42" as Read
+rectangle "Expected DRAFT" as Expected
+rectangle "Atomic update to PROCESSING" as Atomic
+rectangle "Winner emits work" as Work
+rectangle "Loser rejected" as Reject
 
-== Summary
+Read -> Expected : inspect state
+Expected -> Atomic : compare and set
+Atomic --> Work : one success
+Atomic --> Reject : stale attempt
+@enduml
+----
 
-Validating fixes connects concepts to invariants and defensible trade-offs, ensuring systems remain correct under real executions.
+== Idempotent Design
 
-== Further Reading
+[plantuml,idempotent-design,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 
-* "Validating Fixes distributed systems failure mode"
-* "Validating Fixes concurrency design tradeoffs"
-* Structured logging and correlation IDs
-* Invariants in stateful object-oriented systems
+rectangle "Publish request" as Req
+rectangle "Idempotency key" as Key
+rectangle "Deduplication store" as Store
+rectangle "Existing result" as Existing
+rectangle "New side effect" as Effect
 
-== Discussion
+Req -> Key : attach key
+Key --> Store : check
+Store -> Existing : if seen
+Store --> Effect : if new
+Effect -> Store : save result
+@enduml
+----
 
-* Key challenges in validating fixes?
-* How does understanding failures impact design decisions?
+== Single-Owner Queue
+
+[plantuml,single-owner-queue,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+left to right direction
+
+rectangle "Worker A request" as A
+rectangle "Worker B request" as B
+rectangle "Episode queue" as Q
+rectangle "Single owner" as Owner
+rectangle "Episode state" as State
+
+A -> Q : enqueue
+B --> Q : enqueue
+Q --> Owner : ordered delivery
+Owner -> State : one transition at a time
+@enduml
+----
+
+== Log Shape
+
+[source,text]
+----
+event=episode_transition
+operation_id=op-817
+episode_id=episode-42
+worker_id=worker-a
+previous_state=DRAFT
+attempted_state=PROCESSING
+result=accepted
+timestamp=2026-05-20T10:15:30Z
+----
+
+== Before And After
+
+[.columns]
+[.column]
+* Before: two workers read DRAFT
+* Before: duplicate jobs start
+* Before: final status hides duplication
+
+[.column]
+* After: one worker claims transition
+* After: losing worker is rejected
+* After: logs show rejection
+
+== Integrity Packet Path
+
+[plantuml,integrity-packet-path,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "Assumption" as A
+rectangle "Failure reproduction" as F
+rectangle "Design response" as D
+rectangle "Validation evidence" as V
+rectangle "Remaining risk" as R
+
+A -> F : expose
+F --> D : correct
+D -> V : test
+V --> R : qualify
+@enduml
+----
+
+== A1 Application
+
+* Choose one object or workflow in your project.
+* State the invariant that must survive pressure.
+* Create one sequential success scenario.
+* Create one pressure scenario that could fail.
+* Add structured evidence before fixing.
+* Record the validation story in the Integrity Packet.
+
+== Interview Questions
+
+* What invariant is most relevant?
+* What hidden assumption made the baseline appear correct?
+* How would you force the failure repeatedly?
+* What evidence proves the failure happened?
+* Which mechanism would you choose first?
+* What trade-off does your mechanism introduce?
+
+== Summary Model
+
+[plantuml,summary-model,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "Baseline appears correct" as Base
+rectangle "Pressure exposes assumption" as Pressure
+rectangle "Invariant is named" as Inv
+rectangle "Fix protects transition" as Fix
+rectangle "Evidence validates claim" as Evidence
+
+Base -> Pressure : add concurrency
+Pressure --> Inv : identify property
+Inv -> Fix : choose mechanism
+Fix --> Evidence : prove behavior
+@enduml
+----

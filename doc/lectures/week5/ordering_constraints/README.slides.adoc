@@ -1,195 +1,593 @@
 = Ordering Constraints
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Introduction
+== Course Context
 
-* Key insights on ordering constraints
-* Relation to concurrency and system integrity
-* Importance of design assumptions visibility
-* Connection to [A2](../../../assignments/A2/index.md)
+* CS 5254b: Object-Oriented Systems Under Concurrency
+* Week 5 lecture: Ordering Constraints
+* Duration target: 15 minutes
+* Assignment alignment: A2 Integrity Packet
 
-== Opening Scenario
+== Learning Objectives
 
-* Publish event before approval
-* Hidden assumption: delivery order = logical order
-* Consequence: workflow rejection or corruption
-* Challenge: reconcile time and causality
+* Analyze ordering pressure in a stateful concurrent system
+* Diagnose hidden assumptions about time, delivery, and causality
+* Evaluate evidence from logs, traces, interleavings, and tests
+* Design a control that preserves the relevant invariant
+* Defend the decision and trade-off in the Integrity Packet
 
-== Sequential Dependencies
+== Ordering Pressure Model
 
-* Definition: Step B requires output from Step A
-* Importance: Trust under pressure
-* Mechanism: State, timing, behavior
-* Failure: Duplicate work, stale state
-* Design: Expose invariant, log transitions
-
-== Parallel Steps
-
-* Definition: Steps C and D must finish before E
-* Importance: Trust under pressure
-* Mechanism: State, timing, behavior
-* Failure: Stale state, blocked progress
-* Design: Expose invariant, log transitions
-
-== Pre-conditions & Post-conditions
-
-* Definition: Required state before/after stages
-* Importance: Trust under pressure
-* Mechanism: State, timing, behavior
-* Failure: Stale state, blocked progress
-* Design: Expose invariant, log transitions
-
-== Gating
-
-* Definition: Control workflow until criteria met
-* Importance: Trust under pressure
-* Mechanism: State, timing, behavior
-* Failure: Stale state, blocked progress
-* Design: Expose invariant, log transitions
-
-== AI-Assisted Hypothesis
-
-* Definition: Generated design needing validation
-* Importance: Trust under pressure
-* Mechanism: State, timing, behavior
-* Failure: Duplicate work, misleading evidence
-* Design: Expose invariant, log transitions
-
-== System Architecture
-
-[plantuml, target=system_architecture, format=svg, width=80%]
+[plantuml,ordering-pressure-model,svg,width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
 skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "Hidden ordering assumption" as A
+rectangle "Concurrency pressure" as B
+rectangle "Invariant at risk" as C
+rectangle "Evidence" as D
+rectangle "Design control" as E
+
+A --> B : stressed by
+B -> C : exposes
+C -> D : must be shown by
+D --> E : supports
+E --> A : replaces guess
+@enduml
+----
+
+== Opening Narrative
+
+* A publish event arrives before the approval event it depends on
+* The producer sent events in the intended order
+* The service processed the first message it observed
+* The hidden assumption was that delivery order equals logical order
+
+== Time and Causality Diverge
+
+[plantuml,time-causality-diverge,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Producer" as P
+participant "Queue" as Q
+participant "Approval Handler" as A
+participant "Publish Handler" as H
+
+P --> Q : approval event
+P --> Q : publish event
+Q --> H : publish delivered first
+H --> H : prerequisite missing
+Q --> A : approval delivered later
+@enduml
+----
+
+== Hidden Assumption
+
+* Sequential code makes ordering look obvious
+* Concurrent execution makes observation order unstable
+* Correctness depends on logical prerequisites, not arrival timing
+* The design must state what must already be true
+
+== Sequential Dependency
+
+[plantuml,sequential-dependency,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 left to right direction
+
+rectangle "Step A\nproduce prerequisite" as A
+rectangle "Step B\nconsume prerequisite" as B
+rectangle "Valid transition" as V
+
+A -> B : output required
+B --> V : allowed only after A
+@enduml
+----
+
+== Parallel Join
+
+[plantuml,parallel-join,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Step C\nclean audio" as C
+rectangle "Step D\nwrite notes" as D
+rectangle "Join condition\nboth complete" as J
+rectangle "Step E\npublish" as E
+
+C --> J : completed
+D --> J : completed
+J -> E : release work
+@enduml
+----
+
+== Preconditions and Postconditions
+
+* A precondition states what must exist before a stage starts
+* A postcondition states what is guaranteed after a stage finishes
+* These conditions turn timing assumptions into checkable design rules
+* A transition without a condition is hard to defend under pressure
+
+== Gate Model
+
+[plantuml,gate-model,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Incoming work" as W
+rectangle "ApprovalGate" as G
+rectangle "Prerequisites\nvisible and valid" as P
+rectangle "Proceed" as O
+rectangle "Wait or reject" as R
+
+W --> G : requests transition
+P --> G : supplies proof
+G --> O : condition true
+G --> R : condition false
+@enduml
+----
+
+== Architecture View
+
+[plantuml,architecture-view,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 
 rectangle "Ordering Constraints" as Topic
 rectangle "Sequential Dependencies" as A
 rectangle "Parallel Steps" as B
-rectangle "Pre-conditions & Post-conditions" as C
+rectangle "Preconditions\nPostconditions" as C
 rectangle "Validation Evidence" as V
 rectangle "Design Decision" as D
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+Topic --> A : identifies
+A -right-> B : combines with
+B -down-> C : requires
+C -left-> V : produces
+V -up-> D : justifies
+D -> A : refines
 @enduml
 ----
 
-== Worked Example Setup
+== Worked Example
 
-* Podcast Domain:
-  * Constraint: Show notes depend on transcript
-  * Constraint: Publish requires audio & notes
-* Order System: Cannot ship unpaid items
+* Podcast: show notes require the transcript
+* Podcast: publishing requires cleaned audio and show notes
+* Order system: shipping requires payment and inventory reservation
+* The baseline passes when the workflow runs once in order
+* The pressure case asks what happens when observation order changes
 
-== Naive Implementation
+== Normal Order Interaction
 
-* Assumption: Operations happen once in order
-* Typical flow:
-  * Actor performs operation
-  * System reads current state
-  * System applies transition
-  * System emits side effect
+[plantuml,normal-order-interaction,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Order API" as API
+participant "Coordinator" as C
+participant "Inventory" as I
+participant "Payment" as P
+participant "Shipping" as S
 
-== Failure Scenario
+API --> C : create order-42
+C --> I : reserve inventory
+I --> C : reservation confirmed
+C --> P : capture payment
+P --> C : payment confirmed
+C --> S : ship after prerequisites
+@enduml
+----
 
-* Overlapping execution causes:
-  * Stale state observations
-  * Duplicate execution
-  * Workflow blockage
-* Outcome: Mismatch between design and execution model
+== Order State Model
 
-== Improved Design Direction
+[plantuml,order-state-model,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam state {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+[*] --> CREATED
+CREATED -> RESERVED : inventory hold succeeds
+RESERVED --> PAID : payment capture succeeds
+PAID -> READY_TO_SHIP : prerequisites observed
+READY_TO_SHIP --> SHIPPED : shipment emitted once
+PAID --> COMPENSATING : prerequisite later fails
+@enduml
+----
 
-* Name the invariant
-* Make transitions observable
-* Apply controls:
-  * Version checks
-  * Idempotency keys
-  * State-machine guards
+== Core Invariant
 
-== Why Improved Design is Safer
+* An order ships only after inventory is reserved
+* An order ships only after payment is captured
+* The shipment side effect occurs exactly once
 
-* Transitions from hope to proof
-* Invalid interleavings are rejected or recovered
-* Evidence captured for trust
+== Out of Order Delivery
 
-== Failure Modes
+[plantuml,out-of-order-delivery,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Payment Service" as P
+participant "Event Bus" as B
+participant "Coordinator" as C
+participant "Shipping Worker" as S
 
-* Happy-path passes despite design weakness
-  * Detect with: concurrent runs, stress tests
-* Focus on mechanism instead of invariant
-  * Detect by asking about protected invariant
-* Vague evidence lacks operation details
-  * Detect when failure cannot be reconstructed
-* Fix changes behavior without baseline comparison
-  * Detect absence of before/after scenarios
+P --> B : payment confirmed
+B --> S : ship request delivered early
+S --> C : read prerequisites
+C --> S : inventory not visible
+B --> C : reservation event delivered later
+@enduml
+----
+
+== Wait Graph Failure
+
+[plantuml,wait-graph-failure,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Coordinator\nholds inventory lock" as C
+rectangle "Payment Callback\nholds payment lock" as P
+rectangle "Inventory status" as I
+rectangle "Payment status" as Pay
+
+C --> Pay : waits for
+P --> I : waits for
+C --> I : owns
+P --> Pay : owns
+@enduml
+----
+
+== Stuck Workflow
+
+[plantuml,stuck-workflow,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam state {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+CREATED --> RESERVED : inventory reserved
+RESERVED --> WAITING_PAYMENT : payment pending
+WAITING_PAYMENT --> WAITING_INVENTORY_VIEW : callback cannot see reservation
+WAITING_INVENTORY_VIEW --> WAITING_PAYMENT : retry repeats
+WAITING_PAYMENT --> COMPENSATING : timeout
+@enduml
+----
+
+== Design Responses
+
+* State-machine guards reject invalid transitions
+* Ordered acquisition reduces lock-cycle risk
+* Idempotency keys prevent duplicate side effects
+* Timeouts and compensation preserve progress evidence
+
+== Guarded Transition
+
+[plantuml,guarded-transition,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Requested transition\nREADY_TO_SHIP" as T
+rectangle "Guard\nreserved and paid" as G
+rectangle "Commit state change" as C
+rectangle "Reject or wait" as R
+rectangle "Structured log" as L
+
+T -> G : validate
+G --> C : true
+G --> R : false
+C --> L : record proof
+R --> L : record reason
+@enduml
+----
+
+== Idempotent Retry
+
+[plantuml,idempotent-retry,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Retry message\nship order-42" as M
+rectangle "Idempotency key\norder-42 shipment" as K
+rectangle "Dedup store" as D
+rectangle "Emit shipment" as S
+rectangle "Return existing result" as E
+
+M -> K : derives
+K --> D : checks
+D --> S : key absent
+D --> E : key present
+S --> D : records key
+@enduml
+----
 
 == Trade-Off Analysis
 
-[cols="1,1,1,1", options="header"]
-|==
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain and implement | Hides assumptions | Initial implementation
-| Guarded state | Protects invariant directly | Requires modeling | Status changes
-| Explicit coordination | Makes dependencies visible | Introduces bottlenecks | Multi-object workflows
-| Idempotent design | Handles duplicates and failures | Needs ids, deduplication | Queues, retries
-| Observability design | Produces strong evidence | Adds instrumentation | Requires design defense
-|==
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach |Strengths |Weaknesses |When to Use
+|Simple baseline |Easy to explain |Hides timing assumptions |First comparison point
+|Guarded state transition |Protects the invariant directly |Requires explicit state modeling |Workflow status changes
+|Explicit coordination |Makes dependencies visible |Can add waiting or bottlenecks |Multi-object ordering
+|Idempotent design |Handles retries and duplicates |Requires keys and deduplication |Queues and external calls
+|Observability-first design |Supports review evidence |Adds instrumentation work |A2 failure defense
+|===
 
-== Practical Application
+== Evidence Checklist
 
-* Identify invariant relevant to ordering
-* Write sequential scenario
-* Write pressure scenario exposing failure
-* Add operation IDs and entity IDs to logs
-* Capture before/after evidence for fixes
-* Update Integrity Packet with assumptions, evidence
+* Correlation ID for each workflow instance
+* Entity ID for every state transition
+* Timestamped prerequisite observations
+* Before and after test output
+* A reviewer-readable explanation of the invariant
 
-== Assignment Integration
+== Evidence Flow
 
-* Connect concepts to [A2](../../../assignments/A2/index.md)
-* Demonstrate mastery with:
-  * Runnable commands, structured logs
-  * Before/after behavior, failure reproduction
-  * Integrity Packet explanation
+[plantuml,evidence-flow,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
 
-== Discussion Questions
+rectangle "Claim\nordering handled" as C
+rectangle "Pressure test" as T
+rectangle "Structured logs" as L
+rectangle "State timeline" as S
+rectangle "Design decision" as D
 
-1. What invariant is most relevant?
-2. What hidden assumption makes the design appear correct?
-3. How to force the failure in a test?
-4. What evidence proves the failure occurred?
-5. What mechanism would you choose first, and why?
-6. How might issues appear in different stacks?
-7. What would you record in the Integrity Packet?
+C --> T : challenged by
+T -> L : produces
+L -> S : reconstructs
+S --> D : supports
+D --> C : defends
+@enduml
+----
 
-== Summary
+== A2 Integration
 
-* Ordering constraints help reason about system integrity
-* Connect concepts to invariants and evidence
-* Design maturity includes:
-  * Explanation
-  * Stress testing
-  * Recovery validation
+* Choose an ordering-sensitive workflow in your project
+* State the invariant before choosing the mechanism
+* Preserve the failing scenario as repeatable evidence
+* Explain remaining risk in the Integrity Packet
 
-== Further Reading
+== Integrity Packet Loop
 
-* "Ordering Constraints distributed systems failure mode"
-* "Ordering Constraints concurrency design tradeoffs"
-* Focus areas: logging, invariant design, coordination patterns
+[plantuml,integrity-packet-loop,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "Assumption" as A
+rectangle "Failure evidence" as F
+rectangle "Design control" as D
+rectangle "Validation run" as V
+rectangle "Remaining risk" as R
+
+A -right-> F : tested by
+F -down-> D : motivates
+D -left-> V : checked by
+V -left-> R : bounds
+R -up-> A : revises
+@enduml
+----
+
+== Interview Questions
+
+* What invariant is most relevant here?
+* What hidden assumption made the baseline appear correct?
+* How would you force the failure repeatedly?
+* What evidence proves the failure occurred?
+* Which mechanism would you choose first?
+* What trade-off does that mechanism introduce?
+
+== Summary Model
+
+[plantuml,summary-model,svg,width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "Ordering constraint" as O
+rectangle "Named invariant" as I
+rectangle "Pressure scenario" as P
+rectangle "Observable evidence" as E
+rectangle "Defensible design" as D
+
+O -right-> I : clarifies
+I -down-> P : focuses
+P -left-> E : generates
+E -left-> D : justifies
+D -up-> O : strengthens
+@enduml
+----

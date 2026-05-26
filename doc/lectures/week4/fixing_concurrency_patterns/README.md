@@ -1,5 +1,7 @@
 ﻿# Fixing Concurrency Patterns
 
+
+## Video: https://youtu.be/N9kDGrw3DU0
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 4

@@ -1,5 +1,7 @@
 ﻿# Workflow Design Example
 
+
+## Video: https://youtu.be/nr3NnE4GXI4
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 5
