@@ -1,5 +1,7 @@
 ﻿# Deadlocks Explained
 
+
+## Video: https://youtu.be/11Reutr5U5s
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 6

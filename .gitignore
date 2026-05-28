@@ -2,3 +2,6 @@ node_modules/
 .output/
 .outputs/
 *.creds.json
+/.junie
+convo.json
+README.convo.json

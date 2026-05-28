@@ -9,8 +9,8 @@ This assignment begins your semester system. You will use the lecture-provided s
 
 ## What You Must Do
 
-0. **Capture the Lecture Starter System**
-   - Document the baseline system presented in lecture.
+0. **Your A0 assignment should be used for this.**
+   - Document the baseline system 
    - Include:
      - class/object structure
      - responsibilities

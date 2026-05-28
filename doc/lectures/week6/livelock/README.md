@@ -1,5 +1,7 @@
 ﻿# Livelock vs Deadlock
 
+
+## Video: https://youtu.be/04p2J53f1FY
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 6
