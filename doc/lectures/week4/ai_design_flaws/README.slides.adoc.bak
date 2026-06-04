@@ -22,7 +22,7 @@ Dr. Darren Pulsipher
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -93,7 +93,7 @@ D -left-> E : defend
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -166,7 +166,7 @@ A --> R : breaks
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -236,7 +236,7 @@ E --> A : duplicate owner
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -322,7 +322,7 @@ S -left-> L : unclear winner
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -394,7 +394,7 @@ C --> L : record loser
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -469,7 +469,7 @@ I -left-> IP : defend
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold

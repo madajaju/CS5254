@@ -1,5 +1,7 @@
 ﻿# Centralized vs. Distributed Coordination
 
+
+## Video: https://youtu.be/SY30vTKONMI
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 7

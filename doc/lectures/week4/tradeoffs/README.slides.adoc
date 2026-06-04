@@ -24,7 +24,7 @@
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -92,7 +92,7 @@ T --> P : refine design
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -124,7 +124,7 @@ X --> R : increases risk
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -156,7 +156,7 @@ M --> MC : needs guards
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -195,7 +195,7 @@ L --> U : affects latency
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -230,7 +230,7 @@ FAILED --> DRAFT : repair and retry
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -262,7 +262,7 @@ S --> A : claim succeeded
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -302,7 +302,7 @@ S --> B : also appears accepted
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -361,7 +361,7 @@ G -> W : stale write wins
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -394,7 +394,7 @@ C --> R : differs
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -424,7 +424,7 @@ S --> B : PROCESSING version 8
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -464,7 +464,7 @@ S -> O : return accepted or rejected
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -513,7 +513,7 @@ C2 --> C3 : protects invariant
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -584,7 +584,7 @@ A --> D : justify
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold

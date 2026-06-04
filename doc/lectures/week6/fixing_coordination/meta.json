@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 6,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "fixing_coordination",
+  "source": "doc/lectures/week6/fixing_coordination/README.md",
+  "videoPath": "doc/lectures/week6/fixing_coordination/.output/output.mp4",
+  "youtube_title": "Fixing Coordination | CS 5254 Week 6",
+  "summary": "Two components each wait for the other to make progress.",
+  "youtube_description": "Two components each wait for the other to make progress. Logs show activity, but the workflow never reaches completion. The code is locally reasonable, yet the coordination contract is incomplete. What design rule would make progress observable and defensible?\n\nThis CS 5254 Week 6 lecture explores fixing coordination and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "fixing coordination",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "explicit wait states",
+    "lock ordering",
+    "idempotent transitions",
+    "timeouts & recovery",
+    "coordination boundary"
+  ]
+}

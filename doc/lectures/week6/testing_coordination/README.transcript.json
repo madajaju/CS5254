@@ -1,0 +1,62 @@
+[
+  {
+    "slide": 1,
+    "topic": "Testing Coordination",
+    "text": "Welcome to testing coordination. The key idea is that we are not just checking whether individual methods work in isolation. We are asking whether progress, ordering, and ownership still hold when the system is under pressure. A design can look perfectly fine on a happy path and still fail the moment timing, retries, or parallel work enter the picture."
+  },
+  {
+    "slide": 2,
+    "topic": "Framing the design pressure",
+    "text": "Let's start with the framing. Testing coordination is about interaction, not isolated methods. A common mistake is to say, \"the code passed my unit test, so it's correct.\" What really matters is whether two objects, or two steps in a workflow, still agree when they are exercised together. If the system only looks correct when everything happens in order, then the design is still fragile."
+  },
+  {
+    "slide": 3,
+    "topic": "Joint testing",
+    "text": "The key idea here is to test the relationship between two components, not just their individual behavior. When Object A and Object B interact, the important question is whether the shared invariant still holds. That invariant might be about state, ownership, or the order of events. A repeatable test matters because it gives you evidence that the interaction is stable instead of merely lucky."
+  },
+  {
+    "slide": 4,
+    "topic": "Artificial latency",
+    "text": "Here we deliberately slow one branch down. That matters because latency is often what reveals hidden assumptions. If one path finishes quickly and another path stalls, the coordinator has to behave correctly while waiting. This is where you can expose races, blocked progress, or stale decisions. The goal is not to make the system slower for its own sake, but to force the design to prove it can still make progress."
+  },
+  {
+    "slide": 5,
+    "topic": "Small-scale chaos testing",
+    "text": "This is a small version of chaos testing: randomly changing the order of incoming signals to see whether the handler still behaves correctly. Imagine two or three completion events arriving in a different order than the code expected. If the design secretly depends on one specific sequence, this test will uncover it. The hidden assumption is usually that events arrive in the same order they were issued, and that's often not a safe assumption."
+  },
+  {
+    "slide": 6,
+    "topic": "Coordination boundary",
+    "text": "The boundary is the point where independent objects must agree on ordering, ownership, or progress. This is where design pressure becomes visible. One component may request work, another may confirm it, and a third may decide whether the workflow can advance. The important engineering question is: what rule decides that the system is allowed to move forward? If that rule is implicit, the system is harder to trust under concurrency."
+  },
+  {
+    "slide": 7,
+    "topic": "Failure evidence",
+    "text": "When coordination fails, you need evidence that makes the problem reconstructable. Logs, traces, interleavings, and repeatable failures are not just debugging aids; they are the proof that a timing or ordering assumption was wrong. A vague statement like \"it got stuck\" is not enough. You want correlation IDs, state transitions, and a reproducible run so a reviewer can see exactly how the failure happened."
+  },
+  {
+    "slide": 8,
+    "topic": "Corrective design",
+    "text": "Once the invariant is clear, the correction has to protect that invariant directly. You might add a guard, make the operation idempotent, expose state more clearly, or add observability so the transition is visible. But the trade-off is real: stronger protection usually means more metadata, more recovery logic, or more coordination overhead. The fix is not free, and good design work makes that cost explicit."
+  },
+  {
+    "slide": 9,
+    "topic": "Worked example: order workflow",
+    "text": "Let's apply this to an order workflow. The order service creates the order, the coordinator reserves inventory, payment is captured, and only then can shipping proceed. The protected property is simple to state but easy to violate: an order should ship only after inventory is reserved and payment is confirmed exactly once. That is the kind of invariant you want to make visible in code, logs, and tests."
+  },
+  {
+    "slide": 10,
+    "topic": "Failure scenario: stale or late completion",
+    "text": "Now imagine the uncomfortable version. The payment callback is waiting on inventory, and inventory status is waiting on payment, so the workflow never advances. Or worse, a late callback arrives after a timeout and the system makes the wrong decision from stale state. This failure is hidden in the baseline because the happy path never forces the conflict. Your evidence should capture the stuck state, the timing, and the exact ordering that caused it."
+  },
+  {
+    "slide": 11,
+    "topic": "Design response",
+    "text": "The design response is to protect progress explicitly. A state-machine guard rejects invalid moves, ordered acquisition avoids circular waiting, timeout handling prevents indefinite blocking, and compensation gives you a way to recover safely. The trade-off is that the workflow becomes more complex, but that complexity is serving the invariant instead of hiding it. This is how you turn a fragile sequence into a defensible system."
+  },
+  {
+    "slide": 12,
+    "topic": "Trade-off summary",
+    "text": "The trade-off summary is the decision tool. A simple baseline is easy to explain, but it often hides pressure assumptions. A guarded transition protects the invariant directly, while explicit coordination makes dependencies visible but can introduce waiting. Idempotent, retry-safe design helps with duplicates and partial failure, but it needs deduplication or keying. The practical question is always: which mechanism best protects the property you care about, and what cost are you willing to carry?"
+  }
+]

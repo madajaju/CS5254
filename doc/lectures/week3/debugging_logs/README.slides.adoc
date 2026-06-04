@@ -25,7 +25,7 @@ Dr. Darren Pulsipher
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -95,7 +95,7 @@ I --> P : defended
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -167,7 +167,7 @@ Question --> Evidence : before trust
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -237,7 +237,7 @@ note over L: Sort by entity and timestamp, then test invariant
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -305,7 +305,7 @@ Cleaned --> [*]
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -375,7 +375,7 @@ S -> V
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -438,7 +438,7 @@ O --> D : evidence
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -512,7 +512,7 @@ T --> I
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -575,7 +575,7 @@ W --> C
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -654,7 +654,7 @@ system emits side effect
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -728,7 +728,7 @@ L -> C
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -795,7 +795,7 @@ I -> E
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -864,7 +864,7 @@ C -> R
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -938,7 +938,7 @@ L -> P
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -1000,7 +1000,7 @@ Inv --> Fix : state first
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -1085,7 +1085,7 @@ T --> E : validate
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -1155,7 +1155,7 @@ L --> B : compare
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -1229,7 +1229,7 @@ L --> A1 : evidence
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -1299,7 +1299,7 @@ T --> D : supports or refutes
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold

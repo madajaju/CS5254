@@ -28,7 +28,7 @@
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -70,7 +70,7 @@ Decision --> Boundary : refines
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -107,7 +107,7 @@ B --> I : protects
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -147,7 +147,7 @@ D -> E : records
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -180,7 +180,7 @@ I --> P : ordering risk
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -213,7 +213,7 @@ C --> S : ship order
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -252,7 +252,7 @@ SHIPPED --> [*] : complete
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -284,7 +284,7 @@ P -> H : masks pressure
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -318,7 +318,7 @@ PL --> O : progress blocked
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -349,7 +349,7 @@ C --> B : no progress visible
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -380,7 +380,7 @@ O --> C : invariant needs guard
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -421,7 +421,7 @@ N --> D : violates exactly once
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -464,7 +464,7 @@ D -> R : documents
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -491,7 +491,7 @@ SHIPPED --> [*] : shipment recorded
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -523,7 +523,7 @@ T --> R : exits
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -608,7 +608,7 @@ and: duplicate shipment attempts must be rejected
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold

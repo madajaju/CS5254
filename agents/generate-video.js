@@ -245,7 +245,8 @@ function captureSlidePngs(lectureDirectory, expectedSlideCount) {
     }
 
     if (pngFiles.length !== expectedSlideCount) {
-        die(`Rendered slide count ${pngFiles.length} does not match slide deck count ${expectedSlideCount}: ${lectureDirectory}`);
+        const message = `Rendered slide count ${pngFiles.length} does not match slide deck count ${expectedSlideCount}: ${lectureDirectory}`;
+        throw new Error(message);
     }
 
     return pngFiles;
@@ -289,9 +290,12 @@ function conversationPath(lectureDirectory) {
 function slideOutline(lectureDirectory) {
     const slidesPath = path.join(lectureDirectory, SLIDES_ADOC);
     const slidesContent = fs.readFileSync(slidesPath, 'utf8');
+
+    // Reveal.js renders the document title (= ...) as a title slide, then
+    // section headings (==, ===, ...) as normal slides.
     return slidesContent
         .split(/\r?\n/)
-        .filter(line => /^= [^=]|^== [^=]/.test(line))
+        .filter(line => /^=\s+[^=]|^==+\s+[^=]/.test(line))
         .map((line, index) => ({
             slide: index + 1,
             topic: line.replace(/^=+\s+/, '').trim(),
@@ -410,7 +414,8 @@ function createVideoSegments(lectureDirectory, pngFiles, audioFiles) {
     }
 
     if (pngFiles.length !== audioFiles.length) {
-        die(`${path.basename(lectureDirectory)} has ${pngFiles.length} PNG(s) and ${audioFiles.length} audio file(s). Refusing to create a misaligned video.`);
+        let message = `${path.basename(lectureDirectory)} has ${pngFiles.length} PNG(s) and ${audioFiles.length} audio file(s). Refusing to create a misaligned video.`;
+        throw new Error(message);
     }
 
     fs.mkdirSync(segmentsDirectory, {recursive: true});
@@ -537,11 +542,16 @@ function main() {
         ensureRevealHtml(lectureDirectory);
         conversationPath(lectureDirectory);
 
-        const studentVoice = resolveStudentVoice(options.studentVoice, index);
-        if (generateLectureVideo(lectureDirectory, options.apiKey, studentVoice, options.output)) {
-            builtCount += 1;
-        } else {
-            skippedCount += 1;
+        try {
+            const studentVoice = resolveStudentVoice(options.studentVoice, index);
+            if (generateLectureVideo(lectureDirectory, options.apiKey, studentVoice, options.output)) {
+                builtCount += 1;
+            } else {
+                skippedCount += 1;
+            }
+        }
+        catch(e) {
+            console.error("Could not generate video for lecture:", lectureDirectory, e);
         }
     });
 

@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 7,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "ai_coordination",
+  "source": "doc/lectures/week7/ai_coordination/README.md",
+  "videoPath": "doc/lectures/week7/ai_coordination/.output/output.mp4",
+  "youtube_title": "AI Coordination Designs: Critique & Validation | CS 5254 Week 7",
+  "summary": "A student asks AI for a coordination design and receives confident code with a missing ordering guard.",
+  "youtube_description": "A student asks AI for a coordination design and receives confident code with a missing ordering guard. The answer is useful as a draft, but unsafe as evidence. Under concurrent execution the workflow stalls or violates an invariant. How should engineers use AI-generated designs without surrendering responsibility for correctness?\n\nThis CS 5254 Week 7 lecture explores AI coordination designs: critique & validation and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "ai coordination designs",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "coordination hallucinations",
+    "dependency neglect",
+    "validation by trace",
+    "coordination boundary",
+    "progress guarantee"
+  ]
+}

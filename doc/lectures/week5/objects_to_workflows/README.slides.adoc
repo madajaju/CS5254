@@ -17,7 +17,7 @@
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -57,7 +57,7 @@ C -> I : must preserve
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -97,7 +97,7 @@ C -up-> D : next dependency
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -139,7 +139,7 @@ P -> V : release allowed
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -175,7 +175,7 @@ S --> C : shipment recorded
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -210,7 +210,7 @@ COMPENSATING --> [*] : recovery complete
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -242,7 +242,7 @@ G --> X : missing fact
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -284,7 +284,7 @@ system emits side effect
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -313,7 +313,7 @@ T2 --> IL : wait for inventory status
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -344,7 +344,7 @@ T2 --> IL : waits for
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -383,7 +383,7 @@ P --> L : two side effects
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -455,7 +455,7 @@ D --> E : proves result
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -496,7 +496,7 @@ V --> R : unsafe
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
@@ -537,7 +537,7 @@ S -> R : supports
 ----
 @startuml
 skinparam BackgroundColor #123456
-skinparam DefaultFontColor white
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold

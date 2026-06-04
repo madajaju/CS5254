@@ -1,0 +1,281 @@
+= Deadlocks Explained
+
+== Deadlock
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Thread A" as A
+rectangle "Thread B" as B
+rectangle "Resource 1" as R1
+rectangle "Resource 2" as R2
+
+A --> R1 : holds
+R1 --> A : waits for
+B --> R2 : holds
+R2 --> B : waits for
+A -> R2 : requests
+B --> R1 : requests
+@enduml
+----
+
+== The Four Conditions
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Mutual Exclusion" as M
+rectangle "Hold and Wait" as H
+rectangle "No Preemption" as N
+rectangle "Circular Wait" as C
+M --> H
+H -> N
+N -> C
+C --> M : enables
+@enduml
+----
+
+== Circular Wait
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Thread A" as A
+rectangle "Resource 1" as R1
+rectangle "Resource 2" as R2
+rectangle "Thread B" as B
+A --> R1 : holds
+A --> R2 : waits for
+B --> R2 : holds
+B --> R1 : waits for
+@enduml
+----
+
+== Coordination Boundary
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Order API" as API
+rectangle "Coordinator" as C
+rectangle "Inventory" as I
+rectangle "Payment" as P
+API --> C : request
+C --> I : reserve
+C --> P : charge
+I --> C : reserved
+P --> C : paid
+@enduml
+----
+
+== Progress Guarantee
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Work Started" as S
+rectangle "Waiting" as W
+rectangle "Completed" as C
+S --> W : blocked
+W -> C : eventually
+S --> C : direct path
+@enduml
+----
+
+== System View
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Deadlocks Explained" as T
+rectangle "Deadlock" as D
+rectangle "Coffman Conditions" as F
+rectangle "Circular Wait" as C
+rectangle "Evidence" as E
+rectangle "Design Response" as R
+T --> D
+D -> F
+F --> C
+C -> E
+E --> R
+@enduml
+----
+
+== Failure Interleaving
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Coordinator" as C
+participant "Payment" as P
+participant "Inventory" as I
+C --> I : reserve
+I -> C : waiting
+C --> P : charge
+P -> C : waiting
+@enduml
+----
+
+== Design Response
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Invariant" as I
+rectangle "Guard" as G
+rectangle "Timeout" as T
+rectangle "Recovery" as R
+I --> G : check
+G -> T : if blocked
+T --> R : compensate
+G -> R : reject
+@enduml
+----
+
+== Evidence Flow
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Claim" as C
+rectangle "Trace" as T
+rectangle "Repeatable Test" as R
+rectangle "Before / After" as B
+rectangle "Decision" as D
+C --> T
+T -> R
+R --> B
+B -> D
+@enduml
+----
+
+== Trade-Off Comparison
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach
+|Strength
+|Weakness
+|Best Use
+
+|Simple baseline
+|Easy to build
+|Hides pressure assumptions
+|First draft
+
+|Guarded transition
+|Protects invariant directly
+|Needs careful modeling
+|Stateful workflows
+
+|Explicit coordination
+|Makes ordering visible
+|Can create waiting
+|Multi-object steps
+
+|Observability-first
+|Strong evidence
+|Extra instrumentation
+|Validation and defense
+|===

@@ -1,5 +1,7 @@
 ﻿# Testing Coordination
 
+
+## Video: https://youtu.be/Fi4rM5sNQWQ
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 6

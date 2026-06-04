@@ -1,0 +1,57 @@
+[
+  {
+    "slide": 1,
+    "topic": "Deadlocks Explained",
+    "text": "Welcome. In this lecture, we are looking at deadlocks as a real design pressure, not just a vocabulary term. The key idea is that a system can look correct in a simple run and still fail when threads, resources, or workflow steps overlap. Our goal is to learn how to name the invariant, recognize the failure, and defend a correction with evidence."
+  },
+  {
+    "slide": 2,
+    "topic": "Deadlock",
+    "text": "A deadlock happens when two or more threads are each waiting for something the other one is holding, and nobody can move forward. Imagine Thread A holding one resource and requesting another, while Thread B does the opposite. The uncomfortable part is that the system may have been working just fine until that exact interleaving appeared. That is why engineers have to reason about progress, not just correctness in the happy path."
+  },
+  {
+    "slide": 3,
+    "topic": "The Four Conditions",
+    "text": "Deadlock does not appear by magic; it usually requires four conditions to line up. Those are mutual exclusion, hold and wait, no preemption, and circular wait. A common mistake is to talk about locks in general without asking which of these conditions the design actually permits. If you can identify the conditions, you can decide whether to prevent them, detect them, or recover from them."
+  },
+  {
+    "slide": 4,
+    "topic": "Circular Wait",
+    "text": "Circular wait is the classic pattern where Thread A holds Resource 1 and waits for Resource 2, while Thread B holds Resource 2 and waits for Resource 1. This matters because it gives us a concrete shape to look for in real systems. In the podcast example or the order-processing example, the exact names change, but the engineering problem is the same: two independent actions create a loop of dependency that blocks progress."
+  },
+  {
+    "slide": 5,
+    "topic": "Coordination Boundary",
+    "text": "The key idea here is that deadlocks often appear at a coordination boundary, where separate objects or services have to agree on ordering and ownership. In the order flow, the API, coordinator, inventory, and payment components all depend on each other in a specific sequence. If the boundary is not explicit, the system may appear simple in code but behave unpredictably under load or retries. That is why we make the handoff visible and tie it to a clear invariant."
+  },
+  {
+    "slide": 6,
+    "topic": "Progress Guarantee",
+    "text": "A progress guarantee means the work eventually finishes instead of waiting forever. That sounds obvious, but in concurrent systems it is easy to lose. A design can be functionally correct and still fail to make progress if a thread waits too long or a workflow step never gets released. When we evaluate a system, we have to ask not only, 'Does it do the right thing?' but also, 'Will it keep moving under pressure?'"
+  },
+  {
+    "slide": 7,
+    "topic": "System View",
+    "text": "Zooming out, the lecture topic connects deadlock to evidence and then to design response. That order matters. First we name the pressure, then we collect traces or logs that prove what happened, and only then do we choose a fix. This is the professional habit: do not jump straight to a tool. Start with the invariant, then use the evidence to justify the design decision."
+  },
+  {
+    "slide": 8,
+    "topic": "Failure Interleaving",
+    "text": "Let's pause here and make the failure concrete. The coordinator asks inventory to reserve, then gets stuck waiting while payment is also waiting on the coordinator. Each side is doing what it was told, but the combined behavior is a stall. This is hidden in the baseline because the sequential version never forces the competing waits to overlap. To prove the failure, you need a timeline, correlation IDs, and a repeatable interleaving that leaves the workflow visibly stuck."
+  },
+  {
+    "slide": 9,
+    "topic": "Design Response",
+    "text": "The protected property here is workflow progress with the prerequisite ordering made explicit. The mechanism might be a guard on state transitions, ordered acquisition, a timeout, or compensation when a prerequisite cannot be satisfied. The trade-off is that the fix is not free: you add workflow state, recovery paths, and sometimes extra waiting or rejection logic. That is still better than pretending the system is safe when it is only lucky."
+  },
+  {
+    "slide": 10,
+    "topic": "Evidence Flow",
+    "text": "This is the evidence chain you should be able to defend in the Integrity Packet. You start with a claim, then back it with traces, a repeatable test, and a before-and-after comparison. A reviewer should be able to ask, 'What exact state proves the workflow is allowed to move forward?' If you cannot answer that clearly, the design is not yet well defended. The goal is to make the failure and the correction equally visible."
+  },
+  {
+    "slide": 11,
+    "topic": "Trade-Off Comparison",
+    "text": "Here we compare the main approaches. A simple baseline is easy to build, but it hides pressure assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes dependencies visible, but it can introduce waiting. Observability-first designs give you strong evidence for review, but they take extra instrumentation work. The right choice depends on which risk matters most in your system and in your assignment."
+  }
+]

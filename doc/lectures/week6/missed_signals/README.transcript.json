@@ -1,0 +1,52 @@
+[
+  {
+    "slide": 1,
+    "topic": "Missed Signals",
+    "text": "Welcome to Missed Signals. The key idea here is that a system can look correct when you run it once, yet still fail when timing changes. In this lecture, we focus on progress that depends on one component noticing something another component has already done. That is where coordination bugs become visible, and where we have to reason in terms of invariants, evidence, and defensible design choices."
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Narrative",
+    "text": "Imagine two components each waiting for the other to move first. You still see logs, so it feels like work is happening, but the workflow never finishes. A common mistake is to assume that locally reasonable code automatically creates a correct system-level contract. Here, the real question is whether progress is observable and whether you can defend that claim with evidence."
+  },
+  {
+    "slide": 3,
+    "topic": "Lost Signal",
+    "text": "The lost signal problem happens when one thread sends a notification before the other thread is actually waiting for it. After that, the waiting thread can block forever, even though the signal was technically emitted. This matters because the happy path may pass, but under real timing pressure the system can stall, hide the failure, or produce misleading logs. The design lesson is to make the relevant state explicit and validate progress with repeatable evidence."
+  },
+  {
+    "slide": 4,
+    "topic": "Race to Wait",
+    "text": "This is the closely related race to wait. A thread checks a condition, sees that it is not ready, and then gets preempted before it starts waiting. In the meantime, the condition becomes true, but nobody is listening anymore. The key idea here is that the bug is not just about waiting; it's about the timing window between checking and blocking. That gap has to be closed by design, not by hope."
+  },
+  {
+    "slide": 5,
+    "topic": "State-Based Signaling",
+    "text": "A safer approach is to signal based on current state, not just on a momentary event. Instead of asking, \"Did I hear the signal?\" the code asks, \"Is the object in the state that makes progress legal?\" That changes the problem from a fragile event handoff into a durable state check. The trade-off is that you need clear state modeling, but in return you get behavior that survives timing pressure much better."
+  },
+  {
+    "slide": 6,
+    "topic": "Coordination Boundary",
+    "text": "This is the boundary where independent objects have to agree on ordering, ownership, or progress. A common mistake is to treat the boundary as an implementation detail, when in fact it is where the invariant can break. Imagine one object asking another to proceed before the dependency is ready: that is exactly where missed signals appear. Professionally, this boundary is where you must decide what state proves progress is safe."
+  },
+  {
+    "slide": 7,
+    "topic": "Progress Guarantee",
+    "text": "The property we care about here is progress guarantee: work eventually completes instead of waiting forever. That sounds simple, but it has real consequences for design. If you cannot explain why progress will continue under concurrent execution, then the system is still depending on a hidden assumption. The important habit is to make the guarantee explicit, then support it with a control, a test, and evidence."
+  },
+  {
+    "slide": 8,
+    "topic": "Failure Interleaving",
+    "text": "Now consider a concrete failure interleaving. The coordinator waits for payment, payment waits for inventory, and inventory is waiting on the coordinator. Nobody is wrong locally, but together they form a cycle, and the order never moves forward. This is the uncomfortable part: the system can appear busy while actually being stuck. When you analyze this kind of failure, capture the ordering, the entity IDs, and the wait relationships so the evidence proves the stall instead of merely hinting at it."
+  },
+  {
+    "slide": 9,
+    "topic": "Design Response",
+    "text": "The protected property is workflow progress under pressure. To protect it, you introduce a state guard, structured logging, and a repeatable test that can reproduce the failure and then confirm the correction. The trade-off is real: you add metadata, recovery logic, and more design discipline. But that cost is exactly what buys you a defensible fix instead of a fragile one."
+  },
+  {
+    "slide": 10,
+    "topic": "Trade-Off Comparison",
+    "text": "At this point, compare the available approaches. A simple baseline is easy to explain, but it often hides the timing assumption. A guarded transition protects the invariant directly, while explicit coordination makes dependencies visible but can introduce waiting or bottlenecks. An observability-first design helps you defend your conclusion with evidence, which is especially valuable when you need to show before-and-after behavior."
+  }
+]

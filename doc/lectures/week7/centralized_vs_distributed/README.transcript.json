@@ -2,91 +2,61 @@
   {
     "slide": 1,
     "topic": "Centralized vs. Distributed Coordination",
-    "text": "Welcome to our lecture on Centralized vs. Distributed Coordination. Today, we are going to explore how these two approaches impact system design, particularly under concurrency. We will analyze the challenges and trade-offs associated with each method."
+    "text": "Welcome everyone. Today we are looking at centralized versus distributed coordination in a concurrent, stateful system. The key idea is that a design can look correct when you run it once, but still fail when timing, retries, or multiple actors put pressure on the workflow. Our job is to identify the coordination boundary, make the invariant explicit, and then defend the design with evidence rather than hope."
   },
   {
     "slide": 2,
-    "topic": "Learning Objectives",
-    "text": "In this session, we aim to achieve several key learning objectives. First, we will analyze the design pressures that arise in coordination systems. Next, we will diagnose hidden assumptions within these designs. Additionally, we'll evaluate failure evidence using logs and outputs. Lastly, we will learn to design controls that preserve invariants and defend our approach in the Integrity Packet."
+    "topic": "Coordination Boundary",
+    "text": "A coordination boundary is the point where independent parts of the system have to agree on ordering, ownership, or progress. That boundary matters because it tells us exactly where correctness can be lost. If we ignore it, the system may still pass a simple test, but under pressure we can get duplicate work, blocked progress, or confusing logs. The professional habit here is to expose the invariant, log the critical transition, and prove the behavior with repeatable evidence."
   },
   {
     "slide": 3,
-    "topic": "Opening Narrative",
-    "text": "Imagine a scenario where two components are waiting for each other, yet their workflow never completes. You might see logs indicating activity, but the coordination contract between these components is clearly not functioning as expected. The critical question we’ll explore is: What design principles ensure that progress is both observable and defensible?"
+    "topic": "Progress Guarantee",
+    "text": "A progress guarantee means the work eventually completes instead of waiting forever. This is one of those properties that feels obvious until a workflow stalls in production. When a prerequisite never arrives, or arrives late, the system can sit in a waiting state that looks busy but never reaches completion. The important question is not just whether the code can start work, but whether it can reliably finish work or recover when the expected event does not appear."
   },
   {
     "slide": 4,
-    "topic": "Coordination Boundary",
-    "text": "Let’s dive into the coordination boundary. This is defined as the point where independent objects must agree on certain conditions, like ordering or ownership. It's crucial that this boundary is explicit, especially when the system is under pressure. If we fail to acknowledge this boundary, we risk creating issues like duplicate work or blocked progress. As designers, it's important to expose relevant invariants and validate our systems through testing."
+    "topic": "Contention",
+    "text": "Contention happens when concurrent actors compete for the same resource, lock, state, or signal. That competition is where hidden assumptions become visible. If two workers both believe they can update the same object, or both think they own the next step, then stale reads and duplicate updates become possible. The issue is not merely performance; contention changes the meaning of the workflow, so we have to design for it deliberately."
   },
   {
     "slide": 5,
-    "topic": "Progress Guarantee",
-    "text": "Next, we turn our attention to the progress guarantee. This is essential to ensure that our operations will complete eventually, rather than risk waiting indefinitely. Just like the coordination boundary, failures in this area can lead to severe issues, including blocked states. Thus, we need to be clear about the invariants we are maintaining and validate them through robust testing."
+    "topic": "Coordination Model",
+    "text": "The key idea here is that coordination is not an isolated implementation detail; it is part of the overall design pressure. We start with the topic, move to the boundary where agreement is required, then ask what pressure can break it, and finally demand evidence before making a design decision. That loop matters because a good explanation connects the invariant to the observed behavior and then to the corrective action."
   },
   {
     "slide": 6,
-    "topic": "Contention",
-    "text": "Let’s explore contention, which refers to the competition between concurrent actors for shared resources. It's vital that this competition is explicit when the system is under pressure. Again, failing to recognize contention can lead to duplicate work and stalling workflows. As with our previous concepts, our design implications must prioritize exposing invariants and testing to ensure stability."
+    "topic": "Happy Path Assumption",
+    "text": "A common mistake is to let a single successful run convince us the design is sound. In the happy path, the sequence looks clean and the result looks correct, but that often hides a timing assumption. Maybe the operation only works because events happened in the expected order, or because there was no overlap. Once pressure arrives, that hidden assumption becomes the failure point."
   },
   {
     "slide": 7,
-    "topic": "System Architecture View",
-    "text": "This diagram illustrates the relationships between the key concepts of our lecture. At the center, we have the tension between centralized and distributed coordination. Each subsequent concept—coordination boundary, progress guarantee, contention, validation evidence, and design decisions—interconnects, showing how they influence one another. The central question remains whether systems maintain these invariants under various conditions."
+    "topic": "Failure Scenario",
+    "text": "Imagine two workers both reading the same old value before either one finishes writing. Each worker acts locally reasonable, but together they produce the wrong outcome because they were not coordinating on the same state. This is the uncomfortable part: the logs may show activity, but the shared state still ends up incorrect. That is why we ask for correlation IDs, state transitions, and a repeatable test run that captures the failure instead of just describing it."
   },
   {
     "slide": 8,
-    "topic": "Worked Example",
-    "text": "To ground our understanding, let’s consider a practical example within the podcast domain, where we compare centralized versus distributed coordination. We’ll reflect on a naive design assumption that operational processes occur once and in a specific order, which can be misleading in real-world applications."
+    "topic": "Design Response",
+    "text": "The protected property here is the invariant, and the mechanism is whatever keeps that invariant visible and enforceable. That might be a guard on the state transition, an idempotency check, explicit coordination, or a recovery path such as compensation. The trade-off is real: once you add protection, you also add state, branching, retries, or recovery logic. The fix is safer, but it is not free."
   },
   {
     "slide": 9,
-    "topic": "Naive Implementation",
-    "text": "The naive implementation we typically encounter is quite simple. An actor performs an operation, the system reads the current state, applies a transition, and emits a side effect. At first glance, this seems straightforward, but it overlooks potential concurrency issues that can arise in practice."
+    "topic": "Evidence Flow",
+    "text": "This is where the engineering judgment becomes defensible. A test produces logs, the logs correlate to traces, the trace supports the claim, and the claim validates the design choice. If you cannot reconstruct the failure from the evidence, then the argument is too vague. So the question to ask is simple: what exact state or transition proves the workflow is allowed to move forward?"
   },
   {
     "slide": 10,
-    "topic": "Failure Scenario",
-    "text": "Here, we see the potential failure scenarios. Imagine overlapping executions or delayed deliveries leading to stale states. Such problems highlight a critical mismatch between our design assumptions and what the execution model actually presents, resulting in late executions and stuck workflows."
+    "topic": "Trade-Off Comparison",
+    "text": "Here we compare the main approaches. A simple baseline is easy to explain, but it often hides pressure assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes dependencies visible, though it can introduce waiting or even bottlenecks. And an idempotent design handles retries and duplicates well, but it needs deduplication and side-effect control. The right choice depends on which risk is most important in your system."
   },
   {
     "slide": 11,
-    "topic": "Corrected Design Direction",
-    "text": "To improve our design, we must start by naming the invariant and making our transitions observable. Adding correctness controls—such as version checks and idempotency keys—will help prevent invalid interleavings. This proactive approach shifts the focus from simply hoping for correct behavior to explicitly proving it."
+    "topic": "Assignment Connection",
+    "text": "This lecture connects directly to A2. What you should demonstrate is not just a concept in the abstract, but the real object, workflow, event, failure, or recovery mechanism in your own project. You need concrete evidence: runnable commands, structured logs, before-and-after behavior, diagrams, and an Integrity Packet explanation that defends the decision. In other words, show that you can identify the coordination problem, reproduce it, and justify the fix."
   },
   {
     "slide": 12,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "Let’s discuss some common failure modes and anti-patterns. One symptom might be a system passing a happy-path demo without testing under pressure. This occurs because the tests do not expose design weaknesses. To correct this, we should preserve the happy-path tests but also implement failure-focused tests targeting specific invariants."
-  },
-  {
-    "slide": 13,
-    "topic": "Trade-Off Analysis",
-    "text": "In our trade-off analysis, we see several approaches and their corresponding strengths and weaknesses. For example, a simple baseline is easy to implement but may hide critical timing assumptions. Meanwhile, guarded state transitions directly protect the invariant but demand careful modeling. Each approach has its own context of use, so it's essential to choose wisely."
-  },
-  {
-    "slide": 14,
-    "topic": "Practical Application",
-    "text": "As we wrap up, think about applying what we've learned tomorrow. Identify the invariant most relevant to our coordination discussion. Write both a sequential scenario and a pressure scenario that might expose failure. Adding operation IDs to your logs will be crucial when running your tests. And remember to capture before-and-after evidence if you implement any fixes."
-  },
-  {
-    "slide": 15,
-    "topic": "Assignment Integration",
-    "text": "This lecture directly aligns with assignment two, where you should connect the concepts we've discussed to your semester project. Show how the relevant objects, workflows, events, and recovery mechanisms apply within your domain. It’s vital to provide structured evidence and a robust defense for your design choices."
-  },
-  {
-    "slide": 16,
-    "topic": "Validation Questions",
-    "text": "Finally, we will pose some validation questions to reflect on what we've learned. Consider the most relevant invariant to this lecture. Identify any hidden assumptions that might exist and think about how to force a failure in a repeatable test. We’ll also explore what evidence proves a failure occurred and which design mechanism you would choose first, alongside its trade-offs."
-  },
-  {
-    "slide": 17,
-    "topic": "Summary",
-    "text": "In summary, understanding the dynamics of centralized versus distributed coordination enriches our reasoning about system correctness. The goal is to connect these concepts to observable behavior and defensible trade-offs. Ultimately, a design must be explainable, withstand stress testing, and be validated through concrete evidence."
-  },
-  {
-    "slide": 18,
-    "topic": "Further Reading",
-    "text": "As you further explore the topic, consider searching for information on failure modes in centralized versus distributed coordination and design trade-offs in concurrency. Additionally, delve into structured logging and correlation IDs, invariants in stateful object-oriented systems, and common coordination patterns to deepen your understanding."
+    "topic": "Practical Checklist",
+    "text": "Before you finish this topic, make sure you can do a few concrete things. Identify the invariant or progress property. Write one normal scenario and one pressure scenario. Add correlation IDs to your logs. Capture evidence before and after any fix. And then update the Integrity Packet so it records the assumption, the validation, and the remaining risk. That is the habit that turns a working implementation into a defensible design."
   }
 ]

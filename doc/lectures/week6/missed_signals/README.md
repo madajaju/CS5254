@@ -1,5 +1,7 @@
 ﻿# Missed Signals
 
+
+## Video: https://youtu.be/f96ml66C--Y
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 6

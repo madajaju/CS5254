@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 7,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "blocking_vs_nonblocking",
+  "source": "doc/lectures/week7/blocking_vs_nonblocking/README.md",
+  "videoPath": "doc/lectures/week7/blocking_vs_nonblocking/.output/output.mp4",
+  "youtube_title": "Blocking vs. Non-Blocking Coordination | CS 5254 Week 7",
+  "summary": "Two components each wait for the other to make progress.",
+  "youtube_description": "Two components each wait for the other to make progress. Logs show activity, but the workflow never reaches completion. The code is locally reasonable, yet the coordination contract is incomplete. What design rule would make progress observable and defensible?\n\nThis CS 5254 Week 7 lecture explores blocking vs. non-blocking coordination and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "blocking vs non-blocking coordination",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "blocking",
+    "non-blocking",
+    "thread starvation",
+    "callbacks and promises",
+    "coordination boundary"
+  ]
+}

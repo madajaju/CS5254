@@ -1,201 +1,310 @@
 = Blocking vs. Non-Blocking Coordination
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Learning Objectives
+== Lecture Goals
+* Analyze blocking vs. non-blocking coordination as a design pressure.
+* Identify hidden assumptions that make a concurrent workflow look correct.
+* Use logs, traces, and repeatable tests as evidence.
+* Choose a correction that preserves the invariant.
+* Connect the conclusion to Integrity Packet and A2 work.
 
-* Analyze the design pressure from blocking vs. non-blocking coordination
-* Diagnose hidden assumptions in concurrent systems
-* Evaluate failure evidence: logs, traces, interleavings
-* Design corrections preserving the invariant
-* Defend the approach in the Integrity Packet
-
-== Opening Narrative
-
-* Two components wait for each other
-* Logs show activity, but workflow halts
-* Coordination contract is incomplete
-* What design rules make progress observable?
-
-== Core Concept: Blocking
-
-* Definition: Thread stops and waits
-* Importance: Must be explicit before trust
-* Mechanism: Through state, timing, behavior
-* Failure Mode: Leads to duplicates, stale state, or misleading evidence
-* Design Implication: Expose invariant, log transition, validate behavior
-
-== Core Concept: Non-Blocking
-
-* Definition: Thread continues while waiting
-* Importance: Must be explicit before trust
-* Mechanism: Through state, timing, behavior
-* Failure Mode: Same as Blocking
-* Design Implication: Expose invariant, log transition, validate behavior
-
-== Core Concept: Thread Starvation
-
-* Definition: All threads blocked waiting
-* Importance: Must be explicit before trust
-* Mechanism: Through state, timing, behavior
-* Failure Mode: Same as Blocking
-* Design Implication: Expose invariant, log transition, validate behavior
-
-== Core Concept: Callbacks/Promises
-
-* Definition: Handles completion notifications
-* Importance: Must be explicit before trust
-* Mechanism: Through state, timing, behavior
-* Failure Mode: Same as Blocking
-* Design Implication: Expose invariant, log transition, validate behavior
-
-== Core Concept: Coordination Boundary
-
-* Definition: Point of agreement on ordering
-* Importance: Must be explicit before trust
-* Mechanism: Through state, timing, behavior
-* Failure Mode: Same as Blocking
-* Design Implication: Expose invariant, log transition, validate behavior
-
-== System Architecture View
-
-[plantuml, target=architecture, format=svg, width=80%]
+== Topic Map
+[plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
 skinparam shadowing false
 left to right direction
 
-rectangle "Blocking vs. Non-Blocking Coordination" as Topic
-rectangle "Blocking" as A
-rectangle "Non-Blocking" as B
-rectangle "Thread Starvation" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Blocking vs. Non-Blocking\nCoordination" as Topic
+rectangle "Blocking" as Blocking
+rectangle "Non-Blocking" as NonBlocking
+rectangle "Thread Starvation" as Starvation
+rectangle "Validation Evidence" as Evidence
+rectangle "Design Decision" as Decision
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+Topic --> Blocking
+Topic --> NonBlocking
+Blocking --> Starvation
+NonBlocking --> Starvation
+Starvation --> Evidence
+Evidence --> Decision
+Decision --> Topic : refine
+
 @enduml
 ----
 
-== Worked Example: Problem Setup
+== Blocking
+* A thread waits and does no other work.
+* Useful when waiting is explicit and bounded.
+* Risky when waiting hides progress loss.
+* The key question is whether the wait preserves the invariant.
 
-* Podcast Domain: 
-  * Blocking: `Orchestrator` sleeps until `cleaner.clean()`
-  * Non-Blocking: `Orchestrator` requests `Cleaner` while fetching new episodes
-* I/O Wait: Blocking reads vs. asynchronous design
+== Non-Blocking
+* A thread starts work and continues with other tasks.
+* Completion is reported later by callback, promise, or event.
+* Useful when throughput and responsiveness matter.
+* The key question is whether completion is observable and ordered correctly.
 
-== Worked Example: Naive Implementation
+== Coordination Boundary
+* The boundary is where objects must agree on ordering.
+* The boundary is where ownership must be clear.
+* The boundary is where progress can be lost.
+* The boundary is where evidence should be logged.
 
-* Naive design assumptions:
-  * Operation happens once and in order
-  * Method name sounds correct
-  * Sequential test passes
+== Failure Pattern
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam participantBorderColor #123456
+skinparam participantBackgroundColor white
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
+skinparam shadowing false
 
-```text
-actor performs operation
-system reads current state
-system applies transition
-system emits side effect
-```
+participant "Orchestrator" as O
+participant "Cleaner" as C
+participant "Callback" as K
 
-== Worked Example: Failure Scenario
+O --> C : request clean
+C --> O : wait for state
+K --> O : completion signal
+O --> K : blocked by lock
+C --> O : blocked by dependency
 
-* Overlapping execution causes:
-  * Stale state 
-  * Duplicate execution 
-  * Workflow gets stuck 
-* It's a design assumption mismatch, not just syntax.
+@enduml
+----
 
-== Worked Example: Improved Design Direction
+== Thread Starvation
+* All available threads can become blocked.
+* New requests stop making progress.
+* The system may still show activity in logs.
+* The failure is lack of completion, not lack of motion.
 
-* Name the invariant
-* Make transitions observable
-* Add controls like:
-  * Version checks
-  * Idempotency keys
-  * State-machine guards
+== Callback and Promise Flow
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam participantBorderColor #123456
+skinparam participantBackgroundColor white
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
+skinparam shadowing false
 
-== Why Improved Design Is Safer
+participant "Caller" as A
+participant "Async Worker" as B
+participant "Promise/Callback" as P
 
-* Shift from assuming order to proving correctness
-* Reject or recover invalid interleavings with evidence
+A --> B : start operation
+B --> P : register completion
+A --> A : continue other work
+B --> P : complete work
+P --> A : notify done
 
-== Failure Modes and Anti-Patterns
+@enduml
+----
 
-* Symptom: Passes happy-path test.
-  * Why: Test avoids timing or pressure conditions.
-  * Correct: Add failure-focused tests.
-* Symptom: Names a tool, not a design property.
-  * Why: Focus on mechanisms before invariants.
-  * Correct: Write the invariant first.
-* Symptom: Vague evidence.
-  * Why: Logs lack critical IDs or information.
-  * Correct: Capture structured evidence.
+== Hidden Assumptions
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
 
-== Trade-Off Analysis
+rectangle "Happy Path" as H
+rectangle "Single Run" as S
+rectangle "No Delay" as D
+rectangle "No Retry" as R
+rectangle "No Overlap" as O
 
-[cols="1,1,1,1", options="header"]
+H --> S
+S --> D
+D --> R
+R --> O
+
+@enduml
+----
+
+== Evidence to Collect
+* Correlation IDs for each workflow step.
+* State transitions for each object or order.
+* Timestamps for blocking, waiting, and completion.
+* Before and after test output.
+* A repeatable pressure scenario.
+
+== State Transition View
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "CREATED" as C
+rectangle "RESERVED" as R
+rectangle "PAID" as P
+rectangle "READY_TO_SHIP" as S
+rectangle "SHIPPED" as H
+rectangle "COMPENSATING" as X
+
+C --> R : inventory hold succeeds
+R --> P : payment capture succeeds
+P --> S : prerequisites confirmed
+S --> H : ship once
+P --> X : failure recovery
+
+@enduml
+----
+
+== Design Response
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "Invariant" as I
+rectangle "Guarded State" as G
+rectangle "Ordered Coordination" as O
+rectangle "Idempotent Retry" as R
+rectangle "Observable Logs" as L
+
+I --> G
+I --> O
+I --> R
+I --> L
+G --> I : protect
+O --> I : protect
+R --> I : protect
+L --> I : prove
+
+@enduml
+----
+
+== Trade-Offs
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
-| Guarded transition | Protects invariant | Requires careful modeling | Status changes
-| Explicit coordination | Visible dependencies | May cause waiting | Multi-object workflows
-| Idempotent design | Handles duplicates | Needs side-effect control | Queues and retries
-| Observability-first | Produces strong evidence | Adds instrumentation | Assignments requiring proof
+|Approach
+|Strengths
+|Weaknesses
+|When to Use
+
+|Simple baseline
+|Easy to explain and implement
+|Hides timing and pressure assumptions
+|First implementation and comparison point
+
+|Guarded state transition
+|Protects the invariant directly
+|Requires careful state modeling
+|Workflow steps and status changes
+
+|Explicit coordination
+|Makes dependencies visible
+|Can introduce waiting or deadlock
+|Multi-object ordering requirements
+
+|Idempotent retry-safe design
+|Handles duplicates and partial failure
+|Needs keys and deduplication
+|Queues, retries, external calls
+
+|Observability-first design
+|Produces strong evidence
+|Adds instrumentation work
+|Assignments requiring proof
 |===
 
-== Practical Application
+== Failure Reproduction
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam participantBorderColor #123456
+skinparam participantBackgroundColor white
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
+skinparam shadowing false
 
-* Identify invariant relevant to coordination
-* Write sequential and pressure scenarios
-* Add operation & entity IDs to logs
-* Capture before/after evidence if fixing
-* Update the Integrity Packet with assumptions and validations
+participant "T1 Coordinator" as T1
+participant "T2 Callback" as T2
+participant "Inventory Lock" as I
+participant "Payment Lock" as P
 
-== Assignment Integration
+T1 --> I : wait for inventory
+T1 --> P : hold payment path
+T2 --> P : wait for payment
+T2 --> I : observe inventory
+T1 --> T2 : no progress
+T2 --> T1 : no progress
 
-* Connect the lecture concept to [A2](../../../assignments/A2/index.md)
-* Demonstrate mastery with structured evidence
+@enduml
+----
 
-== Validation and Interview Questions
-
-1. What invariant is most relevant here?
-2. What hidden assumption makes the design appear correct?
-3. How would you force the failure in a test?
-4. What proof would validate the failure?
-5. Which mechanism would you choose first? What trade-off?
-6. How would the issue appear in your implementation stacks?
-7. What would you record in the Integrity Packet?
-
-== Discussion
-
-* What design challenges arise in blocking vs. non-blocking systems?
-* How can evidence strengthen your design choices?
+== Practical Steps
+* Write the invariant first.
+* Write one happy-path test.
+* Write one pressure test.
+* Add operation IDs and entity IDs.
+* Compare before and after behavior.
+* Record the remaining risk in the Integrity Packet.
 
 == Summary
-
-* Blocking vs. non-blocking coordination connects to system correctness
-* Engineering task: link concepts to invariants and observable behavior
-* Design maturity is validated by evidence and response strategies
-
-== Further Reading
-
-* "Blocking vs. Non-Blocking Coordination distributed systems failure mode"
-* "Blocking vs. Non-Blocking Coordination concurrency design tradeoffs"
-* Structured logging and correlation IDs
-* Invariants in stateful object-oriented systems
-* Coordination patterns, deadlocks, and progress guarantees
+* Blocking and non-blocking are coordination choices, not just API styles.
+* The real question is whether progress remains observable under pressure.
+* Good design makes the invariant explicit.
+* Good evidence makes the claim defensible.

@@ -1,5 +1,7 @@
 ﻿# AI Coordination Designs: Critique & Validation
 
+
+## Video: https://youtu.be/qeabeN7AP2U
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 7

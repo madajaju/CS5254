@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 6,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "deadlocks",
+  "source": "doc/lectures/week6/deadlocks/README.md",
+  "videoPath": "doc/lectures/week6/deadlocks/.output/output.mp4",
+  "youtube_title": "Deadlocks Explained | CS 5254 Week 6",
+  "summary": "A student asks AI for a coordination design and receives confident code with a missing ordering guard.",
+  "youtube_description": "A student asks AI for a coordination design and receives confident code with a missing ordering guard. The answer is useful as a draft, but unsafe as evidence. Under concurrent execution the workflow stalls or violates an invariant. How should engineers use AI-generated designs without surrendering responsibility for correctness?\n\nThis CS 5254 Week 6 lecture explores deadlocks explained and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "deadlocks explained",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "deadlock",
+    "the four conditions (coffman conditions)",
+    "circular wait",
+    "coordination boundary",
+    "progress guarantee"
+  ]
+}

@@ -2,136 +2,71 @@
   {
     "slide": 1,
     "topic": "Simplicity vs. Scalability",
-    "text": "Welcome everyone to this lecture on Simplicity vs. Scalability. Today, we will explore the critical balance between creating simple designs and ensuring they can scale effectively under pressure."
+    "text": "Welcome everyone. The central theme of this lecture is that a design can look perfectly fine when you try it once, but become fragile when timing, concurrency, or operational pressure increases. We are going to connect that pressure to the invariant the system is supposed to preserve, and to the evidence you need in order to defend the design. The goal is not just to make something run, but to explain why it remains correct when reality gets messier."
   },
   {
     "slide": 2,
-    "topic": "Opening Narrative",
-    "text": "Imagine you have a project that looks flawless during a simple demonstration. However, once you introduce concurrency, ambiguity, or operational pressure, hidden assumptions start to unravel. We'll examine how essential it is to analyze and defend these assumptions before placing trust in our results."
+    "topic": "Lecture Frame",
+    "text": "The key idea here is that the lecture topic, the hidden assumption, the pressure, the invariant, the evidence, and the design response form one chain. A common mistake is to jump straight to a fix like a lock, a queue, or a retry policy before naming what must remain true. Instead, start by identifying the assumption that made the simple version seem correct, then ask what happens when pressure exposes it, and finally look for evidence that the response actually protects the invariant."
   },
   {
     "slide": 3,
-    "topic": "Core Concepts",
-    "text": "Now, let's delve into some core concepts that are foundational to our discussion. Understanding these will provide us with the tools needed to address the trade-offs between simplicity and scalability."
+    "topic": "Simplicity, Pressure, and Evidence",
+    "text": "This is the lecture in one sentence: simple designs often pass the happy path, but pressure reveals the timing, coordination, and state assumptions underneath. What matters professionally is not just whether the code works once, but whether we can state the invariant, observe it, and prove it under stress. If the fix hides the trade-off instead of protecting the invariant, then it is not a real correction."
   },
   {
     "slide": 4,
     "topic": "Cognitive Load",
-    "text": "First, we have cognitive load, which refers to the effort required for a developer to grasp the coordination logic of the system. Recognizing cognitive load is crucial; if it's not made explicit, the system's reliability under pressure can come into question. Ignoring this can lead to stale states or blocked progress."
+    "text": "Cognitive load is the amount of effort it takes to understand the coordination logic. Imagine you are building a workflow where state, timing, and retries all matter at once. If the rules are only implicit in the code, the system can seem straightforward until a second worker, a delayed callback, or a retry forces you to reason about the hidden ordering rules. That is why we want the important transition to be visible and testable."
   },
   {
     "slide": 5,
     "topic": "Resource Saturation",
-    "text": "Next is resource saturation. This occurs when a simple design reaches the limits of the underlying hardware. Just like cognitive load, we need to explicitly address this concept to prevent our systems from failing under stress. If overlooked, we could face issues similar to stale states or blocked progress."
+    "text": "Resource saturation is what happens when a design that feels simple stops fitting the machine. A classic example is one thread per task, which seems clean until the memory for stacks, CPU contention, or scheduler overhead becomes the bottleneck. The uncomfortable part is that the baseline may still work in small tests, so the failure only appears when the system is under enough load to expose the resource limit."
   },
   {
     "slide": 6,
     "topic": "Scale-Up vs. Scale-Out",
-    "text": "The idea of scale-up versus scale-out is equally important. This concept tackles the question of whether adding cores or machines can handle more work. It's vital to recognize and plan for this to ensure our designs can withstand operational pressures without faltering."
+    "text": "Here the question is whether you can handle more work by adding more cores, or whether you need more machines. The important constraint is shared state, because scaling up or out is not free if every worker still has to coordinate through the same bottleneck. So the design question becomes: what coordination cost are we accepting, and how does that affect the invariant we care about?"
   },
   {
     "slide": 7,
     "topic": "System Invariant",
-    "text": "We must also understand the system invariant, which is a condition that should remain true across all valid executions. Failure to maintain this invariant underlines the importance of explicit design considerations to ensure system reliability during pressure situations."
+    "text": "A system invariant is a condition that must remain true across all valid executions. This is the thing you defend, not the implementation detail. Once you can name the invariant, you can decide whether a transition is allowed, whether invalid behavior must be rejected, or whether a failure needs recovery. That is the core of trustworthy design under concurrency pressure."
   },
   {
     "slide": 8,
     "topic": "Failure Mode",
-    "text": "A related concept is failure mode, which refers to a repeatable way the system can violate an invariant or lose progress. Identifying this gives us insight into the weaknesses within our designs and allows us to address them effectively."
+    "text": "A failure mode is a repeatable way the system violates the invariant or loses progress. What makes this uncomfortable is that the happy path may still look fine: one clean demo, one successful request, one successful thread schedule. But under delay, duplicate delivery, or stale state, the same design can produce duplicate work, stuck progress, or misleading logs. The point is to make that failure reproducible so you can study it instead of guessing."
   },
   {
     "slide": 9,
-    "topic": "System / Architecture View",
-    "text": "Let’s now look at a system architecture view of our topic. It’s important to see how simplicity and scalability connect to various design pressures and how evidence plays a role in understanding these dynamics."
+    "topic": "Baseline Workflow",
+    "text": "This is the simple baseline: the order API creates the order, the coordinator reserves inventory, then captures payment, and then shipping happens. It sounds obvious, and that is exactly why it is risky. The hidden assumption is that each step will be observed in the same clean order every time. Once that assumption breaks, the workflow can still look reasonable in code while failing in execution."
   },
   {
     "slide": 10,
-    "topic": "Worked Example",
-    "text": "To ground our discussion, we will look at a worked example from the podcast domain, where a simple Java process uses synchronization. This will illustrate the implications of our earlier concepts in a real-world setting."
+    "topic": "Failure Interleaving",
+    "text": "Let's pause here and make the failure concrete. One component is waiting for reservation while another is waiting for payment state, and each is holding onto the other side's progress. From the operator's point of view, the order just sits there, or worse, the logs suggest movement without proving the prerequisites were satisfied. This is exactly the kind of failure that stays hidden in a baseline demo, because the baseline never forces the conflicting timing."
   },
   {
     "slide": 11,
-    "topic": "Problem Setup",
-    "text": "In this example, the setup involves a single Java process that relies on synchronization. While it appears manageable, we need to analyze its capacity to function under pressure."
+    "topic": "Design Response",
+    "text": "The protected property here is workflow progress with prerequisite ordering. The mechanism can be a state guard, an idempotency key, a timeout and retry rule, or some combination of those, but the important thing is that the invariant is enforced at the transition point. The trade-off is real: you add state, recovery logic, and sometimes latency or coordination overhead. A good fix does not pretend that cost disappears; it makes the cost explicit and justified."
   },
   {
     "slide": 12,
-    "topic": "Naive Implementation",
-    "text": "A naive implementation might assume that actions happen in order with the current state. This logic often manifests in code but can be misleading since it overlooks concurrency issues. However, this method is problematic because it doesn’t consider that operations can overlap or occur out of order."
+    "topic": "Evidence Flow",
+    "text": "This is the evidence chain you want to defend in a review. Start with a trace, include a correlation ID, capture the state change, and then show a repeatable test that supports the claim. The outcome should be a clear statement such as, 'This workflow only advances when the required state is present.' If you cannot connect the trace to the claim, then the evidence is too vague to be useful."
   },
   {
     "slide": 13,
-    "topic": "Failure Scenario",
-    "text": "Under conditions where execution overlaps, we can encounter issues such as stale state or even progress loss. This demonstrates a disconnect between design assumptions and the reality of concurrent execution."
+    "topic": "Trade-Offs",
+    "text": "Each approach here has a different cost profile. A simple baseline is easiest to explain, but it often hides pressure assumptions. A guarded transition directly protects the invariant, but it requires careful state modeling. Explicit coordination makes dependencies visible, but can create bottlenecks. Observability-first design gives strong evidence, but it adds instrumentation work. The right choice depends on which risk is most important for the system you are defending."
   },
   {
     "slide": 14,
-    "topic": "Improved Design Direction",
-    "text": "An improved design should emphasize naming the invariant and making transitions observable. Implementing controls like version checks and idempotency keys will help us safeguard against failures we previously encountered."
-  },
-  {
-    "slide": 15,
-    "topic": "Why Improved Design?",
-    "text": "The reason this improved design is essential is it shifts our approach from merely hoping that the workflow executes correctly to actively proving that we can handle invalid interleavings or recover from them with concrete evidence."
-  },
-  {
-    "slide": 16,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "We now turn our attention to common failure modes and anti-patterns. We'll explore the symptoms of these modes, how we can detect them, and what corrections we can implement to improve our systems."
-  },
-  {
-    "slide": 17,
-    "topic": "Symptom: Single happy-path demonstration succeeds",
-    "text": "One symptom to watch for is when a system passes a single happy-path demonstration. This can happen because tests often ignore conditions that reveal underlying weaknesses. To detect this, we should add concurrent actors or stress tests."
-  },
-  {
-    "slide": 18,
-    "topic": "Symptom: Names a tool, not a design property",
-    "text": "Another sign of trouble arises when explanations point to a tool but not the underlying design property. We can detect this by asking which invariant each mechanism protects. The solution is to clearly write down the invariant first."
-  },
-  {
-    "slide": 19,
-    "topic": "Symptom: Evidence too vague to support claims",
-    "text": "If the evidence is too vague to support a claim, reviewers will find it challenging to reconstruct a failure. We must ensure our logs contain detailed information like operation IDs or state transitions, allowing us to trace back any issues."
-  },
-  {
-    "slide": 20,
-    "topic": "Symptom: Fix changes behavior without baseline comparison",
-    "text": "A notable symptom is when fixes appear to change behavior without comparing against a baseline. To track this, we need to preserve failing scenarios and rerun tests after redesign."
-  },
-  {
-    "slide": 21,
-    "topic": "Trade-Off Analysis",
-    "text": "Now let’s analyze the trade-offs involved in different approaches. Here, we consider the strengths, weaknesses, and the right moments to apply various designs, from simple implementations to more complex guarded state transitions."
-  },
-  {
-    "slide": 22,
-    "topic": "Practical Application",
-    "text": "As you reflect on our discussion, consider practical applications: identify the important invariants in regard to simplicity versus scalability. You should practice writing sequential scenarios that succeed and pressure scenarios that could uncover failures."
-  },
-  {
-    "slide": 23,
-    "topic": "Assignment Integration",
-    "text": "This lecture ties into assignment A2, where you should connect the discussed concepts to your semester projects. Consider how invariants, events, and mechanisms apply to your work."
-  },
-  {
-    "slide": 24,
-    "topic": "Validation and Interview Questions",
-    "text": "To help reinforce your understanding, I have some validation and interview questions for you. Reflect on the invariants relevant to this topic, hidden assumptions, and methods for effectively recording evidence in your Integrity Packet."
-  },
-  {
-    "slide": 25,
-    "topic": "Summary",
-    "text": "In summary, the balance between simplicity and scalability isn't just vocabulary; it’s a fundamental way to assess whether a system remains correct under realistic conditions. Connect your design to invariants, observable behaviors, and ensure you can validate your conclusions."
-  },
-  {
-    "slide": 26,
-    "topic": "Further Reading",
-    "text": "For those interested in diving deeper, I encourage you to explore additional resources on distributed systems, concurrency design trade-offs, structured logging, and coordination patterns. This will enhance your understanding of the concepts we’ve discussed today."
-  },
-  {
-    "slide": 27,
-    "topic": "Discussion",
-    "text": "Lastly, let's open the floor for discussion. Consider how hidden assumptions can shape system design and share any trade-offs you've encountered in your projects. Your insights can enrich our understanding of these concepts."
+    "topic": "Practical Steps",
+    "text": "For the practical part, the workflow is straightforward. Identify the invariant or progress property, write one clean scenario that should succeed, and then write one pressure scenario that could fail. Add operation IDs and entity IDs to your logs so the behavior can be reconstructed later. If you change the design, capture before-and-after evidence and explain the trade-off in the Integrity Packet. That is how you turn an idea into something you can defend."
   }
 ]

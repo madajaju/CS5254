@@ -1,0 +1,62 @@
+[
+  {
+    "slide": 1,
+    "topic": "Fixing Coordination",
+    "text": "Welcome. In this lecture, we are looking at fixing coordination in a stateful concurrent system. The core idea is that a program can look correct when you run it once, but still fail when timing changes, when work is retried, or when two components depend on each other. Our job is to identify the invariant that must remain true, and then choose a control that preserves that invariant under pressure."
+  },
+  {
+    "slide": 2,
+    "topic": "Coordination Under Pressure",
+    "text": "The key idea here is that progress can stop even when every individual component seems active. Two parts may each be waiting for the other, so the logs keep moving but the workflow never completes. A common mistake is to judge correctness only from the happy path. Instead, ask what must remain true when timing changes, and what evidence would prove that the design is actually safe."
+  },
+  {
+    "slide": 3,
+    "topic": "Concept Map",
+    "text": "This lecture connects one central pressure to several design responses. We start with fixing coordination, then break that into explicit wait states, lock ordering, idempotent transitions, and timeouts with recovery. All of those feed into validation evidence, because a design choice is not really defensible until you can test it, observe it, and explain why it works. The point is not just to name a mechanism, but to connect it to the invariant it protects."
+  },
+  {
+    "slide": 4,
+    "topic": "Explicit Wait States",
+    "text": "A useful rule is to wait on a condition, not just on an event. If a signal arrives before the state is ready, the system can miss progress entirely unless the waiting logic checks the condition itself. That is why explicit wait states matter: they make the dependency visible in the design. The professional judgment question is whether the code can recover from timing differences without getting stuck or pretending the work is done too early."
+  },
+  {
+    "slide": 5,
+    "topic": "Lock Ordering",
+    "text": "Deadlock often comes from two workers taking the same resources in different orders. One thread grabs A and waits for B, while another grabs B and waits for A. The invariant here is simple: if multiple locks are required, everyone must acquire them in the same order. That trade-off is worth stating clearly, because lock ordering can reduce deadlock risk, but it also constrains how the design is structured."
+  },
+  {
+    "slide": 6,
+    "topic": "Idempotent Transitions",
+    "text": "Now think about repeated commands. If a finish request arrives twice, the second one should not create a second completion. That is what idempotent transitions protect: the system should change state once, and safely ignore duplicates after that. This matters in real systems because retries, callbacks, and message delivery can all produce repeated input. The cost is that you need state checks or deduplication rules, but that is better than double-processing the same work."
+  },
+  {
+    "slide": 7,
+    "topic": "Timeout and Recovery",
+    "text": "Sometimes coordination fails because progress simply stalls. In that case, waiting forever is not a design; it is a hidden assumption. Timeouts let the system notice that a workflow has stopped making progress, and recovery gives it a way to move forward or clean up safely. The trade-off is important: once you add timeout handling, you also take on the responsibility of choosing what recovery should do and how to avoid creating new errors while trying to fix the old one."
+  },
+  {
+    "slide": 8,
+    "topic": "Coordination Boundary",
+    "text": "A coordination boundary is the point where two independent objects have to agree on ordering, ownership, or progress. That boundary is where assumptions become visible, because each side may think the other side has already done its part. The lesson here is to identify the boundary early and make the transition explicit. If you do not, the system may pass a simple test while still failing the moment two actors interact under real timing pressure."
+  },
+  {
+    "slide": 9,
+    "topic": "Failure Interleaving",
+    "text": "Imagine a coordinator waiting for payment, payment waiting for inventory, and inventory waiting for coordination to finish. That is the uncomfortable failure mode: everyone is active, but nobody can complete the cycle. The baseline version often hides this because the happy path runs in order and with no delay. What you want as evidence is a trace that makes the circular dependency visible, so you can defend the claim that the design really was stuck."
+  },
+  {
+    "slide": 10,
+    "topic": "Corrected Design Response",
+    "text": "The protected property here is workflow progress without violating prerequisite ordering. The mechanism is a combination of state guards, ordered access, idempotency, and timeout handling, so the system can reject invalid transitions or recover from stalls. The trade-off is that you are adding more metadata and more recovery logic. That is the price of making coordination explicit instead of hoping the execution schedule stays friendly."
+  },
+  {
+    "slide": 11,
+    "topic": "Evidence Checklist",
+    "text": "When you defend a coordination fix, the evidence has to be concrete. You want a correlation ID, an entity ID, a state transition log, and a before-and-after test run that uses the same workload. That lets a reviewer reconstruct what happened and see whether the fix really changed the outcome. In an Integrity Packet, this is where you connect the claim to observable behavior instead of just describing the intended design."
+  },
+  {
+    "slide": 12,
+    "topic": "Trade-Off Summary",
+    "text": "This summary is really about choosing the right control for the right pressure. A simple baseline is easy to explain, but it often hides the timing assumptions. A guarded transition protects the invariant directly, explicit coordination makes dependencies visible, and idempotent design handles retries and duplicates. The key habit is to state the invariant first, then choose the mechanism, and be honest about the cost of that choice."
+  }
+]

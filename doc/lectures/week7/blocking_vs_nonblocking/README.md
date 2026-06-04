@@ -1,5 +1,7 @@
 ﻿# Blocking vs. Non-Blocking Coordination
 
+
+## Video: https://youtu.be/LY77FUX1oWs
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 7

@@ -129,18 +129,26 @@ function findLectureUploadFiles(weekDir, explicitUploadJson) {
     .readdirSync(weekDir, { withFileTypes: true })
     .filter((entry) => entry.isDirectory() && entry.name !== ".output")
     .map((entry) => path.resolve(weekDir, entry.name, ".output/upload.json"))
-    .filter((uploadPath) => fs.existsSync(uploadPath))
     .sort();
 }
 
 function buildLectureRecord(repoRoot, uploadJsonPath) {
-  const config = readJson(uploadJsonPath);
+  const outputDir = path.dirname(uploadJsonPath);
+  const lectureDir = path.dirname(outputDir);
+  const metaPath = path.resolve(lectureDir, "meta.json");
+
+  const config = fs.existsSync(uploadJsonPath)
+    ? readJson(uploadJsonPath)
+    : (fs.existsSync(metaPath) ? readJson(metaPath) : null);
+
+  if (!config) {
+    throw new Error(`Missing upload metadata. Expected ${uploadJsonPath} or ${metaPath}`);
+  }
+
   if (!config?.slug) {
     throw new Error(`Lecture upload file is missing slug: ${uploadJsonPath}`);
   }
 
-  const outputDir = path.dirname(uploadJsonPath);
-  const lectureDir = path.dirname(outputDir);
   const readmePath = config.source ? path.resolve(repoRoot, config.source) : path.resolve(lectureDir, "README.md");
   const videoPath = config.videoPath ? path.resolve(repoRoot, config.videoPath) : path.resolve(outputDir, "output.mp4");
   return {
@@ -157,6 +165,50 @@ function writeLectureUpload(lecture, upload) {
   lecture.upload = upload;
   lecture.config.upload = upload;
   writeJson(lecture.uploadJsonPath, lecture.config);
+}
+
+function buildLectureUploadRecord(lecture, repoRoot) {
+  return {
+    course: lecture.course,
+    week: lecture.week,
+    generated_for: lecture.generated_for,
+    slug: lecture.slug,
+    source: path.relative(repoRoot, lecture.readmePath).replace(/\\/g, "/"),
+    videoPath: path.relative(repoRoot, lecture.videoPath).replace(/\\/g, "/"),
+    youtube_title: lecture.youtube_title,
+    summary: lecture.summary,
+    youtube_description: lecture.youtube_description,
+    tags: Array.isArray(lecture.tags) ? lecture.tags : [],
+    ...(lecture.upload ? { upload: lecture.upload } : {}),
+  };
+}
+
+function writeLectureUploadMetadata(lecture, repoRoot) {
+  writeJson(lecture.uploadJsonPath, buildLectureUploadRecord(lecture, repoRoot));
+}
+
+function lectureMetaPath(lectureDir) {
+  return path.resolve(lectureDir, "meta.json");
+}
+
+function buildLectureMetaRecord(lecture, repoRoot) {
+  return {
+    course: lecture.course,
+    week: lecture.week,
+    generated_for: lecture.generated_for,
+    slug: lecture.slug,
+    source: path.relative(repoRoot, lecture.readmePath).replace(/\\/g, "/"),
+    videoPath: path.relative(repoRoot, lecture.videoPath).replace(/\\/g, "/"),
+    youtube_title: lecture.youtube_title,
+    summary: lecture.summary,
+    youtube_description: lecture.youtube_description,
+    tags: Array.isArray(lecture.tags) ? lecture.tags : [],
+  };
+}
+
+function writeLectureMeta(lecture, repoRoot) {
+  const metaPath = lectureMetaPath(lecture.lectureDir);
+  writeJson(metaPath, buildLectureMetaRecord(lecture, repoRoot));
 }
 
 function loadCredentials(args) {
@@ -471,6 +523,18 @@ async function main() {
   }
 
   const lectures = uploadJsonFiles.map((uploadJsonFile) => buildLectureRecord(repoRoot, uploadJsonFile));
+
+  if (dryRun) {
+    for (const lecture of lectures) {
+      console.log(`PLAN META ${path.relative(repoRoot, lectureMetaPath(lecture.lectureDir)).replace(/\\/g, "/")}`);
+      console.log(`PLAN UPLOAD ${path.relative(repoRoot, lecture.uploadJsonPath).replace(/\\/g, "/")}`);
+    }
+  } else {
+    for (const lecture of lectures) {
+      writeLectureMeta(lecture, repoRoot);
+      writeLectureUploadMetadata(lecture, repoRoot);
+    }
+  }
 
   for (const lecture of lectures) {
     const existingUrl = extractVideoUrl(lecture.readmePath);

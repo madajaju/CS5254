@@ -1,0 +1,208 @@
+= Missed Signals
+
+== Opening Narrative
+* Two components each wait for the other to make progress.
+* Logs show activity, but the workflow never completes.
+* The code looks locally reasonable.
+* The coordination contract is incomplete.
+* The design question is how to make progress observable and defensible.
+
+== Lost Signal
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBorderColor #123456
+skinparam BoxFontColor black
+skinparam BoxBackgroundColor white
+skinparam componentStyle rectangle
+left to right direction
+rectangle "Thread A" as A
+rectangle "Thread B" as B
+A --> B : notify()
+B --> A : wait()
+@enduml
+----
+
+== Race to Wait
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBorderColor #123456
+skinparam BoxFontColor black
+skinparam BoxBackgroundColor white
+skinparam componentStyle rectangle
+left to right direction
+rectangle "Check condition" as C1
+rectangle "Condition becomes true" as C2
+rectangle "Start waiting" as C3
+C1 --> C2 : too late
+C2 -> C3 : missed window
+@enduml
+----
+
+== State-Based Signaling
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBorderColor #123456
+skinparam BoxFontColor black
+skinparam BoxBackgroundColor white
+skinparam componentStyle rectangle
+left to right direction
+rectangle "Object state" as S1
+rectangle "Signal checks state" as S2
+rectangle "Progress becomes visible" as S3
+S1 --> S2 : query current state
+S2 -> S3 : signal only if needed
+@enduml
+----
+
+== Coordination Boundary
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBorderColor #123456
+skinparam BoxFontColor black
+skinparam BoxBackgroundColor white
+skinparam componentStyle rectangle
+left to right direction
+rectangle "Object A" as O1
+rectangle "Boundary" as O2
+rectangle "Object B" as O3
+O1 --> O2 : request
+O2 --> O3 : dependency
+O3 -> O2 : response
+O2 --> O1 : proceed
+@enduml
+----
+
+== Progress Guarantee
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBorderColor #123456
+skinparam BoxFontColor black
+skinparam BoxBackgroundColor white
+skinparam componentStyle rectangle
+left to right direction
+rectangle "Work starts" as P1
+rectangle "Invariant holds" as P2
+rectangle "Work completes" as P3
+P1 --> P2 : preserve state
+P2 -> P3 : eventual completion
+@enduml
+----
+
+== Failure Interleaving
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBorderColor #123456
+skinparam BoxFontColor black
+skinparam BoxBackgroundColor white
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Coordinator" as C
+participant "Payment" as P
+participant "Inventory" as I
+C --> P : wait for payment
+P --> I : wait for inventory
+I --> C : wait for coordinator
+@enduml
+----
+
+== Design Response
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBorderColor #123456
+skinparam BoxFontColor black
+skinparam BoxBackgroundColor white
+skinparam componentStyle rectangle
+left to right direction
+rectangle "State guard" as G1
+rectangle "Structured log" as G2
+rectangle "Repeatable test" as G3
+rectangle "Defensible fix" as G4
+G1 --> G2 : expose invariant
+G2 -> G3 : prove failure
+G3 --> G4 : validate correction
+@enduml
+----
+
+== Trade-Off Comparison
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach
+|Strengths
+|Weaknesses
+|When to use
+
+|Simple baseline
+|Easy to explain
+|Often hides timing assumptions
+|First pass comparison
+
+|Guarded transition
+|Protects the invariant directly
+|Requires careful state modeling
+|Workflow steps and reservations
+
+|Explicit coordination
+|Makes dependencies visible
+|Can add waiting or bottlenecks
+|Multi-object ordering
+
+|Observability-first
+|Produces strong evidence
+|Adds instrumentation work
+|Failure proof and review
+|===

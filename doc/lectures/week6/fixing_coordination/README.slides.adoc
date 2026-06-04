@@ -1,0 +1,279 @@
+= Fixing Coordination
+
+== Coordination Under Pressure
+[.column]
+* Two components wait on each other
+* Logs show activity, but progress stops
+* The code can look correct on the happy path
+
+[.column]
+* The real question is about the invariant
+* What must remain true when timing changes?
+* What evidence proves the design is safe?
+
+== Concept Map
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Fixing\nCoordination" as Topic
+rectangle "Explicit\nWait States" as A
+rectangle "Lock\nOrdering" as B
+rectangle "Idempotent\nTransitions" as C
+rectangle "Timeouts &\nRecovery" as D
+rectangle "Validation\nEvidence" as E
+Topic --> A
+Topic --> B
+Topic --> C
+Topic --> D
+Topic --> E
+@enduml
+----
+
+== Explicit Wait States
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Signal arrives" as S
+rectangle "State is not ready" as R
+rectangle "Wait on condition" as W
+rectangle "State becomes ready" as T
+S --> R
+R -> W
+W --> T
+@enduml
+----
+
+== Lock Ordering
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Worker 1\nlocks A then B" as W1
+rectangle "Worker 2\nlocks B then A" as W2
+rectangle "Deadlock risk" as D
+W1 --> D
+W2 --> D
+@enduml
+----
+
+== Idempotent Transitions
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Finish requested\nfirst time" as F1
+rectangle "State changes\nonce" as S
+rectangle "Finish requested\nagain" as F2
+rectangle "Ignore duplicate" as I
+F1 --> S
+F2 --> I
+@enduml
+----
+
+== Timeout and Recovery
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Workflow stalls" as A
+rectangle "Timeout expires" as B
+rectangle "Recovery action" as C
+rectangle "Progress resumes" as D
+A --> B
+B -> C
+C --> D
+@enduml
+----
+
+== Coordination Boundary
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Object A" as A
+rectangle "Boundary" as B
+rectangle "Object B" as C
+A --> B
+B --> C
+@enduml
+----
+
+== Failure Interleaving
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Coordinator" as C
+participant "Payment" as P
+participant "Inventory" as I
+C --> P : waits for payment
+P --> I : waits for inventory
+I --> C : waits for coordination
+@enduml
+----
+
+== Corrected Design Response
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "State guard" as G
+rectangle "Ordered access" as O
+rectangle "Idempotency key" as K
+rectangle "Timeout and retry" as T
+rectangle "Observable evidence" as E
+G --> O
+O -> K
+K --> T
+T -> E
+@enduml
+----
+
+== Evidence Checklist
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Correlation ID" as C
+rectangle "Entity ID" as E
+rectangle "State transition log" as S
+rectangle "Before/after test" as T
+C --> E
+E -> S
+S --> T
+@enduml
+----
+
+== Trade-Off Summary
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach |Strength |Weakness |Best use
+
+|Simple baseline |Easy to explain |Hides pressure assumptions |First pass
+
+|Guarded transition |Protects the invariant directly |Needs careful state modeling |Stateful workflows
+
+|Explicit coordination |Makes ordering visible |Can add waiting or deadlock risk |Multi-object dependencies
+
+|Idempotent design |Handles duplicates and retries |Needs keys and deduplication |Async and external calls
+|===

@@ -2,111 +2,86 @@
   {
     "slide": 1,
     "topic": "Blocking vs. Non-Blocking Coordination",
-    "text": "Welcome to today's lecture on Blocking vs. Non-Blocking Coordination. We will explore crucial topics related to coordinated work within concurrent systems. Let's dive in."
+    "text": "Welcome. Today we are looking at blocking versus non-blocking coordination as a design pressure in concurrent object-oriented systems. The key idea here is not just whether code waits or continues, but whether progress is still correct, observable, and defensible when timing, overlap, retries, or load get more complicated."
   },
   {
     "slide": 2,
-    "topic": "Learning Objectives",
-    "text": "In this lecture, our key objectives are to analyze design pressures emerging from blocking and non-blocking coordination, diagnose hidden assumptions in concurrent systems, evaluate failure evidence, and learn how to design effective corrections that preserve system invariants."
+    "topic": "Lecture Goals",
+    "text": "By the end of this lecture, you should be able to recognize the hidden assumptions behind a workflow that only looks correct on the happy path. You should also be able to use logs, traces, and repeatable tests as evidence, choose a correction that protects the invariant, and then connect that decision back to your Integrity Packet and A2 work."
   },
   {
     "slide": 3,
-    "topic": "Opening Narrative",
-    "text": "Let's set the stage with a scenario. Imagine two components that are waiting on one another, leading to a halt in workflow. Although the logs tell a story of activity, progress is stuck. How can we establish design rules that make this progress observable and defensible?"
+    "topic": "Topic Map",
+    "text": "Let's start with the big picture. Blocking and non-blocking both feed into the same pressure point: thread starvation, loss of progress, and weak evidence. From there, we move to validation evidence, and then to a design decision. That sequence matters because a good engineering response starts with observing the failure clearly before proposing a fix."
   },
   {
     "slide": 4,
-    "topic": "Core Concept: Blocking",
-    "text": "Blocking occurs when a thread halts its operations, waiting for a resource or a signal. This concept is vital because it identifies conditions that need to be clear before trusting the system when pressure arises. If ignored, blocking can produce issues such as duplicate work or blocked progress."
+    "topic": "Blocking",
+    "text": "Blocking means a thread stops and waits, doing nothing else until the resource or signal arrives. That can be perfectly valid if the wait is explicit and bounded. A common mistake is to treat blocking as harmless just because a sequential test passes. The real question is whether the wait preserves the invariant and whether the system still makes progress under pressure."
   },
   {
     "slide": 5,
-    "topic": "Core Concept: Non-Blocking",
-    "text": "In contrast, non-blocking operations allow a thread to initiate a task and continue working on others while waiting for it to complete. Like blocking, we must make this condition explicit before we can trust the system under load. Failing to manage non-blocking effectively can lead to similar failures as those caused by blocking."
+    "topic": "Non-Blocking",
+    "text": "Non-blocking coordination means a thread starts work and then continues doing other useful tasks while completion is reported later through a callback, promise, or event. This is useful for responsiveness and throughput, but it creates a new responsibility: completion must still be observable and ordered correctly. If that completion signal is vague or late, the system can appear active while actually drifting away from correctness."
   },
   {
     "slide": 6,
-    "topic": "Core Concept: Thread Starvation",
-    "text": "Thread starvation happens when all threads become blocked, leaving the system unable to process new requests. It's critical to define this condition explicitly; otherwise, it can compromise system reliability in high-pressure situations."
+    "topic": "Coordination Boundary",
+    "text": "The coordination boundary is the point where separate objects have to agree on ordering, ownership, or progress. This is where failures become real. If the boundary is unclear, one object may think work is complete while another still thinks it is pending. That is why this boundary is exactly where we should log the critical transition and validate the invariant."
   },
   {
     "slide": 7,
-    "topic": "Core Concept: Callbacks/Promises",
-    "text": "Callbacks and promises are essential tools that help manage the completion notifications of non-blocking operations. Similar to our earlier concepts, these must be clearly understood for our systems to maintain their integrity under pressure."
+    "topic": "Failure Pattern",
+    "text": "Here is the uncomfortable failure pattern: one component requests work, another component waits on state, and a callback exists but cannot make progress because something is already locked or waiting. The logs may still show activity, but the workflow never finishes. This is a classic coordination failure, and it is hidden in the baseline because the happy path never forces the system to prove that progress can survive overlap."
   },
   {
     "slide": 8,
-    "topic": "Core Concept: Coordination Boundary",
-    "text": "The coordination boundary is a pivotal point where independent objects must reach agreement on ordering or progress. This idea must be articulated clearly to ensure that the system can be trusted when faced with concurrency challenges."
+    "topic": "Thread Starvation",
+    "text": "Thread starvation happens when all available threads are blocked waiting for signals, and nothing new can be processed. The important detail is that the system may still look busy. You may see logs, callbacks, and requests, but no completion. So the failure is not motion; the failure is lack of forward progress."
   },
   {
     "slide": 9,
-    "topic": "System Architecture View",
-    "text": "Here, we visualize our discussion topics in an architecture diagram. This illustration connects concepts of blocking and non-blocking coordination with vital design elements. The aim is to ensure that our systems can address concerns regarding evidence and ongoing refinements."
+    "topic": "Callback and Promise Flow",
+    "text": "Callbacks and promises are the tools that let a non-blocking operation report completion later. The caller starts the work, continues with other tasks, and then receives a notification when the worker is done. The design challenge is making sure that the completion event is tied to the correct work item and that it arrives in a way the rest of the system can trust."
   },
   {
     "slide": 10,
-    "topic": "Worked Example: Problem Setup",
-    "text": "Let's consider a practical example in the podcast domain. In a blocking scenario, the Orchestrator thread will call `cleaner.clean()` and then wait. Conversely, in a non-blocking example, it sends a request to the Cleaner while continuing its work on new episodes. This difference has significant implications for performance."
+    "topic": "Hidden Assumptions",
+    "text": "A lot of concurrency bugs come from hidden assumptions like single-run execution, no delay, no retry, and no overlap. Those assumptions often feel invisible because the code reads sensibly and the sequential test passes. A common mistake is to confuse a successful demonstration with a proven design. The pressure test is what reveals whether the assumption was actually safe."
   },
   {
     "slide": 11,
-    "topic": "Worked Example: Naive Implementation",
-    "text": "Imagine a naive implementation where the design assumes operations that only occur once and in order. This assumption might seem reasonable at first, but it often leads to unexpected issues when state and operations overlap."
+    "topic": "Evidence to Collect",
+    "text": "When you evaluate a coordination problem, collect evidence that lets another person reconstruct what happened. That means correlation IDs, state transitions, timestamps, and before-and-after test output. If you want to defend the conclusion, the evidence has to make the failure repeatable, not just believable."
   },
   {
     "slide": 12,
-    "topic": "Worked Example: Failure Scenario",
-    "text": "Consider how overlapping executions can create problems like stale state or duplicate operations. These outcomes reveal a fundamental mismatch between the design assumption and what actually occurs during implementation, indicating potential pitfalls in our setup."
+    "topic": "State Transition View",
+    "text": "A useful way to reason about the workflow is as a state machine: created, reserved, paid, ready to ship, shipped, and sometimes compensating. The protected invariant is that shipping only happens after inventory is reserved and payment is captured exactly once. That state model matters because it turns vague progress talk into a concrete rule that can be checked and defended."
   },
   {
     "slide": 13,
-    "topic": "Worked Example: Improved Design Direction",
-    "text": "To enhance our design, we should identify the invariant, making transitions observable, and employ controls like version checks and idempotency keys. Each of these improvements aims to create a more robust and reliable system."
+    "topic": "Design Response",
+    "text": "The protected property here is explicit workflow progress under concurrency. We protect it with guarded state transitions, ordered coordination, idempotent retry behavior, and observable logs. The trade-off is that the design becomes more complex: more metadata, more recovery logic, and sometimes more waiting or coordination overhead. That cost is real, but it is the price of making correctness defensible."
   },
   {
     "slide": 14,
-    "topic": "Why Improved Design Is Safer",
-    "text": "The refined design shifts our approach from simply hoping workflows will execute correctly to actively proving that invalid scenarios are rejected or managed. This proactive stance fortifies our system against failures."
+    "topic": "Trade-Offs",
+    "text": "This table is really a decision guide. A simple baseline is easy to explain, but it hides timing assumptions. Guarded transitions protect the invariant directly, but they require careful state modeling. Explicit coordination makes dependencies visible, but can introduce deadlock or bottlenecks. Idempotent retry-safe design helps with duplicate or partial work, and observability-first design gives you stronger evidence. The right choice depends on which risk most threatens your system."
   },
   {
     "slide": 15,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "We must recognize common anti-patterns, such as passing tests that fail to account for timing or pressure conditions. By implementing failure-focused tests, we can make our systems far more robust against real-world challenges."
+    "topic": "Failure Reproduction",
+    "text": "This failure is most convincing when you can reproduce it. Imagine one coordinator waiting on inventory while still holding a payment-related lock, and a callback waiting on payment while needing inventory status. Neither side can move, so the order gets stuck or, worse, the log makes it look like progress happened when it did not. That is exactly why we want a repeatable failing test and a wait or lock graph to capture the evidence."
   },
   {
     "slide": 16,
-    "topic": "Trade-Off Analysis",
-    "text": "Analyzing trade-offs is vital. For instance, while a simple baseline is easy to implement, it can obscure timing assumptions. In contrast, an observability-first approach can provide substantial evidence, though it may require additional instrumentation efforts."
+    "topic": "Practical Steps",
+    "text": "If you are applying this tomorrow, start with the invariant. Then write one happy-path test and one pressure test. Add operation IDs and entity IDs so the logs are reconstructable. Compare the behavior before and after your change, and record the remaining risk in the Integrity Packet. That sequence gives you both a technical fix and a defensible explanation."
   },
   {
     "slide": 17,
-    "topic": "Practical Application",
-    "text": "For your next steps, identify the invariant that is most pertinent to blocking versus non-blocking coordination. Create both sequential and pressure scenarios, ensuring to document this effectively in your logs. Capture the evidence appropriately, prior and post any fixes."
-  },
-  {
-    "slide": 18,
-    "topic": "Assignment Integration",
-    "text": "As you work through your semester project, connect the concepts we've discussed today to your specific project. Show relevant patterns of object, workflow, or failure mechanism, supported by structured evidence."
-  },
-  {
-    "slide": 19,
-    "topic": "Validation and Interview Questions",
-    "text": "Consider potential interview questions that could arise from this lecture. For example, what invariants are most relevant to our discussion? How do hidden assumptions create a façade of correctness in designs? Reflecting on these questions can contribute to your understanding and preparation."
-  },
-  {
-    "slide": 20,
-    "topic": "Discussion",
-    "text": "Now, let's consider design challenges in blocking versus non-blocking systems. What difficulties do you think may arise, and how might evidence strengthen your design choices?"
-  },
-  {
-    "slide": 21,
     "topic": "Summary",
-    "text": "In summary, understanding blocking versus non-blocking coordination connects deeply to system correctness. The engineering task before us is to create solid connections between our concepts, observable behaviors, and robust design choices that can be defended with evidence."
-  },
-  {
-    "slide": 22,
-    "topic": "Further Reading",
-    "text": "For those interested in delving deeper, explore topics such as failure modes in distributed systems and the trade-offs of concurrency design. Engaging with further readings can enhance your knowledge and practical applications."
+    "text": "The main takeaway is that blocking and non-blocking are not just API styles; they are coordination choices that affect whether progress remains correct under pressure. Good design makes the invariant explicit, and good evidence makes the claim defensible. A design is not mature until it can be explained, stressed, repaired, and validated."
   }
 ]

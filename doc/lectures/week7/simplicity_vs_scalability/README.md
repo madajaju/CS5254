@@ -1,5 +1,7 @@
 ﻿# Simplicity vs. Scalability
 
+
+## Video: https://youtu.be/oo2G-XI4D9E
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 7

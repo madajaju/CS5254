@@ -1,0 +1,378 @@
+= Livelock vs Deadlock
+
+== Opening Idea
+* Two components each wait for the other to make progress.
+* Logs can show activity while work never completes.
+* The code may look locally reasonable.
+* The coordination contract is still incomplete.
+* The lecture asks what rule makes progress observable and defensible.
+
+== Topic Map
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Livelock vs Deadlock" as Topic
+rectangle "Livelock" as A
+rectangle "Resource Rejection" as B
+rectangle "Spinning vs. Waiting" as C
+rectangle "Validation Evidence" as V
+rectangle "Design Decision" as D
+Topic -> A
+A --> B
+B --> C
+C -> V
+V -> D
+D -> A : refine
+@enduml
+....
+
+== Livelock
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Thread A" as A
+rectangle "Thread B" as B
+rectangle "Shared Goal" as G
+A --> B : yields politely
+B --> A : yields politely
+A -> G : no progress
+B -> G : no progress
+@enduml
+....
+
+== Deadlock
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Thread A" as A
+rectangle "Thread B" as B
+rectangle "Lock 1" as L1
+rectangle "Lock 2" as L2
+A --> L1 : holds
+B --> L2 : holds
+A --> L2 : waits
+B --> L1 : waits
+@enduml
+....
+
+== Spinning vs. Waiting
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Livelock" as L
+rectangle "Deadlock" as D
+rectangle "CPU active" as C
+rectangle "Blocked wait" as W
+L --> C : busy retrying
+D --> W : sleeping or blocked
+@enduml
+....
+
+== Coordination Boundary
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Object A" as A
+rectangle "Object B" as B
+rectangle "Boundary" as X
+A --> X : ordering
+B -> X : ownership
+X --> A : progress rule
+X --> B : progress rule
+@enduml
+....
+
+== Progress Guarantee
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Work Arrives" as A
+rectangle "Invariant Checked" as B
+rectangle "Transition Allowed" as C
+rectangle "Work Completes" as D
+A --> B
+B -> C : guard passes
+C --> D : progress observed
+@enduml
+....
+
+== Resource Rejection
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Shared Resource" as R
+A --> R : releases politely
+B --> R : releases politely
+A --> R : retries
+B --> R : retries
+@enduml
+....
+
+== Failure Evidence
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Logs" as L
+rectangle "Trace" as T
+rectangle "Interleaving" as I
+rectangle "Repeatable Test" as R
+L --> T : correlation ids
+T -> I : ordering
+I --> R : reproduce
+@enduml
+....
+
+== Corrective Design
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Invariant" as I
+rectangle "Guard" as G
+rectangle "Backoff" as B
+rectangle "Observability" as O
+I --> G : protect
+G -> B : recover
+B --> O : prove
+@enduml
+....
+
+== Worked Example
+* Two workers need a publishing slot.
+* Each worker releases the slot to be polite.
+* Each worker then retries at the same time.
+* The workflow stays active but never finishes.
+* A hallway example shows the same pattern.
+* Both people step aside in the same direction repeatedly.
+
+== Failure Scenario
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Sequential Test" as S
+rectangle "Concurrent Pressure" as P
+rectangle "Hidden Assumption" as H
+rectangle "Stuck Workflow" as W
+S --> H : passes
+P --> H : breaks
+H --> W : no progress
+@enduml
+....
+
+== Design Response
+[plantuml, width=100%]
+....
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam monochrome false
+skinparam ArrowThickness 2
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "State Model" as S
+rectangle "Idempotency" as I
+rectangle "Timeouts" as T
+rectangle "Compensation" as C
+S --> I : duplicate-safe
+I -> T : no forever wait
+T --> C : recover
+@enduml
+....
+
+== Trade-Offs
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach
+|Strengths
+|Weaknesses
+|When to Use
+
+|Simple baseline
+|Easy to explain
+|Hides pressure assumptions
+|First implementation and comparison
+
+|Guarded transition
+|Protects the invariant directly
+|Needs careful modeling
+|Status changes and workflow steps
+
+|Explicit coordination
+|Makes dependencies visible
+|Can bottleneck or deadlock
+|Multi-object ordering
+
+|Idempotent design
+|Handles duplicates and retries
+|Needs keys and deduplication
+|Queues and external calls
+|===
+
+== Evidence to Capture
+* Correlation IDs and entity IDs
+* State transition logs
+* Before and after test runs
+* Lock or wait graph
+* Reproducible pressure scenario
+* Clear note of the protected invariant

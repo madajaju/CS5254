@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 7,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "centralized_vs_distributed",
+  "source": "doc/lectures/week7/centralized_vs_distributed/README.md",
+  "videoPath": "doc/lectures/week7/centralized_vs_distributed/.output/output.mp4",
+  "youtube_title": "Centralized vs. Distributed Coordination | CS 5254 Week 7",
+  "summary": "Two components each wait for the other to make progress.",
+  "youtube_description": "Two components each wait for the other to make progress. Logs show activity, but the workflow never reaches completion. The code is locally reasonable, yet the coordination contract is incomplete. What design rule would make progress observable and defensible?\n\nThis CS 5254 Week 7 lecture explores centralized vs. distributed coordination and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "centralized vs distributed coordination",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "coordination boundary",
+    "progress guarantee",
+    "contention",
+    "distributed systems",
+    "coordination strategy"
+  ]
+}

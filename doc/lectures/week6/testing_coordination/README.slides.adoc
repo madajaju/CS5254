@@ -1,0 +1,294 @@
+= Testing Coordination
+
+== Framing the design pressure
+* Testing coordination is about interaction, not isolated methods.
+* The question is whether progress, ordering, and ownership still hold under pressure.
+* A design is weaker when it only looks correct on the happy path.
+
+== Joint testing
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "Object A" as A
+rectangle "Object B" as B
+rectangle "Interaction\ninvariant" as I
+rectangle "Repeatable\ntest" as T
+
+A --> I : state or event
+B --> I : state or event
+I -> T : verify together
+@enduml
+----
+
+== Artificial latency
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "Slow branch" as S
+rectangle "Fast branch" as F
+rectangle "Coordinator" as C
+rectangle "Observed outcome" as O
+
+S --> C : delayed completion
+F --> C : normal completion
+C -> O : expose waiting or race
+@enduml
+----
+
+== Small-scale chaos testing
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "Signal 1" as S1
+rectangle "Signal 2" as S2
+rectangle "Signal 3" as S3
+rectangle "Handler" as H
+rectangle "Order-sensitive bug" as B
+
+S1 --> H : permute arrival
+S2 --> H : permute arrival
+S3 --> H : permute arrival
+H -> B : reveal hidden ordering assumption
+@enduml
+----
+
+== Coordination boundary
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "Independent object" as A
+rectangle "Independent object" as B
+rectangle "Boundary" as X
+rectangle "Progress rule" as P
+
+A --> X : request
+B --> X : confirm
+X -> P : ordering or ownership decision
+@enduml
+----
+
+== Failure evidence
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "Log lines" as L
+rectangle "Trace" as T
+rectangle "Interleaving" as I
+rectangle "Repeatable failure" as R
+
+L --> T : correlate
+T -> I : reconstruct
+I --> R : prove pressure effect
+@enduml
+----
+
+== Corrective design
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "Invariant" as I
+rectangle "Guard" as G
+rectangle "Idempotency" as D
+rectangle "Observability" as O
+rectangle "Reviewable test" as R
+
+I --> G : protect
+I -> D : dedupe
+I --> O : expose state
+O -> R : validate
+@enduml
+----
+
+== Worked example: order workflow
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "Order API" as A
+rectangle "Coordinator" as C
+rectangle "Inventory" as I
+rectangle "Payment" as P
+rectangle "Shipping" as S
+
+A -> C : create order
+C --> I : reserve inventory
+C --> P : capture payment
+C --> S : ship after both confirm
+@enduml
+----
+
+== Failure scenario: stale or late completion
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "Payment callback" as P
+rectangle "Inventory lock" as I
+rectangle "Waiting workflow" as W
+rectangle "Stuck order" as S
+
+P --> W : waits for inventory
+I --> W : waits for payment
+W -> S : no progress
+@enduml
+----
+
+== Design response
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam classBackgroundColor white
+skinparam classFontColor black
+skinparam classBorderColor #123456
+skinparam shadowing false
+left to right direction
+
+rectangle "State machine guard" as G
+rectangle "Ordered acquisition" as O
+rectangle "Timeout handling" as T
+rectangle "Compensation" as C
+rectangle "Protected progress" as P
+
+G --> P : reject invalid move
+O --> P : avoid cycle
+T --> P : fail fast
+C --> P : recover safely
+@enduml
+----
+
+== Trade-off summary
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach |Strength |Weakness |Best use
+
+|Simple baseline
+|Easy to explain
+|Hides pressure assumptions
+|First pass
+
+|Guarded transition
+|Protects the invariant directly
+|Requires careful state modeling
+|Stateful workflows
+
+|Explicit coordination
+|Makes dependency visible
+|Can introduce waits
+|Multi-object steps
+
+|Idempotent retry-safe design
+|Handles duplicate work
+|Needs deduplication
+|Queues and callbacks
+|===

@@ -1,0 +1,82 @@
+[
+  {
+    "slide": 1,
+    "topic": "Livelock vs Deadlock",
+    "text": "Welcome to the lecture on livelock versus deadlock. The key idea here is that concurrency problems are not just about whether code runs, but whether it keeps making progress under pressure. Two components can each look reasonable in isolation, yet still get stuck because the coordination contract is incomplete."
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Idea",
+    "text": "Let's start with the basic failure pattern: one component waits for the other, and the other waits back. You may still see logs and activity, which can make the system look alive, but the workflow never finishes. A common mistake is to trust that a locally correct method automatically creates a globally correct process. The real question is what rule makes progress observable and defensible."
+  },
+  {
+    "slide": 3,
+    "topic": "Topic Map",
+    "text": "This lecture is organized as a chain of reasoning. We begin with livelock, move to the specific pattern of resource rejection, then contrast spinning with waiting, and then focus on validation evidence. That leads into design decisions. Notice the emphasis: the goal is not just to name the failure, but to connect it to the evidence and the correction that protects the invariant."
+  },
+  {
+    "slide": 4,
+    "topic": "Livelock",
+    "text": "Livelock happens when threads are active and responsive, but still make no meaningful progress. Imagine two workers politely stepping aside for each other forever. They are doing work, but not advancing the shared goal. This matters because the system can pass a simple test and still fail under timing pressure. The important engineering judgment is to identify the invariant that should have advanced and make that transition visible in the design."
+  },
+  {
+    "slide": 5,
+    "topic": "Deadlock",
+    "text": "Deadlock is a different kind of stop: each thread holds something the other needs, so both wait forever. In practice, the machine often looks quiet because the threads are blocked or sleeping. The important distinction is that deadlock is a waiting problem, while livelock is an activity problem. Both are progress failures, but they create different symptoms and different evidence trails."
+  },
+  {
+    "slide": 6,
+    "topic": "Spinning vs. Waiting",
+    "text": "A useful diagnostic question is whether the system is spinning or waiting. Livelocked threads often consume CPU because they keep retrying, backing off, or rechecking state. Deadlocked threads usually sit blocked. That difference matters because it changes what you look for in traces, logs, and performance data. It also affects how you defend the diagnosis in an Integrity Packet, since the observed behavior is part of the claim."
+  },
+  {
+    "slide": 7,
+    "topic": "Coordination Boundary",
+    "text": "The key idea here is the coordination boundary: the point where independent objects must agree on ordering, ownership, or progress. This is where hidden assumptions become dangerous. If one component assumes the other will move first, or assumes state will be observed in a certain order, the system may work in a sequential test and fail under real concurrency. Good design makes that boundary explicit and testable."
+  },
+  {
+    "slide": 8,
+    "topic": "Progress Guarantee",
+    "text": "A progress guarantee means the work eventually completes instead of waiting forever. That property should be checked, not hoped for. The design should guard the relevant state transition, allow only valid movement forward, and make that movement visible in evidence. This is the kind of property that turns a fragile implementation into something you can actually defend."
+  },
+  {
+    "slide": 9,
+    "topic": "Resource Rejection",
+    "text": "Resource rejection is a classic livelock pattern. Two workers both release a resource to be polite, then both try again at the same time, and the cycle repeats. Nothing is technically broken at the individual action level, but the shared behavior never converges. This is uncomfortable because it can look fair while still being useless. The lesson is to protect the progress invariant, not just the local courtesy rule."
+  },
+  {
+    "slide": 10,
+    "topic": "Failure Evidence",
+    "text": "When a concurrency failure is real, the evidence should let another reviewer reconstruct it. That usually means structured logs with correlation IDs, a trace that preserves ordering, and a repeatable test that reproduces the interleaving. A vague complaint like 'it got stuck' is not enough. You want evidence that makes the failure concrete enough to defend and compare against the corrected version."
+  },
+  {
+    "slide": 11,
+    "topic": "Corrective Design",
+    "text": "The protected property here is progress under pressure. One way to protect it is with a guard on the state transition, plus backoff and observability so invalid retries do not silently loop forever. Another option is explicit coordination or compensation when a prerequisite fails. The trade-off is real: more control often means more metadata, more recovery logic, and more design complexity. The fix is safer, but it is not free."
+  },
+  {
+    "slide": 12,
+    "topic": "Worked Example",
+    "text": "Let's make this concrete with the publishing-slot example. Two workers both need the same slot, and each one releases it politely when it notices the other needs it too. If both keep retrying together, the workflow stays active but never finishes. The hallway example is the same idea in human terms: both people step aside in the same direction over and over. These examples are useful because they make the failure feel ordinary, not exotic."
+  },
+  {
+    "slide": 13,
+    "topic": "Failure Scenario",
+    "text": "Here is the uncomfortable part: a sequential test can pass while concurrent pressure breaks the hidden assumption. The baseline version assumes operations happen once, in order, with current state. Under overlap, delay, or retry, that assumption fails and the workflow can get stuck. What you should capture is the before-and-after behavior, along with the exact state or interleaving that exposes the mismatch between the design and the execution model."
+  },
+  {
+    "slide": 14,
+    "topic": "Design Response",
+    "text": "A sound response starts by naming the invariant, then choosing the mechanism that protects it. A guarded state model can prevent illegal transitions, idempotency can absorb duplicate work, timeouts can prevent forever waits, and compensation can recover from partial failure. Each mechanism helps, but each one also introduces cost. The important part is that the design now rejects or contains invalid interleavings instead of pretending they cannot happen."
+  },
+  {
+    "slide": 15,
+    "topic": "Trade-Offs",
+    "text": "This comparison is about judgment, not just mechanisms. A simple baseline is easy to explain, but it often hides the pressure condition. Guarded transitions protect the invariant directly, though they require careful modeling. Explicit coordination makes dependencies visible, but it can create bottlenecks. Idempotent design handles duplicates and retries well, but it needs keys and deduplication. The right choice depends on the workflow and the failure you are trying to defend against."
+  },
+  {
+    "slide": 16,
+    "topic": "Evidence to Capture",
+    "text": "If you want to defend your analysis, capture evidence that another person can verify. Include correlation IDs and entity IDs, state transition logs, a lock or wait graph if relevant, and a repeatable pressure scenario. Keep a before-and-after comparison if you make a fix. Most importantly, state the protected invariant clearly, because the evidence only matters when it supports a precise design claim."
+  }
+]
