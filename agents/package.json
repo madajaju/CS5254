@@ -5,8 +5,9 @@
   "main": "AIHelper.js",
   "scripts": {
     "build:lectures": "node buildLectures.js",
-    "build:slides": "node buildSlides.js ../doc/lectures/week7",
+    "build:slides": "node buildSlides.js ../doc/lectures/week6",
     "build:pdf": "node generate-pdf.js",
+    "build:lecture-html": "node buildLectureHtml.js",
     "build:video": "node generate-video.js ../doc/lectures/week7",
     "build:brightspace": "node generateBrightspace.js",
     "upload:videos": "node uploadVideo.js --credentials youtube.creds.json --week-dir ../doc/lectures/week7",
