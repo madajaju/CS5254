@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 8,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "midterm_prep",
+  "source": "doc/lectures/week8/midterm_prep/README.md",
+  "videoPath": "doc/lectures/week8/midterm_prep/.output/output.mp4",
+  "youtube_title": "Midterm Preparation: How to Think, Not Memorize | CS 5254 Week 8",
+  "summary": "A course project appears correct during a simple demonstration.",
+  "youtube_description": "A course project appears correct during a simple demonstration. Once concurrency, ambiguity, or operational pressure is introduced, the design exposes a hidden assumption about trace analysis. What must the engineer analyze and defend before trusting the result?\n\nThis CS 5254 Week 8 lecture explores midterm preparation: how to think, not memorize and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "midterm preparation",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "trace analysis",
+    "pattern matching",
+    "tradeoff justification",
+    "integrity packet",
+    "exam prep"
+  ]
+}

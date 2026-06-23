@@ -2,136 +2,116 @@
   {
     "slide": 1,
     "topic": "System Reasoning Walkthrough",
-    "text": "Welcome everyone to our lecture on System Reasoning Walkthrough. Today, we will delve into the intricacies of analyzing system behavior, especially when concurrency and pressure are introduced."
+    "text": "Welcome. In this walkthrough, we are looking at how a system can appear correct until it is placed under pressure. The main goal is to move from a simple working demo to a defensible engineering explanation: what is the invariant, what assumption is hiding underneath, and what evidence would prove the system still behaves correctly when timing, retries, or concurrency get in the way."
   },
   {
     "slide": 2,
-    "topic": "Learning Objectives",
-    "text": "Our learning objectives for today include analyzing design pressure in stateful concurrent systems and diagnosing the hidden assumptions that can make systems appear correct in simpler scenarios. We will also evaluate failure evidence using logs and tests, design corrections that maintain our invariants, and finally, we’ll discuss how to defend our methods in the Integrity Packet."
+    "topic": "Why It Matters",
+    "text": "The key idea here is that a design can look fine once and still be unreliable. A happy-path run is not enough if the system depends on ordering, exclusivity, or current state. We want to surface the hidden assumption early, define the invariant first, and only then pick the mechanism that protects it. Just as important, the evidence has to survive failure, not just success."
   },
   {
     "slide": 3,
-    "topic": "Opening Narrative",
-    "text": "Imagine you have a project that seems perfect during a demo, but once you add some operational pressure, it exposes hidden assumptions. What should we analyze to trust the results in such situations? Let's explore."
+    "topic": "Pressure Lens",
+    "text": "Think of the lecture topic as a chain of reasoning under pressure. Behavior creates pressure, pressure exposes a hidden assumption, the hidden assumption points to an invariant, and the invariant demands evidence. That evidence is what lets you defend the design instead of guessing about it. Professional engineering judgment starts when you can explain how pressure changes the story."
   },
   {
     "slide": 4,
-    "topic": "Core Concepts",
-    "text": "In this section, we discuss core concepts essential to understanding system reasoning. We'll cover Deductive Reasoning, Mental Modeling, Hypothesis Testing, System Invariants, and Failure Modes."
+    "topic": "Deductive Reasoning",
+    "text": "Deductive reasoning means you observe logs, timings, or traces and infer what must be happening inside the system. You are not just saying, \"I think it worked\". You are proving a claim from external evidence. Under concurrency pressure, that becomes essential, because the same code can produce very different outcomes depending on the interleaving."
   },
   {
     "slide": 5,
-    "topic": "Deductive Reasoning",
-    "text": "Deductive Reasoning involves using external observations to infer internal behaviors in the system. This is crucial for identifying conditions that must be explicit before trusting the system, particularly under pressure. If ignored, we risk creating duplicate work or misleading evidence, emphasizing the need to expose invariants, log transitions, and validate our tests."
+    "topic": "Deductive Model",
+    "text": "A useful mental chain is logs to trace, trace to state, and state to claim. In other words, start from the evidence you can capture, connect it to the internal transition, and then make a precise statement about what the system must have done. This is how you avoid vague explanations and turn observations into a defensible conclusion."
   },
   {
     "slide": 6,
-    "topic": "Mental Modeling",
-    "text": "Mental Modeling is about creating a conceptual map of how the system operates without direct code examination. This helps us pinpoint conditions we need to clarify for trusting the system under stress. Similar to Deductive Reasoning, failing to model mentally can lead to stale states or workflow halts. Again, we must effectively reveal invariants."
+    "topic": "Mental Model",
+    "text": "Mental modeling is about building an execution map before you stare at the code. You ask: who acts first, what state changes, where can timing drift, and what happens if two actors overlap? That matters because the visible method names often suggest a clean sequential flow, while the real execution path may be much messier."
   },
   {
     "slide": 7,
-    "topic": "Hypothesis Testing",
-    "text": "Hypothesis Testing involves forming a theory about where a failure could arise and then conducting tests to validate or invalidate that theory. It's crucial in ensuring we understand the conditions necessary for system reliability. Remember, if we overlook this, systems can yield duplicate outputs or misleading logs, so we must be diligent about documenting invariants."
+    "topic": "Mental Map",
+    "text": "Imagine two workers both reaching for the same queue and the same episode. If both can act on the same item without coordination, then the design is assuming away conflict. The point of this model is to make the execution path visible in your head: multiple actors, one shared entity, and a queue or boundary where pressure can create races."
   },
   {
     "slide": 8,
-    "topic": "System Invariant",
-    "text": "A System Invariant is a condition that must remain true throughout all valid executions of the system. Recognizing and ensuring these invariants exist can help us trust our system under pressure. We also need to be aware of how failure to maintain these can lead to misleading evidence or even loss of system progress."
+    "topic": "Hypothesis Test",
+    "text": "A strong engineering habit is to form a concrete failure theory and then test it directly. Don't just run the system and hope for the best. Pick a hypothesis about what might be broken, create the pressure that would expose it, repeat the run, and compare the traces. That is how you separate a guess from an actual diagnosis."
   },
   {
     "slide": 9,
-    "topic": "Failure Mode",
-    "text": "Failure Mode refers to a specific way the system might violate an invariant or lose progress. Understanding these modes is essential because they often relate to internal states, timing, or interleaved behaviors. The implications are similar: we need to expose invariants and ensure proper documentation and logging."
+    "topic": "Test Loop",
+    "text": "The workflow is theory, pressure test, trace, revision. That loop matters because the first explanation is often incomplete. You test the theory, inspect the evidence, and then revise the design or the claim. If the system survives the pressure, great. If not, the trace tells you what must change."
   },
   {
     "slide": 10,
-    "topic": "System View",
-    "text": "This diagram illustrates how the concepts interconnect within our discussion of system reasoning. It highlights the flow from Deductive Reasoning to design decisions influenced by validation evidence. This reinforces the importance of linking system correctness to evidence, especially as conditions change."
+    "topic": "Invariant",
+    "text": "Here the invariant is the thing that must stay true across all valid runs. In a stateful concurrent system, that is often something like one owner at a time, or no stale transition after a newer one. A common mistake is to describe the tool first. Instead, name the property first, because the mechanism only matters if it protects the right condition."
   },
   {
     "slide": 11,
-    "topic": "Worked Example",
-    "text": "Now, let's look at a worked example. Picture live analysis of logging where we observe `Episode-1` being published twice, revealing a system that lacks proper locking between checks and updates. This reveals critical design assumptions that can affect project outcomes."
+    "topic": "State Guard",
+    "text": "A state machine is a very practical way to protect an invariant. An episode starts in DRAFT, then a worker claims it into PROCESSING, and later it may move to READY, PUBLISHED, or FAILED. The important part is that the transition itself becomes meaningful. If the system accepts only valid moves, then it can reject stale or competing work instead of silently drifting into ambiguity."
   },
   {
     "slide": 12,
-    "topic": "Problem Setup",
-    "text": "In our example, we have logs from two threads checking a status nearly simultaneously, which leads us to deduce that there's no adequate locking mechanism in place. Understanding this failure context in our project settings—perhaps an Order Fulfillment system—helps us see the real-world applications."
+    "topic": "Failure Race",
+    "text": "This is the uncomfortable failure case. Two workers both read the same episode as DRAFT before either one writes back, and now they both believe they own the same work. In the happy path, that race is hidden because only one worker happens to act. Under pressure, the invariant breaks, duplicate processing starts, and the logs may even hide which worker actually won."
   },
   {
     "slide": 13,
-    "topic": "Mental Model",
-    "text": "Let’s consider a simple mental model that assumes operations occur once and sequentially. However, this often doesn’t reflect true execution. The assumption may remain invisible in the code, leading to unforeseen consequences, especially when operational overlaps occur."
+    "topic": "Failure Evidence",
+    "text": "When this breaks, the symptoms are concrete: duplicate work, stale state, misleading logs, or stuck progress. The evidence you need is not just a generic error message. You want worker IDs, episode IDs, previous and new state, timestamps, and repeatable output so a reviewer can reconstruct exactly how the failure happened."
   },
   {
     "slide": 14,
-    "topic": "Failure Scenario",
-    "text": "As we bring in overlapping executions or operational delays, what happens? We might observe stale states or duplicate executions. The mismatch between our design assumptions and the actual execution patterns can result in system failures, which are more than mere syntax errors."
+    "topic": "Pressure Timeline",
+    "text": "A useful pressure test is to put two workers against the same episode and insert a delay between the check and the claim. That creates the race on purpose. The key question is whether the code treats check and update as one atomic ownership step, or whether it splits them apart and lets both workers slip through."
   },
   {
     "slide": 15,
-    "topic": "Improved Design Direction",
-    "text": "To avoid the pitfalls we've just examined, we should focus on clearly naming our invariants. We also want transitions to be observable and introduce controls like version checks or retry mechanisms. Each element plays a critical role in safeguarding our system's robustness."
+    "topic": "Design Response",
+    "text": "The protected property here is that only one worker can own the transition at a time. You can protect that with an atomic check-and-set, a versioned write, synchronized transition logic, or a single-owner queue. The trade-off is real: you gain correctness around the invariant, but you usually give up some parallelism or add more explicit control logic."
   },
   {
     "slide": 16,
-    "topic": "Why Is It Safer?",
-    "text": "By shifting our focus from merely trusting operational execution to proving the containment of invalid states with proper evidence, we create a design that is not only reliable but also defensible. This approach helps us manage risks more effectively."
+    "topic": "Correction Path",
+    "text": "The correction path is about moving from an assumption to a defensible control. First, make the invariant explicit. Then use an atomic check or versioned write so stale work is rejected instead of accepted. Finally, log the critical transition so the losing path is visible in review. That extra control is not free, but it is what makes the design trustworthy."
   },
   {
     "slide": 17,
-    "topic": "Failure Modes",
-    "text": "Let’s explore some common failure modes. For instance, if a system passes test cases without addressing timing or concurrent pressures, it might appear successful at first glance. By introducing repeated runs and stressing these tests, we can better detect underlying weaknesses."
+    "topic": "Tradeoffs",
+    "text": "No correction is free, and that is exactly what you should be able to defend. The simple baseline is easy, but it hides timing assumptions. Guarded transitions protect the core invariant, but require careful modeling. Retry-safe designs handle duplicates and partial failure, but they need more control state. Observability-first designs produce strong evidence, but they cost more instrumentation work."
   },
   {
     "slide": 18,
-    "topic": "Happy-path Success",
-    "text": "A common symptom of potential failure lies in ‘happy-path’ successes, where the tests don't incorporate the pressure conditions. We can address this by refining our test approaches to include failure-focused scenarios that target specific invariants."
+    "topic": "Evidence Flow",
+    "text": "A strong claim moves from claim to log line to trace to review. That is the evidence chain you want in an Integrity Packet or design defense. If you can point to the operation ID, the entity ID, the state transition, and the repeated result, then your reviewer can check the story instead of taking it on faith."
   },
   {
     "slide": 19,
-    "topic": "Naming Tools",
-    "text": "Another symptom is when tools are named without acknowledging the underlying design properties they are meant to safeguard. We must prompt ourselves to identify which invariant a tool is protecting. Writing down the invariant first can clarify our mechanisms' roles."
+    "topic": "A1 Connection",
+    "text": "This is where the lecture connects directly to the assignment. For A1, you should identify the invariant in your own project, show a pressure test that can break the naive version, capture before and after evidence if you change the design, and defend the trade-off in your Integrity Packet. The goal is not just to make it work, but to prove why your approach is the right one."
   },
   {
     "slide": 20,
-    "topic": "Vague Evidence",
-    "text": "Vague evidence supporting our design claims can lead to confusion. For instance, if logs lack critical identifiers, reviewers may struggle to interpret the failure scenarios. Structuring our logs and linking them directly to our design claims is a necessary corrective measure."
+    "topic": "Assignment View",
+    "text": "For your project, pick the domain object or workflow that matters most, then create a failure test that puts it under pressure. From that run, collect evidence that a reviewer can inspect: logs, traces, outputs, and a clear connection to the Integrity Packet. What you need to demonstrate is not just behavior, but a defended design decision grounded in observed failure and recovery."
   },
   {
     "slide": 21,
-    "topic": "Trade-Off Analysis",
-    "text": "Let’s perform a trade-off analysis across various approaches. For instance, a simple baseline is easy to implement but can hide critical timing assumptions. In contrast, adopting a guarded state transition might directly protect invariants while requiring careful state modeling."
+    "topic": "Anti-Patterns",
+    "text": "These are the mistakes to avoid. A happy path alone gives false confidence. A tool without an invariant means you are solving the wrong problem. Vague evidence cannot support a claim. And a fix without a baseline comparison makes it impossible to know whether you actually improved anything. Those anti-patterns are common, and they are exactly what this lecture is trying to prevent."
   },
   {
     "slide": 22,
-    "topic": "Practical Application",
-    "text": "As we wrap up our discussion, tomorrow, I encourage you to identify the most relevant invariant for your projects. Craft both a sequential success scenario and a pressure scenario to explore potential failures while enhancing your logs for detailed tracking."
+    "topic": "Anti-Pattern Map",
+    "text": "All of these anti-patterns funnel into the same outcome: false confidence. If you only test the easy case, if you talk about the mechanism before the property, if your logs are too weak, or if you never compare before and after, then the design may feel correct without being correct. The professional habit is to make the pressure explicit and then prove the result with evidence."
   },
   {
     "slide": 23,
-    "topic": "Assignment Integration",
-    "text": "Remember, this lecture aligns with your [A1] assignment. You’ll want to connect today's concepts to your semester project by demonstrating relevant objects, workflows, events, or recovery mechanisms in your domain. Concrete evidence will be key."
-  },
-  {
-    "slide": 24,
-    "topic": "Validation Questions",
-    "text": "Here are some validation questions to consider: What invariant is most relevant to your work? What hidden assumption appears to make a baseline design correct? Explore how you might force a failure in tests or record evidence of that failure occurring."
-  },
-  {
-    "slide": 25,
-    "topic": "Summary",
-    "text": "In summary, our journey today through system reasoning has revealed the critical links between invariants, observable behavior, and the trade-offs necessary to maintain correctness under pressure. Mastery of these concepts is vital in our engineering practices."
-  },
-  {
-    "slide": 26,
-    "topic": "Further Reading",
-    "text": "For those interested in delving deeper, I recommend exploring topics such as structured logging and correlation IDs, or looking into invariants in stateful object-oriented systems. This will enhance your understanding and application of today's concepts."
-  },
-  {
-    "slide": 27,
     "topic": "Discussion",
-    "text": "Let’s open the floor for discussion. How can we improve our testing strategies under pressure? I'm curious to hear your insights into the unseen assumptions you often navigate in your work."
+    "text": "Let's pause here and think like reviewers. First, ask which invariant would break first in your own system. Then ask which control you would actually defend if someone challenged your design. The best answer is not the most complicated mechanism. It is the one that protects the right property and can be supported by clear evidence."
   }
 ]

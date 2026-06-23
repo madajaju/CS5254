@@ -2,101 +2,51 @@
   {
     "slide": 1,
     "topic": "Common Failure Patterns",
-    "text": "Welcome everyone to our lecture on Common Failure Patterns. Today, we'll explore how these patterns affect the reliability of stateful concurrent systems, especially under pressure."
+    "text": "Welcome everyone. Today we are looking at common failure patterns in concurrent, stateful systems, and more importantly, how to reason about them like an engineer rather than just a coder. The big idea is that a design can look fine in a happy-path demo and still fail under pressure. Our job is to identify the hidden assumption, name the invariant that matters, and defend the design with evidence."
   },
   {
     "slide": 2,
-    "topic": "Opening Narrative",
-    "text": "Let's start with an important scenario: imagine a student asks AI for a coordination design and gets back code that is missing key ordering guards. While the draft might be useful, it poses significant risks if used in practice. As engineers, we must ensure correctness in any AI-generated designs we utilize."
+    "topic": "Topic Map",
+    "text": "Let’s start by organizing the space. The main lecture topic branches into several failure patterns: race conditions, deadlock, missed signals, and livelock. Each of those should lead us toward evidence, not just intuition. And then evidence feeds design response. That is the professional loop here: identify the failure mode, capture the proof, and choose a correction that protects the right property without pretending the trade-off disappears."
   },
   {
     "slide": 3,
-    "topic": "Core Concept: Race Condition (Lost Update)",
-    "text": "The first core concept we need to understand is the Lost Update Race Condition. This occurs when multiple writers operate without protection, allowing some updates to be lost. Recognizing conditions like this is essential if we want to trust our systems under pressure."
+    "topic": "Race Condition",
+    "text": "A race condition begins with multiple writers and no protection. That can produce a lost update, stale state, or other results that look random but are actually explainable once timing is involved. A common mistake is to assume the method is correct because it worked once. The key idea here is to force the design to prove itself under repeated execution, because only then do we learn whether the state transition is actually safe."
   },
   {
     "slide": 4,
-    "topic": "Core Concept: Race Condition (Check-Then-Act)",
-    "text": "Next, we have the Check-Then-Act Race Condition. This happens when a system reads stale state information before acting, leading to similar issues as the Lost Update. Again, being explicit about these conditions is critical if we expect reliability."
+    "topic": "Check-Then-Act",
+    "text": "This pattern is about reading state, deciding based on that read, and then acting after the state may already have changed. That gap is where the bug lives. The operation is built on a stale view, so the invariant can break even though every individual step seems reasonable. In practice, this is why we want the design to expose the transition explicitly and why we test with a repeatable scenario rather than a single clean run."
   },
   {
     "slide": 5,
-    "topic": "Core Concept: Deadlock",
-    "text": "Now, let's discuss Deadlock, which arises from circular resource dependencies. If we encounter this, it can lead to halted progress, and as before, we must be clear about these risks to maintain system trust under various scenarios."
+    "topic": "Deadlock",
+    "text": "Deadlock is a circular resource dependency. One thread holds one resource and waits for another, while a second thread does the reverse, and now nothing moves. What makes this especially dangerous is that the system may appear active right up until it stops making progress. The engineering question is not just how to prevent the cycle, but how to recognize it in logs, traces, or blocked-worker evidence when it happens."
   },
   {
     "slide": 6,
-    "topic": "Core Concept: Missed Signal",
-    "text": "The Missed Signal condition occurs when signals are sent to objects that aren't yet in a waiting state. This can result in blocked workflows and requires us to explicitly define our states to avoid confusion."
+    "topic": "Missed Signal",
+    "text": "A missed signal happens when something is signaled before the receiver is actually waiting. The notification is effectively lost, and the waiting side can sit forever. This is a classic timing failure, and it is easy to miss in a baseline test because the timing has to line up just wrong. The fix is usually not magical; it is a guarded wait, a stronger state protocol, and evidence that shows the wakeup condition is handled correctly."
   },
   {
     "slide": 7,
-    "topic": "Core Concept: Livelock",
-    "text": "Finally, we have Livelock, where state changes occur but without any productive outcome. Like the previous examples, failing to adequately address this can lead to duplicate work and stale state, ultimately undermining system reliability."
+    "topic": "Livelock",
+    "text": "Livelock is different from deadlock: the system is busy, but it is not getting anywhere. You may see retries, backoffs that are too weak, or actors constantly changing state without ever completing the work. That is uncomfortable because activity can fool people into thinking the system is healthy. The thing to measure here is progress, not motion, and that is why a progress metric matters."
   },
   {
     "slide": 8,
-    "topic": "System View",
-    "text": "Here, we see a system view that connects common failure patterns through a series of dependencies. It emphasizes that the focus should not just be on whether code runs once, but on whether crucial invariants hold up under various real-world conditions."
+    "topic": "Evidence to Collect",
+    "text": "When we say evidence, we are being very specific. We want correlation IDs so we can trace one workflow, entity IDs so we know which object changed, state transitions so the narrative is reconstructable, and latency plus retry data so pressure is visible. Then we need a repeatable workload, because without repeatability we cannot compare the baseline to the fix. This is the kind of material that makes a failure defensible in review."
   },
   {
     "slide": 9,
-    "topic": "Worked Example: Problem Setup",
-    "text": "Let’s consider a practical example from the podcast domain. We can encounter a Lost Update when two workers try to increment an AssetCount but one of the updates is overlooked. Similarly, an inconsistent read could show an episode marked as PUBLISHED while it is not actually published."
+    "topic": "Design Response",
+    "text": "The design response starts with the invariant, not the tool. Once you know what must remain true, you choose the mechanism that protects it, such as a guarded transition, explicit coordination, or a retry-safe path. Then you make the transition visible, validate with a test, and defend the trade-off. The important point is that protection is never free: you usually pay with complexity, waiting, or reduced throughput."
   },
   {
     "slide": 10,
-    "topic": "Naive Implementation",
-    "text": "In a naive implementation, we assume sequential operations happen correctly based on current state. However, these assumptions can be misleading since they may not account for concurrent processes, which may lead to unexpected issues."
-  },
-  {
-    "slide": 11,
-    "topic": "Failure Scenario",
-    "text": "Now let's discuss a failure scenario. An overlapping execution, delayed deliveries, or retries can expose stale states, resulting in workflows getting stuck. This highlights the importance of aligning design assumptions with actual execution models."
-  },
-  {
-    "slide": 12,
-    "topic": "Corrected Design Direction",
-    "text": "To improve our design, we should name the invariant clearly and ensure transitions are observable. Adding safety controls like version checks, idempotency keys, and explicit coordination can help protect against these failure modes."
-  },
-  {
-    "slide": 13,
-    "topic": "Improved Design: Safety",
-    "text": "The goal of the improved design is to move from merely hoping that execution proceeds correctly to proving that our system can handle invalid interleavings effectively."
-  },
-  {
-    "slide": 14,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "Let's discuss some common symptoms of failure modes. For instance, if a happy-path test passes but fails under stress, we need to intentionally incorporate failure-focused tests to reveal hidden issues."
-  },
-  {
-    "slide": 15,
-    "topic": "Trade-Off Analysis",
-    "text": "In our trade-off analysis, we look at various approaches, weighing their strengths and weaknesses. For example, a simple baseline is easy to implement but often hides underlying timing assumptions, while guarded transitions protect invariants directly."
-  },
-  {
-    "slide": 16,
-    "topic": "Practical Application",
-    "text": "Moving forward, it's important to apply what we've learned. Identify a relevant invariant, create both a success scenario and a pressure scenario to expose potential failures, and capture detailed logs with operation IDs."
-  },
-  {
-    "slide": 17,
-    "topic": "Assignment Integration",
-    "text": "As a part of your assignments, you'll connect the concepts from this lecture to your semester project. Demonstrate mastery with evidence, which includes runnable commands, structured logs, and a clear explanation in your Integrity Packet."
-  },
-  {
-    "slide": 18,
-    "topic": "Validation Questions",
-    "text": "As we wrap up, consider these validation questions. What's the most relevant invariant? What hidden assumptions could create false correctness? How would you provoke a repeatable failure or provide evidence that it occurred?"
-  },
-  {
-    "slide": 19,
-    "topic": "Summary",
-    "text": "To summarize, common failure patterns are pivotal in reasoning about system correctness. Connecting these concepts to observable behaviors and clear trade-offs is essential for robust engineering."
-  },
-  {
-    "slide": 20,
-    "topic": "Discussion",
-    "text": "Finally, let’s open the floor for discussion. How might hidden state impact design, and what strategies could you suggest to reduce the risk of failure in your systems?"
+    "topic": "Trade-Offs",
+    "text": "Here is the practical comparison. A simple baseline is easy to explain, but it often hides timing assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes dependencies visible, though it can add waiting. And observability-first design gives you strong evidence, but it means more instrumentation work. The right choice depends on what failure you are trying to make impossible, or at least measurable."
   }
 ]

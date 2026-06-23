@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 8,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "failure_patterns",
+  "source": "doc/lectures/week8/failure_patterns/README.md",
+  "videoPath": "doc/lectures/week8/failure_patterns/.output/output.mp4",
+  "youtube_title": "Common Failure Patterns | CS 5254 Week 8",
+  "summary": "A student asks AI for a coordination design and receives confident code with a missing ordering guard.",
+  "youtube_description": "A student asks AI for a coordination design and receives confident code with a missing ordering guard. The answer is useful as a draft, but unsafe as evidence. Under concurrent execution the workflow stalls or violates an invariant. How should engineers use AI-generated designs without surrendering responsibility for correctness?\n\nThis CS 5254 Week 8 lecture explores common failure patterns and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "common failure patterns",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "race condition",
+    "deadlock",
+    "missed signal",
+    "livelock",
+    "observability"
+  ]
+}

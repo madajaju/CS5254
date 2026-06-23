@@ -2,106 +2,86 @@
   {
     "slide": 1,
     "topic": "Midterm Preparation: How to Think, Not Memorize",
-    "text": "Welcome to today's lecture on Midterm Preparation: How to Think, Not Memorize. This session is part of the course CS 5254b, focusing on Object-Oriented Systems Under Concurrency. We'll spend the next 15 minutes diving deep into how to analyze and design systems under concurrent constraints."
+    "text": "Welcome. The theme of this lecture is simple: do not treat the midterm like a vocabulary test. Instead, practice the habit of thinking through pressure, invariants, evidence, and trade-offs. That is the same mindset you need for concurrency and for the Integrity Packet."
   },
   {
     "slide": 2,
-    "topic": "Overview",
-    "text": "In this overview slide, we will discuss the key elements of the course, which includes our design pressure in concurrent systems, and how our upcoming assignment aligns with this lecture, particularly Assignment 1."
+    "topic": "Lecture Focus",
+    "text": "The key idea here is that you should analyze pressure, not just the happy path. A design can look fine when everything runs once in order, but that tells you very little about correctness under concurrency or operational stress. Before you choose a fix, name the invariant you are trying to protect, and then connect that reasoning back to A1."
   },
   {
     "slide": 3,
-    "topic": "Learning Objectives",
-    "text": "Our learning objectives today are to analyze the design pressures that come into play during concurrency, diagnose hidden system assumptions, evaluate failure evidence through logs and traces, design corrections while preserving system invariants, and learn how to defend our approaches in the Integrity Packet format."
+    "topic": "The Question Behind the Question",
+    "text": "When you see a midterm question, the real task is usually not the literal wording in front of you. The deeper question is: what hidden assumption makes the baseline look correct, and what pressure breaks it? After that, you need to show evidence, explain the trade-off, and defend the correction clearly."
   },
   {
     "slide": 4,
-    "topic": "Opening Narrative",
-    "text": "Let's begin with an opening narrative. Many course projects might seem correct during initial tests, but once concurrency is introduced, hidden assumptions can surface. We need to ask ourselves: what aspects must we analyze and defend to ensure our designs hold up under pressure?"
+    "topic": "Lecture Flow",
+    "text": "The lecture moves in a deliberate order. We start with the topic, then identify design pressure, then isolate the invariant, then gather evidence, and finally defend the decision. That sequence matters because a good answer does not begin with a tool or a framework. It begins with the property that must stay true."
   },
   {
     "slide": 5,
     "topic": "Trace Analysis",
-    "text": "Moving into Trace Analysis, the key idea here is understanding what the final state of a system is given a specific code block and an interleaving of operations. This concept is crucial because it helps identify the conditions that must be explicitly expressed for a system to be trusted, especially under pressure."
+    "text": "Trace analysis asks a very concrete question: given a code block and a particular interleaving, what is the final state? This is how you move from vague intuition to disciplined reasoning. If you ignore the trace, a system may pass a simple test but still produce duplicate work, stale state, or blocked progress once timing changes."
   },
   {
     "slide": 6,
     "topic": "Pattern Matching",
-    "text": "Now, let's explore Pattern Matching. This is about identifying specific types of failures within a design. Recognizing these failures helps make hidden conditions explicit, which is essential to ensure the system operates correctly under concurrent pressure."
+    "text": "Pattern matching means recognizing which kind of failure you are actually looking at, such as a race or a deadlock. The point is not to name a buzzword. The point is to understand what condition is being violated so you can choose the right response instead of treating every bug the same way."
   },
   {
     "slide": 7,
     "topic": "Tradeoff Justification",
-    "text": "On the topic of Tradeoff Justification, it is important to explain why certain fixes are implemented over others. This understanding allows us to articulate the critical conditions that affect our systems. We must also recognize how different mechanisms can impact object states and workflow timing."
+    "text": "A strong answer explains why one fix was chosen instead of another. Every correction protects something, but every correction also costs something. Maybe you gain safety but lose parallelism, or you make the workflow clearer but more complex. Good engineering judgment means stating that trade-off directly."
   },
   {
     "slide": 8,
     "topic": "Integrity Reasoning",
-    "text": "Integrity Reasoning refers to applying a mindset focused on integrity within our design and exam answers. By making hidden assumptions explicit, we bring to light how these can affect a system's operation, especially when faced with complex concurrency scenarios."
+    "text": "Integrity reasoning is about defending your conclusion with evidence, not just confidence. You identify the assumption, collect the right logs or test results, validate the behavior, and then state the remaining risk honestly. That is exactly the mindset behind the Integrity Packet."
   },
   {
     "slide": 9,
     "topic": "System Invariant",
-    "text": "Continuing with System Invariants, these are conditions that must always remain true across all valid executions of the system. Understanding and maintaining these invariants is vital for establishing trust in the system's correctness under various conditions."
+    "text": "A system invariant is a condition that must remain true across all valid executions. That sounds abstract, but it is the anchor for almost every design discussion in this course. If you cannot say what must never be violated, then you cannot really say whether your design is correct."
   },
   {
     "slide": 10,
-    "topic": "System / Architecture View",
-    "text": "In this system architecture view, we see the interconnections between various concepts we've discussed, like Trace Analysis, Pattern Matching, and Tradeoff Justification. The diagram emphasizes that our design must connect to evidence of its reliability, considering all pressures that could alter execution."
+    "topic": "Example Pressure Scenario",
+    "text": "Imagine two workers reading the same episode at nearly the same time. Each one sees the same status and both try to move it forward. Under light testing this may never happen, but under pressure the overlap exposes the weakness: the design treated a read and a write as if they were one atomic step when they were not."
   },
   {
     "slide": 11,
-    "topic": "Worked Example",
-    "text": "Let's look at a worked example. Imagine an exam-style question where Thread A runs 'x = x + 1' and Thread B runs 'x = x + 2'. If we ask for the possible final values for x starting at 0, we are invited to consider the interleavings that lead to each potential outcome."
+    "topic": "Failure Evidence",
+    "text": "When the failure matters, you need repeatable evidence. A single vague statement like \"it failed once\" is not enough. You want structured logs, correlation IDs, repeated runs, and a clear path from the observed behavior to the claim that the invariant was violated. That is what makes the failure defensible."
   },
   {
     "slide": 12,
-    "topic": "Failure Scenario",
-    "text": "Now, consider the failure scenario. Overlapping execution can lead to issues such as stale state or repeated operations. It's important to recognize these challenges to understand where our designs may fall short."
+    "topic": "Design Response",
+    "text": "The protected property here is the episode state transition itself. The mechanism might be an atomic update, a version check, idempotency, or a single-owner queue. Each one strengthens correctness, but none of them is free. The trade-off is usually less flexibility or less parallelism in exchange for a more trustworthy transition."
   },
   {
     "slide": 13,
-    "topic": "Improved Design Direction",
-    "text": "To address these failures, we can improve our design by clearly naming the invariant, making transitions observable, and adding correctness controls such as version checks or idempotency keys. This proactive approach enhances the reliability of our systems."
+    "topic": "Comparison of Approaches",
+    "text": "Here you can compare several design responses. A simple baseline is easy to explain, but it often hides pressure assumptions. A guarded transition protects the invariant directly, while explicit coordination makes dependencies visible. An observability-first approach does not solve the bug by itself, but it gives you evidence strong enough to defend the design."
   },
   {
     "slide": 14,
-    "topic": "Why Improved Design",
-    "text": "The reason why this improved design is considered safer is that it moves away from a mindset of hoping that the workflow executes in the intended order. Instead, it emphasizes the need to prove that invalid interleavings are contained and controlled."
+    "topic": "Practical Workflow",
+    "text": "A practical way to prepare is to write one sequential case that should succeed, then one pressure case that could fail, and then capture logs before and after any fix. The goal is to preserve the failure long enough to understand it, and then prove that your correction really changed the outcome."
   },
   {
     "slide": 15,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "We must be aware of various failure modes and anti-patterns in our designs. For instance, if a system passes a single happy-path test, we should question whether it has been subjected to the timing and pressure conditions necessary to expose any weaknesses."
+    "topic": "A1 Connection",
+    "text": "This is where the lecture connects directly to A1. In your own project domain, identify the object, workflow, event, or recovery mechanism that matters. Then show the invariant, the failure evidence, and the Integrity Packet reasoning that defends your design choice. The strongest submissions do not just describe the system; they defend it."
   },
   {
     "slide": 16,
-    "topic": "Trade-Off Analysis",
-    "text": "In this slide, we analyze trade-offs associated with different approaches. Each technique has its strengths and weaknesses, such as how a simple baseline is easy to explain, yet may obscure critical timing assumptions, while guarded transitions directly protect core invariants but require careful modeling."
+    "topic": "Interview Questions",
+    "text": "Use these questions as a rehearsal for the midterm and for oral defense. First name the invariant, then identify the hidden assumption, then explain how you would force the failure, and finally describe what evidence proves your claim. If you can answer those questions cleanly, you are thinking like an engineer rather than memorizing phrases."
   },
   {
     "slide": 17,
-    "topic": "Practical Application",
-    "text": "As we move into practical application, I encourage you to identify the relevant invariant for your midterm preparation. Write out a sequential scenario that should succeed and a concurrent pressure scenario that may reveal a potential failure. Remember to capture evidence before and after any fixes are applied."
-  },
-  {
-    "slide": 18,
-    "topic": "Assignment Integration",
-    "text": "Finally, let's connect these concepts back to Assignment 1. You will need to demonstrate how the principles discussed in this lecture apply to your semester project, showing relevant workflows or recovery mechanisms, and providing structured logs as evidence."
-  },
-  {
-    "slide": 19,
-    "topic": "Discussion Questions",
-    "text": "To wrap up, consider these discussion questions: What invariant is most relevant to the systems we've discussed? How do hidden assumptions affect the correctness of your designs? I invite you to share your thoughts and insights."
-  },
-  {
-    "slide": 20,
     "topic": "Summary",
-    "text": "In summary, today we connected the idea of midterm preparation to reasoning about system correctness. Remember, a well-designed system is one that can be clearly explained, placed under stress, and validated with robust evidence."
-  },
-  {
-    "slide": 21,
-    "topic": "Further Reading",
-    "text": "For further reading, explore topics related to midterm preparation, especially concerning failure modes and design trade-offs. Dive into structured logging and invariants in stateful object-oriented systems to expand your understanding."
+    "text": "The central message is to think, stress, repair, and validate. First, reason about the design. Then push it under pressure. If it fails, correct it with intention. Finally, prove the result with evidence. That sequence is what makes a design mature, and it is the same sequence you should use on the midterm."
   }
 ]

@@ -1,175 +1,303 @@
 = AI Coordination Designs: Critique & Validation
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Learning Objectives
+== Opening Idea
+* AI can produce a plausible coordination design
+* Plausible is not the same as correct
+* Under concurrency, hidden assumptions become failures
+* Validation means stressing the invariant, not trusting the draft
 
-* Analyze design pressure: AI coordination designs
-* Diagnose hidden assumptions affecting correctness
-* Evaluate failure evidence via logs and traces
-* Design controls preserving invariants without obscuring trade-offs
-* Connect chosen approaches to A2 deliverables
-
-== Opening Narrative
-
-* Student requests AI design, receives flawed code
-* Missing ordering guard leads to workflow issues
-* Engineers navigate AI designs without losing accountability
-
-== Coordination Hallucinations
-
-* AI suggests patterns without event handling
-* Critical to make conditions explicit under pressure
-* Leads to duplicate work or blocked progress
-* Must expose invariants and validate behavior
-
-== Dependency Neglect
-
-* AI may ignore necessary outputs between stages
-* Trust issues arise without explicit conditions
-* Risk of duplicate work or misleading evidence
-* Ensure invariants are logged and validated
-
-== Validation by Trace
-
-* Trace AI logic with adversarial interleavings
-* Identify deadlocks or missed signals
-* Requires explicit conditions for trusted behavior
-* Log transitions, validate with tests
-
-== Coordination Boundary
-
-* Agreement on ordering or progress among objects
-* Vital to expose conditions before trusting system
-* Failure leads to duplicate work or misleading evidence
-* Design should log transitions and validate
-
-== Progress Guarantee
-
-* Shows work eventually completes, not waiting forever
-* Explicit conditions necessary for trust under pressure
-* Can lead to operational failures if ignored
-* Design must log, validate transitions
-
-== System / Architecture View
-
-[plantuml, target=architecture, format=svg, width=80%]
+== Coordination Hallucination
+[plantuml, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam backgroundColor #123456
 skinparam shadowing false
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
 left to right direction
+rectangle "AI Draft" as A
+rectangle "Missing Guard" as B
+rectangle "Looks Correct" as C
+rectangle "Concurrent Pressure" as D
+rectangle "Failure" as E
+A -> B : suggests
+B --> C : passes happy path
+C -> D : meets timing pressure
+D --> E : stalls or duplicates work
+@enduml
+----
 
-rectangle "AI Coordination Designs: Critique & Validation" as Topic
-rectangle "Coordination Hallucinations" as A
-rectangle "Dependency Neglect" as B
-rectangle "Validation by Trace" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+== Dependency Neglect
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam shadowing false
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+left to right direction
+rectangle "Stage A" as A
+rectangle "Stage B" as B
+rectangle "AI Output" as C
+rectangle "Hidden Assumption" as D
+rectangle "Broken Workflow" as E
+A --> B : required result
+B -> C : omits dependency
+C --> D : assumes order
+D -> E : fails under pressure
+@enduml
+----
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+== Validation by Trace
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam shadowing false
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+left to right direction
+rectangle "Claim" as A
+rectangle "Adversarial Interleaving" as B
+rectangle "Trace" as C
+rectangle "Invariant Check" as D
+rectangle "Decision" as E
+A --> B : test with pressure
+B -> C : observe order
+C --> D : compare state
+D -> E : accept or reject
+@enduml
+----
+
+== Coordination Boundary
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam shadowing false
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+left to right direction
+rectangle "Object A" as A
+rectangle "Boundary" as B
+rectangle "Object B" as C
+rectangle "Ordering Rule" as D
+rectangle "Progress Property" as E
+A --> B : emits state
+B -> C : must agree
+C --> D : enforces sequence
+D -> E : keeps work moving
+@enduml
+----
+
+== Progress Guarantee
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam shadowing false
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+left to right direction
+rectangle "Waiting" as A
+rectangle "Timeout" as B
+rectangle "Retry" as C
+rectangle "Recovery" as D
+rectangle "Completed" as E
+A --> B : no progress
+B -> C : retry policy
+C --> D : compensate
+D -> E : finish work
+@enduml
+----
+
+== System View
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam shadowing false
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+left to right direction
+rectangle "AI Coordination Designs" as Topic
+rectangle "Hallucination" as H
+rectangle "Trace" as T
+rectangle "Boundary" as B
+rectangle "Progress" as P
+rectangle "Design Response" as R
+Topic --> H : produces
+H -> T : validate
+T --> B : isolate
+B -> P : protect
+P --> R : revise
 @enduml
 ----
 
 == Worked Example
-
-* **Podcast Domain**: AI proposes parallel threads, lacks join logic
-* **Critique**: Assumes `notify()` follows `wait()` without guards
-
-== Naive Implementation
-
-* Assumes operations occur once, in order
-* Often invisible due to method name correctness
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam shadowing false
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+left to right direction
+rectangle "Transcription" as A
+rectangle "Cleanup" as B
+rectangle "Publish" as C
+rectangle "Missing Join" as D
+rectangle "Unsafe Release" as E
+A --> D : runs in parallel
+B --> D : runs in parallel
+D -> E : skips coordination
+E --> C : publishes early
+@enduml
+----
 
 == Failure Scenario
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam shadowing false
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+left to right direction
+rectangle "Concurrent Order" as A
+rectangle "Delayed Callback" as B
+rectangle "Stale State" as C
+rectangle "Blocked Workflow" as D
+rectangle "Misleading Evidence" as E
+A --> B : pressure arrives
+B -> C : reads old status
+C --> D : waits forever
+D -> E : looks plausible
+@enduml
+----
 
-* Overlapping execution leads to stale state, blocked progress
-* Mismatch between design assumption and execution
+== Design Response
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam shadowing false
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+left to right direction
+rectangle "Invariant" as A
+rectangle "Guard" as B
+rectangle "Structured Log" as C
+rectangle "Repeatable Test" as D
+rectangle "Defensible Design" as E
+A --> B : enforce
+B -> C : expose
+C --> D : verify
+D -> E : defend
+@enduml
+----
 
-== Improved Design Direction
-
-* Name the invariant, make transitions observable
-* Introduce controls: version checks, state-machine guards
-
-== Safer Design Benefits
-
-* Proves invalid interleavings are rejected or contained
-* Shifts focus from hope to evidence in execution
-
-== Failure Modes and Anti-Patterns
-
-* Symptom: Single happy-path test passes
-  * Detect: Add stress conditions, concurrent actors
-* Symptom: Tool mentioned, no design property stated
-  * Detect: Ask for protected invariant
-* Symptom: Vague evidence for claims
-  * Detect: Log capture is insufficient
-* Symptom: Fix alters behavior, lacks baseline comparison
-  * Detect: No repeatable failure scenario preserved
-
-== Trade-Off Analysis
-
-[cols="1,1,1,1", options="header"]
+== Trade-Offs
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | Initial comparison
-| Guarded transition | Protects invariant | Needs careful modeling | Workflow steps
-| Explicit coordination | Visible dependencies | Risk of deadlock | Multi-object workflows
-| Idempotent design | Handles duplicates | Requires deduplication | Queued operations
-| Observability-first | Strong evidence | Adds instrumentation | Failure proof assignments
+|Approach |Strength |Weakness |Best Fit
+|Simple baseline |Easy to build |Hides pressure assumptions |First draft
+|Guarded transition |Protects invariant directly |Needs careful modeling |Stateful workflows
+|Explicit coordination |Makes dependencies visible |May add waiting |Multi-step ordering
+|Observability-first |Produces strong evidence |Adds instrumentation work |Validation and review
 |===
 
-== Practical Application
+== Evidence to Capture
+* Correlation IDs
+* Entity IDs
+* State transitions
+* Before and after runs
+* Failure reproduction
+* Trade-off discussion
 
-* Identify invariant relevant to AI designs
-* Write sequential scenario and pressure scenario exposing failures
-* Add operation and entity IDs to logs
-* Capture before/after evidence for fixes 
-* Update Integrity Packet with assumptions and validations
+== Practical Move
+* Write the invariant first
+* Create one happy-path test
+* Create one pressure test
+* Add structured logs
+* Compare before and after
+* Record the decision in the Integrity Packet
 
-== Assignment Integration
-
-* Supports [A2](../../../assignments/A2/index.md)
-* Demonstrate mastery with evidence and structured logs
-
-== Validation Questions
-
-1. What invariant is most relevant?
-2. What hidden assumption distorts baseline design?
-3. How to force repeatable test failures?
-4. What evidence proves failure?
-5. First design mechanism and its trade-off?
-6. Different appearance in implementation stacks?
-7. Integrity Packet records for defense?
-
-== Summary
-
-* AI coordination designs critical for system correctness
-* Engineering connects concepts to observable behavior
-* Design maturity requires evidential support and reasoning
-
-== Further Reading
-
-* Search "AI Coordination Designs failure mode"
-* Topic: Structured logging and correlation IDs
-* Topic: Invariants in stateful systems
-* Topic: Coordination patterns and progress guarantees
-
-== Discussion
-
-* How do we validate AI-generated designs?
-* What hidden failures have you encountered in projects?
+== A2 Connection
+* Show the object, workflow, or event in your own domain
+* Connect the failure to a concrete invariant
+* Use evidence, not confidence
+* Defend the chosen repair and its trade-off

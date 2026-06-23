@@ -1,5 +1,7 @@
 ﻿# Common Failure Patterns
 
+
+## Video: https://youtu.be/Mz1Wdp6VzOo
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 8

@@ -1,5 +1,7 @@
 ﻿# System Reasoning Walkthrough
 
+
+## Video: https://youtu.be/Y7ISM5w9Gl8
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 8

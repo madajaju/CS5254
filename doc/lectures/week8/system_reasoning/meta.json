@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 8,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "system_reasoning",
+  "source": "doc/lectures/week8/system_reasoning/README.md",
+  "videoPath": "doc/lectures/week8/system_reasoning/.output/output.mp4",
+  "youtube_title": "System Reasoning Walkthrough | CS 5254 Week 8",
+  "summary": "A course project appears correct during a simple demonstration.",
+  "youtube_description": "A course project appears correct during a simple demonstration. Once concurrency, ambiguity, or operational pressure is introduced, the design exposes a hidden assumption about deductive reasoning. What must the engineer analyze and defend before trusting the result?\n\nThis CS 5254 Week 8 lecture explores system reasoning walkthrough and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "system reasoning walkthrough",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "deductive reasoning",
+    "mental modeling",
+    "hypothesis testing",
+    "system invariant",
+    "failure mode"
+  ]
+}
