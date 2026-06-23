@@ -11,193 +11,774 @@ Dr. Darren Pulsipher
 :icons: font
 :stem:
 
-== Learning Objectives
+== Why It Matters
+* Looks correct once
+* Breaks under pressure
+* Hidden assumption
+* Evidence must survive failure
+* Invariant first
+* Mechanism second
 
-* Analyze design pressure in stateful concurrent systems.
-* Diagnose hidden assumptions allowing incorrect appearances.
-* Evaluate failure evidence using logs and tests.
-* Design corrections preserving invariants.
-* Defend approach in Integrity Packet.
-
-== Opening Narrative
-
-A project appears correct during demos but reveals hidden assumptions under pressure. What should engineers analyze?
-
-== Core Concepts
-
-== Deductive Reasoning
-
-* Definition: Use observations to prove internal behavior.
-* Importance: Identifies conditions to trust the system under pressure.
-* Mechanism: Observed through states, timing, behavior.
-* Failure mode: Can lead to duplicate work or misleading evidence.
-* Implication: Expose invariants, log transitions, validate tests.
-
-== Mental Modeling
-
-* Definition: Conceptual map of execution without code.
-* Importance: Identifies conditions to trust the system under pressure.
-* Mechanism: Observed through states, timing, coordination.
-* Failure mode: May lead to stale state or blocked progress.
-* Implication: Expose invariants, log transitions, validate tests.
-
-== Hypothesis Testing
-
-* Definition: Theory on a failure, tested to prove/disprove.
-* Importance: Identifies conditions to trust the system under pressure.
-* Mechanism: Appears through states, timing, retries.
-* Failure mode: Yield duplicate work or misleading logs if ignored.
-* Implication: Expose invariants, log transitions, validate tests.
-
-== System Invariant
-
-* Definition: Condition remaining true across executions.
-* Importance: Identifies conditions to trust the system under pressure.
-* Mechanism: Observed through states, timing, workflows.
-* Failure mode: Leads to misleading evidence or loss of progress.
-* Implication: Expose invariants, log transitions, validate tests.
-
-== Failure Mode
-
-* Definition: Repeatable way system violates an invariant.
-* Importance: Identifies conditions to trust the system under pressure.
-* Mechanism: Related to states, timing, or behavior interleavings.
-* Failure mode: May produce duplicate work or misleading evidence.
-* Implication: Expose invariants, log transitions, validate tests.
-
-== System View
-
-[plantuml, target=system_view, format=svg, width=80%]
+== Pressure Lens
+[plantuml, target=pressure-lens, format=svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 skinparam shadowing false
 left to right direction
 
-rectangle "System Reasoning Walkthrough" as Topic
-rectangle "Deductive Reasoning" as A
-rectangle "Mental Modeling" as B
-rectangle "Hypothesis Testing" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Behavior" as B
+rectangle "Pressure" as P
+rectangle "Hidden assumption" as H
+rectangle "Invariant" as I
+rectangle "Evidence" as E
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+B --> P
+P -> H
+H --> I
+I -> E
 @enduml
 ----
 
-This diagram links the lecture topic to the evidence required for system correctness under varying conditions.
+== Deductive Reasoning
+* Observe logs
+* Infer internals
+* Prove what must be true
+* Under pressure, not guesses
 
-== Worked Example
+== Deductive Model
+[plantuml, target=deductive-model, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-== Problem Setup
+rectangle "Logs" as L
+rectangle "Trace" as T
+rectangle "State" as S
+rectangle "Claim" as C
 
-* Live Analysis: Logs show `Episode-1` published twice.
-** Observation: Thread A logs "Checking status" at 10.01ms.
-** Observation: Thread B logs "Checking status" at 10.02ms.
-** Deduction: No locking between check and update.
-
-* Project Context: Applying reasoning to a student's project.
+L --> T
+T -> S
+S --> C
+@enduml
+----
 
 == Mental Model
+* Map execution path
+* Before source code
+* Timing matters
+* State matters
 
-Assuming operation happens once, in order, and with the current state:
+== Mental Map
+[plantuml, target=mental-map, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-```text
-actor performs operation
-system reads current state
-system applies transition
-system emits side effect
-```
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Queue" as Q
+rectangle "Episode" as E
 
-== Failure Scenario
+A --> Q
+B --> Q
+Q --> E
+@enduml
+----
 
-Competing executions under pressure can yield stale states or duplicate operations. This mismatch reveals design assumptions versus actual execution.
+== Hypothesis Test
+* Pick a failure theory
+* Run a targeted test
+* Repeat the run
+* Compare evidence
 
-== Improved Design Direction
+== Test Loop
+[plantuml, target=test-loop, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-Name the invariant, make transitions observable, and implement controls: version checks, idempotency, coordination mechanisms, or retries.
+rectangle "Theory" as T
+rectangle "Pressure test" as P
+rectangle "Trace" as R
+rectangle "Revision" as V
 
-== Why Is It Safer?
+T --> P
+P -> R
+R --> V
+@enduml
+----
 
-The improved design shifts focus from trusting execution order to proving that invalid conditions are contained or recoverable with evidence.
+== Invariant
+* Must stay true
+* Across valid runs
+* State machine guard
+* One owner at a time
 
-== Failure Modes
+== State Guard
+[plantuml, target=state-guard, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-== Happy-path Success
+state "DRAFT" as D
+state "PROCESSING" as P
+state "READY" as R
+state "PUBLISHED" as U
+state "FAILED" as F
 
-* Symptom: Happy-path success in tests.
-* Cause: Tests avoid timing or pressure conditions.
-* Detection: Introduce repeated runs and concurrency.
-* Correction: Add failure-focused tests targeting invariants.
+D ---> P : claim
+P -> R : complete
+R ---> U : publish
+P ---> F : error
+@enduml
+----
 
-== Naming Tools
+== Failure Race
+[plantuml, target=failure-race, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-* Symptom: Naming tools without design properties.
-* Cause: Ignore stating invariants.
-* Detection: Ask which invariant is protected.
-* Correction: Write invariant first, then choose mechanisms.
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+database "Episode 42" as E
+rectangle "Invariant" as I
 
-== Vague Evidence
+A --> E : read DRAFT
+B --> E : read DRAFT
+A --> E : write PROCESSING
+B --> E : write PROCESSING
+E ---> I : violated
+@enduml
+----
 
-* Symptom: Vague evidence supporting claims.
-* Cause: Logs lacking critical identifiers.
-* Detection: Reviewers cannot trace failure from evidence.
-* Correction: Capture structured evidence linked to claims.
+== Failure Evidence
+* Duplicate work
+* Stale state
+* Misleading logs
+* Stuck progress
 
-== Trade-Off Analysis
+== Pressure Timeline
+[plantuml, target=pressure-timeline, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-[cols="1,1,1,1", options="header"]
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+database "Episode 42" as E
+
+A --> E : check status
+B -> E : check status
+A -> E : claim
+B --> E : claim
+@enduml
+----
+
+== Design Response
+* Guard the transition
+* Make ownership explicit
+* Log the critical step
+* Keep trade-offs visible
+
+== Correction Path
+[plantuml, target=correction-path, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Invariant" as I
+rectangle "Atomic check" as C
+rectangle "Versioned write" as W
+rectangle "Reviewable log" as L
+
+I --> C
+C -> W
+W --> L
+@enduml
+----
+
+== Tradeoffs
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
-| Guarded state | Protects invariant | Requires modeling | Status changes
-| Explicit coordination | Makes dependencies clear | May cause deadlock | Multi-object workflows
-| Idempotent design | Handles duplicates | Needs deduplication | Queues, async workers
-| Observability-first | Strong evidence | Adds instrumentation overhead | Design defenses
+| Approach | Strength | Weakness | Use
+| Baseline | Easy | Hides timing | First pass
+| Guarded | Protects invariant | Needs modeling | State changes
+| Retry-safe | Handles duplicates | More control state | Queues
+| Observed | Strong evidence | More logging | Defense
 |===
 
-== Practical Application
+== Evidence Flow
+[plantuml, target=evidence-flow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-Tomorrow:
+rectangle "Claim" as C
+rectangle "Log line" as L
+rectangle "Trace" as T
+rectangle "Review" as R
 
-* Identify the relevant invariant for system reasoning.
-* Write one scenario that succeeds sequentially.
-* Write one pressure scenario exposing potential failures.
-* Enhance logs with operation IDs before testing.
-* Capture before/after evidence upon applying fixes.
-* Update Integrity Packet with assumptions and evidence.
+C --> L
+L -> T
+T --> R
+@enduml
+----
 
-== Assignment Integration
+== A1 Connection
+* Choose your invariant
+* Show pressure test
+* Capture before / after
+* Defend trade-off
 
-Connect concepts to [A1](../../../assignments/A1/index.md) by illustrating invariants and recovery mechanisms in your project.
+== Assignment View
+[plantuml, target=assignment-view, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-== Validation Questions
+rectangle "Project domain" as P
+rectangle "Failure test" as F
+rectangle "Evidence" as E
+rectangle "Integrity Packet" as I
 
-1. What invariant is most relevant?
-2. What assumption makes baseline design seem correct?
-3. How would you force failure in tests?
-4. What evidence would confirm the failure?
-5. Which mechanism would you choose first—trade-offs?
-6. How does this issue vary across implementation stacks?
-7. What to record in Integrity Packet to defend conclusions?
+P --> F
+F -> E
+E --> I
+@enduml
+----
 
-== Summary
+== Anti-Patterns
+* Happy path only
+* Tool before invariant
+* Vague evidence
+* Fix without baseline
 
-System reasoning walkthrough connects invariants, observable behavior, and trade-offs to ensure ongoing correctness under realistic loads. 
+== Anti-Pattern Map
+[plantuml, target=anti-pattern-map, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-== Further Reading
+rectangle "Happy path" as H
+rectangle "Weak claim" as W
+rectangle "Vague logs" as V
+rectangle "No comparison" as N
+rectangle "False confidence" as F
 
-* "System Reasoning Walkthrough distributed systems failure mode"
-* "System Reasoning Walkthrough concurrency design tradeoffs"
-* Structured logging and correlation IDs
-* Invariants in stateful object-oriented systems
+H --> F
+W --> F
+V --> F
+N --> F
+@enduml
+----
 
 == Discussion
-
-* How can we improve our testing strategies under pressure?
-* What are the unseen assumptions you often work with?
+* What invariant breaks first?
+* Which control would you defend?
