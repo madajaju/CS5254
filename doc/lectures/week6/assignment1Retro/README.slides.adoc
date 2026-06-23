@@ -1,0 +1,635 @@
+= A1 Retrospective: Object Models Under Concurrency
+Dr. Darren Pulsipher
+:revealjs_theme: black
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_center: true
+:revealjs_width: "100%"
+:revealjs_height: "100%"
+:revealjsdir: https://cdn.jsdelivr.net/npm/reveal.js@4
+:source-highlighter: highlight.js
+
+== A1 Retrospective
+
+[.stretch]
+image::https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200[]
+
+=== What We Learned
+
+* Object ownership matters
+* Concurrency exposes design flaws
+* Invariants drive architecture
+* AI recommendations require validation
+* Thread-safe is not the same as correct
+
+[NOTE.speaker]
+--
+The goal of A1 was not to teach locking.
+The goal was to teach object-model correctness under concurrency.
+--
+
+== Assignment Goals
+
+=== What A1 Was Designed To Teach
+
+[.stretch]
+[%header,cols="2,4"]
+|===
+|Topic |Purpose
+
+|Object Model
+|Define ownership, responsibilities, and boundaries
+
+|Concurrency
+|Expose weaknesses in object interactions
+
+|Invariants
+|Define what must always remain true
+
+|Failure Analysis
+|Understand why correct-looking systems fail
+
+|Redesign
+|Preserve correctness under concurrent execution
+
+|AI Critique
+|Validate rather than blindly trust recommendations
+|===
+
+== Class Performance Summary
+
+=== Aggregate Assessment
+
+[.stretch]
+[%header,cols="3,1"]
+|===
+|Skill Area |Score
+
+|Concurrency Basics
+|95
+
+|Race Identification
+|94
+
+|Two-Stack Implementation
+|92
+
+|OO Modeling
+|90
+
+|Invariant Thinking
+|82
+
+|Ownership Modeling
+|80
+
+|Tradeoff Analysis
+|76
+
+|Architectural Reasoning
+|75
+
+|AI Critique
+|68
+|===
+
+[NOTE.speaker]
+--
+The class is strong technically.
+
+The biggest growth opportunities are:
+ownership,
+architecture,
+and AI critique.
+--
+
+== What Students Did Well
+
+=== Consistent Strengths
+
+[%step]
+* All teams demonstrated real concurrency
+* All teams produced observable failures
+* Most teams generated useful logs
+* Most redesigns restored correctness
+* Two-stack implementations were generally strong
+* Students understood race conditions
+
+=== Overall
+
+The class understands concurrency.
+
+The next step is understanding architecture.
+
+== Common Failure Pattern
+
+=== Student Thinking
+
+[.stretch]
+[plantuml, student-thinking, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+left to right direction
+
+[Shared State] --> [Race Condition]
+[Race Condition] --> [Add Lock]
+[Add Lock] --> [Problem Solved?]
+
+note bottom of [Problem Solved?]
+This is the common assumption:
+the symptom disappearing means the design is correct.
+end note
+@enduml
+----
+
+=== Architectural Thinking
+
+[.stretch]
+[plantuml, architectural-thinking, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+left to right direction
+
+[Invariant Violated] --> [Ownership Boundary Weak]
+[Ownership Boundary Weak] --> [Object Model Allows Violation]
+[Object Model Allows Violation] --> [Redesign Ownership]
+[Redesign Ownership] --> [Concurrency Becomes Simpler]
+
+note bottom of [Redesign Ownership]
+Correctness improves when the boundary
+prevents invalid state, not when a lock hides it.
+end note
+@enduml
+----
+
+== Deep Dive #1
+
+=== Ownership vs Synchronization
+
+[.stretch]
+image::https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200[]
+
+=== Key Question
+
+Instead of:
+
+[source,java]
+----
+synchronized(course)
+----
+
+Ask:
+
+[source]
+----
+Why can multiple threads modify Course?
+----
+
+== Ownership Analysis
+
+=== Weak Design
+
+
+[.stretch]
+[plantuml, weak-ownership, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+top to bottom direction
+
+rectangle Student
+rectangle Course
+rectangle EnrollmentManager
+
+Student --> Course : requests change
+Student --> EnrollmentManager : also mutates state
+Course --> EnrollmentManager : also mutates state
+
+note right of EnrollmentManager
+Weak design:
+multiple actors can change the same state.
+end note
+@enduml
+----
+
+Everyone modifies enrollment.
+
+Nobody owns enrollment.
+
+=== Strong Design
+
+[.stretch]
+[plantuml, strong-ownership, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+top to bottom direction
+
+rectangle Student
+rectangle Course
+
+Student --> Course : requests enrollment change
+Course --> Course : validates invariant
+Course --> Student : returns result
+
+note right of Course
+Strong design:
+one owner enforces the invariant
+and prevents invalid state.
+end note
+@enduml
+----
+
+Course owns enrollment.
+
+Course enforces invariants.
+
+== Ownership Findings
+
+=== What We Observed
+
+[.stretch]
+[%header,cols="2,4"]
+|===
+|Pattern |Observation
+
+|Shared State
+|Students identified it successfully
+
+|Ownership
+|Often unclear
+
+|Authority
+|Rarely documented
+
+|Boundary Enforcement
+|Usually implemented with locks
+
+|Ownership Reduction
+|Rarely considered
+|===
+
+== Deep Dive #2
+
+=== Invariants Drive Architecture
+
+[.stretch]
+image::https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?w=1200[]
+
+=== Typical Pattern
+
+[source]
+----
+Invariant:
+Enrollment <= Capacity
+
+Fix:
+Add Lock
+----
+
+=== Better Pattern
+
+[source]
+----
+Invariant:
+Enrollment <= Capacity
+
+Therefore:
+Course owns enrollment decisions
+----
+
+== Invariant Driven Design
+
+=== Strong Design Flow
+
+[source]
+----
+Invariant
+     ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ
+Ownership
+     ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ
+Authority
+     ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ
+Boundary
+     ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ
+Implementation
+----
+
+[.stretch]
+[plantuml, strong-design-flow, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+
+[Invariant] -> [Ownership]
+[Ownership] -> [Authority]
+[Authority] -> [Boundary]
+[Boundary] --> [Implementation]
+
+note right of [Boundary]
+The boundary is a design decision,
+not just a locking strategy.
+end note
+@enduml
+----
+
+=== Weak Design Flow
+
+[.stretch]
+[plantuml, weak-design-flow, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+left to right direction
+
+[Implementation] --> [Race]
+[Race] --> [Lock]
+[Lock] --> [Temporary Stability]
+
+note bottom of [Temporary Stability]
+This stabilizes behavior without fixing the object model.
+end note
+@enduml
+----
+
+== Invariant Findings
+
+=== Observations
+
+[.stretch]
+[%header,cols="2,4"]
+|===
+|What Students Did |What Was Missing
+
+|Listed invariants
+|Used invariants to justify architecture
+
+|Identified violations
+|Derived ownership from invariants
+
+|Validated correctness
+|Explained authority boundaries
+
+|Added synchronization
+|Reduced shared state
+|===
+
+== Deep Dive #3
+
+=== AI Is Not An Architect
+
+[.stretch]
+image::https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200[]
+
+=== Largest Weakness Across Submissions
+
+Most critiques focused on:
+
+* Locks
+* Synchronization
+* Thread-safe collections
+
+Few critiques focused on:
+
+* Assumptions
+* Ownership
+* Invariants
+* Architectural consequences
+
+== Weak vs Strong AI Critique
+
+=== Weak Critique
+
+[source]
+----
+AI suggested ConcurrentHashMap
+----
+
+[.stretch]
+[plantuml, weak-ai-critique, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+left to right direction
+
+[AI Suggestion] --> [Thread-Safe Collection]
+[Thread-Safe Collection] --> [Feels Correct]
+[Feels Correct] --> [Invariant Still Broken]
+
+note bottom of [Invariant Still Broken]
+Thread safety is not the same as correctness.
+end note
+@enduml
+----
+
+=== Strong Critique
+
+[source]
+----
+AI assumed thread safety
+would preserve correctness.
+
+It ignored the invariant that
+only one worker may claim work.
+
+The recommendation solved
+a symptom, not the root cause.
+----
+
+[plantuml, strong-ai-critique, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+top to bottom direction
+
+[AI Recommendation] --> [Assumption Check]
+[Assumption Check] -> [Invariant Check]
+[Invariant Check] --> [Ownership Check]
+[Ownership Check] -> [Valid Design Decision]
+
+note right of [Invariant Check]
+Good critique asks whether the recommendation
+preserves correctness, not just performance.
+end note
+@enduml
+----
+
+== AI Review Checklist
+
+=== Before Accepting AI Recommendations
+
+[%step]
+* What assumptions is AI making?
+* What invariant is AI protecting?
+* What invariant is AI ignoring?
+* Who owns the state?
+* Can ownership remove sharing?
+* What tradeoffs exist?
+* How will we validate correctness?
+
+== Architecture vs Programming
+
+=== Programmer Mindset
+
+[source]
+----
+What lock should I add?
+----
+
+[plantuml, programmer-vs-architect, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+left to right direction
+
+[Programmer Mindset] --> [What lock should I add?]
+[Architect Mindset] --> [Why can this object violate the invariant?]
+
+note bottom of [Programmer Mindset]
+Optimize the symptom.
+end note
+
+note bottom of [Architect Mindset]
+Remove the cause.
+end note
+@enduml
+----
+
+=== Architect Mindset
+
+[source]
+----
+Why does this object permit
+the invariant to be violated?
+----
+
+== Cross-Submission Findings
+
+=== Group 1: Implementation Focused
+
+* Aircraft Tracking
+* Course Enrollment
+
+Pattern:
+
+[plantuml, group1-pattern, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+left to right direction
+
+[State Shared] --> [Race]
+[Race] --> [Synchronize]
+
+note bottom of [Synchronize]
+Implementation-focused thinking stops at the patch.
+end note
+@enduml
+----
+
+=== Group 2: Architecture Focused
+
+* Commodities Exchange
+* Context OS
+* Content Package
+
+Pattern:
+
+[plantuml, group2-pattern, svg]
+----
+@startuml
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam backgroundColor transparent
+left to right direction
+
+[Invariant] --> [Ownership Boundary]
+[Ownership Boundary] --> [Object Model Weakness]
+[Object Model Weakness] --> [Redesign Ownership]
+
+note bottom of [Redesign Ownership]
+Architecture-focused thinking starts with the boundary.
+end note
+@enduml
+----
+
+== Class-Wide Opportunities
+
+=== Areas To Improve
+[.stretch]
+[%header,cols="2,2"]
+|===
+|Strengths |Growth Areas
+
+|Concurrency Basics
+|Ownership Modeling
+
+|Race Detection
+|Architectural Reasoning
+
+|Logging
+|Tradeoff Analysis
+
+|Validation
+|AI Critique
+
+|Two-Stack Development
+|Invariant-Driven Design
+|===
+
+== What We Need For A2
+
+=== Focus Areas
+
+[%step]
+* Ownership before synchronization
+* Invariants before implementation
+* Authority before access
+* Architecture before optimization
+* Validation before trust
+* AI as advisor, not architect
+
+== Final Takeaway
+
+[.stretch]
+image::https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=1200[]
+
+=== Most Important Lesson
+
+[quote]
+____
+Concurrency did not create the problem.
+
+Concurrency exposed a problem that already existed in the object model.
+____
+
+=== Remember
+
+[%step]
+* Clear ownership simplifies concurrency
+* Invariants drive architecture
+* Thread-safe does not mean correct
+* AI recommendations require validation
+* Architecture is about preserving correctness
