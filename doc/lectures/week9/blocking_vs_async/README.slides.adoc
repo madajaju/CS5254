@@ -1,154 +1,262 @@
 = Blocking is the Enemy of Scale
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Objectives
-* Analyze design pressure of blocking in stateful concurrent systems
-* Diagnose hidden assumptions under pressure
-* Evaluate failure evidence: logs, traces, tests
-* Design corrections preserving invariants
-* Defend chosen approach with Integrity Packet
+== Lecture at a Glance
+* Blocking appears harmless in a single workflow.
+* Under load, it can saturate workers and stall progress.
+* The real question is whether the invariant still holds.
+* Evidence must show the failure, not just the happy path.
+* Design responses trade peak throughput for controlled behavior.
 
-== Opening Narrative
-* System passes tests under load
-* Queues grow; logs interleave
-* Invariants fail under pressure
-* Design systems to measure behavior changes
-
-== Concept: Blocking Call
-* Thread waits for a response
-* Must be explicit for system trust
-* Mechanism: state, timing, behavior
-* Failure: duplicates, stale state, progress blocked
-* Design: expose invariant; validate behavior
-
-== Concept: Resource Saturation
-* All threads blocked; no new work
-* Must be explicit for system trust
-* Mechanism: state, timing, behavior
-* Failure: duplicates, stale state, progress blocked
-* Design: expose invariant; validate behavior
-
-== Concept: Throughput Bottlenecks
-* Sequential blocking slows system
-* Must be explicit for system trust
-* Mechanism: state, timing, behavior
-* Failure: duplicates, stale state, progress blocked
-* Design: expose invariant; validate behavior
-
-== Concept: Coordination Boundary
-* Independent objects agree on progress
-* Must be explicit for system trust
-* Mechanism: state, timing, behavior
-* Failure: duplicates, stale state, progress blocked
-* Design: expose invariant; validate behavior
-
-== Concept: Progress Guarantee
-* Shows work eventually completes
-* Must be explicit for system trust
-* Mechanism: state, timing, behavior
-* Failure: duplicates, stale state, progress blocked
-* Design: expose invariant; validate behavior
-
-== System / Architecture View
-[plantuml, target=architecture, format=svg, width=80%]
+== Blocking Call
+[plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participantBackgroundColor white
+skinparam participantBorderColor #123456
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
 skinparam shadowing false
-left to right direction
-
-rectangle "Blocking is the Enemy of Scale" as Topic
-rectangle "Blocking Call" as A
-rectangle "Resource Saturation" as B
-rectangle "Throughput Bottlenecks" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
-
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+skinparam monochrome true
+skinparam defaultTextAlignment center
+rectangle "Thread" as T
+rectangle "Blocking Call" as B
+rectangle "Other Work" as O
+T --> B : waits
+B -> O : cannot proceed
 @enduml
 ----
 
-== Worked Example: Problem Setup
-* Podcast Domain: Orchestrator waits for AudioCleaner
-* Order System: Waiting for external Payment Gateway
-* Example of blocking under load
+== Resource Saturation
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participantBackgroundColor white
+skinparam participantBorderColor #123456
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
+skinparam shadowing false
+skinparam monochrome true
+skinparam defaultTextAlignment center
+rectangle "Worker Pool" as W
+rectangle "Blocked Thread" as B1
+rectangle "Blocked Thread" as B2
+rectangle "New Request" as N
+W --> B1 : occupied
+W -> B2 : occupied
+N --> W : waits
+@enduml
+----
 
-== Worked Example: Naive Implementation
-* Assumes one operation, in order
-* Often invisible in code
-* Sequential test passes
+== Throughput Bottlenecks
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participantBackgroundColor white
+skinparam participantBorderColor #123456
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
+skinparam shadowing false
+skinparam monochrome true
+skinparam defaultTextAlignment center
+rectangle "Step 1" as S1
+rectangle "Step 2" as S2
+rectangle "Step 3" as S3
+S1 --> S2 : sequential wait
+S2 -> S3 : accumulates delay
+@enduml
+----
 
-== Worked Example: Failure Scenario
-* Operations can observe stale state
-* Execute twice; arrive late
-* Mismatch between design and execution
+== Coordination Boundary
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participantBackgroundColor white
+skinparam participantBorderColor #123456
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
+skinparam shadowing false
+skinparam monochrome true
+skinparam defaultTextAlignment center
+rectangle "Object A" as A
+rectangle "Boundary" as B
+rectangle "Object B" as C
+A -> B : request
+B --> C : agree on order
+C -> A : confirm
+@enduml
+----
 
-== Worked Example: Improved Design
-* Name invariant and make transition observable
-* Add correctness controls: version checks, etc.
-* Moves from hope to proof
+== Progress Guarantee
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participantBackgroundColor white
+skinparam participantBorderColor #123456
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
+skinparam shadowing false
+skinparam monochrome true
+skinparam defaultTextAlignment center
+rectangle "Accepted Work" as W
+rectangle "Queue" as Q
+rectangle "Completed Work" as C
+W --> Q : enqueue
+Q -> C : eventually finishes
+@enduml
+----
 
-== Failure Modes and Anti-Patterns
-* **Symptom**: Single happy-path test passes
-  * **Detection**: Add concurrent actors, stress conditions
-  * **Correction**: Add failure-focused tests
-* **Symptom**: Names tools, not properties
-  * **Detection**: Ask which invariant is protected
-  * **Correction**: State invariant first, then mechanism
+== Failure Under Pressure
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participantBackgroundColor white
+skinparam participantBorderColor #123456
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
+skinparam shadowing false
+skinparam monochrome true
+skinparam defaultTextAlignment center
+rectangle "Load" as L
+rectangle "Queue Growth" as Q
+rectangle "Timeouts" as T
+rectangle "Duplicate Work" as D
+L -> Q : exceeds capacity
+Q --> T : delays response
+T -> D : retries overlap
+@enduml
+----
+
+== Design Response
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participantBackgroundColor white
+skinparam participantBorderColor #123456
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
+skinparam shadowing false
+skinparam monochrome true
+skinparam defaultTextAlignment center
+rectangle "Invariant" as I
+rectangle "Backpressure" as B
+rectangle "Bounded Retry" as R
+rectangle "Observable Logs" as O
+I -> B : protect
+B --> R : control
+R -> O : evidence
+@enduml
+----
+
+== Evidence Flow
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participantBackgroundColor white
+skinparam participantBorderColor #123456
+skinparam participantFontColor black
+skinparam lifeLineBorderColor white
+skinparam lifeLineBackgroundColor white
+skinparam shadowing false
+skinparam monochrome true
+skinparam defaultTextAlignment center
+rectangle "Baseline Run" as A
+rectangle "Pressure Run" as B
+rectangle "Correction Run" as C
+rectangle "Residual Risk" as D
+A -> B : compare
+B --> C : fix
+C -> D : assess
+@enduml
+----
 
 == Trade-Off Analysis
-[cols="1,1,1,1", options="header"]
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
-| Guarded state | Protects core invariant | Needs modeling | Status changes
-| Explicit coordination | Makes dependencies visible | Can introduce bottlenecks | Multi-object workflows
-| Idempotent design | Handles duplicates | Requires control | Queues, retries
-| Observability-first | Strong evidence | Adds work | Assignments requiring proof
-|===
+|Approach
+|Strengths
+|Weaknesses
+|When to Use
 
-== Practical Application
-* Identify relevant invariant
-* Write sequential scenario to succeed
-* Write pressure scenario to expose failures
-* Capture logs with IDs before running scenarios
-* Document evidence if applying a fix
+|Simple baseline
+|Easy to explain
+|Hides pressure assumptions
+|First comparison point
+
+|Guarded transition
+|Protects the invariant
+|Needs careful state modeling
+|Workflow state changes
+
+|Explicit coordination
+|Makes dependencies visible
+|Can create waiting
+|Multi-object ordering
+
+|Observability-first
+|Strong evidence for review
+|Adds instrumentation work
+|Stress and validation
+|===
 
 == Assignment Integration
-* Connect concepts to [A2]
-* Show relevant object, event, failure mechanism
-* Mastery: evidence through logs, tests, explanations
-
-== Validation Questions
-1. What invariant is relevant?
-2. What hidden assumption is present?
-3. How to force repeatable failure?
-4. What evidence proves failure?
-5. Which mechanism to choose first?
-6. How would issues differ in stacks?
-7. What to record in Integrity Packet?
-
-== Summary
-* Central insight: blocking impacts scale
-* Connect concepts to observables and trade-offs
-* Reason about system correctness under pressure
-
-== Further Reading
-* Search: "Blocking is the Enemy of Scale"
-* Topic: structured logging and invariant patterns
-* Topic: coordination patterns and guarantees
+* Connect blocking to a concrete object or workflow in your project.
+* Show the invariant that must survive pressure.
+* Reproduce one failure with logs, traces, or repeatable output.
+* Compare baseline and corrected behavior.
+* Record assumptions, evidence, and trade-offs in the Integrity Packet.

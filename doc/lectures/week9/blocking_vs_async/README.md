@@ -1,5 +1,7 @@
 ﻿# Blocking is the Enemy of Scale
 
+
+## Video: https://youtu.be/cNhIvM_etoU
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 9

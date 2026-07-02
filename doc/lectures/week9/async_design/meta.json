@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 9,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "async_design",
+  "source": "doc/lectures/week9/async_design/README.md",
+  "videoPath": "doc/lectures/week9/async_design/.output/output.mp4",
+  "youtube_title": "Designing Async Systems | CS 5254 Week 9",
+  "summary": "Async systems require explicit control over events, retries, ordering, and observability.",
+  "youtube_description": "Async systems require explicit control over events, retries, ordering, and observability. The lecture frames the pressure model, state transitions, and trade-offs that matter when work moves across time and the design has to defend its invariant with evidence.\n\nThis CS 5254 Week 9 lecture explores designing async systems and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "designing async systems",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "events",
+    "retries",
+    "ordering",
+    "observability",
+    "invariants"
+  ]
+}

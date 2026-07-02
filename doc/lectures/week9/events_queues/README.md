@@ -1,5 +1,7 @@
 ﻿# Events, Queues, Workers
 
+
+## Video: https://youtu.be/Hdy1ilr5erU
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 9

@@ -1,5 +1,7 @@
 ﻿# Designing Async Systems
 
+
+## Video: https://youtu.be/a3wnYs_BR7g
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 9

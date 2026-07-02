@@ -1,203 +1,425 @@
 = Designing Async Systems
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Lecture Overview
+== Opening Pressure
 
-* Course: CS 5254b - Object-Oriented Systems Under Concurrency
-* Week: 9
-* Duration: 15 minutes
-* Prerequisites: Prior lectures on object state, concurrency pressure, structured evidence, and Integrity Packet reasoning
-* Assignment: [A2](../../../assignments/A2/index.md)
+[.column]
+* A synchronous workflow moves to background workers
+* Responsiveness improves
+* Correctness now depends on events, retries, ordering, observability
 
-== Learning Objectives
+[.column]
+* The business workflow looks the same
+* The execution model changes
+* The question becomes: what must be explicit across time?
 
-* Analyze design pressure in async systems
-* Diagnose hidden assumptions of correctness
-* Evaluate failure evidence using logs and traces
-* Design correction that preserves invariants
-* Defend approach in Integrity Packet
+== Async Pressure Model
 
-== Opening Narrative
-
-* User experience shifts with async systems
-* Correctness relies on events and observability
-* What must be made explicit when work spans time?
-
-== Core Concept: Event Storming
-
-* Definition: Identify significant events
-* Importance: Trust the system under pressure
-* Mechanism: Object state, workflow timing, etc.
-* Failure Mode: Duplicate work, stale state, blocked progress
-* Design Implication: Expose invariants, log transitions
-
-== Core Concept: Workflow Orchestration
-
-* Definition: "Orchestrator Worker" for async logic
-* Importance: Trust the system under pressure
-* Mechanism: Appears through object state and timing
-* Failure Mode: Duplicate work, stale state, blocked progress
-* Design Implication: Expose invariants, log transitions
-
-== Core Concept: Error Propagation
-
-* Definition: Handle failures in background workers
-* Importance: Trust the system under pressure
-* Mechanism: Object state, timing, retries, etc.
-* Failure Mode: Duplicate work, stale state, blocked progress
-* Design Implication: Expose invariants, log transitions
-
-== Core Concept: Observability
-
-* Definition: Importance of Correlation IDs
-* Importance: Trust the system under pressure
-* Mechanism: Object state, timing, queues, etc.
-* Failure Mode: Duplicate work, stale state, blocked progress
-* Design Implication: Expose invariants, log transitions
-
-== Core Concept: Asynchronous Boundary
-
-* Definition: Work continues later on another worker
-* Importance: Trust the system under pressure
-* Mechanism: Object state, timing, retries, etc.
-* Failure Mode: Duplicate work, stale state, blocked progress
-* Design Implication: Expose invariants, log transitions
-
-== System Architecture View
-
-[plantuml, target=system_architecture, format=svg, width=80%]
+[plantuml,width=100%]
 ----
 @startuml
 skinparam monochrome true
 skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
 left to right direction
-
-rectangle "Designing Async Systems" as Topic
-rectangle "Event Storming" as A
-rectangle "Workflow Orchestration (Async)" as B
-rectangle "Error Propagation" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
-
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+rectangle "Workflow" as W
+rectangle "Worker" as R
+rectangle "Queue" as Q
+rectangle "Evidence" as E
+W -> Q : submit
+Q --> R : deliver later
+R --> E : log outcome
+E --> W : refine design
 @enduml
 ----
 
-== Worked Example: Problem Setup
+== Core Concepts
 
-* Podcast Domain: Ingest -> Clean -> Transcribe
-* Design Decision: Large "Job" object vs. small "Event" messages
+* Event storming makes significant events explicit
+* Workflow orchestration names the async control point
+* Error propagation must work without a waiting user
+* Observability depends on correlation IDs and structured traces
 
-== Naive Implementation
+== Event Storming Failure Model
 
-A naive design assumes:
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+rectangle "Happy Path" as H
+rectangle "Hidden Assumption" as A
+rectangle "Pressure" as P
+rectangle "Duplicate Work" as D
+H --> A : passes once
+A -> P : timing changes
+P --> D : stale state or repeat action
+@enduml
+----
 
-* Operation happens once, in order, and with current state
-* Often invisible in code due to method naming
+== Workflow Orchestration
 
-```text
-actor performs operation
-system reads current state
-system applies transition
-system emits side effect
-```
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+rectangle "Orchestrator" as O
+rectangle "Step A" as A
+rectangle "Step B" as B
+rectangle "Step C" as C
+O --> A : start
+A --> O : result
+O --> B : continue
+B --> O : result
+O --> C : finish
+@enduml
+----
 
-== Failure Scenario
+== Error Propagation and Recovery
 
-* Overlapping execution leads to stale state, retries
-* Failure is not just syntax errors; reflects design mismatch
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+rectangle "Worker Crash" as W
+rectangle "Retry" as R
+rectangle "Idempotency Check" as I
+rectangle "Safe Resume" as S
+W --> R : fail before ack
+R -> I : redeliver
+I --> S : deduplicate
+@enduml
+----
 
-== Improved Design Direction
+== Observability and Correlation
 
-* Name the invariant explicitly
-* Make transitions observable
-* Use keys, guards, retries with backoff, etc.
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+rectangle "Request ID" as R
+rectangle "Log Entry" as L
+rectangle "Trace Span" as T
+rectangle "Failure Evidence" as E
+R --> L : tag every step
+L -> T : connect events
+T --> E : reconstruct order
+@enduml
+----
 
-== Safer Design Explanation
+== Design Controls
 
-Switching from:
-* Hopeful execution order
-To:
-* Proving invalid interleavings are contained or recovered
+[.column]
+* Invariant first
+* Then choose a control
+* Version checks
+* Idempotency keys
 
-== Failure Modes and Anti-Patterns
+[.column]
+* Durable completion records
+* Retry with backoff
+* Compensation or reconciliation
+* Structured logs with IDs
 
-* Symptom: Passes happy-path test
-  * **Detection**: Run under pressure
-  * **Correction**: Add failure-focused tests
+== Example Workflow
 
-* Symptom: Names tools, not design properties
-  * **Detection**: Ask about the invariant
-  * **Correction**: Define invariant first
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+rectangle "Checkout" as C
+rectangle "Queue" as Q
+rectangle "Worker" as W
+rectangle "Idempotency Store" as I
+rectangle "Notification" as N
+C -> Q : publish order event
+Q --> W : deliver event
+W --> I : claim key
+I --> W : allow once
+W --> N : notify
+@enduml
+----
 
-* Symptom: Vague evidence
-  * **Detection**: Reviewer cannot reconstruct failure
-  * **Correction**: Capture structured evidence
+== State Transition Model
 
-* Symptom: Fix changes behavior, no baseline
-  * **Detection**: Lack of before/after tests
-  * **Correction**: Keep failing test for comparison
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+rectangle "ENQUEUED" as E
+rectangle "DELIVERED" as D
+rectangle "PROCESSING" as P
+rectangle "COMPLETED" as C
+rectangle "ACKED" as A
+E --> D : queue hands off
+D -> P : claim idempotency key
+P --> C : side effect succeeds
+C -> A : ack succeeds
+@enduml
+----
 
-== Trade-Off Analysis
+== Failure Interleaving
 
-[cols="1,1,1,1", options="header"]
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+rectangle "Worker A ships" as A
+rectangle "Crash before ack" as C
+rectangle "Redelivery to Worker B" as B
+rectangle "Duplicate side effect" as D
+A --> C : partial success
+C -> B : queue retries
+B --> D : repeat work
+@enduml
+----
+
+== Design Response
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+rectangle "Baseline" as B
+rectangle "Protected Invariant" as P
+rectangle "Control" as C
+rectangle "Evidence" as E
+B --> P : define what must hold
+P -> C : choose guard
+C --> E : prove with logs
+@enduml
+----
+
+== Trade-Offs
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
-| Guarded state | Protects invariant | Needs careful modeling | Status changes 
-| Explicit coordination | Visible dependencies | Can cause deadlock | Multi-object workflows 
-| Idempotent design | Handles duplicates | Requires keys | Async workers
-| Observability-first | Strong evidence | Adds instrumentation | Design proof
+|Approach |Strengths |Weaknesses |Use When
+
+|Simple baseline
+|Easy to explain
+|Hides timing assumptions
+|First pass and comparison
+
+|Guarded state transition
+|Protects the invariant directly
+|Needs careful state modeling
+|Status changes and workflow steps
+
+|Explicit coordination
+|Makes dependencies visible
+|Can bottleneck progress
+|Multi-object ordering requirements
+
+|Idempotent retry-safe design
+|Handles duplicates and partial failure
+|Needs keys or deduplication
+|Queues and external calls
 |===
 
-== Practical Application
+== Pressure Test and Evidence
 
-* Identify invariant relevant to async design
-* Write one sequential scenario and one pressure scenario
-* Add IDs to logs before running pressure scenario
-* Capture before/after evidence for fixes
-* Update Integrity Packet with assumptions and evidence
+[.column]
+* Run the happy path
+* Run the pressure path
+* Capture logs with IDs
 
-== Assignment Integration
-
-Supports [A2](../../../assignments/A2/index.md)
-* Connect lecture concept to project
-* Show relevant mechanisms in domain
-* Evidence: logs, diagrams, behavior, explanation
-
-== Validation Questions
-
-1. What invariant is most relevant here?
-2. What hidden assumption makes the design seem correct?
-3. How would you repeatably force a failure?
-4. What evidence would prove the failure occurred?
-5. What mechanism would you choose first, and trade-offs?
-6. How would the issue appear differently in your stacks?
-7. What goes in the Integrity Packet to defend your conclusion?
-
-== Summary
-
-* Designing async systems: a reasoning method
-* Connect concepts to invariants, observable behavior
-* A design matures through explanation, stress, evidence
-
-== Further Reading
-
-* Search: "Designing Async Systems distributed systems"
-* Explore: structured logging, correlation IDs
-* Investigate: invariants in OO systems, coordination patterns
+[.column]
+* Compare before and after
+* Preserve the failing scenario
+* Defend the fix with evidence

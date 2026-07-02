@@ -1,5 +1,7 @@
 ﻿# Async Models Across Languages
 
+
+## Video: https://youtu.be/aEnbR_tZI2E
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 9

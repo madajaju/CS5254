@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 9,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "blocking_vs_async",
+  "source": "doc/lectures/week9/blocking_vs_async/README.md",
+  "videoPath": "doc/lectures/week9/blocking_vs_async/.output/output.mp4",
+  "youtube_title": "Blocking is the Enemy of Scale | CS 5254 Week 9",
+  "summary": "A blocking step can look harmless in one workflow and still saturate the system under load.",
+  "youtube_description": "A blocking step can look harmless in one workflow and still saturate the system under load. Once timing and concurrency pressure change, the design has to defend progress, explain backlog, and preserve the invariant with evidence.\n\nThis CS 5254 Week 9 lecture explores blocking versus async coordination and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "blocking vs async",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "blocking call",
+    "resource saturation",
+    "throughput bottleneck",
+    "progress guarantee",
+    "observability"
+  ]
+}

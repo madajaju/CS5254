@@ -2,106 +2,81 @@
   {
     "slide": 1,
     "topic": "Events, Queues, Workers",
-    "text": "Welcome to the lecture on Events, Queues, and Workers. Today, we're going to explore how these concepts relate to concurrent systems and why they are crucial for ensuring correctness in our applications."
+    "text": "Welcome. Today’s lecture is about what happens when a workflow stops being immediate and starts happening in the background. The business goal may look the same, but the engineering problem changes a lot once work moves across time. Now correctness depends on events, queues, workers, retries, ordering, and whether we can actually observe what happened. The key question is: what has to become explicit so the system still behaves correctly under pressure?"
   },
   {
     "slide": 2,
-    "topic": "Introduction",
-    "text": "Let's start with the shift from synchronous to asynchronous workflows. As we move tasks to background workers, we improve user responsiveness. However, this introduces new challenges. Correctness now relies heavily on how we handle events, retries, and ordering within our system."
+    "topic": "Opening Narrative",
+    "text": "Imagine you take a synchronous operation and offload it to a background worker so the user gets a faster response. That is usually a good move for responsiveness, but it also means the original method no longer guarantees immediate completion. The work may be delayed, repeated, or processed in a different order. So the design has changed, even if the business story sounds unchanged. The real challenge is making the hidden assumptions visible before the system is trusted."
   },
   {
     "slide": 3,
-    "topic": "Learning Objectives",
-    "text": "By the end of this lecture, you'll be able to analyze the design pressures in stateful concurrent systems, identify hidden assumptions, evaluate failure evidence, design corrections while preserving important invariants, and connect these ideas to your assignments."
+    "topic": "Topic Map",
+    "text": "This topic breaks into five connected ideas. An event names what happened. A queue stores work until it can be handled. A worker performs the work. Evidence tells us whether the behavior was actually correct. And design choice is where we decide how to protect the important invariant. The important engineering habit here is to connect the abstraction to proof, not just to implementation."
   },
   {
     "slide": 4,
-    "topic": "Core Concept: Event",
-    "text": "Let's dive into the core concept of an event. An event is essentially a record of something that has happened in the past. Understanding events is vital because they serve as the backbone for trust in your system, especially under pressure. If we neglect this aspect, we risk producing duplicate work or having stale state, which can lead to breakdowns in the system."
+    "topic": "Event",
+    "text": "An event is a record of something that already happened. That sounds simple, but it matters because past occurrences are not the same as current state. A common mistake is to treat an event like a method call and assume the rest of the system will immediately agree. In practice, the event becomes useful only if it is observable and tied to the invariant we care about. If we ignore that, the code may look fine on the happy path while still producing duplicate work or stale decisions under pressure."
   },
   {
     "slide": 5,
-    "topic": "Core Concept: Queue",
-    "text": "Next, we have queues. A queue acts as a buffer that stores events until they can be processed. Like events, queues are crucial for maintaining system integrity under load. If we overlook their function, we might end up with blocked progress or create situations where tasks are repeated unnecessarily."
+    "topic": "Queue",
+    "text": "A queue is the buffer that lets work wait until a consumer is ready. That buffering is exactly what makes it useful, and also what introduces risk. The producer can move on while the consumer is delayed, retried, or temporarily unavailable. So the queue is not just a convenience layer; it is part of the system’s timing model. When you use it, you need to think about delivery, ordering, and what evidence proves that an item was handled correctly."
   },
   {
     "slide": 6,
-    "topic": "Core Concept: Worker",
-    "text": "Now, let's talk about the worker, or consumer. Workers are the components responsible for pulling events from queues and executing actions based on those events. Their role is significant in ensuring that the system can handle tasks efficiently. As with events and queues, neglecting the nuances of worker behavior can lead to issues like duplicate work and outdated state."
+    "topic": "Worker",
+    "text": "The worker is the component that pulls work from the queue and does something real, usually a side effect like shipping an order, cleaning a file, or sending a notification. This is where correctness can fail in a very concrete way. The worker may run more than once, crash halfway through, or acknowledge completion too late. So the worker logic has to be built around the idea that delivery and execution are not the same thing."
   },
   {
     "slide": 7,
-    "topic": "Core Concept: Decoupling",
-    "text": "Another important aspect is decoupling. This means that the producer of an event does not need to know who will consume that event or even if the consumer is currently online. This separation is crucial for maintaining system flexibility and robustness. However, if we fail to manage this properly, it could result in misleading evidence or unnecessary duplications."
+    "topic": "Decoupling",
+    "text": "Decoupling means the producer does not need to know who is consuming the event, or whether that consumer is even online right now. That is a strength because it reduces direct dependency and improves responsiveness. But it also means the producer can no longer assume immediate completion. The real design question becomes whether the system can still protect its invariant when the two sides are separated in time and ownership."
   },
   {
     "slide": 8,
-    "topic": "Core Concept: Asynchronous Boundary",
-    "text": "Asynchronous boundaries mark points in our system where work is paused and may resume later, potentially on different workers or event loops. Recognizing these boundaries is essential for maintaining trust in the system under pressure. Ignoring them can lead to delays and other failures, similar to those encountered with events and queues."
+    "topic": "Asynchronous Boundary",
+    "text": "An asynchronous boundary is the point where work continues later, often on another worker or event loop. That boundary is where hidden assumptions become dangerous. Once you cross it, retries become possible, timing changes, and evidence matters much more. A common mistake is to think of the code as one continuous flow when in reality it has become a sequence of partially independent steps. That is why we need logs, IDs, and repeatable tests."
   },
   {
     "slide": 9,
-    "topic": "System Architecture View",
-    "text": "Here, we see a representation of how events, queues, and workers interact within a system. The diagram illustrates not just the relationships between these components but also how decisions are made and validated within the architecture. It's important to understand that the integrity of the system relies on the ongoing connection between these elements."
+    "topic": "State Transition Model",
+    "text": "Here the important idea is that event processing is really a state machine. The work begins enqueued, gets delivered, enters processing, finishes as completed, and is only then acknowledged. If the worker crashes before completion, the item may move into retry pending and come back later. The invariant we care about is simple to say but hard to preserve: each external side effect should happen at most once, even if the queue delivers the same event more than once. That is the property the state model is trying to protect."
   },
   {
     "slide": 10,
-    "topic": "Worked Example: Setup",
-    "text": "To make these concepts more concrete, let’s consider a worked example. In the podcast domain, an `EpisodeIngestor` puts a message on a `CleanupQueue`, while a worker like `AudioCleaner` processes those messages. Similarly, in an order system, the `Checkout` process sends a `PaymentRequested` message to a queue. This practical application helps illustrate the concepts we are discussing."
+    "topic": "Failure Interleaving",
+    "text": "Let’s make the failure concrete. Worker A ships order-42 and then crashes before it can acknowledge the message. The queue assumes the delivery was not completed and redelivers the same event to Worker B. Now the system can ship the same order again, or at least produce logs that no longer line up with the actual outcome. This is uncomfortable because the baseline version often looks correct until exactly this kind of timing pressure appears. The evidence students should capture here is the delivery ID, the worker logs, and the side-effect trail that proves the duplicate path happened."
   },
   {
     "slide": 11,
-    "topic": "Naive Implementation",
-    "text": "A common mistake when designing these systems is to assume a simple, one-time operation that relies purely on the current state. However, this assumption often masks deeper complexities that can lead to issues when tested under real-world conditions, as demonstrated in our example."
+    "topic": "Failure Scenario",
+    "text": "The pressure here is at-least-once delivery combined with an acknowledgement timeout and a worker restart. Each part is reasonable on its own, but together they expose the hidden assumption that delivery count equals execution count. That assumption is false. The result can be duplicate side effects, missing notifications, or a run that never reaches a clean final acknowledgement. The key lesson is that the consumer must be designed around uncertainty, not around the fantasy of exactly-once execution."
   },
   {
     "slide": 12,
-    "topic": "Failure Scenario",
-    "text": "Let’s discuss what a failure scenario might look like. In overlapping executions or with delays, a system might encounter problems like stale state or late arrivals, causing workflows to get stuck. This mismatch between design assumptions and actual execution can lead to significant challenges."
+    "topic": "Design Response",
+    "text": "The protected property is that retried events do not inflate side effects or hide lost work. To defend that property, we use idempotency keys, durable completion records, retry-safe handlers, and reconciliation scans. Those controls make invalid repeats visible or harmless. But they are not free. They add storage, more state to reason about, and more complex handler logic. That trade-off is worth naming explicitly, because a fix that works only by making the system opaque is not a real fix."
   },
   {
     "slide": 13,
-    "topic": "Improved Design Direction",
-    "text": "To mitigate these issues, we can improve our designs. It's important to explicitly name the invariants we want to maintain and ensure that transitions are observable. We can implement controls for correctness by using retries or version checks whenever necessary to handle potential failures."
+    "topic": "Evidence Flow",
+    "text": "This lecture is really about evidence as much as it is about architecture. A defensible claim needs delivery IDs, operation IDs, worker logs, and an audit trail that ties the action to the outcome. If the worker succeeds but the acknowledgement is lost, the evidence still needs to explain what happened. That is why we design for delivery uncertainty and then prove the result with structured records. In an Integrity Packet, this is the material that supports the design decision."
   },
   {
     "slide": 14,
-    "topic": "Why Improved Design is Safer",
-    "text": "Implementing improved designs shifts our focus from merely hoping a workflow succeeds to guaranteeing that any invalid interleavings are either rejected or can be recovered with clear evidence. This enhances both reliability and our ability to troubleshoot issues down the line."
+    "topic": "Trade-Off Table",
+    "text": "There are several ways to respond, and each one trades simplicity for control. A simple baseline is easiest to explain, but it often hides timing assumptions. A guarded state transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes dependencies visible, though it can create waiting or bottlenecks. An idempotent design is especially useful for queues and retries, but it needs keys and deduplication logic. The main takeaway is that the mechanism should match the failure, not just the framework you happen to be using."
   },
   {
     "slide": 15,
-    "topic": "Failure Modes & Anti-Patterns",
-    "text": "We need to be cautious of various failure modes and anti-patterns. For instance, if a system only passes a single happy-path demonstration, it may not reflect reality. We can test for this by introducing concurrent scenarios and failure-focused tests to reveal possible weaknesses."
+    "topic": "Practical Application",
+    "text": "For practice, start by identifying the invariant or progress property that matters most in your own system. Then write one normal scenario that should succeed and one pressure scenario that could expose the failure. Before you run the pressure case, add operation IDs and entity IDs to your logs so the behavior can be traced. If you apply a fix, capture before and after evidence. And finally, update the Integrity Packet with the assumption, the evidence, the validation, and any remaining risk."
   },
   {
     "slide": 16,
-    "topic": "Trade-Off Analysis",
-    "text": "Let's examine some trade-offs in our approaches. For example, a simple baseline might be easy to understand and implement, but it often hides the underlying assumptions about timing and pressure. On the other hand, guarded state transitions require careful modeling to protect the core invariants. Each approach has its strengths and weaknesses depending on the context of use."
-  },
-  {
-    "slide": 17,
-    "topic": "Practical Application",
-    "text": "To apply what we've learned, start by identifying the invariant that is most relevant to your system. Write a sequential scenario that should work smoothly, then draft a pressure scenario that could expose potential failures. Remember to include operation IDs in your logs to facilitate tracking during testing."
-  },
-  {
-    "slide": 18,
     "topic": "Assignment Integration",
-    "text": "This lecture ties directly into your assignment A3. You'll need to connect our discussions to your project by illustrating a pertinent object, workflow, or event within your chosen domain. Your goal is to showcase concrete evidence through logs, commands, and other artifacts."
-  },
-  {
-    "slide": 19,
-    "topic": "Discussion",
-    "text": "Now, I’d like to open the floor for discussion with two questions. First, what invariant do you believe is most relevant based on today’s topics? Secondly, what hidden assumptions do you think might lead a design to appear correct, when in fact it may not be?"
-  },
-  {
-    "slide": 20,
-    "topic": "Summary",
-    "text": "In summary, understanding events, queues, and workers is crucial for reasoning about system correctness, especially under realistic execution conditions. Our task as professional engineers is to connect these concepts with observable behavior and to justify our design choices through clear evidence."
-  },
-  {
-    "slide": 21,
-    "topic": "Further Reading",
-    "text": "Lastly, I encourage you to explore further reading options. Look into topics such as distributed systems failure modes related to events, queues, and workers, concurrency design trade-offs, structured logging, and invariants in stateful object-oriented systems. These will deepen your understanding and prepare you for practical applications."
+    "text": "This lecture connects directly to A3. You should be able to point to a real object, workflow, event, failure, or recovery mechanism in your own project and explain how it behaves under pressure. The goal is not just to say that you use queues or background work, but to defend the design with runnable commands, structured logs, before and after behavior, diagrams, and failure reproduction. That is the level of evidence expected in the oral defense and in the Integrity Packet."
   }
 ]

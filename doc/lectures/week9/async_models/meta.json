@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 9,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "async_models",
+  "source": "doc/lectures/week9/async_models/README.md",
+  "videoPath": "doc/lectures/week9/async_models/.output/output.mp4",
+  "youtube_title": "Async Models Across Languages | CS 5254 Week 9",
+  "summary": "Node.js, Java, Go, and Python expose the same async pressure through different execution models.",
+  "youtube_description": "Node.js, Java, Go, and Python expose the same async pressure through different execution models. The lecture compares the hidden assumptions, failure modes, and evidence patterns that matter when work moves across callbacks, futures, channels, and event loops.\n\nThis CS 5254 Week 9 lecture explores async models across languages and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "async models across languages",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "node.js",
+    "java",
+    "go",
+    "python",
+    "correlation ids"
+  ]
+}

@@ -1,102 +1,127 @@
 [
-  {
-    "slide": 1,
-    "topic": "Async Models Across Languages",
-    "text": "Welcome to the lecture on Async Models Across Languages. Today, we'll explore how asynchronous workflows introduce concurrency issues and the ways in which these impact the correctness of our systems. We'll discuss the significance of events and observability in ensuring our designs function properly across different languages."
-  },
-  {
-    "slide": 2,
-    "topic": "Introduction",
-    "text": "To get started, let's address the core concepts of async models. These models significantly change how workflows operate, particularly by moving tasks into background processing. This shift means that correctness relies heavily on understanding events, handling retries, managing ordering, and ensuring we can observe significant state changes. It’s crucial for us to explicitly define how work transitions across time."
-  },
-  {
-    "slide": 3,
-    "topic": "Node.js (Event Loop)",
-    "text": "Let's dive into Node.js, which employs a single-threaded, non-blocking event loop mechanism. This allows us to handle many tasks simultaneously using callbacks or the newer async/await syntax. It's essential to understand that we must make the conditions under which our systems operate explicit; neglecting this could lead to scenarios where duplicate work is generated or the system works with outdated, stale state."
-  },
-  {
-    "slide": 4,
-    "topic": "Java (Threads/Futures)",
-    "text": "Moving on to Java, traditionally a multi-threaded environment, we see it adapting to modern practices with tools like CompletableFuture and Project Loom for managing asynchronous tasks. Similar to Node.js, there are critical conditions that must be made explicit to gain trust in our system's performance under pressure, or we risk running into the same failure modes like stale state and duplicated work."
-  },
-  {
-    "slide": 5,
-    "topic": "Go (Goroutines/Channels)",
-    "text": "Now let's consider Go, which uses lightweight threads called goroutines to handle concurrent tasks. These communicate through channels, allowing for an efficient way to manage concurrency. Just like in Java and Node.js, conditions within this design need to be clearly articulated. If not, we may encounter the same types of failures we've previously discussed."
-  },
-  {
-    "slide": 6,
-    "topic": "Python (Asyncio)",
-    "text": "In Python, we have the asyncio library, which provides an event loop model akin to Node.js but comes with its unique syntax and constraints. It’s vital to clarify the conditions under which operations occur since ignoring them can lead to failures that are prevalent across other asynchronous models."
-  },
-  {
-    "slide": 7,
-    "topic": "Asynchronous Boundary",
-    "text": "Next, we define what we call an Asynchronous Boundary. This is simply a point in our workflow where tasks are paused and will continue later, often on a different worker or event loop. Recognizing and making these boundaries explicit is critical for the overall reliability of our system."
-  },
-  {
-    "slide": 8,
-    "topic": "System / Architecture View",
-    "text": "Here, we visualize the architecture related to async models across different programming languages. At the center is the concept of analyzing how these various async models interact. This architecture emphasizes the need for strong validation evidence, which connects back to our design considerations. It's important to remember that successful implementation isn't just about one-time functionality but rather about maintaining invariants as we scale."
-  },
-  {
-    "slide": 9,
-    "topic": "Worked Example",
-    "text": "Let's look at a worked example to ground these concepts. We will consider a two-stack comparison: in Java, we can use ScheduledExecutorService to simulate background tasks, while in Node.js, we might use setImmediate or an EventEmitter. Understanding the syntactic parity between languages will help us grasp these concepts better."
-  },
-  {
-    "slide": 10,
-    "topic": "Problem Setup",
-    "text": "In our problem setup, we acknowledge that naive implementations often incorrectly assume operations will happen once and in the right order. These assumptions frequently remain hidden in the code, making it hard to identify potential failure points until they surface during execution."
-  },
-  {
-    "slide": 11,
-    "topic": "Naive Implementation",
-    "text": "This naive implementation approach typically follows a pattern: an actor performs an operation, the system reads the current state, applies a transition, and emits a side effect. However, the challenges arise due to invisible assumptions that can lead to unexpected behavior."
-  },
-  {
-    "slide": 12,
-    "topic": "Failure Scenario",
-    "text": "Under situations of overlapping execution or delayed responses, we might encounter stale states, duplicate operations, or even stalled workflows. These aren’t just simple syntax errors; they reflect deeper design flaws where the initial assumptions made are proven incorrect under pressure."
-  },
-  {
-    "slide": 13,
-    "topic": "Improved Design Direction",
-    "text": "To improve our design, we need to clearly name the invariant we're trying to protect, make transitions observable, and implement controls such as version checks or idempotency keys. This structured approach helps to ensure that our systems can handle failures gracefully."
-  },
-  {
-    "slide": 14,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "We must be aware of certain failure modes and anti-patterns. For instance, when a system passes a happy-path test, it may still mask design weaknesses due to inadequate testing under realistic conditions. Recognizing these symptoms allows for better detection and correction strategies, such as adding structured logs and stress tests."
-  },
-  {
-    "slide": 15,
-    "topic": "Trade-Off Analysis",
-    "text": "In our trade-off analysis, we break down various approaches based on their strengths and weaknesses. For example, starting with a simple baseline provides an easy implementation, but it might hide key timing assumptions. Understanding when to use certain approaches, like guarded state transitions or explicit coordination, is crucial for reliable system design."
-  },
-  {
-    "slide": 16,
-    "topic": "Practical Application",
-    "text": "As we approach practical applications of these concepts, I'd like you to identify the most relevant invariant for async models in your projects. Write both a sequential and a pressure scenario to test your definitions. Remember to log operation IDs to help capture the full picture when you are under stress testing conditions."
-  },
-  {
-    "slide": 17,
-    "topic": "Assignment Integration",
-    "text": "This lecture ties directly into Assignment 3. You'll need to apply what we've discussed by connecting these async concepts to your semester project. Show how the relevant workflows, events, failures, and recovery mechanisms operate in your domain. Your work should be supported with tangible evidence and detailed explanations in your Integrity Packet."
-  },
-  {
-    "slide": 18,
-    "topic": "Discussion",
-    "text": "Let's take a moment for discussion. I want you to think about which invariant from today's lecture is most relevant to your work. How might you force a failure in a repeatable test? Additionally, consider what hidden assumptions could exist in your baseline designs and what trade-offs you would prioritize in your projects."
-  },
-  {
-    "slide": 19,
-    "topic": "Summary",
-    "text": "As we wrap up, remember the central theme: async models have a significant impact on system correctness. It’s vital to connect these concepts to your invariants, observable behaviors, and defensible design choices. Through our discussions and exercises, ensure that your designs can be clearly explained, validated, and adapted to real-world conditions."
-  },
-  {
-    "slide": 20,
-    "topic": "Further Reading",
-    "text": "Finally, for those interested in further readings, I encourage you to explore resources on distributed systems failure modes, concurrency design trade-offs, and structured logging practices. These topics are invaluable for deepening your understanding of async models across languages and improving your systems design skills."
-  }
+    {
+        "slide":  1,
+        "topic":  "Async Models Across Languages",
+        "text":  "Welcome. This lecture is about how asynchronous execution changes the meaning of correctness. A workflow that looks simple in a synchronous model can become fragile once work moves into callbacks, futures, channels, or event loops. The key idea is that the business intent may stay the same, but the design pressure changes. We need to be able to name the invariant, observe the critical transitions, and defend the trade-offs when work continues later instead of right now."
+    },
+    {
+        "slide":  2,
+        "topic":  "Topic Map",
+        "text":  "The lecture starts by connecting one topic across several language models: Node.js, Java, Go, and Python. They all give us different ways to represent asynchronous work, but they also push failure into slightly different places. The important move is to stop treating the language feature as the whole story. Instead, trace each model toward evidence and then toward a design decision. That is how we reason professionally about async systems: not just which syntax we use, but what proof we have that the system still behaves correctly under pressure."
+    },
+    {
+        "slide":  3,
+        "topic":  "Async Boundary",
+        "text":  "Let\u0027s pause here and focus on the boundary where work is handed off to happen later. That boundary is where hidden assumptions become dangerous. The caller may assume the work will complete immediately, but the later worker depends on state that may change before execution. A common mistake is to treat submission and completion as the same thing. They are not. Once work crosses this boundary, we need to think about retries, delayed execution, lost acknowledgements, and stale state."
+    },
+    {
+        "slide":  4,
+        "topic":  "Node.js",
+        "text":  "Node.js gives us a single-threaded event loop with non-blocking behavior. That can make the system feel simple, but the design pressure is still real: callbacks and async functions can defer important work, and that means object state may change before the operation resumes. The lesson here is not just how the event loop works, but what invariant must be protected when work is paused and resumed. If we ignore that, the code may pass the happy path while still producing duplicate work, stale state, or misleading logs."
+    },
+    {
+        "slide":  5,
+        "topic":  "Java",
+        "text":  "In Java, asynchronous work often appears through threads, futures, or modern constructs like CompletableFuture and virtual threads. The syntax may look familiar, but the pressure points are different: shared objects, joins, completion timing, and visibility of state. The important question is not whether the task runs, but whether the right state is observed at the right time. If the design relies on lucky ordering, it may appear correct in a small test and then fail when the execution becomes concurrent or delayed."
+    },
+    {
+        "slide":  6,
+        "topic":  "Go",
+        "text":  "Go tends to make concurrency feel lightweight through goroutines and channels, but that does not remove the need for explicit design. Channels communicate events, and workers may act on them later, which means delivery count is not the same as effect count. The professional judgment here is to identify what must happen once, what may happen more than once, and what evidence proves the difference. Otherwise, the system can quietly repeat work or hide a retry failure behind a clean-looking API."
+    },
+    {
+        "slide":  7,
+        "topic":  "Python",
+        "text":  "Python\u0027s asyncio model is similar in spirit to Node.js: work pauses at await points and resumes later in an event loop. That creates the same kind of pressure on state, ordering, and observability. The main point is that the syntax changes, but the engineering question does not. We still need to know what happens if the task resumes after state has changed, or if a retry causes the same operation to be attempted again. Good async design makes those assumptions explicit instead of leaving them hidden inside the code."
+    },
+    {
+        "slide":  8,
+        "topic":  "Failure Scenario",
+        "text":  "Here is the uncomfortable version of the story: a worker ships an order, crashes before acknowledging completion, and the queue delivers the same event again. Now the side effect can happen twice, or the system can end up with a log that never records a clean finish. This failure is easy to miss in a baseline demo because the happy path assumes one delivery, one execution, and one acknowledgement. Under real pressure, those are separate events, and the evidence has to prove which one actually happened."
+    },
+    {
+        "slide":  9,
+        "topic":  "Design Response",
+        "text":  "The protected property here is that retried events do not create extra side effects or hide lost work. The mechanism is a combination of idempotency keys, durable completion records, and retry-safe handlers. That gives us a way to reject duplicates or recover safely when delivery is repeated. The trade-off is real: we add storage, state management, and more complex handler logic. So the fix is safer, but it is not free. It makes the invariant explicit and gives reviewers something concrete to inspect."
+    },
+    {
+        "slide":  10,
+        "topic":  "Problem Setup",
+        "text":  "This lecture often begins with a comparison between two stacks. In Java, a ScheduledExecutorService can move work into the background. In Node.js, setImmediate or an EventEmitter can create a similar effect. The point is not that the tools are identical. The point is that they can both hide the same design assumption: that work happens once, in order, and against current state. Once you see the pattern, you can compare the stacks by the failure they create, not just by the syntax they use."
+    },
+    {
+        "slide":  11,
+        "topic":  "Syntactic Parity",
+        "text":  "It is easy to over-focus on syntax here. People may want to say that await in JavaScript is the same as .get() or .thenAccept() in Java, but that is only a surface comparison. The deeper issue is that the execution model and pressure points are different. Similar-looking code can still fail in different ways, and those differences matter when you are collecting evidence or defending a design. The goal is not to match keywords; it is to understand how each model affects timing, state, and correctness."
+    },
+    {
+        "slide":  12,
+        "topic":  "Naive Model",
+        "text":  "A naive model assumes the operation happens once, the state is current, and the order is guaranteed. That is why the sequential test passes and everyone feels safe. The hidden assumption is usually timing: nothing delays the work, nothing retries it, and nothing else changes the state first. As soon as you introduce delay, overlap, or retry, the same design can produce duplicate work or stale state. So the lesson is to write down the assumption before the test convinces you it is true."
+    },
+    {
+        "slide":  13,
+        "topic":  "Corrected Design",
+        "text":  "A corrected design starts by naming the invariant, then exposing the transition that matters, and finally adding a control such as idempotency, version checks, or coordination. Depending on the workflow, you might also need retries, state logging, or explicit validation. The key idea is that the fix should protect the property you care about, not just make the symptom disappear. And because every control has a cost, the design should also make the trade-off visible."
+    },
+    {
+        "slide":  14,
+        "topic":  "Evidence Flow",
+        "text":  "This is where the lecture becomes evidence-driven. The design claim has to be supported by queue delivery IDs, idempotency records, worker logs, and a side-effect audit trail. If a worker succeeds but the acknowledgement is lost, we need to know whether the work was applied once, applied twice, or left ambiguous. That review question matters because async systems are often judged by traces, not by intent. So the evidence has to be specific enough that another person can reconstruct the failure and the recovery."
+    },
+    {
+        "slide":  15,
+        "topic":  "Failure Interleaving",
+        "text":  "Imagine one worker ships an order and then crashes before it can acknowledge the message. The queue then redelivers the same event to a second worker. If the consumer assumes delivery count and execution count are identical, duplicate shipment becomes possible. This is the kind of failure that stays hidden in a happy-path version because everything looks clean until timing changes. Professional engineering judgment means forcing this interleaving and capturing evidence that proves the problem really happened."
+    },
+    {
+        "slide":  16,
+        "topic":  "State Transition Model",
+        "text":  "This model names the lifecycle explicitly: enqueued, delivered, processing, completed, acknowledged, and retry pending. The protected invariant is that each external side effect for an order event is applied at most once, even if delivery happens more than once. Notice how the crash path is part of the design, not an edge case we ignore. That matters because state machines make failure visible, and visible failure is something we can reason about, test, and defend."
+    },
+    {
+        "slide":  17,
+        "topic":  "Failure Modes and Anti-Patterns",
+        "text":  "There are a few recurring mistakes here. One is letting a single happy-path demonstration stand in for proof; another is naming a tool without naming the property it protects. A third is producing evidence that is too vague to reconstruct the failure. The correction is consistent: keep the baseline, add pressure, write down the invariant first, and make the logs or traces structured enough to support the claim. That is the difference between a demo and an engineering argument."
+    },
+    {
+        "slide":  18,
+        "topic":  "Failure Modes and Anti-Patterns (cont)",
+        "text":  "Another mistake is naming a tool but not the design property it protects. That happens when students focus on frameworks before invariants. The fix is to ask which invariant the mechanism protects, write the invariant first, and only then select the mechanism."
+    },
+    {
+        "slide":  19,
+        "topic":  "Failure Modes and Anti-Patterns (cont)",
+        "text":  "A second failure mode is evidence that is too vague to support the claim. Logs without operation IDs or state transitions leave reviewers unable to reconstruct the failure. The correction is to capture structured evidence and link it directly to the claim."
+    },
+    {
+        "slide":  20,
+        "topic":  "Trade-Off Analysis",
+        "text":  "Each approach gives you a different balance of safety and cost. A simple baseline is easy to explain, but it hides timing assumptions. A guarded state transition protects the invariant directly, but it requires careful modeling. Explicit coordination makes dependencies visible, though it can slow the system down. Idempotent or retry-safe design is strong for duplicate delivery, but it needs keys and deduplication logic. Observability-first design helps with review and defense, but it adds instrumentation work. The right choice depends on which risk matters most."
+    },
+    {
+        "slide":  21,
+        "topic":  "Practical Application",
+        "text":  "Let\u0027s turn this into action. First, identify the invariant or progress property that matters in your system. Then write one sequential scenario that should succeed and one pressure scenario that could reveal failure. Before you run the pressure test, add operation IDs and entity IDs to the logs. If you apply a fix, capture before-and-after evidence, and then update the Integrity Packet with the assumption, the evidence, the validation, and any remaining risk. That is the habit we want you to practice."
+    },
+    {
+        "slide":  22,
+        "topic":  "Assignment Integration",
+        "text":  "This lecture connects directly to A3. For your project, you should show the relevant object, workflow, event, failure, or recovery mechanism in your own domain. The deliverables are not just code; they include runnable commands, structured logs, diagrams, failure reproduction, and a design defense. In other words, you need to demonstrate that you can explain the async behavior, prove the failure or the fix, and justify the decision in the Integrity Packet."
+    },
+    {
+        "slide":  23,
+        "topic":  "Validation and Interview Questions",
+        "text":  "These questions are the checklist for your own defense. What invariant matters most? What hidden assumption makes the baseline look correct? How would you force the failure again and again? What evidence would prove the failure occurred? Which mechanism would you choose first, and what does it cost you? And how would the same issue look in your two implementation stacks? If you can answer those clearly, you are not just using async tools; you are reasoning about them."
+    },
+    {
+        "slide":  24,
+        "topic":  "Summary",
+        "text":  "The central insight is that async models across languages are not just vocabulary differences. They are different ways that execution pressure can expose hidden assumptions. A mature design can explain its invariant, survive stress, produce evidence, and justify its trade-offs. So the real engineering task is to make the system understandable under realistic conditions, not just correct in a perfect demo."
+    },
+    {
+        "slide":  25,
+        "topic":  "Further Reading",
+        "text":  "If you want to go deeper, focus on structured logging, correlation IDs, invariants in stateful object-oriented systems, and message queues with idempotency and event ordering. Those topics will help you connect the lecture to both design reasoning and evidence collection. They also give you better language for A3, where the goal is to defend a real system under realistic pressure."
+    }
 ]

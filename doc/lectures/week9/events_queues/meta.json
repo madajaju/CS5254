@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 9,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "events_queues",
+  "source": "doc/lectures/week9/events_queues/README.md",
+  "videoPath": "doc/lectures/week9/events_queues/.output/output.mp4",
+  "youtube_title": "Events, Queues, Workers | CS 5254 Week 9",
+  "summary": "Background work shifts correctness onto events, queues, workers, and the evidence that proves them.",
+  "youtube_description": "Background work shifts correctness onto events, queues, workers, and the evidence that proves them. The lecture shows how async boundaries create ordering, retry, and observability pressure, and how to defend the invariant with structured records.\n\nThis CS 5254 Week 9 lecture explores events, queues, workers and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "events queues workers",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "event",
+    "queue",
+    "worker",
+    "idempotency",
+    "evidence"
+  ]
+}
