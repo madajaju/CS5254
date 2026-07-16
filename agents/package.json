@@ -5,11 +5,11 @@
   "main": "AIHelper.js",
   "scripts": {
     "build:lectures": "node buildLectures.js",
-    "build:slides": "node buildSlides.js ../doc/lectures/week9",
+    "build:slides": "node buildSlides.js ../doc/lectures/week10",
     "build:pdf": "node generate-pdf.js",
-    "build:video": "node generate-video.js ../doc/lectures/week9",
+    "build:video": "node generate-video.js ../doc/lectures/week10",
     "build:brightspace": "node generateBrightspace.js",
-    "upload:videos": "node uploadVideo.js --credentials youtube.creds.json --week-dir ../doc/lectures/week9",
+    "upload:videos": "node uploadVideo.js --credentials youtube.creds.json --week-dir ../doc/lectures/week10",
     "build:lectures:custom": "node buildLectures.js ./lectures ./lectureBuild.md",
     "start": "npm run build:lectures"
   },

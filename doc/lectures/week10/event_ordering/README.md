@@ -1,5 +1,7 @@
 ﻿# Out-of-Order Events
 
+
+## Video: https://youtu.be/OntoBAO_mXI
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 10

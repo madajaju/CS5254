@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 10,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "lost_messages",
+  "source": "doc/lectures/week10/lost_messages/README.md",
+  "videoPath": "doc/lectures/week10/lost_messages/.output/output.mp4",
+  "youtube_title": "Lost Messages and Recovery | CS 5254 Week 10",
+  "summary": "A completion event disappears during a broker restart, so the workflow remains in PROCESSING forever.",
+  "youtube_description": "A completion event disappears during a broker restart, so the workflow remains in PROCESSING forever. The lecture covers silent failures, zombie workflows, and recovery patterns that make missing messages visible.\n\nThis CS 5254 Week 10 lecture explores lost messages and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "lost messages",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "message queues",
+    "reconciliation",
+    "zombie workflows",
+    "broker failures",
+    "recovery"
+  ]
+}

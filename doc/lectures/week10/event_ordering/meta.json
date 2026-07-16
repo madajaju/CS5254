@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 10,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "event_ordering",
+  "source": "doc/lectures/week10/event_ordering/README.md",
+  "videoPath": "doc/lectures/week10/event_ordering/.output/output.mp4",
+  "youtube_title": "Out-of-Order Events and Causality | CS 5254 Week 10",
+  "summary": "An approval event arrives after the publish event that depends on it, and the workflow fails because delivery order and logical order diverge.",
+  "youtube_description": "An approval event arrives after the publish event that depends on it, and the workflow fails because delivery order and logical order diverge. The lecture focuses on causality, state regression, and the controls that keep the invariant intact.\n\nThis CS 5254 Week 10 lecture explores out-of-order events and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "out-of-order events",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "event ordering",
+    "causality",
+    "state regression",
+    "message queues",
+    "async boundaries"
+  ]
+}

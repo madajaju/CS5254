@@ -2,101 +2,86 @@
   {
     "slide": 1,
     "topic": "Lost Messages",
-    "text": "Welcome to our lecture on Lost Messages. Today, we will explore how lost messages can affect the correctness of stateful concurrent systems and the implications this has on design and trust."
+    "text": "Welcome to Lost Messages. The core idea is that a system can look completely healthy while progress has silently disappeared. A worker finishes its job, a message is supposed to move the workflow forward, and then that message never arrives. The important question is not whether the code ran once, but whether the design still protects progress when delivery, timing, or the broker itself becomes unreliable."
   },
   {
     "slide": 2,
-    "topic": "Introduction",
-    "text": "Let's begin with a scenario: imagine an episode-processing worker that completes audio cleanup and emits a completion event. However, during a broker restart, this event disappears, causing the workflow to remain in a perpetual 'PROCESSING' state. Even though each object may look correct in isolation, the entire system loses progress, raising a critical question: how can a design effectively detect and recover from such message losses?"
+    "topic": "Why It Matters",
+    "text": "Let's start with the practical risk. A message can vanish, the code can still look correct, and the workflow can simply stop moving. That is why this topic matters: progress becomes a lie. In a stateful concurrent system, the absence of a message is not a small inconvenience. It can leave an object stuck forever, hide a broken assumption, and produce misleading evidence that passes a happy-path test but fails under pressure."
   },
   {
     "slide": 3,
-    "topic": "Core Concept: Silent Failures",
-    "text": "The first core concept we need to understand is silent failures. This occurs when a producer sends a message and assumes it has been successfully delivered. However, this message fails to reach its intended queue or consumer, resulting in unwanted consequences like duplicate work or stale state. It's crucial to explicitly address this issue to ensure system reliability, which includes logging transitions and validating behaviors."
+    "topic": "Lost Path",
+    "text": "Imagine a worker publishing a finish event to the broker, and then that message is lost before the workflow receives it. From the worker's point of view, the operation was completed. From the workflow's point of view, nothing happened. The workflow stays in PROCESSING because the transition it depended on never arrived. This is the uncomfortable part: every component can appear locally correct, while the system as a whole has lost forward motion."
   },
   {
     "slide": 4,
-    "topic": "Core Concept: Zombie Workflows",
-    "text": "Next, we have the concept of zombie workflows. These are workflows that get stuck in an 'In Progress' state indefinitely due to a lost 'Finish' event. This reliance on timely message delivery can lead to failures similar to what we see with silent failures. To combat this, we must ensure that our design exposes invariants and validates transitions throughout the workflow process."
+    "topic": "Silent Failure",
+    "text": "A silent failure happens when the producer assumes success, but the queue delivery never actually happens. The consumer never sees the finish event, so the system keeps waiting for progress that will not come. A common mistake is to treat the send call as proof that the system advanced. It is not proof. The design has to make the critical transition observable and testable, otherwise the failure stays invisible until a real broker problem exposes it."
   },
   {
     "slide": 5,
-    "topic": "Core Concept: Broker Failures",
-    "text": "Broker failures refer to situations where the message queue crashes or loses persistent data. This form of failure is often overlooked, yet it can significantly compromise the correctness of the system and its state. To build trust and resiliency into our designs, it's vital to implement monitoring and logging for these transitional states."
+    "topic": "Invisible Assumption",
+    "text": "The hidden assumption here is that the happy path represents the real execution model. That assumption feels safe because sequential tests pass and method names sound correct. But timing, delay, retries, and partial failure break that illusion. The key idea is to surface the assumption explicitly: what must be true for progress to remain valid, and what evidence would tell us that the assumption no longer holds?"
   },
   {
     "slide": 6,
-    "topic": "Core Concept: Asynchronous Boundary",
-    "text": "Asynchronous boundaries mark points in the system where work continues later, possibly on a different worker or event loop. The risk here is the potential for lost messages. Therefore, we need to explicitly consider this in our designs to ensure workflows remain consistent. It's important to validate the observed behavior after any transitions occur to prevent inconsistencies."
+    "topic": "Zombie Workflow",
+    "text": "A zombie workflow is a workflow that never leaves PROCESSING because the finish event was lost. It is especially dangerous because it looks alive from the outside, but it is not moving. The transition to COMPLETED never happens, and then the final acknowledgement never matters because the system is already stuck. This matters because the failure is not just one missing message; it is a broken progress property that can hold an order, episode, or job open forever."
   },
   {
     "slide": 7,
-    "topic": "Core Concept: Temporal Coupling",
-    "text": "Temporal coupling creates hidden dependencies on event timing, meaning the execution of actions depends on when specific events are completed or observed. This can lead to stale states or duplicate executions. It’s critical to uncover these dependencies during pressure testing and state them explicitly as invariants, ensuring that our system functions correctly under varying conditions."
+    "topic": "Failure Evidence",
+    "text": "When this failure happens, the evidence is usually uncomfortable but clear: a stuck state, a missing final log, and no completion event. The right response is not to guess. It is to capture repeatable evidence that proves the workflow got stuck in the same way each time. That means operation IDs, entity IDs, timing, and a test that can recreate the failure under pressure. Without that, the design defense is just a story."
   },
   {
     "slide": 8,
-    "topic": "Architecture Diagram",
-    "text": "Now, let's explore an architecture diagram that encapsulates the ideas discussed. The diagram presents 'Lost Messages' as a central topic, branching into core concepts like silent failures, zombie workflows, and broker failures. It emphasizes the importance of validation evidence and careful design decisions, ultimately illustrating how these concepts refine our understanding of the system."
+    "topic": "Broker Crash",
+    "text": "Now make the failure more concrete: the broker itself crashes or loses durable data. In that case, the queue may accept work, but the message can disappear with the broker's restart. The uncomfortable observation is that the producer may believe the handoff happened, while the durable record is gone. This is why broker reliability is part of the design problem, not an implementation detail. The boundary between producer, broker, and consumer is exactly where lost messages become design pressure."
   },
   {
     "slide": 9,
-    "topic": "Worked Example",
-    "text": "Moving on to a worked example, we see practical scenarios like in the podcast domain where an `AudioCleaner` finishes its task but the corresponding message is lost, halting the workflow. Similarly, in an order system, if the `PaymentConfirmed` event is lost, the user’s order will never ship. These scenarios highlight the real-world implications of lost messages."
+    "topic": "Temporal Coupling",
+    "text": "This is where timing becomes part of the design. Delivery time matters, acknowledgements can race with crashes, and retries can duplicate work. A common mistake is to assume that send, process, and acknowledge are naturally aligned. They are not. Once you recognize the temporal coupling, you can ask the real question: what happens if success and acknowledgement are separated by a failure window?"
   },
   {
     "slide": 10,
-    "topic": "Problem Setup",
-    "text": "In our problem setup, we must consider the consequences of these failures. Both examples demonstrate that without proper message delivery, system progress is stalled. Addressing this issue requires a clear understanding of the potential pitfalls in our designs."
+    "topic": "Race Window",
+    "text": "Think through the race carefully. Worker A ships the order, then crashes before the acknowledgement is durable. The broker redelivers the message to Worker B. Now the same work may happen twice unless the design defends against it. This is why the failure is not just duplicate traffic; it is a violation of the invariant that each external side effect should happen at most once, even if delivery happens more than once."
   },
   {
     "slide": 11,
-    "topic": "Naive Design",
-    "text": "Let's look at a naive design that operates under the assumption that everything occurs exactly once and in order. This approach often hides invisible failures even if the process passes basic tests. The steps typically involve an actor performing an operation, the system reading the current state, applying a transition, and emitting a side effect."
+    "topic": "Guarded State",
+    "text": "One response is to guard the state transition directly. The protected property is that the workflow moves through valid states in a controlled order, even when retries happen. The mechanism is to claim, process, complete, and then acknowledge in a way that makes the transition visible and defendable. The trade-off is that state modeling becomes more careful and more complex, but that complexity is the cost of protecting the invariant instead of hoping timing will cooperate."
   },
   {
     "slide": 12,
-    "topic": "Failure Scenario",
-    "text": "In a failure scenario, overlapping executions can lead to conditions where stale states occur. This situation illustrates that the system may execute actions multiple times or become blocked. The insight here is that real failures highlight a critical mismatch between the initial design assumptions and the reality of execution."
+    "topic": "Correction Pattern",
+    "text": "The correction pattern is straightforward in principle: name the invariant, record the transition, make retries safe, and reconcile missing progress. That means the fix is not just a code change. It is a design response. You decide what must remain true, then choose a mechanism that protects it, such as guarded state, idempotency, or explicit reconciliation. The important point is that the fix must preserve the property without pretending it is free."
   },
   {
     "slide": 13,
-    "topic": "Improved Direction",
-    "text": "To improve upon the naive design, we should explicitly name the invariant we want to preserve and make transitions observable. Implementing controls such as version checks and idempotency keys can help prove that operations execute in the intended order, shifting our approach away from merely hoping for the best."
+    "topic": "Idempotent Control",
+    "text": "A strong control for this problem is idempotency. The worker claims a key in an idempotency store, checks whether the operation has already been done, and only applies the external side effect once. This protects against duplicate delivery and retry storms. The trade-off is extra storage and more handler logic, but that is a reasonable cost when the alternative is double shipping, duplicate notifications, or hidden lost work."
   },
   {
     "slide": 14,
-    "topic": "Failure Modes",
-    "text": "Let’s discuss some failure modes we may encounter. One symptom is when a test only demonstrates a single happy path success. This often happens because the test avoids conditions that would expose hidden weaknesses. To rectify this, we need to perform repeated runs and incorporate structured logging to capture potential failures."
+    "topic": "Tradeoffs",
+    "text": "Now compare the options. A baseline implementation is simple, but it hides timing assumptions. A guarded design protects the invariant directly, but it requires careful modeling. An observed design gives stronger evidence, but it adds logging and instrumentation work. The key lesson is that the right choice depends on the property you need to defend. If you cannot explain the trade-off, you probably have not named the invariant clearly enough."
   },
   {
     "slide": 15,
-    "topic": "Trade-Off Analysis",
-    "text": "In our trade-off analysis, we can see various design approaches along with their strengths and weaknesses. For instance, a simple baseline is easy to implement but does not reveal timing issues. On the other hand, a guarded state transition can protect core invariants, albeit with a more complex model. Understanding these trade-offs helps us make informed design decisions."
+    "topic": "Evidence Flow",
+    "text": "Evidence is what turns a claim into a defensible conclusion. Start with operation IDs, capture logs with timing, follow the trace, and use that to defend the design in review. If the worker succeeds but the acknowledgement is lost, what should the system record? That is the kind of question you should be able to answer with structured evidence, not intuition. The point is to design for delivery uncertainty instead of assuming exactly-once execution."
   },
   {
     "slide": 16,
-    "topic": "Practical Application",
-    "text": "Now for the practical application. Tomorrow, identify the invariant most relevant to lost messages in your systems. Write down a sequential scenario that should work as expected, another that applies pressure to expose failures, and ensure your logs are equipped with operation and entity IDs. Capturing before and after evidence when applying fixes is crucial."
+    "topic": "Assignment Link",
+    "text": "For the assignment, you should show four things: the invariant, the failure, the fix, and the evidence. That means your own project needs a concrete object, workflow, event, or recovery mechanism where lost messages could matter. Then you need before-and-after behavior, runnable commands or logs, and an Integrity Packet explanation that defends the design choice. In other words, demonstrate that you can identify the risk, force the failure, and justify the correction."
   },
   {
     "slide": 17,
-    "topic": "Assignment Integration",
-    "text": "As we integrate this lecture with your upcoming assignment A3, your task will be to clearly connect the concepts we've discussed to your semester project. You'll need to illustrate the relevant objects, workflows, events, and any failures or recovery mechanisms in your own domain, providing concrete evidence to support your assertions."
-  },
-  {
-    "slide": 18,
-    "topic": "Validation Questions",
-    "text": "Before we wrap up, consider these validation questions: What invariant or progress property is most relevant to our discussion? What hidden assumptions could cause the baseline design to appear correct? How can you create repeatable tests to force failures, and what evidence would solidly demonstrate that those failures occurred?"
-  },
-  {
-    "slide": 19,
-    "topic": "Summary",
-    "text": "To summarize, understanding lost messages is not merely about vocabulary but is essential for reasoning about system correctness under realistic execution scenarios. Our aim should be to connect these concepts to our invariants and observable behavior, ensuring our designs are validated and defensible with robust evidence."
-  },
-  {
-    "slide": 20,
-    "topic": "Further Reading",
-    "text": "For further reading, you can search phrases like 'Lost Messages in distributed systems failure mode' or 'Lost Messages concurrency design tradeoffs.' Additionally, explore topics around structured logging, invariants in stateful object-oriented systems, and message queues to deepen your understanding."
+    "topic": "Discussion",
+    "text": "Let's pause here and use the lecture as a design review. Ask yourself: what breaks first when delivery is lost, and which control gives proof rather than hope? A good answer should name the invariant, describe the failure scenario, and explain what evidence would convince a reviewer. If you can do that, you are thinking like an engineer who can defend a concurrent system under pressure."
   }
 ]

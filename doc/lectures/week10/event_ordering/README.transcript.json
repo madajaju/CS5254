@@ -2,126 +2,81 @@
   {
     "slide": 1,
     "topic": "Out-of-Order Events",
-    "text": "Welcome to today's lecture on Out-of-Order Events. In this session, we will explore how certain events in a stateful concurrent system don't always arrive in the order we expect, and how this can impact system correctness."
+    "text": "Welcome to Out-of-Order Events. The central idea is that a system can look correct in a simple test and still fail when timing changes. We are going to focus on what happens when delivery order, processing order, and business order are not the same thing. In practice, that means looking for hidden assumptions, identifying the invariant that really matters, and then proving whether the system still behaves correctly under pressure."
   },
   {
     "slide": 2,
-    "topic": "Learning Objectives",
-    "text": "Our objectives for today are clear. First, we will analyze the design pressure that arises from out-of-order events. Second, we'll diagnose the hidden assumptions that could lead to erroneous behavior in our systems. Next, we will evaluate failure evidence, using tools such as logs and traces, and then we'll design effective corrections that preserve our system's invariants. Lastly, you'll learn how to defend these approaches within your Integrity Packet."
+    "topic": "Why It Breaks",
+    "text": "Let's start with the basic reasons this kind of design breaks. A message can be delivered in one order and handled in another. A fast worker can outrun a slow one. A late event can overwrite newer state. And the biggest trap is that a happy-path test often hides all of that because it never creates the timing pressure that exposes the weakness. The key idea here is that correctness has to survive concurrency and delay, not just a clean sequential run."
   },
   {
     "slide": 3,
-    "topic": "Opening Narrative",
-    "text": "To illustrate our topic, consider this: events arrive not necessarily in the order they are logically expected. This discrepancy—where delivery order does not match logical order—forces our systems to adapt when causality and timing diverge. It's crucial for our architecture to handle this gracefully."
+    "topic": "Non-FIFO",
+    "text": "Here the important lesson is that a queue does not always behave like a simple line. You may send event A and then event B, but B can be consumed first by a worker that happens to be available sooner. That means the system cannot assume that first in means first out. Professionally, this matters because once you admit that delivery order is not guaranteed, you have to design around the real invariant instead of the convenient one."
   },
   {
     "slide": 4,
-    "topic": "Core Concepts: Non-FIFO Queues",
-    "text": "Let's dive into our first core concept: Non-FIFO queues. In many distributed systems, the first message in does not always equate to the first message out. This is a significant realization, as it means we need to explicitly clarify this behavior in our systems to build trust, especially under pressure."
+    "topic": "Race to Consumer",
+    "text": "A race to the consumer happens when two events are published in the expected order, but a faster worker completes the later event first. That is a subtle failure mode because the producer did nothing obviously wrong. The problem is that execution timing split the workflow into competing paths. A common mistake is to treat completion order as if it were the same as send order. Once you see that distinction, you start asking what evidence proves which worker did what and when."
   },
   {
     "slide": 5,
-    "topic": "Core Concepts: Race to the Consumer",
-    "text": "Next, we'll discuss the 'Race to the Consumer' phenomenon. Imagine two events are sent in order, A followed by B. If Event B is processed faster, it may complete before Event A. This can lead to unexpected behavior under pressure, which we must clearly address in our systems."
+    "topic": "Hidden Assumption",
+    "text": "This is the hidden assumption that causes so many bugs. First sent does not mean first handled. Handled does not mean committed. Committed does not mean acknowledged. The message here is that time can split delivery from causality. If you do not name that assumption explicitly, your code may pass every sequential test and still fail the moment the system becomes asynchronous."
   },
   {
     "slide": 6,
-    "topic": "Core Concepts: State Regression",
-    "text": "Another vital concept is State Regression. This occurs when an older event arrives after a newer one, possibly overwriting more recent data. To ensure our systems can be trusted, we must handle these situations explicitly."
+    "topic": "Async Boundary",
+    "text": "An asynchronous boundary is the point where work leaves the current thread, process, or transaction and continues later somewhere else. That boundary is where uncertainty enters the design. After the enqueue, another worker may pick up the job later and update state at a different time than the caller expected. This matters because once work crosses that boundary, you need controls that survive delay, retry, and reordering instead of relying on immediate execution."
   },
   {
     "slide": 7,
-    "topic": "Core Concepts: Asynchronous Boundary",
-    "text": "As we continue, let's explore the idea of an Asynchronous Boundary. This is where work transitions to another worker or continues on a different event loop. Clear communication across these boundaries is essential for maintaining system integrity."
+    "topic": "State Regression",
+    "text": "State regression is what happens when an older event arrives late and pushes the system backward. Imagine an episode that is already approved and published, and then a stale update comes in and resets the state as if approval had never happened. That is not just inconvenient; it can break workflows and mislead operators. The invariant at risk is that newer valid state should not be overwritten by stale information."
   },
   {
     "slide": 8,
-    "topic": "Core Concepts: Temporal Coupling",
-    "text": "Lastly, we look at Temporal Coupling. This refers to hidden dependencies on the timing of events—when they arrive, when they are processed, or when they are observed. Making these dependencies clear is vital for our system's trustworthiness."
+    "topic": "Regression Failure",
+    "text": "This is the uncomfortable failure mode. A late event overwrites the current state, and now the workflow looks broken even though the earlier steps really happened. The operator sees stale results, the customer sees missing progress, and the logs may not make the problem obvious unless they include identifiers and timestamps. The reason this stays hidden in the baseline version is that nothing delays the older event enough to let it arrive after the newer one."
   },
   {
     "slide": 9,
-    "topic": "System / Architecture View",
-    "text": "In the architecture view of Out-of-Order Events, we can see how each concept interacts. The central theme here is to ensure that our systems maintain correctness under varying conditions, whether it's timing, load, retries, or complexity."
+    "topic": "Corrective Control",
+    "text": "The first move in a correction is to name the invariant. After that, you can choose a mechanism that protects it: guarded transitions, retry-safe handling, and evidence that captures what really happened. The important trade-off is that the fix is not free. Guards add state modeling, safe retries add storage or coordination, and evidence-first designs add logging work. The point is not to avoid cost, but to spend it where it protects correctness."
   },
   {
     "slide": 10,
-    "topic": "Worked Example",
-    "text": "To solidify our understanding, we will examine worked examples that highlight these concepts effectively. These real-world scenarios will help you see the challenges and strategies involved in handling out-of-order events."
+    "topic": "Guarded State",
+    "text": "A guarded state transition means the system does not accept every event blindly. It first claims the right to act, then checks whether the event is still valid, and only then applies the change. If the event is stale, it gets rejected instead of regressing the workflow. This is safer because it protects the invariant directly. The trade-off is that the state machine becomes more deliberate, which means more design work up front."
   },
   {
     "slide": 11,
-    "topic": "Problem Setup",
-    "text": "In the problem setup, consider two scenarios. In the Podcast domain, the `EpisodeApproved` event is sent, followed by the `EpisodePublished`. If the latter arrives first due to network issues, this can lead to failure. Similarly, in an Order System, if a `CancelOrder` event arrives before a `CreateOrder` event, it can cause confusion and errors."
+    "topic": "Idempotency Flow",
+    "text": "Idempotency is how you make retries and duplicate delivery safe. The worker checks a deduplication store before applying the side effect, and that lets the system distinguish a fresh event from one it has already handled. The protected property is that the external action happens at most once, even if delivery happens more than once. The trade-off is extra storage and more complicated handler logic, but that cost is usually worth it when queues and retries are involved."
   },
   {
     "slide": 12,
-    "topic": "Naive Implementation",
-    "text": "A naive implementation might suggest that operations occur once, sequentially, and with the current state. However, this oversimplifies the complexity inherent in real-world execution, where timing and order are not always guaranteed."
+    "topic": "Evidence",
+    "text": "Evidence is what turns a claim into something a reviewer can defend. You want correlated logs, delivery IDs, trace information, and a reconstruction of the order in which things actually happened. That lets you show not just that the system failed or recovered, but why. This matters because a fix that cannot be demonstrated with repeatable evidence is very hard to trust in an Integrity Packet or in a design review."
   },
   {
     "slide": 13,
-    "topic": "Failure Scenario",
-    "text": "In our failure scenario, overlapping executions or delayed deliveries can cause operations to observe stale state or arrive late. It's crucial to recognize that these issues are not just syntax errors; they're indicative of deeper design mismatches."
+    "topic": "Tradeoffs",
+    "text": "Here the comparison is between simplicity and protection. The baseline is easy, but it hides timing assumptions. Guarded state protects the invariant, but it needs a more careful model. Idempotent design helps with retries and duplicate delivery, but it adds storage or deduplication logic. Observability gives strong proof, but it costs more logging and instrumentation. The key engineering judgment is choosing the smallest control that still protects the property you care about."
   },
   {
     "slide": 14,
-    "topic": "Improved Design Direction",
-    "text": "Toward a more robust design, we should name our invariants and make critical transitions observable. By doing this, we gain clarity and control over the operations our systems perform."
+    "topic": "Practical Move",
+    "text": "Let's turn this into a concrete process. First, write down the invariant. Then build one test that should pass in the normal case and one that forces the failure. Add operation IDs so you can track the object or event across the system. Capture before and after behavior, because the comparison is part of the evidence. Finally, update the Integrity Packet so the assumption, the failure, the fix, and the remaining risk are all explicit."
   },
   {
     "slide": 15,
-    "topic": "Why Improved Design Is Safer",
-    "text": "The improved design not only enhances safety but also shifts our focus from merely hoping that workflows will execute correctly in order, to ensuring that invalid interleavings are effectively rejected or mitigated."
+    "topic": "Assignment Link",
+    "text": "This is where the lecture connects directly to A3. You need to show the object or workflow in your own domain, reproduce the failure, defend the correction, and connect the result to the evidence in your submission. In an oral defense, you should be ready to explain what breaks first, what control you chose, and what trade-off it introduces. The goal is not just to make the system work, but to prove that you understand why it works."
   },
   {
     "slide": 16,
-    "topic": "Failure Modes: Single Happy-Path Pass",
-    "text": "One common failure mode occurs when the system successfully passes only a single happy-path demonstration. This happens because the test often overlooks the timing or ordering pressures that highlight design weaknesses."
-  },
-  {
-    "slide": 17,
-    "topic": "Failure Modes: Tool vs. Property",
-    "text": "Another failure mode is when a student names a tool but not the design property. This reflects a shift in focus from the invariant that must hold true towards the mechanisms themselves."
-  },
-  {
-    "slide": 18,
-    "topic": "Failure Modes: Vague Evidence",
-    "text": "A third symptom is evidence that is too vague to support the claim made. Often, insufficient logging prevents us from tracing failures back to their causes. Stronger evidence is necessary for thorough analysis."
-  },
-  {
-    "slide": 19,
-    "topic": "Failure Modes: Fix Without Comparison",
-    "text": "We also see issues when a fix changes behavior without any comparison to a baseline scenario. If the original failure was not preserved, we cannot meaningfully determine the success of our fixes."
-  },
-  {
-    "slide": 20,
-    "topic": "Trade-Off Analysis",
-    "text": "Now let’s evaluate trade-offs in our design decisions. For example, a simple baseline approach is easy to understand but may hide critical timing assumptions, while a more guarded state transition directly protects the core invariant at the cost of requiring careful state modeling."
-  },
-  {
-    "slide": 21,
-    "topic": "Practical Application",
-    "text": "In practical application, I encourage you to identify the invariant or progress property most relevant to out-of-order events. Write a successful sequential scenario and a pressure scenario that exposes potential failures. Ensure your logs contain enough detail for effective tracing."
-  },
-  {
-    "slide": 22,
-    "topic": "Assignment Integration",
-    "text": "In connection with Assignment A3, you should demonstrate how the concepts learned today apply to your semester project. Show evidence through logs, behaviors, and diagrams to defend your design choices."
-  },
-  {
-    "slide": 23,
-    "topic": "Validation and Interview Questions",
-    "text": "Finally, let's go through some validation questions. These will help you reflect on the invariants relevant to this lecture, uncover hidden assumptions, and think about how to effectively force failures in tests while capturing relevant evidence."
-  },
-  {
-    "slide": 24,
-    "topic": "Summary",
-    "text": "To conclude, we've highlighted how out-of-order events reflect system correctness under realistic conditions. Connecting our concepts to invariants and observable behavior is essential. A robust design is one that is backed by solid evidence."
-  },
-  {
-    "slide": 25,
-    "topic": "Further Reading",
-    "text": "For those interested in diving deeper, I recommend further reading on distributed systems failures, concurrency design trade-offs, and the importance of structured logging and correlation IDs. These resources will enrich your understanding of out-of-order events."
+    "topic": "Discussion",
+    "text": "Let's pause here and use this as a design conversation. In your own system, what breaks first: ordering, state, or evidence? And if you choose one control, what new risk does it introduce? Those are the kinds of questions that separate a quick fix from a defensible engineering decision. If you can answer them clearly, you are ready to explain the design in an interview, a review, or an Integrity Packet."
   }
 ]

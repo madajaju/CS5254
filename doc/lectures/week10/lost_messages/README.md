@@ -1,5 +1,7 @@
 ﻿# Lost Messages
 
+
+## Video: https://youtu.be/piOkotruTD0
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 10

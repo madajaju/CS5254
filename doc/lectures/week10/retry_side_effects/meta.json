@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 10,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "retry_side_effects",
+  "source": "doc/lectures/week10/retry_side_effects/README.md",
+  "videoPath": "doc/lectures/week10/retry_side_effects/.output/output.mp4",
+  "youtube_title": "Retry Side Effects and Idempotency | CS 5254 Week 10",
+  "summary": "A retry tries to finish work that already half-succeeded, creating duplicate files, charges, or resources.",
+  "youtube_description": "A retry tries to finish work that already half-succeeded, creating duplicate files, charges, or resources. The lecture focuses on retry storms, partial success, and side-effect controls that preserve the invariant.\n\nThis CS 5254 Week 10 lecture explores retry side effects and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "retry side effects",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "retry storms",
+    "idempotency",
+    "partial success",
+    "side effects",
+    "resource leaks"
+  ]
+}

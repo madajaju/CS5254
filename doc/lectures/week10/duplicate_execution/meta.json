@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 10,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "duplicate_execution",
+  "source": "doc/lectures/week10/duplicate_execution/README.md",
+  "videoPath": "doc/lectures/week10/duplicate_execution/.output/output.mp4",
+  "youtube_title": "Duplicate Execution in At-Least-Once Delivery | CS 5254 Week 10",
+  "summary": "A worker finishes a job, but its acknowledgement is lost before the queue records success, so the same message runs again.",
+  "youtube_description": "A worker finishes a job, but its acknowledgement is lost before the queue records success, so the same message runs again. The lecture shows why duplicate execution is a design pressure, not a queue bug, and how to defend the invariant with evidence.\n\nThis CS 5254 Week 10 lecture explores duplicate execution and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "duplicate execution",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "at-least-once delivery",
+    "idempotency",
+    "side effects",
+    "message queues",
+    "retries"
+  ]
+}

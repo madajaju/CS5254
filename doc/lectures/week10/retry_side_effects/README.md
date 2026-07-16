@@ -1,5 +1,7 @@
 ﻿# Retry Side Effects
 
+
+## Video: https://youtu.be/f-KnNbKc6bo
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 10
