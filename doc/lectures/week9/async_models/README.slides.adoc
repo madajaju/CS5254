@@ -5,7 +5,7 @@
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -44,7 +44,7 @@ D --> Topic : refine
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -74,7 +74,7 @@ H --> C : may fail under pressure
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -109,7 +109,7 @@ CB --> EL : return control
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -144,7 +144,7 @@ F --> TP : join or chain
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -178,7 +178,7 @@ W --> CH : ack or retry
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -213,7 +213,7 @@ T --> L : resume later
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -245,7 +245,7 @@ B --> X : ship again
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -329,7 +329,7 @@ H -> O : preserve behavior
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -361,7 +361,7 @@ C -> W : review question
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -391,7 +391,7 @@ B --> L : duplicate shipment risk
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black

@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 11,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "idempotency",
+  "source": "doc/lectures/week11/idempotency/README.md",
+  "videoPath": "doc/lectures/week11/idempotency/.output/output.mp4",
+  "youtube_title": "Idempotency for Retry-Safe Systems | CS 5254 Week 11",
+  "summary": "A course project appears correct during a simple demonstration, then hidden assumptions about repeated requests show up under concurrency or operational pressure.",
+  "youtube_description": "A course project appears correct during a simple demonstration, then hidden assumptions about repeated requests show up under concurrency or operational pressure. The lecture shows how idempotent operations and idempotency keys protect invariants under retries and duplicates.\n\nThis CS 5254 Week 11 lecture explores idempotency and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "idempotency",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "idempotency keys",
+    "retries",
+    "duplicate requests",
+    "message queues",
+    "retry-safe systems"
+  ]
+}

@@ -12,7 +12,7 @@
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -46,7 +46,7 @@ T --> D : selects control
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -76,7 +76,7 @@ C -> D : supports reasoning
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -106,7 +106,7 @@ X --> Q : delay or retry
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -136,7 +136,7 @@ W --> K : acknowledge completion
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -166,7 +166,7 @@ P --> N : does not depend on identity
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -196,7 +196,7 @@ R -> O : evidence is needed
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -230,7 +230,7 @@ P --> R : crash before completion
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -260,7 +260,7 @@ B --> Q : process again
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -290,7 +290,7 @@ C -> D : same event runs again
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -320,7 +320,7 @@ I --> R : recovers missed work
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black

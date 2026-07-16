@@ -55,7 +55,7 @@ What kind of system is small enough to implement but rich enough to fail in mean
 
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 
 start

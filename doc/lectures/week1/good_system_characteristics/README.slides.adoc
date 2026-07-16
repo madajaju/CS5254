@@ -69,7 +69,7 @@ Dr. Darren Pulsipher
 [plantuml, target=system-view, format=svg, width=80%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 
 start

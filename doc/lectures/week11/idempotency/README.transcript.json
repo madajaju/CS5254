@@ -2,101 +2,71 @@
   {
     "slide": 1,
     "topic": "Idempotency",
-    "text": "Welcome to today's lecture on Idempotency, part of our course on Object-Oriented Systems Under Concurrency. In this session, we'll explore how idempotency impacts the design and reliability of concurrent systems."
+    "text": "Welcome. Today we are looking at idempotency as a design pressure in concurrent systems. The key idea here is that a solution can look correct in a simple run and still fail once retries, timing, or duplicate delivery enter the picture. We are going to connect the concept to invariants, evidence, and design decisions, because a professional answer is not just \"does it work once?\" but \"does it still protect the important state when the system is stressed?\""
   },
   {
     "slide": 2,
-    "topic": "Introduction",
-    "text": "In this introduction, we will briefly discuss the course context, including the specific week we are in and the topics we've covered so far. Remember, our focus today revolves around the concept of idempotency and its importance in handling concurrency."
+    "topic": "Lecture Frame",
+    "text": "This lecture is organized around a feedback loop: start with the invariant, connect it to evidence, then test it under failure pressure, and finally choose a design response. That loop matters because idempotency is not just a definition to memorize. It is a way to reason about whether repeated input causes repeated damage, or whether the system safely recognizes that it has already processed the request. As we move through the lecture, keep asking what must remain true, what evidence proves it, and what trade-off the fix introduces."
   },
   {
     "slide": 3,
-    "topic": "Learning Objectives",
-    "text": "Today, we aim to achieve several key learning objectives. We will analyze the design pressures that arise from idempotency, diagnose any hidden assumptions in our systems, and evaluate the evidence of failure through logs and traces. Additionally, we’ll discuss designing corrections, all while managing trade-offs."
+    "topic": "Idempotent Operation",
+    "text": "An idempotent operation is one where repeating the same input does not create additional effect. A common mistake is to equate that with \"the code ran without crashing.\" That is too weak. The real question is whether the protected state changes only once, even when retries, queues, or timing differences cause the same action to be attempted again. If the operation is not designed for that pressure, the happy path can look fine while duplicate work quietly accumulates."
   },
   {
     "slide": 4,
-    "topic": "Opening Narrative",
-    "text": "Let’s begin by reflecting on a critical narrative: a system may seem correct during initial testing, but when subjected to concurrency or operational pressure, hidden assumptions may surface. It’s essential for engineers to identify what must be analyzed before we can trust our results."
+    "topic": "Idempotency Key",
+    "text": "A very common mechanism for protecting repeated requests is an idempotency key. Think of it as a unique request identity that the server can use to recognize, \"I have already seen this one.\" In an order or payment flow, that key lets the server either return the earlier result or reject the duplicate rather than charging twice or creating two records. The important design question is not simply whether the key exists, but whether the server stores and checks it in a way that survives retries and partial failure."
   },
   {
     "slide": 5,
-    "topic": "Idempotent Operation",
-    "text": "First, let’s define an idempotent operation. This is an operation that produces no additional effect when it is executed multiple times with the same parameters. Understanding this concept is crucial because it assures us that our systems can withstand pressure without unintended consequences like duplicate work or stale states."
+    "topic": "System Invariant",
+    "text": "At the center of the topic is a system invariant: a condition that must stay true across all valid executions. The key idea here is that the invariant comes first, before the mechanism. You should be able to say what must never happen, such as an external side effect occurring twice for the same request. Once that is clear, then you can choose the mechanism that protects it. Good design makes the invariant visible in the implementation and in the evidence used to validate it."
   },
   {
     "slide": 6,
-    "topic": "Idempotency Key",
-    "text": "Now, let’s discuss the idempotency key. This unique identifier, commonly a UUID, is used by the server to recognize requests and ensure that operations are only performed once. It plays a vital role in maintaining trust in our systems during simultaneous operations."
+    "topic": "Failure Mode",
+    "text": "The failure mode is usually uncomfortable because the system may pass a single demonstration and still be wrong. What you observe is duplicate side effects, stale state, blocked progress, or logs that do not line up with reality. The hidden problem is that the baseline test often assumes one request, one execution, and perfect ordering. Under pressure, that assumption breaks, and the failure is no longer a syntax problem or a small bug; it is evidence that the design model was too optimistic."
   },
   {
     "slide": 7,
-    "topic": "System Invariant",
-    "text": "Next, we need to understand what we mean by system invariant. This refers to conditions that must remain true during all executions. It’s about ensuring we have a reliable framework to trust our system under varying conditions."
+    "topic": "Design Trade-Off",
+    "text": "Any real correction introduces a trade-off. If you add state checks, deduplication, retries, or coordination, you usually improve safety and debuggability, but you pay with more storage, more logic, or more waiting. That is the professional judgment we want students to practice: do not pretend the fix is free. Instead, name the quality you are protecting and the cost you are accepting. A strong design choice is one where the trade-off is deliberate and defensible."
   },
   {
     "slide": 8,
-    "topic": "Design Trade-Off",
-    "text": "Now let’s examine design trade-offs. This is the process of balancing competing qualities like simplicity, safety, and throughput. Recognizing these trade-offs is a key skill, as they dictate how resilient our systems are under pressure."
+    "topic": "Queue Redelivery",
+    "text": "Imagine a queue delivering the same event more than once. Worker A claims the event, performs the side effect, and then crashes before the acknowledgement succeeds. The queue does what many real systems do: it redelivers the message to Worker B. If Worker B checks an idempotency store first, it can detect that the work was already completed and safely skip the duplicate. This matters because delivery count and execution count are not the same thing, and a reliable consumer has to be designed around that fact."
   },
   {
     "slide": 9,
-    "topic": "System Architecture",
-    "text": "Here we have a visual representation of the system architecture relating to idempotency. It shows how the idempotent operation links to the idempotency key, the system invariant, and ultimately to our design decisions and validation evidence."
+    "topic": "Baseline Flow",
+    "text": "Here is the happy-path mental model: checkout publishes an order, the queue delivers it, the worker sends a notification or ships the order, and then the worker acknowledges completion. That sequence looks straightforward, which is exactly why it can hide risk. The hidden assumption is that each step happens once, in order, and without interruption. The moment retries or partial failure appear, that simple story is no longer enough to defend the design."
   },
   {
     "slide": 10,
-    "topic": "Worked Example",
-    "text": "Let’s consider a worked example in a podcast domain. For instance, an unsafe operation like `episode.addAsset(file)` could add multiple assets if retried. In contrast, an idempotent approach, such as `episode.upsertAsset(assetId, file)`, avoids this by updating or adding without duplication."
+    "topic": "Failure Interleaving",
+    "text": "Now make the failure concrete. Worker A ships order 42, then crashes before the acknowledgement reaches the queue. The queue redelivers the same event to Worker B, and B ships the order again. That is the kind of failure that feels slightly embarrassing in production because the original logs may look almost normal, yet the customer sees duplicate fulfillment or duplicate external calls. The important evidence to capture here is the delivery identity, the worker logs, and the side-effect trail, so you can prove the interleaving rather than merely suspect it."
   },
   {
     "slide": 11,
-    "topic": "Failure Scenario",
-    "text": "Under certain conditions like delays or retries, operations can encounter stale states or even execute multiple times. This illustrates a design mismatch that can lead to significant issues within our system."
+    "topic": "Corrected Design",
+    "text": "The protected property in the corrected design is that retried events do not create extra side effects or hide lost work. The mechanism is a combination of idempotency keys, durable completion records, retry-safe handlers, and reconciliation when needed. The trade-off is real: the handler becomes more complex, and you need extra storage or bookkeeping. But that cost is justified because the system is now designed to survive duplicate delivery instead of pretending it will never happen."
   },
   {
     "slide": 12,
-    "topic": "Improved Design Direction",
-    "text": "To mitigate these failure risks, we should implement a clearer design direction. This includes naming our invariants explicitly, making transitions observable, and enforcing correctness controls such as version checks and idempotency keys."
+    "topic": "Evidence to Record",
+    "text": "When you defend an idempotency claim, evidence matters as much as the code. You want operation IDs, entity IDs, state transitions, and an audit trail that lets a reviewer reconstruct what happened. The goal is to prove the relationship between the request and the resulting state change. If the worker succeeds but the acknowledgement is lost, the evidence should still let you show whether the duplicate was blocked, skipped, or replayed. That is the kind of artifact that supports an Integrity Packet defense."
   },
   {
     "slide": 13,
-    "topic": "Why Improved Design Is Safer",
-    "text": "The safer approach ensures that any invalid workflows or interleavings can be effectively rejected or recovered from, thereby enhancing the integrity of our systems."
+    "topic": "Trade-Off Table",
+    "text": "This comparison table is meant to help you choose the right response for the kind of pressure you face. A simple baseline is easiest to build, but it often hides the problem. Guarded state transitions directly protect the invariant, but they require careful modeling. Explicit coordination makes ordering visible, but it can become a bottleneck. Idempotent design handles duplicates and retries well, though it needs keys or deduplication support. The right answer depends on what failure you are trying to contain and what cost you are willing to pay."
   },
   {
     "slide": 14,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "We should be aware of specific symptoms indicating design flaws. For instance, passing a single happy-path test could be misleading while repeated runs and concurrent actors could reveal underlying issues that need addressing."
-  },
-  {
-    "slide": 15,
-    "topic": "Trade-Off Analysis",
-    "text": "In trade-off analysis, we evaluate different strategies, such as simple baselines versus guarded state transitions, weighing their strengths and weaknesses. This process helps us determine the best approach for given design challenges."
-  },
-  {
-    "slide": 16,
-    "topic": "Practical Application",
-    "text": "For practical applications, consider these tasks: identify the most relevant invariant for idempotency, create both a sequential scenario and a pressure scenario, and ensure your logs capture all relevant IDs before conducting tests."
-  },
-  {
-    "slide": 17,
-    "topic": "Assignment Integration",
-    "text": "This lecture's concepts tie into your upcoming assignment, A3. You'll need to connect the ideas of idempotency to your project, demonstrating the relevant workflows and recovery mechanisms specific to your focus area."
-  },
-  {
-    "slide": 18,
-    "topic": "Discussion",
-    "text": "Let’s engage in some discussion. First, what invariant do you think is most relevant in the context of this lecture? Also, consider the hidden assumptions that could impact design validity."
-  },
-  {
-    "slide": 19,
-    "topic": "Summary",
-    "text": "To summarize, idempotency is a critical concept for ensuring that our systems remain reliable under real-world conditions. It is our task as engineers to bridge the gap between theoretical concepts and practical applications backed by evidence."
-  },
-  {
-    "slide": 20,
-    "topic": "Further Reading",
-    "text": "For those interested in delving deeper, I recommend searching for topics that cover idempotency in distributed systems and concurrency design trade-offs, as well as exploring invariants and message queues."
+    "topic": "Integrity Packet",
+    "text": "This final piece ties the whole lecture back to the assignment mindset. Start with the assumption you made, then create a pressure test that can break it, then collect the observed evidence, and finally justify the design choice you made in response. That is the structure of a strong Integrity Packet defense. For A3, you should be able to explain your own workflow or object in this same way: what invariant matters, how you tested it under pressure, what the evidence showed, and what trade-off your design accepts."
   }
 ]

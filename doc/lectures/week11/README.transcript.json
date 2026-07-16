@@ -1,0 +1,77 @@
+[
+  {
+    "slide": 1,
+    "topic": "Week 11",
+    "text": "Welcome to Week 11. This part of the course is about the control problems that make asynchronous systems reliable: idempotency, event ordering, state machines, and debugging. These ideas come up any time requests can be retried, messages can arrive late, or work can be processed more than once."
+  },
+  {
+    "slide": 2,
+    "topic": "Idempotency",
+    "text": "The key idea here is that repeating an operation should not change the outcome after the first successful attempt. That protects us from retries, duplicate deliveries, and partial failures. Imagine a payment request or a job submission: if the client sends it twice, we still want one business action, not two."
+  },
+  {
+    "slide": 3,
+    "topic": "Idempotency",
+    "text": "A simple way to think about idempotency is that the client can send the same request again and the service returns the same result instead of doing the work twice. The important engineering judgment here is not just accepting retries, but making sure the second attempt is recognized as a repeat and handled safely."
+  },
+  {
+    "slide": 4,
+    "topic": "Idempotency",
+    "text": "Here the service checks an idempotency key in storage before doing anything irreversible. If that key has already been used, the API returns the prior result instead of creating a duplicate effect. This matters because the protected property is exactly-once business behavior at the application level, and the trade-off is extra storage and lookup logic to make that guarantee possible."
+  },
+  {
+    "slide": 5,
+    "topic": "Idempotency",
+    "text": "A duplicate delivery can be uncomfortable because everything may look normal from the outside: the handler receives the message again, but the database has to recognize that it has already processed it. The hidden danger in the happy path is that the original success makes the duplicate easy to miss unless you record evidence of the first processing step and verify that no second side effect occurred."
+  },
+  {
+    "slide": 6,
+    "topic": "Event Ordering",
+    "text": "Now we move to event ordering. The key idea is that once messages can arrive out of sequence, the system has to decide what kind of ordering it actually needs. Sometimes global ordering is too expensive, so a common design is to preserve order per partition or per entity instead. The right choice depends on the balance between throughput, latency, and correctness."
+  },
+  {
+    "slide": 7,
+    "topic": "Event Ordering",
+    "text": "In the simplest case, a producer sends events into a queue and the consumer processes them in the same order. That gives a very clean mental model: event one, then event two, then a consistent result. This matters because many bugs only appear when a later message is handled before an earlier one, so order is part of the system contract."
+  },
+  {
+    "slide": 8,
+    "topic": "Event Ordering",
+    "text": "A more scalable approach is to split the stream into partitions so that each entity keeps its own local order. Entity one can go to one partition, entity two to another, and each partition preserves sequence independently. The protected property is local ordering, and the trade-off is that you give up one single total order in exchange for better scale."
+  },
+  {
+    "slide": 9,
+    "topic": "State Machines",
+    "text": "State machines help us model which transitions are valid and which ones are forbidden. The key idea here is that you do not just store a status label, you define the allowed movement between statuses. That prevents illegal actions and makes workflow logic much easier to reason about in payments, approvals, and background jobs."
+  },
+  {
+    "slide": 10,
+    "topic": "State Machines",
+    "text": "This is the basic lifecycle of a job: it starts pending, moves to running, and then either succeeds or fails. Once it reaches a terminal state, it is done. The important lesson is that valid transitions are explicit, so the system can reject impossible changes instead of quietly drifting into an inconsistent state."
+  },
+  {
+    "slide": 11,
+    "topic": "State Machines",
+    "text": "A review workflow is a great example of a state machine in a business process. A draft becomes submitted, then it can either be approved or rejected, and both of those are terminal outcomes. This protects the workflow by making the review path concrete, but it also means every transition has to be deliberately implemented and audited."
+  },
+  {
+    "slide": 12,
+    "topic": "Debugging Async Systems",
+    "text": "Debugging asynchronous systems is hard because the bug is often not in one service, but in the interaction between retries, delays, duplicates, and hidden failures. The key idea here is to start with correlation IDs, logs, metrics, and traces so you can reconstruct what actually happened. Reproducing the message flow is usually more useful than staring at one component in isolation."
+  },
+  {
+    "slide": 13,
+    "topic": "Debugging Async Systems",
+    "text": "A good debugging setup lets you follow one request across the API, the worker, and the trace system. The client sends a request with a correlation ID, the API writes a log entry, the job gets queued, and the worker records completion. That chain of evidence is what lets you explain where latency or failure entered the system."
+  },
+  {
+    "slide": 14,
+    "topic": "Debugging Async Systems",
+    "text": "This failure mode is subtle: a broker delivers late, a consumer retries, and a producer ends up causing duplicate side effects. From the outside, the system may look merely slow, but the real issue is that asynchronous delivery obscures the true sequence of events. The evidence you want to capture is the full path of the message, including retries and acknowledgments, so you can see where the duplication came from."
+  },
+  {
+    "slide": 15,
+    "topic": "Debugging Async Systems",
+    "text": "When something goes wrong, logs, metrics, and traces each answer a different question. Logs help you see sequence, metrics show rate and lag, and traces show the causal path across services. The engineer’s job is to combine those signals to isolate the failure, rather than guessing from a single symptom. That is the professional debugging skill these systems demand."
+  }
+]

@@ -1,5 +1,7 @@
 ﻿# Debugging Async Systems
 
+
+## Video: https://youtu.be/2fcDBOzI-vo
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 11
@@ -58,7 +60,7 @@ A synchronous workflow is moved into background workers to improve responsivenes
 ## System / Architecture View
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 

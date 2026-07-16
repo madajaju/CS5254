@@ -56,7 +56,7 @@ Dr. Darren Pulsipher
 [plantuml, target=workflow, format=svg, width=80%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 
 rectangle "Prompt AI for\ndraft or critique" as Prompt

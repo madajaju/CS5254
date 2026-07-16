@@ -55,7 +55,7 @@ What evidence must a student preserve so another engineer can trust the design a
 
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 
 rectangle "Correctness Claim" as Claim

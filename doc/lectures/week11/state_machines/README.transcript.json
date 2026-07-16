@@ -2,106 +2,86 @@
   {
     "slide": 1,
     "topic": "State Machines",
-    "text": "Welcome, everyone, to our lecture on State Machines. Today, we will explore how state machines play a critical role in understanding system behaviors, especially when those systems operate under concurrent conditions."
+    "text": "Welcome to State Machines. The key idea here is that a system can look correct in a simple demo and still fail once concurrency, retries, or operational pressure are introduced. In this lecture, we are not just naming states for the sake of it. We are learning how to defend a design by identifying the invariant, the valid transitions, the failure mode, and the evidence that proves the system still behaves correctly when things get messy."
   },
   {
     "slide": 2,
-    "topic": "Opening Narrative",
-    "text": "Let’s begin with a scenario. Imagine you have a project that seems to work perfectly during a simple demonstration. However, when we introduce concurrency, hidden assumptions start to surface. Our focus today is on what engineers need to analyze to ensure the system is reliable under these conditions."
+    "topic": "Pressure",
+    "text": "Let's start with the pressure behind the topic. A common mistake is to trust the happy path because it passed once. But concurrency and retries expose hidden assumptions very quickly. The important question is not whether the workflow worked in a single run. It is whether the design still holds when timing changes, when the same request happens twice, or when two actors compete for the same state. That is where the real engineering judgment begins."
   },
   {
     "slide": 3,
-    "topic": "Learning Objectives",
-    "text": "By the end of this lecture, you should be able to analyze the design pressures brought by state machines, diagnose hidden assumptions that emerge before concurrency is introduced, and evaluate failure evidence using tools like logs and traces. Furthermore, you'll learn how to design controls that maintain invariants while addressing necessary trade-offs, and how to defend your approach effectively in the Integrity Packet linked to your assignments."
+    "topic": "States",
+    "text": "A state machine begins with states: the explicit conditions an object can be in, like DRAFT, PROCESSING, READY_TO_PUBLISH, or PUBLISHED. The key idea is that these conditions are not just labels. They define what the system is allowed to do next. If the state is hidden or vague, the code may appear to work while quietly allowing duplicate work, stale updates, or blocked progress. A mature design makes the state visible and testable."
   },
   {
     "slide": 4,
-    "topic": "Core Concepts: States",
-    "text": "Let's delve into our first core concept: States. A state represents one of several possible conditions an object can be in, such as 'DRAFT', 'CLEANING', or 'PUBLISHED'. It's vital to make these states explicit in your design, especially under pressure, to ensure the system can be trusted. Ignoring this can lead to undesirable outcomes like duplicate work or stale state."
+    "topic": "Transitions",
+    "text": "States matter because movement between them matters even more. A transition is the valid path from one condition to another, triggered by a specific event. Imagine you are building a workflow where one action claims work, another finishes processing, and a later step publishes the result. The next state depends on both the current state and the event that arrives. If you do not model those transitions clearly, the system starts making assumptions instead of enforcing rules."
   },
   {
     "slide": 5,
-    "topic": "Core Concepts: Transitions",
-    "text": "Next up are Transitions. These represent the valid paths between states, which are triggered by specific events. It’s crucial to clearly define these transitions to maintain system trust. Similar to states, overlooking transitions can result in significant system failures or errors, like producing duplicate work or getting stuck in an outdated state."
+    "topic": "Guard",
+    "text": "This is where the guard comes in. The key idea here is that illegal events should be rejected instead of being forced through the workflow. If something tries to jump from the wrong state to the wrong outcome, the system should block it. A guard protects the invariant directly. That matters because it turns a vague hope into an explicit rule: only valid transitions are allowed, and invalid ones are treated as failures, not as inconvenient edge cases."
   },
   {
     "slide": 6,
-    "topic": "Core Concepts: Illegal Transition Guard",
-    "text": "Now, let's talk about the Illegal Transition Guard. This is the logic that prevents an event from occurring if it doesn't align with valid transitions from the current state. For example, if you’re in a 'DRAFT' state, you shouldn’t be able to move directly to 'PUBLISHED'. Having this guard in place helps maintain system integrity by rejecting invalid transitions, adding another layer of confidence."
+    "topic": "Determinism",
+    "text": "Determinism means that given the same state and the same event, the next state is predictable. That sounds simple, but it is a big deal for testing and review. A common mistake is to let hidden timing or shared mutable state decide the outcome. When that happens, the same input can produce different results. Here we want repeatable behavior, because repeatable behavior is what lets us build trustworthy tests and defend the design under scrutiny."
   },
   {
     "slide": 7,
-    "topic": "Core Concepts: Deterministic Behavior",
-    "text": "Deterministic Behavior is our next focus. It means that given a specific state and an event, the next state must always be predictable. This predictability is essential to trust how your system behaves under pressure. If this principle is not adhered to, your system might face issues like executing tasks multiple times or getting stuck, risking overall reliability."
+    "topic": "Invariant",
+    "text": "Now we connect state machines to invariants. The key idea is that valid executions preserve a condition that must always remain true, while invalid executions threaten it. Evidence is what defends that claim. It is not enough to say the design should work; you need logs, traces, or repeatable test output that show the invariant surviving pressure. In professional work, the invariant is the property you defend, and the evidence is how you prove it."
   },
   {
     "slide": 8,
-    "topic": "Core Concepts: System Invariant",
-    "text": "Finally, let’s explore System Invariants. An invariant is a condition that must remain true across all valid executions. This means that no matter how the system is being used, certain critical properties must hold true. Similar to our previous concepts, neglecting system invariants can lead to major flaws like duplicate tasks or inconsistent data."
+    "topic": "Read State",
+    "text": "Let’s move into the concurrent example. Two workers read the same episode record and both see DRAFT. At that moment, everything still looks harmless. The danger is that each worker now believes it owns the next step. This is a classic hidden assumption: the read and the update are treated as if they were one atomic act, even though real execution splits them apart. That gap is where the race condition begins."
   },
   {
     "slide": 9,
-    "topic": "System Architecture View",
-    "text": "Here we have a visual representation of our state machine architecture. The flow outlines how states, transitions, and safeguards work together to ensure the system operates smoothly. This architecture emphasizes that maintaining an invariant throughout the operation of a system is crucial, especially when faced with timing and coordination complexities."
+    "topic": "Race Window",
+    "text": "The race window is the uncomfortable part. Worker A checks that the episode is DRAFT, and before A writes anything, Worker B checks the same thing. Then both try to write PROCESSING. That is how duplicate processing begins. The failure is hidden in the baseline because the logic looked correct when run alone. Under pressure, though, the design no longer has a single owner for the transition, and that breaks the invariant."
   },
   {
     "slide": 10,
-    "topic": "Worked Example: Problem Setup",
-    "text": "Let’s look at a practical example to understand these concepts better. In our podcast domain, we define a transition from 'INGESTED' to 'CLEANED' once cleaning is finished. We have a guard that will reject any 'Publish' event while still in 'INGESTED'. Similarly, an order system cannot progress to 'SHIPPED' unless it’s marked as 'PAID'."
+    "topic": "Broken Invariant",
+    "text": "This failure is concrete: the same episode can trigger duplicate side effects, and the final logs may not clearly reveal which worker actually won. That is what makes the problem slightly uncomfortable in practice. You do not just get a wrong answer; you get a confusing system that may leave evidence too weak to reconstruct what happened. The important lesson is to capture thread or worker IDs, entity IDs, states, and timestamps so the failure can be proven, not guessed."
   },
   {
     "slide": 11,
-    "topic": "Worked Example: Naive Implementation",
-    "text": "Now, consider a naive implementation model. This typically involves a series of steps that assume the operation occurs in order, and the current state is accurately read before performing a transition. However, this kind of approach can lead to misunderstandings and incorrect operation handling if concurrent processes interfere."
+    "topic": "Fix",
+    "text": "The correction must protect the invariant, not just make the code look cleaner. Here the protected property is that only one worker may own the transition for a given episode at a time. The mechanism could be an atomic compare-and-set, a versioned update, synchronization, or a single-owner queue. The trade-off is real: you gain safety, but you also give up some parallelism or add more explicit transition logic. The fix is not free, and it should not pretend to be."
   },
   {
     "slide": 12,
-    "topic": "Worked Example: Failure Scenario",
-    "text": "In concurrent execution scenarios, the system can encounter several issues. For instance, an operation might read an outdated state or execute multiple times, leading to deadlocks or other malfunctions. The key takeaway here is that failures emerge from misalignments between designed assumptions and the reality of execution under these conditions."
+    "topic": "Evidence",
+    "text": "Now we connect the fix to evidence. The key idea is that a design is only defensible if the evidence can be used to reconstruct the decision. Logs, traces, and review artifacts should let someone see the claim, follow the transition, and understand why the losing worker was rejected. That is exactly the kind of material that belongs in an Integrity Packet: the invariant, the bad interleaving, the protected transition, and the proof that the system behaved correctly under pressure."
   },
   {
     "slide": 13,
-    "topic": "Worked Example: Improved Design",
-    "text": "To improve our design, it's crucial to name the invariant clearly. By making transitions observable and implementing controls like version checks or idempotency keys, we can enhance the reliability of our system. Adding these mechanisms helps to prevent issues arising from concurrent operations, thus maintaining integrity."
+    "topic": "Failure Scenario",
+    "text": "Let’s pause here and make the failure explicit. Two workers read the same state, both attempt the same transition, and duplicate work starts. The hidden part is that the baseline looked fine because the check and the update were mentally treated as one step. In reality, they were separated by time. The pressure scenario is what exposes that gap, and the evidence should make the overlap visible instead of leaving it buried in a vague success message."
   },
   {
     "slide": 14,
-    "topic": "Worked Example: Safer Design",
-    "text": "An improved design ensures that invalid transitions or interleavings are effectively rejected or contained. This shift emphasizes a proactive stance by providing substantive evidence rather than merely hoping that the system executes in the correct order. This is a significant step towards robust system architecture."
+    "topic": "Response",
+    "text": "A good response has three pieces. First, guard the transition. Second, use an atomic update or single-owner mechanism so the state cannot be claimed twice. Third, keep IDs and states in the logs so the outcome can be reviewed later. The trade-off is that this introduces more explicit control and often less concurrency around the protected entity. But that is the point: we are choosing correctness under pressure over a false sense of simplicity."
   },
   {
     "slide": 15,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "Let's discuss some common failure modes. One symptom is when the system passes a single happy-path test, revealing a design weakness. By employing stress tests or failure-focused tests, we can better target these weaknesses and improve the system. Each identified symptom has its own detection and correction strategy."
+    "topic": "Tradeoffs",
+    "text": "This table is really a decision guide. The simple baseline is easy to build, but it hides timing assumptions. A guarded transition protects the invariant directly, but it requires careful modeling. Explicit coordination makes ordering visible, though it can create bottlenecks. Observability-first design gives strong evidence for review, but it adds instrumentation work. A mature engineer chooses based on the invariant and the failure mode, not just on convenience."
   },
   {
     "slide": 16,
-    "topic": "Trade-Off Analysis",
-    "text": "We also need to consider trade-offs in our designs. Different strategies come with their own strengths and weaknesses. For instance, a simple baseline might be easy to implement, but it often hides crucial timing assumptions. Choosing the right approach depends on the specific requirements and contexts of your system."
+    "topic": "Assignment",
+    "text": "For the assignment, you need to show your own object, your own failure, your fix, and your evidence. That means you should connect this lecture to your project domain, not just repeat the class example. The expectation is that you can demonstrate the relevant workflow, force a pressure scenario, and then defend the correction with runnable evidence. In other words, you should be able to explain both the design and the proof in your oral defense."
   },
   {
     "slide": 17,
-    "topic": "Practical Application",
-    "text": "Looking ahead, you should practice employing these concepts practically. Identify the most relevant invariant in your system, write a sequential scenario expected to succeed, and create a pressure scenario that could expose potential failures. It's essential to integrate robust logging before performing tests and to systematically capture evidence of changes."
-  },
-  {
-    "slide": 18,
-    "topic": "Assignment Integration",
-    "text": "As you connect the lecture concepts to your assignments, particularly A3, focus on illustrating relevant objects, workflows, or mechanisms in your domain. Demonstrating mastery involves providing concrete evidence and defending your design decisions in the Integrity Packet."
-  },
-  {
-    "slide": 19,
-    "topic": "Validation Questions",
-    "text": "As we wrap up, I encourage you to reflect on some validation questions. For instance, what invariant stands out as most relevant to this lecture? What hidden assumptions might make your design appear correct at a glance? Think about how you could force a failure in a repeatable test and what evidence would substantiate your claims."
-  },
-  {
-    "slide": 20,
-    "topic": "Summary",
-    "text": "In summary, understanding state machines is crucial for reasoning about system correctness under realistic execution scenarios. Our goal as engineers is to connect theoretical concepts to invariants, observable behaviors, and defensible trade-offs. Only when our designs are explainable, stress-tested, and validated with solid evidence can we consider them mature."
-  },
-  {
-    "slide": 21,
-    "topic": "Further Reading",
-    "text": "For those interested in delving deeper, I recommend exploring some search phrases such as 'State Machines distributed systems failure mode' and 'State Machines concurrency design tradeoffs'. Additionally, consider looking into topics like structured logging and invariants in stateful object-oriented systems to enhance your understanding."
+    "topic": "Discussion",
+    "text": "Let's end with a practical discussion question. Which invariant in your project is easiest to miss, and what failure would you force in order to defend the design? A strong answer names the condition that must remain true, explains how it could fail under pressure, and describes the evidence you would collect to prove the fix works. That is the habit we want: identify the invariant first, then choose the mechanism and the proof."
   }
 ]

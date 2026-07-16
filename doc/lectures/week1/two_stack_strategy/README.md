@@ -55,7 +55,7 @@ How can two stacks be used as a comparison tool rather than a source of confusio
 
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 
 rectangle "Shared Domain Model" as Model

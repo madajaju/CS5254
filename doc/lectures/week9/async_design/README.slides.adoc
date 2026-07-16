@@ -17,7 +17,7 @@
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -64,7 +64,7 @@ E --> W : refine design
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -102,7 +102,7 @@ P --> D : stale state or repeat action
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -142,7 +142,7 @@ O --> C : finish
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -180,7 +180,7 @@ I --> S : deduplicate
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -232,7 +232,7 @@ T --> E : reconstruct order
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -273,7 +273,7 @@ W --> N : notify
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -313,7 +313,7 @@ C -> A : ack succeeds
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -351,7 +351,7 @@ B --> D : repeat work
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black

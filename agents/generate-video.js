@@ -116,27 +116,28 @@ function discoverLectureDirectories(target) {
         die(`Target directory not found: ${resolvedTarget}`);
     }
 
-    if (isLectureDirectory(resolvedTarget)) {
-        return [resolvedTarget];
-    }
-
     const lecturesRoot = fs.existsSync(path.join(resolvedTarget, 'lectures'))
         ? path.join(resolvedTarget, 'lectures')
         : resolvedTarget;
 
-    const directLectureDirs = childDirectories(lecturesRoot).filter(isLectureDirectory);
-    if (directLectureDirs.length > 0) {
-        return directLectureDirs;
-    }
-
-    const weekLectureDirs = childDirectories(lecturesRoot)
-        .flatMap(weekDir => childDirectories(weekDir).filter(isLectureDirectory));
-
-    if (weekLectureDirs.length === 0) {
+    const lectureDirs = collectLectureDirectories(lecturesRoot);
+    if (lectureDirs.length === 0) {
         die(`No lecture directories found under: ${resolvedTarget}`);
     }
 
-    return weekLectureDirs;
+    return lectureDirs;
+}
+
+function collectLectureDirectories(directory, results = new Set()) {
+    if (isLectureDirectory(directory)) {
+        results.add(directory);
+    }
+
+    for (const childDir of childDirectories(directory)) {
+        collectLectureDirectories(childDir, results);
+    }
+
+    return Array.from(results).sort((a, b) => a.localeCompare(b));
 }
 
 function ensureRevealHtml(lectureDirectory) {

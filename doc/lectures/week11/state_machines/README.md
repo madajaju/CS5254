@@ -1,5 +1,7 @@
 ﻿# State Machines
 
+
+## Video: https://youtu.be/xMJGcmFjOcE
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 11
@@ -58,7 +60,7 @@ A course project appears correct during a simple demonstration. Once concurrency
 ## System / Architecture View
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 

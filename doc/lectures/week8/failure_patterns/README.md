@@ -60,7 +60,7 @@ A student asks AI for a coordination design and receives confident code with a m
 ## System / Architecture View
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 

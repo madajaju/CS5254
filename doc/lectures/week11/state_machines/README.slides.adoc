@@ -1,5 +1,4 @@
 = State Machines
-Dr. Darren Pulsipher
 :revealjs_theme: white
 :revealjs_slideNumber: true
 :revealjs_hash: true
@@ -11,187 +10,387 @@ Dr. Darren Pulsipher
 :icons: font
 :stem:
 
-== Opening Narrative
+== Pressure
 
-* A project appears correct during a simple demo.
-* Concurrency introduces hidden assumptions.
-* What must the engineer analyze?
-
-== Learning Objectives
-
-* Analyze design pressure from state machines.
-* Diagnose hidden assumptions pre-concurrency.
-* Evaluate failure evidence with logs and traces.
-* Design controls preserving invariants, addressing trade-offs.
-* Defend approach in the Integrity Packet linked to A3.
-
-== Core Concepts: States
-
-* Definition: Possible conditions (e.g., `DRAFT`, `CLEANING`).
-* Importance: Must be explicit to trust under pressure.
-* Mechanisms: Affected by state, timing, behavior, coordination.
-* Failure: Ignoring leads to duplicate work, stale state.
-* Design: Expose invariant, log transitions, repeat tests.
-
-== Core Concepts: Transitions
-
-* Definition: Valid paths between states.
-* Importance: Must be explicit for system trust.
-* Mechanisms: Affected by state, timing, behavior, coordination.
-* Failure: Ignoring leads to duplicate work, stale state.
-* Design: Expose invariant, log transitions, repeat tests.
-
-== Core Concepts: Illegal Transition Guard
-
-* Definition: Rejects invalid transitions from current state.
-* Importance: Must be explicit for trust.
-* Mechanisms: Affected by state, timing, behavior, coordination.
-* Failure: Ignoring leads to duplicate work, stale state.
-* Design: Expose invariant, log transitions, repeat tests.
-
-== Core Concepts: Deterministic Behavior
-
-* Definition: Predictable next state from current state and event.
-* Importance: Must be explicit to trust.
-* Mechanisms: Affected by state, timing, behavior, coordination.
-* Failure: Ignoring leads to duplicate work, stale state.
-* Design: Expose invariant, log transitions, repeat tests.
-
-== Core Concepts: System Invariant
-
-* Definition: Condition must remain true in valid executions.
-* Importance: Must be explicit for trust.
-* Mechanisms: Affected by state, timing, behavior, coordination.
-* Failure: Ignoring leads to duplicate work, stale state.
-* Design: Expose invariant, log transitions, repeat tests.
-
-== System Architecture View
-
-[plantuml, target=system_architecture, format=svg, width=80%]
+[plantuml, target=pressure, format=svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
 skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 left to right direction
-
-rectangle "State Machines" as Topic
-rectangle "States" as A
-rectangle "Transitions" as B
-rectangle "Illegal Transition Guard" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
-
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+rectangle "Happy path" as H
+rectangle "Concurrency" as C
+rectangle "Retries" as R
+rectangle "Hidden assumption" as X
+H --> X : passes demo
+C --> X : exposes timing
+R --> X : exposes duplicates
 @enduml
 ----
 
-== Worked Example: Problem Setup
+== States
 
-* **Podcast Example**:
-  * Transition: `INGESTED` + `CleanFinished` -> `CLEANED`.
-  * Guard: Reject `Publish` event if `INGESTED`.
-* **Order System**:
-  * Can't `SHIPPED` unless in `PAID` state.
+[plantuml, target=states, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
 
-== Worked Example: Naive Implementation
+[*] -> DRAFT
+DRAFT --> PROCESSING
+PROCESSING -> READY_TO_PUBLISH
+READY_TO_PUBLISH --> PUBLISHED
+PROCESSING --> FAILED
+@enduml
+----
 
-* Operation sequence:
-  * Actor performs operation.
-  * System reads current state.
-  * System applies transition.
-  * System emits side effect.
+== Transitions
 
-== Worked Example: Failure Scenario
+[plantuml, target=transitions, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Current state" as S
+rectangle "Event" as E
+rectangle "Next state" as N
+S --> N : valid transition
+E --> N : triggers
+S --> E : observed by logic
+@enduml
+----
 
-* Concurrent operations can:
-  * Observe stale state.
-  * Execute twice or arrive late.
-  * Leave the workflow stuck.
-* Failure reveals mismatch between design assumption and execution.
+== Guard
 
-== Worked Example: Improved Design
+[plantuml, target=guard, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "State" as S
+rectangle "Guard" as G
+rectangle "Illegal event" as I
+rectangle "Reject" as R
+S --> G
+I --> G
+G --> R : block
+@enduml
+----
 
-* Name the invariant.
-* Make transitions observable.
-* Add controls:
-  * Version checks
-  * Idempotency keys
-  * Coordination, retries, compensation
+== Determinism
 
-== Worked Example: Safer Design
+[plantuml, target=determinism, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "State" as S
+rectangle "Event" as E
+rectangle "Predictable next state" as N
+rectangle "Repeatable test" as T
+S --> N : deterministic
+E --> N : one result
+T --> N : proves it
+@enduml
+----
 
-* Improved design:
-  * Proves invalid interleavings are rejected or contained.
-  * Changes focus from hoping execution order to solid evidence.
+== Invariant
 
-== Failure Modes and Anti-Patterns
+[plantuml, target=invariant, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Invariant" as I
+rectangle "Valid execution" as V
+rectangle "Invalid execution" as X
+rectangle "Evidence" as E
+V --> I : preserves
+X --> I : violates
+E --> I : defends
+@enduml
+----
 
-* **Symptom**: System passes happy-path demo.
-  * **Detection**: Use stress tests.
-  * **Correction**: Add failure-focused tests targeting the invariant.
+== Read State
 
-* **Symptom**: Tool named, not property.
-  * **Detection**: Ask which invariant is protected.
-  * **Correction**: State the invariant first.
+[plantuml, target=readstate, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+autonumber
+participant "Worker A" as A
+participant "Worker B" as B
+database "Episode" as E
+A --> E : read status
+B --> E : read status
+E --> A : DRAFT
+E --> B : DRAFT
+@enduml
+----
 
-* **Symptom**: Vague evidence.
-  * **Detection**: Reviewer can't reconstruct failures.
-  * **Correction**: Capture structured evidence.
+== Race Window
 
-* **Symptom**: Fix changes behavior without baseline.
-  * **Detection**: No before/after runs.
-  * **Correction**: Preserve failing test.
+[plantuml, target=racewindow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+autonumber
+participant "Worker A" as A
+participant "Worker B" as B
+database "Episode" as E
+A --> E : check DRAFT
+B --> E : check DRAFT
+A --> E : write PROCESSING
+B --> E : write PROCESSING
+@enduml
+----
 
-== Trade-Off Analysis
+== Broken Invariant
 
-[cols="1,1,1,1", options="header"]
+[plantuml, target=broken, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Same episode" as E
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Duplicate side effects" as D
+A --> E : start
+B --> E : start
+A --> D
+B --> D
+@enduml
+----
+
+== Fix
+
+[plantuml, target=fix, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Claim" as C
+rectangle "Guard" as G
+rectangle "Atomic update" as A
+rectangle "Log" as L
+C --> G : validate
+G -> A : allow one owner
+A --> L : record transition
+@enduml
+----
+
+== Evidence
+
+[plantuml, target=evidence, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Claim" as C
+rectangle "Logs" as L
+rectangle "Trace" as T
+rectangle "Review" as R
+C -> L : prove
+L --> T : reconstruct
+T -> R : defend
+@enduml
+----
+
+== Failure Scenario
+
+[.column]
+--
+* Two workers read the same state
+* Both attempt the same transition
+* Duplicate work starts
+--
+
+[.column]
+--
+* Winner is hidden in logs
+* Pressure: overlapping execution
+* Root cause: check and update split apart
+--
+
+== Response
+
+[.column]
+--
+* Guard the transition
+* Use an atomic update or single owner
+* Keep IDs and states in logs
+--
+
+[.column]
+--
+* Re-run the same pressure test
+* Reject stale or competing transitions
+* Preserve evidence for review
+--
+
+== Tradeoffs
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
-| Guarded transition | Protects core invariant | Requires careful modeling | Status changes
-| Explicit coordination | Makes dependencies visible | Can cause deadlocks | Multi-object workflows
-| Idempotent design | Handles duplicates | Requires control | Queues, retries
-| Observability-first | Strong evidence | Adds instrumentation | Failure proof
+| Approach | Strength | Weakness | Use
+| Baseline | Simple | Hides timing | First version
+| Guarded | Protects invariant | Needs modeling | State changes
+| Coordinated | Visible order | Bottlenecks | Multi-object flow
+| Observed | Strong evidence | Adds logging | Design defense
 |===
 
-== Practical Application
+== Assignment
 
-* Identify the invariant relevant to state machines.
-* Write one sequential scenario.
-* Write one pressure scenario exposing failure.
-* Add operation IDs to logs for pressure test.
-* Capture before/after evidence.
-* Update Integrity Packet with assumptions and risks.
+[.column]
+--
+* Show your object
+* Show your failure
+--
 
-== Assignment Integration
+[.column]
+--
+* Show your fix
+* Show your evidence
+--
 
-* Connect lecture concepts to [A3](../../../assignments/A3/index.md).
-* Show relevant object, workflow, event, or failure mechanism.
-* Mastery demonstrated with evidence and Integrity Packet defense.
+== Discussion
 
-== Validation Questions
+[.column]
+--
+* Which invariant is easiest to miss in your project?
+--
 
-1. What invariant is relevant here?
-2. What hidden assumption appears correct?
-3. How to force failure in tests?
-4. What evidence proves failure?
-5. Which design mechanism first, and what trade-off?
-6. How would it appear differently in two stacks?
-7. What to record in Integrity Packet?
-
-== Summary
-
-* State machines enable reasoning about system correctness.
-* Connect to invariants, observable behavior, defensible trade-offs.
-* Design maturity requires explainability and stress testing.
-
-== Further Reading
-
-* Search phrase: "State Machines distributed systems failure mode"
-* Search phrase: "State Machines concurrency design tradeoffs"
-* Topics: structured logging, invariants, idempotency, message queues.
+[.column]
+--
+* What failure would you force to defend the design?
+--

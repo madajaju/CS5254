@@ -1,163 +1,320 @@
 = Idempotency
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Introduction
+== Lecture Frame
+[plantuml,width=100%]
+....
+@startuml
 
-* Course: CS 5254b - Object-Oriented Systems Under Concurrency
-* Week: 11
-* Duration: 15 minutes
-* Prior Topics: Object state, concurrency pressure, Integrity Packet reasoning
-
-== Learning Objectives
-
-* Analyze design pressure from idempotency
-* Diagnose hidden system assumptions
-* Evaluate failure evidence using logs, traces
-* Design corrections while managing trade-offs
-* Defend approaches in Integrity Packet
-
-== Opening Narrative
-
-A system appears correct until exposed to concurrency or pressure. What assumptions must engineers analyze before trusting results?
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+rectangle "Idempotency" as Topic
+rectangle "Invariant" as I
+rectangle "Evidence" as E
+rectangle "Failure Pressure" as F
+rectangle "Design Response" as D
+Topic -> I
+I --> E
+E -> F
+F -> D
+D -> I : refine
+@enduml
+....
 
 == Idempotent Operation
-
-* Definition: No additional effect when called multiple times with same parameters
-* Importance: Key for trusting systems under pressure
-* Mechanism: Through state, timing, worker behavior
-* Failure: Causes duplicate work, stale state
-* Design: Expose invariant, log transitions, validate with tests
+* Same input, no additional effect on repeat
+* The real question is whether the state change is protected
+* Retries, queues, and timing make the assumption visible
+* Happy-path success can hide duplicate work
+* Good design makes the critical transition explicit
 
 == Idempotency Key
+[plantuml,width=100%]
+....
+@startuml
 
-* Definition: Unique identifier for request recognition
-* Importance: Key for trusting systems under pressure
-* Mechanism: Through state, timing, worker behavior
-* Failure: Causes duplicate work, stale state
-* Design: Expose invariant, log transitions, validate with tests
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+rectangle "Client Request" as C
+rectangle "Idempotency Key" as K
+rectangle "Server Record" as S
+rectangle "Duplicate Request" as D
+C --> K
+K --> S
+D --> K : same key
+S --> C : allow or reject
+@enduml
+....
 
 == System Invariant
+[plantuml,width=100%]
+....
+@startuml
 
-* Definition: Condition that remains true across executions
-* Importance: Key for trusting systems under pressure
-* Mechanism: Through state, timing, worker behavior
-* Failure: Causes duplicate work, stale state
-* Design: Expose invariant, log transitions, validate with tests
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+rectangle "Valid Execution" as V
+rectangle "Invariant Holds" as H
+rectangle "State Change" as S
+rectangle "Observable Evidence" as E
+V -> H
+H -> S
+S --> E
+E -> H : verify
+@enduml
+....
+
+== Failure Mode
+[plantuml,width=100%]
+....
+@startuml
+
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+rectangle "One Request" as O
+rectangle "Retry" as R
+rectangle "Duplicate Side Effect" as D
+rectangle "Misleading Logs" as L
+O -> R
+R -> D
+D --> L
+L --> O : hides cause
+@enduml
+....
 
 == Design Trade-Off
-
-* Definition: Choice between competing qualities
-* Importance: Key for trusting systems under pressure
-* Mechanism: Through state, timing, worker behavior
-* Failure: Causes duplicate work, stale state
-* Design: Expose invariant, log transitions, validate with tests
-
-== System Architecture
-
-[plantuml, target=architecture, format=svg, width=80%]
-----
+[plantuml,width=100%]
+....
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
-left to right direction
-
-rectangle "Idempotency" as Topic
-rectangle "Idempotent Operation" as A
-rectangle "Idempotency Key" as B
-rectangle "System Invariant" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
-
-Topic --> A
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+rectangle "Simplicity" as A
+rectangle "Safety" as B
+rectangle "Throughput" as C
+rectangle "Debuggability" as D
 A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+B -> C
+C -> D
+D --> A : choose
 @enduml
-----
+....
 
-== Worked Example
+== Queue Redelivery
+[plantuml,width=100%]
+....
+@startuml
 
-* Podcast Domain:
-  * Unsafe: `episode.addAsset(file)` (Multiple assets if retried)
-  * Idempotent: `episode.upsertAsset(assetId, file)` (Avoids duplicates)
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+participant "Queue" as Q
+participant "Worker A" as A
+participant "Worker B" as B
+participant "Idempotency Store" as S
+Q --> A : deliver event-9
+A -> S : claim key
+A -> Q : ack lost
+Q -> B : redeliver event-9
+B -> S : check key
+B -> Q : skip duplicate
+@enduml
+....
 
-* Order System:
-  * `client_request_id` prevents double-charging.
+== Baseline Flow
+[plantuml,width=100%]
+....
+@startuml
 
-== Failure Scenario
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+rectangle "Checkout" as C
+rectangle "Queue" as Q
+rectangle "Worker" as W
+rectangle "Notification" as N
+C -> Q : publish order-42
+Q --> W : deliver event-9
+W -> N : send once
+W --> Q : ack
+@enduml
+....
 
-Under delays, retries, or failures, operations can observe stale state or execute twice. This reveals a design mismatch.
+== Failure Interleaving
+[plantuml,width=100%]
+....
+@startuml
 
-== Improved Design Direction
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+participant "Worker A" as A
+participant "Worker B" as B
+participant "Queue" as Q
+participant "External Service" as E
+A --> E : ship order-42
+A --> Q : crash before ack
+Q --> B : redeliver event-9
+B --> E : ship order-42 again
+@enduml
+....
 
-* Name the invariant
-* Make transitions observable
-* Implement correctness controls: version checks, idempotency keys
+== Corrected Design
+[plantuml,width=100%]
+....
+@startuml
 
-== Why Improved Design Is Safer
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+rectangle "Request" as R
+rectangle "Key Check" as K
+rectangle "State Guard" as G
+rectangle "Side Effect" as S
+R -> K
+K --> G
+G -> S
+S -> K : record completion
+@enduml
+....
 
-It ensures invalid interleavings are rejected or recovered with evidence.
+== Evidence to Record
+[plantuml,width=100%]
+....
+@startuml
 
-== Failure Modes and Anti-Patterns
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+rectangle "Operation ID" as O
+rectangle "Entity ID" as E
+rectangle "State Transition" as T
+rectangle "Audit Trail" as A
+O --> T
+E --> T
+T --> A
+A --> O : prove
+@enduml
+....
 
-* Symptom: Single happy-path test passes
-  * Detection: Use repeated runs, concurrent actors
-  * Correction: Add targeted failure tests
-
-* Symptom: Names a tool, not a design property
-  * Detection: Ask for the invariant
-  * Correction: Write invariant first
-
-== Trade-Off Analysis
-
-[cols="1,1,1,1", options="header"]
+== Trade-Off Table
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | First implementation
-| Guarded state | Protects invariant | Requires state modeling | Status changes
-| Explicit coordination | Dependencies visible | May introduce deadlocks | Multi-object workflows
-| Idempotent design | Handles duplicates | Requires keys | Queues, retries
-| Observability-first | Strong evidence | Adds instrumentation | Failure proofing
+|Approach |Strength |Weakness |Use When
+|Simple baseline |Easy to explain |Hides pressure assumptions |First pass
+|Guarded state transition |Protects invariant |Needs careful modeling |Workflow steps
+|Explicit coordination |Makes dependencies visible |Can bottleneck |Multi-object ordering
+|Idempotent design |Handles duplicates |Needs keys or deduplication |Retries and queues
 |===
 
-== Practical Application
+== Integrity Packet
+[plantuml,width=100%]
+....
+@startuml
 
-* Identify relevant invariant
-* Write sequential and pressure scenarios
-* Capture IDs in logs
-* Document before/after evidence
-* Update Integrity Packet accordingly
-
-== Assignment Integration
-
-This lecture supports [A3](../../../assignments/A3/index.md). Show relevant object, workflow, and recovery mechanisms.
-
-== Discussion
-
-1. What invariant is most relevant here?
-2. Which hidden assumption affects design validity?
-3. How to force failure in tests?
-4. What evidence supports the failure?
-
-== Summary
-
-Idempotency is crucial for reasoning about system correctness under realistic execution. Connect concepts to invariants and evidence.
-
-== Further Reading
-
-* "Idempotency distributed systems failure mode"
-* "Idempotency concurrency design tradeoffs"
-* Invariants in stateful object-oriented systems
-* Message queues and event ordering
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+rectangle "Assumption" as A
+rectangle "Pressure Test" as P
+rectangle "Observed Evidence" as E
+rectangle "Design Choice" as D
+A -> P
+P -> E
+E --> D
+D -> A : defend
+@enduml
+....

@@ -63,7 +63,7 @@ Dr. Darren Pulsipher
 [plantuml, target=architecture, format=svg, width=80%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 
 rectangle "Shared Domain Model" as Model

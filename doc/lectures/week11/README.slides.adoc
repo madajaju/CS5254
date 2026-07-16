@@ -1,0 +1,337 @@
+= Week 11
+
+== Idempotency
+
+[.text]
+* Idempotency means repeating an operation does not change the result after the first success.
+* It helps protect against retries, duplicates, and partial failures.
+* Common examples include payment requests, job processing, and message consumption.
+
+== Idempotency
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam BoxBorderColor #123456
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+Alice -> Bob : first request
+Alice --> Bob : retry same request
+Bob --> Alice : same outcome
+@enduml
+----
+
+== Idempotency
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor white
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam BoxBorderColor #123456
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor white
+actor Client
+box "Service" #555
+participant API
+participant Store
+end box
+Client --> API : submit request
+API --> Store : check idempotency key
+Store --> API : key already used
+API --> Client : return prior result
+@enduml
+----
+
+== Idempotency
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam BoxBorderColor #123456
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+actor Retry
+participant Handler
+participant Database
+Retry --> Handler : duplicate delivery
+Handler --> Database : detect existing record
+Database --> Handler : already processed
+Handler --> Retry : no duplicate side effect
+@enduml
+----
+
+== Event Ordering
+
+[.text]
+* Event ordering determines how a system handles messages that arrive out of sequence.
+* Ordering can be enforced globally, per partition, or per entity.
+* The right strategy depends on throughput, latency, and correctness needs.
+
+== Event Ordering
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam BoxBorderColor #123456
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+participant Producer
+participant Queue
+participant Consumer
+Producer --> Queue : event 1
+Producer --> Queue : event 2
+Queue --> Consumer : deliver in order
+Consumer --> Producer : consistent processing
+@enduml
+----
+
+== Event Ordering
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam BoxBorderColor #123456
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+rectangle Stream
+rectangle "Partition A"
+rectangle "Partition B"
+Stream --> "Partition A" : entity 1 events
+Stream --> "Partition B" : entity 2 events
+"Partition A" --> "Partition A" : preserve local order
+"Partition B" --> "Partition B" : preserve local order
+@enduml
+----
+
+== State Machines
+
+[.text]
+* State machines model valid transitions between states.
+* They prevent illegal actions by making transitions explicit.
+* They are useful for workflows, payments, approvals, and async jobs.
+
+== State Machines
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam BoxBorderColor #123456
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+[*] --> Pending
+Pending -> Running : start
+Running -> Succeeded : complete
+Running -> Failed : error
+Succeeded --> [*]
+Failed --> [*]
+@enduml
+----
+
+== State Machines
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam BoxBorderColor #123456
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+[*] --> Draft
+Draft -> Submitted : user action
+Submitted --> Approved : review passes
+Submitted --> Rejected : review fails
+Approved --> [*]
+Rejected --> [*]
+@enduml
+----
+
+== Debugging Async Systems
+
+[.text]
+* Async bugs often come from retries, duplicates, lag, and hidden failures.
+* Good debugging starts with correlation IDs, logs, metrics, and traces.
+* Reproducing message flow is often more useful than inspecting one service alone.
+
+== Debugging Async Systems
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam BoxBorderColor #123456
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+participant Client
+participant API
+participant Worker
+participant Trace
+Client -> API : request with correlation id
+API --> Trace : write log entry
+API --> Worker : enqueue job
+Worker --> Trace : write completion
+@enduml
+----
+
+== Debugging Async Systems
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam BoxBorderColor #123456
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+participant Producer
+participant Broker
+participant Consumer
+Producer --> Broker : send event
+Broker --> Consumer : deliver late
+Consumer --> Broker : ack after retry
+Producer --> Consumer : duplicate side effect
+@enduml
+----
+
+== Debugging Async Systems
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+skinparam BoxBorderColor #123456
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+participant Logs
+participant Metrics
+participant Traces
+participant Engineer
+Logs --> Engineer : show sequence
+Metrics --> Engineer : show rate and lag
+Traces --> Engineer : show causal path
+Engineer --> Engineer : isolate failure
+@enduml
+----

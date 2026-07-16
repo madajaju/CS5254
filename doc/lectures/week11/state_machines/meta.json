@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 11,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "state_machines",
+  "source": "doc/lectures/week11/state_machines/README.md",
+  "videoPath": "doc/lectures/week11/state_machines/.output/output.mp4",
+  "youtube_title": "State Machines for Safe Transitions | CS 5254 Week 11",
+  "summary": "A course project appears correct during a simple demonstration, then a hidden assumption about valid states and transitions breaks under pressure.",
+  "youtube_description": "A course project appears correct during a simple demonstration, then a hidden assumption about valid states and transitions breaks under pressure. The lecture shows how explicit states, guarded transitions, and deterministic behavior protect invariants.\n\nThis CS 5254 Week 11 lecture explores state machines and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "state machines",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "states",
+    "transitions",
+    "transition guards",
+    "deterministic behavior",
+    "workflow design"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 11,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "debugging_async",
+  "source": "doc/lectures/week11/debugging_async/README.md",
+  "videoPath": "doc/lectures/week11/debugging_async/.output/output.mp4",
+  "youtube_title": "Debugging Async Systems with Evidence | CS 5254 Week 11",
+  "summary": "A synchronous workflow moves into background workers, so correctness now depends on events, retries, ordering, and observability across time.",
+  "youtube_description": "A synchronous workflow moves into background workers, so correctness now depends on events, retries, ordering, and observability across time. The lecture focuses on correlation IDs, state snapshots, and traces as the basis for debugging async behavior.\n\nThis CS 5254 Week 11 lecture explores debugging async systems and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "debugging async systems",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "correlation ids",
+    "tracing",
+    "observability",
+    "state snapshots",
+    "async boundaries"
+  ]
+}

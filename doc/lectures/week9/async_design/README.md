@@ -60,7 +60,7 @@ A synchronous workflow is moved into background workers to improve responsivenes
 ## System / Architecture View
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 

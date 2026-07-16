@@ -1,196 +1,289 @@
 = Debugging Async Systems
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Overview
-
-* Course: CS 5254b - Object-Oriented Systems Under Concurrency
-* Week: 11
-* Duration: 15 minutes
-* Prerequisites: Prior lectures on object state, concurrency pressure
-* Assignment Alignment: [A3](../../../assignments/A3/index.md)
-
-== Learning Objectives
-
-* Analyze design pressure of async systems
-* Diagnose hidden assumptions in correct-looking systems
-* Evaluate failure evidence: logs, traces, interleavings
-* Design corrections preserving relevant invariants
-* Connect findings to A3 deliverables
-
-== Opening Narrative
-
-* Background workers enhance responsiveness.
-* Correctness depends on events, retries, ordering, observability.
-* What needs to be explicit when work moves across time?
-
-== Key Concept: Event Tracing
-
-* Definition: Follow Correlation ID across queues/workers.
-* Importance: Identifies necessary conditions for trust.
-* Mechanism: Object state, workflow timing, worker behavior.
-* Failure: Duplicate work, stale state, blocked progress.
-* Design: Expose invariant, log transitions, validate tests.
-
-== Key Concept: State Snapshots
-
-* Definition: Log object state before/after async events.
-* Importance: Identifies necessary conditions for trust.
-* Mechanism: Object state, workflow timing, worker behavior.
-* Failure: Duplicate work, stale state, blocked progress.
-* Design: Expose invariant, log transitions, validate tests.
-
-== Key Concept: Asynchronous Boundary
-
-* Definition: Point where work continues later (in another worker).
-* Importance: Identifies necessary conditions for trust.
-* Mechanism: Object state, workflow timing, worker behavior.
-* Failure: Duplicate work, stale state, blocked progress.
-* Design: Expose invariant, log transitions, validate tests.
-
-== Key Concept: Temporal Coupling
-
-* Definition: Hidden dependency on event timings.
-* Importance: Identifies necessary conditions for trust.
-* Mechanism: Object state, workflow timing, worker behavior.
-* Failure: Duplicate work, stale state, blocked progress.
-* Design: Expose invariant, log transitions, validate tests.
-
-== Key Concept: Correlation
-
-* Definition: Linking logs/events to a single workflow instance.
-* Importance: Identifies necessary conditions for trust.
-* Mechanism: Object state, workflow timing, worker behavior.
-* Failure: Duplicate work, stale state, blocked progress.
-* Design: Expose invariant, log transitions, validate tests.
-
-== System / Architecture View
-
-[plantuml, target=architecture, format=svg, width=80%]
+== Topic Map
+[plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
-skinparam shadowing false
-left to right direction
 
-rectangle "Debugging Async Systems" as Topic
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Debugging\nAsync Systems" as Topic
 rectangle "Event Tracing" as A
 rectangle "State Snapshots" as B
-rectangle "Asynchronous Boundary" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
-
+rectangle "Asynchronous\nBoundary" as C
+rectangle "Validation\nEvidence" as V
+rectangle "Design\nDecision" as D
 Topic --> A
-A --> B
-B --> C
-C --> V
+A -> B
+B -> C
+C -> V
 V --> D
-D --> A : refine
+D -> A : refine
 @enduml
 ----
 
-== Worked Example: Problem Setup
+== Event Tracing
+[plantuml,width=100%]
+----
+@startuml
 
-* Podcast Domain: Log aggregator shows `Episode-123` picked by `Worker-A`.
-* Trace Analysis: `Publish` event processed before `Cleaned` event.
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Service" as S
+participant "Queue" as Q
+participant "Worker" as W
+participant "Log" as L
+S --> Q : submit(order-42, cid-9)
+Q --> W : deliver(cid-9)
+W --> L : trace(cid-9)
+W --> Q : ack(cid-9)
+@enduml
+----
 
-== Naive Implementation
+== State Snapshots
+[plantuml,width=100%]
+----
+@startuml
 
-* Assumes operation happens once, in order, with current state.
-* Illustration:
-    actor performs operation
-    system reads current state
-    system applies transition
-    system emits side effect
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Before" as B
+rectangle "After" as A
+rectangle "State\nTransition" as T
+B --> T
+T --> A
+@enduml
+----
 
-== Failure Scenario
+== Asynchronous Boundary
+[plantuml,width=100%]
+----
+@startuml
 
-* Under overlapping execution, the same operation can:
-  * observe stale state
-  * execute twice
-  * arrive late
-  * leave the workflow stuck
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Synchronous\nCaller" as S
+rectangle "Async\nQueue" as Q
+rectangle "Later\nWorker" as W
+S --> Q : handoff
+Q -> W : resume later
+W --> S : observe changed state
+@enduml
+----
 
-== Improved Design Direction
+== Temporal Coupling
+[plantuml,width=100%]
+----
+@startuml
 
-* Name the invariant and make transitions observable.
-* Add correctness controls appropriate to failure:
-    * version checks
-    * idempotency keys
-    * explicit coordination
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Event Sent First" as A
+rectangle "Event Observed Later" as B
+rectangle "Hidden Timing\nDependency" as C
+A --> C
+B --> C
+@enduml
+----
 
-== Why the Design Is Safer
+== Correlation
+[plantuml,width=100%]
+----
+@startuml
 
-* Shift from hoping the workflow executes correctly to proving it.
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Checkout" as C
+participant "Queue" as Q
+participant "Worker" as W
+participant "Store" as S
+C --> Q : ship(order-42, cid-9)
+Q --> W : deliver(cid-9)
+W --> S : claim(cid-9)
+W --> S : complete(cid-9)
+@enduml
+----
 
-== Failure Modes and Anti-Patterns
+== Failure Pressure
+[plantuml,width=100%]
+----
+@startuml
 
-* **Symptom**: System passes happy-path test.
-    * **Detection**: Add concurrent actors or stress conditions.
-    * **Correction**: Preserve happy-path but add failure-focused tests.
-* **Symptom**: Naming tools, not design properties.
-    * **Detection**: Ask which invariant the mechanism protects.
-* **Symptom**: Vague evidence.
-    * **Detection**: Logs lack IDs/timing.
-    * **Correction**: Capture structured evidence.
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Worker A" as A
+participant "Queue" as Q
+participant "Worker B" as B
+A --> Q : process(cid-9)
+A --> Q : crash before ack
+Q --> B : redeliver(cid-9)
+B --> Q : process again
+@enduml
+----
 
-== Trade-Off Analysis
+== Design Response
+[plantuml,width=100%]
+----
+@startuml
 
-[cols="1,1,1,1", options="header"]
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Invariant" as I
+rectangle "Idempotency\nKey" as K
+rectangle "Durable\nCompletion" as D
+rectangle "Retry-Safe\nHandler" as H
+I -> K
+K --> D
+D -> H
+@enduml
+----
+
+== Evidence Flow
+[plantuml,width=100%]
+----
+@startuml
+
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Delivery ID" as A
+rectangle "Entity ID" as B
+rectangle "State Log" as C
+rectangle "Audit Trail" as D
+left to right direction
+A --> C
+B --> C
+C --> D
+@enduml
+----
+
+== Trade-Offs
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | Initial implementation
-| Guarded transition | Protects core invariant | Requires careful modeling | Workflow changes
-| Explicit coordination | Visible dependencies | Can cause deadlocks | Multi-object workflows
-| Idempotent design | Handles duplicates | Requires deduplication | Queues, async workers
-| Observability-first | Strong evidence | Adds instrumentation | Failure proof assignments
+|Approach |Strength |Weakness |Use Case
+
+|Simple baseline
+|Easy to explain
+|Hides timing assumptions
+|First pass
+
+|Guarded state transition
+|Protects the invariant directly
+|Requires careful modeling
+|Workflow steps
+
+|Explicit coordination
+|Makes dependencies visible
+|Can add waiting
+|Ordering requirements
+
+|Idempotent design
+|Handles duplicates and retries
+|Needs keys and deduplication
+|Queues and async workers
 |===
-
-== Practical Application
-
-* Identify invariant relevant to async debugging.
-* Write sequential scenario expected to succeed.
-* Write pressure scenario exposing potential failure.
-* Add operation/entity IDs to logs for pressure scenario.
-* Capture before/after evidence if fix is applied.
-
-== Assignment Integration
-
-* Connect lecture concept to semester project.
-* Show relevant object/workflow/event in project domain.
-* Mastery through concrete evidence: structured logs, diagrams, etc.
-
-== Validation Questions
-
-1. What invariant is relevant to this lecture?
-2. What assumption makes design appear correct?
-3. How to force the failure in a repeatable test?
-4. What evidence proves failure occurred?
-5. Which design mechanism to choose first?
-6. How would the issue appear in two stacks?
-7. What to record in the Integrity Packet?
-
-== Summary
-
-* Debugging async systems requires reasoning about correctness.
-* Connect concepts to invariants, observable behavior, and trade-offs.
-
-== Further Reading
-
-* Search phrase: "Debugging Async Systems distributed systems failure mode"
-* Topic: structured logging and correlation IDs
-* Topic: invariants in stateful systems
-
-== Discussion
-
-* How can we ensure our async systems remain correct?
-* What trade-offs are acceptable in async design?

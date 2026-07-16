@@ -16,7 +16,7 @@
 [plantuml, format=svg]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 
@@ -31,7 +31,7 @@ A --> B
 [plantuml, format=svg]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 
@@ -46,7 +46,7 @@ A --> B
 [plantuml, format=svg]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 
@@ -61,7 +61,7 @@ A --> B
 [plantuml, format=svg]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 
@@ -76,7 +76,7 @@ A --> B
 [plantuml, format=svg]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 
@@ -91,7 +91,7 @@ A --> B
 [plantuml, format=svg]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 

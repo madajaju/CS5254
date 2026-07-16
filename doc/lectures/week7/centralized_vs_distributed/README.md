@@ -46,7 +46,7 @@ Two components each wait for the other to make progress. Logs show activity, but
 ## System / Architecture View
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 

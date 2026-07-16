@@ -12,7 +12,7 @@
 == Feature Parity
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 
@@ -30,7 +30,7 @@ C --> D
 == Portability
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 
@@ -48,7 +48,7 @@ C --> D
 == Validation
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 
@@ -66,7 +66,7 @@ C --> D
 == System Invariant
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 
@@ -84,7 +84,7 @@ C --> D
 == Failure Mode
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 

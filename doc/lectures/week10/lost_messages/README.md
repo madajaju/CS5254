@@ -60,7 +60,7 @@ An episode-processing worker completes audio cleanup and emits a completion even
 ## System / Architecture View
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 

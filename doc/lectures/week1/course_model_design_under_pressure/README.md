@@ -55,7 +55,7 @@ This course starts from that gap: when does a clean object model become unsafe u
 
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 

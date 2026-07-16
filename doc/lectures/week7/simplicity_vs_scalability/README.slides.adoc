@@ -5,7 +5,7 @@
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -47,7 +47,7 @@ D --> I : refine
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -81,7 +81,7 @@ Retry --> Logic : duplicate work
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -113,7 +113,7 @@ C -> F : contention
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -143,7 +143,7 @@ D --> A : redesign
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -173,7 +173,7 @@ T -> I : preserve
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -205,7 +205,7 @@ S --> P
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -236,7 +236,7 @@ C --> S : ship order
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -270,7 +270,7 @@ P --> I : wait for inventory state
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -304,7 +304,7 @@ E --> I : prove
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black

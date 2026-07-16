@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 11,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "event_ordering_strategies",
+  "source": "doc/lectures/week11/event_ordering_strategies/README.md",
+  "videoPath": "doc/lectures/week11/event_ordering_strategies/.output/output.mp4",
+  "youtube_title": "Event Ordering Strategies Under Pressure | CS 5254 Week 11",
+  "summary": "A publish event arrives before the approval event it depends on, and the workflow fails because delivery order and logical order diverge.",
+  "youtube_description": "A publish event arrives before the approval event it depends on, and the workflow fails because delivery order and logical order diverge. The lecture covers versioning, causal ordering, buffering, and partitioning strategies for preserving correctness.\n\nThis CS 5254 Week 11 lecture explores event ordering strategies and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "event ordering strategies",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "causal ordering",
+    "versioning",
+    "buffering",
+    "partitioning",
+    "message queues"
+  ]
+}

@@ -57,7 +57,7 @@ A publish event arrives before the approval event it depends on. The service han
 ## System / Architecture View
 ```plantuml
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 left to right direction
 

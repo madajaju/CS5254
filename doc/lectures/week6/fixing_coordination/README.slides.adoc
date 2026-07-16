@@ -15,7 +15,7 @@
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -46,7 +46,7 @@ Topic --> E
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -74,7 +74,7 @@ W --> T
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -100,7 +100,7 @@ W2 --> D
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -127,7 +127,7 @@ F2 --> I
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -155,7 +155,7 @@ C --> D
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -181,7 +181,7 @@ B --> C
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -209,7 +209,7 @@ I --> C : waits for coordination
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
@@ -239,7 +239,7 @@ T -> E
 [plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
 skinparam backgroundColor #123456
 skinparam defaultFontColor black

@@ -2,116 +2,71 @@
   {
     "slide": 1,
     "topic": "Event Ordering Strategies",
-    "text": "Welcome everyone to our lecture on Event Ordering Strategies. Today, we'll delve into the intricacies of how the order in which events are processed can impact the integrity of systems, particularly under concurrent conditions."
+    "text": "Welcome to Event Ordering Strategies. The key idea here is that a system can look correct when everything arrives neatly in order, but still fail as soon as timing, retries, or concurrency enter the picture. In this lecture, we are asking a professional engineering question: what happens when the order the producer intended is not the order the consumer actually experiences?"
   },
   {
     "slide": 2,
     "topic": "Opening Narrative",
-    "text": "Let's start with a scenario that illustrates our main theme. Imagine a situation where a publish event arrives before its corresponding approval event. This sequence disrupts the workflow, demonstrating a critical point: the delivery order does not always equate to the logical order of events. We'll explore the implications of this when time and causality diverge."
+    "text": "Imagine a publish event arriving before the approval event it depends on. A careless consumer may process the first message it sees and leave the workflow in a corrupted state. The hidden assumption is that delivery order and logical order are the same thing. A common mistake is to treat that assumption as if it were free. Here, the real pressure is execution order under concurrency and retries, not syntax."
   },
   {
     "slide": 3,
-    "topic": "Learning Objectives",
-    "text": "In this lecture, we aim to accomplish several key objectives. First, we'll analyze the design pressures that arise in event ordering strategies. We'll also learn to diagnose hidden assumptions in concurrent systems and evaluate failure evidence through various methods. Moreover, we'll discuss how to design corrections that preserve critical invariants and how to defend our approaches in our Integrity Packet."
+    "topic": "Event Ordering Pressure",
+    "text": "Here we make the pressure concrete: a producer sends an event to a queue, the queue delivers it to a consumer, and the consumer immediately processes the first message it sees. That is the baseline path, and it is exactly where hidden assumptions live. If the system depends on a particular order, then the consumer has to prove it can detect when that order breaks, not just hope the queue behaves nicely."
   },
   {
     "slide": 4,
-    "topic": "Core Concepts",
-    "text": "Now, let's move on to the core concepts that will underpin our understanding of event ordering strategies. These concepts will provide the foundation for designing robust concurrent systems."
+    "topic": "Sequence Numbers and Versioning",
+    "text": "Sequence numbers or versioning make ordering explicit. If an event says it is version five and the current state is only version three, the consumer knows there is a gap and must wait or reject the update rather than guessing. This matters because the system can now detect stale data and missing transitions. The trade-off is that you have to maintain version state and decide what to do when a gap appears."
   },
   {
     "slide": 5,
-    "topic": "Sequence Numbers / Versioning",
-    "text": "First up is the idea of sequence numbers or versioning. This concept involves attaching a monotonically increasing number to each event, allowing consumers to identify gaps or stale data. It’s crucial that we make this condition explicit; if ignored, the system might appear to be functioning correctly but could produce duplicate work or misleading evidence."
+    "topic": "Causal Ordering",
+    "text": "Causal ordering means a dependent event is never processed before the event it depends on. In other words, if Event B needs Event A to be valid, B must not run ahead of A. The key idea is that dependency has to be part of the design, not just part of the developer's mental model. Without that guard, the workflow can appear healthy in tests and still fail under real timing pressure."
   },
   {
     "slide": 6,
-    "topic": "Causal Ordering",
-    "text": "Next, we have causal ordering, which ensures that if Event B depends on Event A, then B must not be processed until after A. This principle is vital for building trust in our systems as it prevents scenarios where operations are processed out of order, which can also lead to duplicate work or blocked progress."
+    "topic": "Buffering and Reordering",
+    "text": "Sometimes the right response is not to reject an early event, but to hold it in a buffer until its predecessor arrives. That gives the system a chance to release events in the correct order. This is useful when temporary disorder is expected, but it introduces its own trade-off: buffering consumes memory and adds complexity, so you need a clear rule for when waiting is acceptable and when it becomes dangerous."
   },
   {
     "slide": 7,
-    "topic": "Buffering/Reordering",
-    "text": "Let's discuss buffering and reordering. This strategy involves temporarily holding onto 'early' events until their predecessors arrive. Just like the previous concepts, this too must be explicitly managed; failure to do so can result in duplicate work and misleading system behavior."
+    "topic": "Partitioning and Sharding",
+    "text": "Partitioning or sharding is a way to keep all events for the same entity on the same consumer path. If every event for EpisodeID-1 lands on one worker, that worker can preserve the local order much more reliably. The important property is not just throughput; it is that the same entity experiences a consistent sequence of changes. This matters because cross-worker interleavings are one of the easiest ways to hide a race condition."
   },
   {
     "slide": 8,
-    "topic": "Partitioning / Sharding",
-    "text": "Now we move to partitioning or sharding, which ensures that all events related to a particular entity are processed by the same consumer in the order they were produced. This practice is essential for maintaining the integrity of the order in which events are handled, as violating this can introduce significant issues in the overall state of the system."
+    "topic": "Asynchronous Boundary",
+    "text": "An asynchronous boundary is where work stops being immediate and continues later, often on another worker or event loop. That boundary is where assumptions about timing usually break. The key idea is to identify what state must survive the handoff and what evidence proves the work completed correctly. If you do not name that boundary, it is easy to miss where the invariant can be lost."
   },
   {
     "slide": 9,
-    "topic": "Asynchronous Boundary",
-    "text": "Our next concept is the asynchronous boundary. This refers to points where processing continues later, often on a different worker or event loop. Making these boundaries explicit is critical; otherwise, it can lead to issues similar to those we've discussed: duplicate work and misleading evidence."
+    "topic": "Failure Interleaving",
+    "text": "Now we make the failure uncomfortable: Worker A ships an order, then crashes before acknowledging the message. The queue redelivers the same event to Worker B, and the side effect happens again. That may mean duplicate shipment, a missing notification, or a log sequence that never shows a clean completion. This failure was hidden in the happy path because the simple test did not include crash, redelivery, or delayed acknowledgement. Evidence such as delivery IDs, entity IDs, and audit logs is what lets you prove the failure really happened."
   },
   {
     "slide": 10,
-    "topic": "System / Architecture View",
-    "text": "Here we take a system or architecture view of event ordering strategies. It's important to see how all these concepts connect to create a pressure point in our system. We need to ensure that when timing and coordination complexity change, the relevant invariants still hold."
+    "topic": "Design Response",
+    "text": "The protected property here is that a retried event must not inflate side effects or hide lost work. The mechanism is to use idempotency keys, durable completion records, retry-safe handlers, and reconciliation scans. That protects correctness, but it is not free: you pay with extra storage, more handler logic, and more design discipline. A good fix does not pretend uncertainty went away; it contains the uncertainty and makes recovery visible."
   },
   {
     "slide": 11,
-    "topic": "Worked Example",
-    "text": "To put these concepts into context, let’s consider a worked example. In the podcast domain, for instance, a status update may include a version number that the consumer uses to wait for any missing versions. Similarly, in an order system, we ensure that an 'Order Cancelled' event should not create an 'Order Created' state if it arrives prematurely."
+    "topic": "Failure Evidence",
+    "text": "The point of evidence is to make the claim reviewable. Delivery IDs, entity IDs, state-transition logs, and the audit trail all help reconstruct what actually happened. A reviewer should be able to answer questions like: did the worker succeed but the acknowledgement get lost? Did the same event run twice? Was there a gap between delivery and completion? If you cannot reconstruct that from the evidence, then the design defense is too vague."
   },
   {
     "slide": 12,
-    "topic": "Problem Setup",
-    "text": "Let's delve a bit deeper into the problem setup. The podcast example shows us how using versioning helps maintain the order, while the order system example emphasizes the importance of processing events in the right sequence to avoid incorrect states."
+    "topic": "Trade-Offs",
+    "text": "Different approaches protect different properties. A simple baseline is easy to explain, but it hides timing assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes dependencies visible, though it can introduce waiting and bottlenecks. Idempotent design handles duplicates and retries, but it needs keys and deduplication. The practical question is not which tool sounds strongest, but which trade-off matches the failure you are actually defending against."
   },
   {
     "slide": 13,
-    "topic": "Naive Implementation",
-    "text": "A naive implementation might assume that operations occur in a strict order. Often, this assumption remains hidden in the code and leads to failures when conditions change. The typical process flow appears legitimate but can fail spectacularly under concurrency pressures."
+    "topic": "Practical Application",
+    "text": "For your own system, start by naming the invariant or progress property you care about. Then write one scenario that should succeed in the normal case and one pressure scenario that could expose the weakness. Add operation IDs and entity IDs to your logs before you run the pressure case. If you apply a fix, capture before-and-after evidence and update the Integrity Packet with the assumption, the validation, and any remaining risk. That is the standard for a defensible design choice."
   },
   {
     "slide": 14,
-    "topic": "Failure Scenario",
-    "text": "Consider the failure scenario where overlapping executions, delays, retries, or partial failures come into play. These situations can lead to stale states, and in some cases, operations may execute multiple times, leading to inconsistencies we must address."
-  },
-  {
-    "slide": 15,
-    "topic": "Improved Design Direction",
-    "text": "An improved design approach involves explicitly naming the invariant that needs to be preserved and making transitions observable. Incorporating correctness controls, like version checks and idempotency, strengthens the system's reliability against failures."
-  },
-  {
-    "slide": 16,
-    "topic": "Why Improved Design Is Safer",
-    "text": "The enhanced design direction is safer because it shifts our focus from simply hoping that operations execute in the intended order to actively proving that any invalid interleavings are either rejected or recovered appropriately."
-  },
-  {
-    "slide": 17,
-    "topic": "Failure Modes and Anti-Patterns",
-    "text": "Now, let's explore failure modes and common anti-patterns. Our first symptom is when a system passes a single happy-path demonstration, which often masks design weaknesses. We need to employ stress conditions and concurrent actors to truly test these systems."
-  },
-  {
-    "slide": 18,
-    "topic": "Trade-Off Analysis",
-    "text": "In our trade-off analysis, we’ll evaluate various approaches to event ordering. Each approach has its strengths and weaknesses, and knowing when to use each can help us navigate the complexities of designing robust systems."
-  },
-  {
-    "slide": 19,
-    "topic": "Practical Application",
-    "text": "As we move towards practical application, I encourage you to identify the most relevant invariant in the context of event ordering strategies. Think about writing successful sequential scenarios and challenging pressure scenarios to test your systems."
-  },
-  {
-    "slide": 20,
-    "topic": "Assignment Integration",
-    "text": "This lecture also integrates with your ongoing assignments, particularly A3. I expect you to connect these concepts to your project and demonstrate relevance through structured logs, failure reproductions, and your Integrity Packet."
-  },
-  {
-    "slide": 21,
-    "topic": "Validation and Interview Questions",
-    "text": "To foster discussion, consider these questions: What invariant is most relevant here? What hidden assumption could make your baseline appear valid? How might you force a failure in a repeatable test, and what evidence would prove that failure?"
-  },
-  {
-    "slide": 22,
     "topic": "Summary",
-    "text": "In summary, our exploration today demonstrated that event ordering strategies are not merely technical terms; they represent a crucial lens through which we can evaluate system correctness. It's essential to connect these concepts to the invariants and behaviors we can observe."
-  },
-  {
-    "slide": 23,
-    "topic": "Discussion",
-    "text": "Finally, I invite you to discuss the trade-offs between correctness and performance. How can we better capture evidence of failures? I look forward to hearing your thoughts."
+    "text": "The central insight is that event ordering strategies are not just terminology. They are a way to reason about whether a system remains correct when execution gets messy. The professional task is to connect the invariant to observable behavior, then to a correction that has a real trade-off. A design is not mature until it can be explained, stressed, repaired, and validated with evidence."
   }
 ]

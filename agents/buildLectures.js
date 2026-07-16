@@ -44,7 +44,7 @@ async function main() {
     for (const readmeFile of readmeFiles) {
         await buildLecture(readmeFile, systemPrompt);
         await transcriptCreator(readmeFile, transcriptSystemPrompt);
-        await convoCreator(readmeFile, convoSystemPrompt);
+        // await convoCreator(readmeFile, convoSystemPrompt);
     }
 
     console.log('Lecture build complete.');

@@ -1,217 +1,322 @@
 = Event Ordering Strategies
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
 == Opening Narrative
+[.column]
+* A publish event can arrive before the approval event it depends on.
+* The service may process the first message it sees and corrupt the workflow.
+* Hidden assumption: delivery order equals logical order.
 
-* Event delivery order ≠ logical order
-* Example: Publish event arrives before approval
-* Impacts integrity of workflows
-* Need for reasoning when time & causality diverge
+[.column]
+* The design question is how the system should reason when time and causality diverge.
+* The pressure is not syntax; it is execution order under concurrency and retries.
 
-
-== Learning Objectives
-
-* Analyze design pressure of event ordering strategies
-* Diagnose hidden assumptions in concurrent systems
-* Evaluate failure evidence using various methods
-* Design corrections that preserve invariants
-* Defend approaches in the Integrity Packet
-
-
-== Core Concepts
-
-== Sequence Numbers / Versioning
-
-* Definition: Monotonically increasing number for events
-* Importance: Explicit identification of conditions needed
-* Mechanism: Through state, timing, retries, etc.
-* Failure Mode: Duplicate work, stale state, misleading evidence
-* Design Implication: Log transitions, validate with tests
-
-
-== Causal Ordering
-
-* Definition: Event B cannot process before Event A
-* Importance: Necessary condition for trustworthiness
-* Mechanism: Appears through state, timing, etc.
-* Failure Mode: Duplicate work, blocked progress
-* Design Implication: Log transitions, validate with tests
-
-
-== Buffering/Reordering
-
-* Definition: Temporary buffer for early events
-* Importance: Explicit conditions are vital
-* Mechanism: Through state, timing, retries, etc.
-* Failure Mode: Duplicate work, stale state, misleading evidence
-* Design Implication: Log transitions, validate with tests
-
-
-== Partitioning / Sharding
-
-* Definition: Events for the same entity handled together
-* Importance: Critical for maintaining order
-* Mechanism: Through state, timing, retries, etc.
-* Failure Mode: Duplicate work, stale state, blocked progress
-* Design Implication: Log transitions, validate with tests
-
-
-== Asynchronous Boundary
-
-* Definition: Work continues later, on another worker
-* Importance: Must be made explicit for trust
-* Mechanism: Through state, timing, retries, etc.
-* Failure Mode: Duplicate work, stale state, misleading evidence
-* Design Implication: Log transitions, validate with tests
-
-
-== System / Architecture View
-
-[plantuml, target=architecture, format=svg, width=80%]
+== Event Ordering Pressure
+[plantuml,width=100%]
 ----
 @startuml
-skinparam monochrome true
+
 skinparam shadowing false
-left to right direction
-
-rectangle "Event Ordering Strategies" as Topic
-rectangle "Sequence Numbers / Versioning" as A
-rectangle "Causal Ordering" as B
-rectangle "Buffering/Reordering" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
-
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Producer" as P
+rectangle "Queue" as Q
+rectangle "Consumer" as C
+P -> Q : publish event
+Q --> C : deliver event
+C --> C : process first\nmessage seen
 @enduml
 ----
 
-== Worked Example
+== Sequence Numbers and Versioning
+[plantuml,width=100%]
+----
+@startuml
 
-== Problem Setup
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Event v3" as V3
+rectangle "Current state v3" as S3
+rectangle "Event v5" as V5
+rectangle "Gap detected" as G
+V3 --> S3 : apply
+V5 --> G : wait for v4
+@enduml
+----
 
-* Podcast Domain:
-  * StatusUpdate includes version number
-  * Consumer waits for missing versions
-* Order System:
-  * OrderCancelled must not create OrderCreated state
+== Causal Ordering
+[plantuml,width=100%]
+----
+@startuml
 
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Event A" as A
+rectangle "Event B" as B
+rectangle "Dependency check" as D
+A -> D : happens first
+D --> B : allow processing
+@enduml
+----
 
-== Naive Implementation
+== Buffering and Reordering
+[plantuml,width=100%]
+----
+@startuml
 
-* Assumes operation occurs in order
-* Often invisible in code
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Early event" as E
+rectangle "Buffer" as B
+rectangle "Missing predecessor" as M
+rectangle "Release in order" as R
+E --> B : hold
+B -> M : wait
+M --> R : predecessor arrives
+@enduml
+----
 
-```
-actor performs operation
-system reads current state
-system applies transition
-system emits side effect
-```
+== Partitioning and Sharding
+[plantuml,width=100%]
+----
+@startuml
 
-== Failure Scenario
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "EpisodeID-1 events" as E1
+rectangle "Shard A" as S1
+rectangle "EpisodeID-2 events" as E2
+rectangle "Shard B" as S2
+E1 --> S1 : same consumer
+E2 --> S2 : same consumer
+@enduml
+----
 
-* Overlapping execution, delay, retry, or partial failure
-* Operations can observe stale state or execute twice
+== Asynchronous Boundary
+[plantuml,width=100%]
+----
+@startuml
 
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Caller" as C
+rectangle "Async boundary" as A
+rectangle "Later worker" as W
+C -> A : hand off work
+A --> W : continue later
+@enduml
+----
 
-== Improved Design Direction
+== Failure Interleaving
+[plantuml,width=100%]
+----
+@startuml
 
-* Name invariant, make transitions observable
-* Add correctness controls: version checks, idempotency
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Worker A" as A
+rectangle "Crash before ack" as C
+rectangle "Worker B" as B
+rectangle "Duplicate side effect" as D
+A --> C : ships order
+C -> B : redelivery
+B --> D : repeats work
+@enduml
+----
 
-== Why Improved Design Is Safer
+== Design Response
+[plantuml,width=100%]
+----
+@startuml
 
-* Shifts focus to proving invariants
-* Rejects, contains, or recovers invalid interleavings
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Invariant" as I
+rectangle "Idempotency key" as K
+rectangle "Durable completion record" as D
+rectangle "Reconciliation scan" as R
+I --> K : protect
+K -> D : record once
+D --> R : recover gaps
+@enduml
+----
 
+== Failure Evidence
+[plantuml,width=100%]
+----
+@startuml
 
-== Failure Modes and Anti-Patterns
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Delivery ID" as L
+rectangle "Entity ID" as E
+rectangle "State transition log" as S
+rectangle "Audit trail" as A
+L --> S : correlate
+E --> S : correlate
+S -> A : prove behavior
+@enduml
+----
 
-* Symptom: System passes single happy-path test
-  * Why: Test avoids revealing design weaknesses
-  * Detection: Use concurrent actors, stress tests
-  * Correction: Add failure-focused tests for invariants
-
-* Symptom: Names a tool, not a design property
-  * Why: Focus on mechanics over invariants
-  * Detection: Ask for the invariant protection
-  * Correction: State invariant first, then mechanism
-
-* Symptom: Vague evidence for claims
-  * Why: Logs lack details for reconstruction
-  * Detection: Reviewer can’t verify failure
-  * Correction: Capture structured evidence
-
-* Symptom: Fix changes behavior but not compared
-  * Why: Failure not preserved repeatably
-  * Detection: No before/after comparison
-  * Correction: Preserve and rerun failing test
-
-
-== Trade-Off Analysis
-
-[cols="1,1,1,1", options="header"]
+== Trade-Offs
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | Initial implementation comparison
-| Guarded state transition | Protects core invariant | Requires careful modeling | Status changes, workflows
-| Explicit coordination | Makes dependencies visible | May cause deadlocks | Multi-object workflows
-| Idempotent design | Handles duplicates | Needs deduplication | Queues, retries, async
-| Observability-first | Strong evidence | Needs instrumentation | Assignments needing proof
-|===
+|Approach
+|Strengths
+|Weaknesses
+|When to use
 
+|Simple baseline
+|Easy to explain and implement
+|Hides timing assumptions
+|First pass and comparison point
+
+|Guarded transition
+|Protects the invariant directly
+|Requires careful state modeling
+|Workflow steps and status changes
+
+|Explicit coordination
+|Makes dependencies visible
+|Can add waiting or bottlenecks
+|Multi-object ordering requirements
+
+|Idempotent design
+|Handles duplicates and retries
+|Needs keys and deduplication
+|Queues and async workers
+|===
 
 == Practical Application
-
-* Identify the invariant relevant to event ordering
-* Write one sequential scenario for success
-* Write one pressure scenario for failure
-* Add operation IDs and entity IDs to logs
-* Capture before/after evidence for fixes
-* Update Integrity Packet with assumptions and evidence
-
-
-== Assignment Integration
-
-* Supports [A3](../../../assignments/A3/index.md)
-* Connect concepts to semester project
-* Show relevant components in their domain
-
-
-== Validation and Interview Questions
-
-1. What invariant is most relevant?
-2. What hidden assumption makes baseline appear correct?
-3. How to force the failure in a repeatable test?
-4. What evidence proves the failure?
-5. Which mechanism to choose first, and what trade-off?
-6. How does the issue appear differently in your stacks?
-7. What to record in the Integrity Packet?
-
+* Identify the invariant or progress property.
+* Write one sequential scenario that should succeed.
+* Write one pressure scenario that could fail.
+* Add operation IDs and entity IDs to logs.
+* Capture before and after evidence if you apply a fix.
+* Update the Integrity Packet with assumption, evidence, validation, and remaining risk.
 
 == Summary
+[plantuml,width=100%]
+----
+@startuml
 
-* Event ordering strategies reason about system correctness
-* Connect concepts to invariants and observable behavior
-* Design maturity includes validation and evidence
-
-
-== Discussion
-
-* What trading off correctness for performance looks like?
-* How can we better capture failure evidence?
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Invariant" as I
+rectangle "Evidence" as E
+rectangle "Trade-off" as T
+rectangle "Corrected design" as C
+I -> E : observe
+E --> T : evaluate
+T -> C : defend
+@enduml
+----
