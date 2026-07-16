@@ -11,133 +11,817 @@ Dr. Darren Pulsipher
 :icons: font
 :stem:
 
-== Introduction
+== Why It Matters
 
-* Course: CS 5254b - Object-Oriented Systems Under Concurrency
-* Duration: 15 minutes
-* Prerequisites: Previous knowledge on object state and concurrency pressure
-* Key inquiry: What must engineers analyze before trusting results under pressure?
+* Looks correct once
+* Breaks under retries
+* Hidden assumption
+* Concurrency pressure
+* Evidence must survive failure
 
 == Retry Storms
 
-* Definition: Multiple workers retry simultaneously; can overwhelm systems.
-* Impact: Must be explicit for system reliability.
-* Mechanism: Related to object state, workflow timing, retries.
-* Failure Mode: Risk of producing duplicates or misleading evidence.
-* Design Implication: Log critical transitions and validate behavior.
+* Many failed workers retry together
+* Downstream load spikes
+* Duplicate work appears
+* Progress can stall
 
-== Partial Success Failure
+== Retry Storms
 
-* Definition: Worker completes partial task, then fails, causing conflicts.
-* Impact: Similar importance for system reliability.
-* Mechanism: Appears through state, workflow timing, retries.
-* Failure Mode: Duplicate work or stale state.
-* Design Implication: Maintain invariants, log transitions, validate.
-
-== Zombie Resources
-
-* Definition: Multiple copies of a resource due to retries.
-* Impact: Implications under pressure.
-* Mechanism: Object state, worker behavior, coordination.
-* Failure Mode: Duplicate work or stalled workflows.
-* Design Implication: Expose invariants, log transitions.
-
-== System Invariants
-
-* Definition: Conditions that must hold true across executions.
-* Impact: Critical for trustworthy systems.
-* Mechanism: Observes state, timing, coordination.
-* Failure Mode: Breach leads to duplicates or inconsistencies.
-* Design Implication: Structural evidence and validation.
-
-== Concept Diagram
-
-[plantuml, target=concept_diagram, format=svg, width=80%]
+[plantuml, target=retry-storms, format=svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 skinparam shadowing false
 left to right direction
 
-rectangle "Retry Side Effects" as Topic
-rectangle "Retry Storms" as A
-rectangle "Partial Success Failure" as B
-rectangle "Zombie Resources" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Worker C" as C
+rectangle "Downstream" as D
+rectangle "Retry queue" as Q
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+A --> D : fail
+B --> D : fail
+C --> D : fail
+D --> Q : backpressure
+Q --> A : retry
+Q --> B : retry
+Q --> C : retry
 @enduml
 ----
 
-== Worked Example: Podcast Domain
+== Partial Success
 
-* Scenario: Uploading a 1GB file drops at 99%, retries consume 2GB bandwidth.
-* Assumption: Operations succeed without error.
-* Failure: System confused by retries, stale state or delays.
+* Half-finished side effect
+* Retry repeats the action
+* File, charge, or publish twice
+* Conflict becomes visible
 
-== Failure Scenario Overview
+== Partial Success
 
-* Overlapping execution introduces unexpected states.
-* Failure arises from design assumptions vs. reality.
+[plantuml, target=partial-success, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-== Improved Design Direction
+rectangle "Worker" as W
+rectangle "File" as F
+rectangle "Retry" as R
+rectangle "Conflict" as C
 
-* Principle: Name the invariant; make transitions observable.
-* Controls: Version checks, idempotency keys, explicit retries.
-* Shift focus from hope to proof in execution order.
+W --> F : write 50%
+W --> R : crash
+R --> W : retry
+W --> F : write again
+F --> C : duplicate / clash
+@enduml
+----
 
-== Failure Modes and Anti-Patterns
+== Zombie Resources
 
-* Symptom: Single happy-path success.
-** Why: Tests avoid pressure conditions.
-** Detect: Concurrent tests, stress conditions.
-** Correct: Add focused failure tests.
+* Repeated retries create copies
+* VMs, files, or jobs linger
+* Cost grows silently
+* Cleanup becomes part of design
 
-* Symptom: Tool name, not a design property.
-** Why: Mechanism chosen without invariant clarity.
-** Detect: Ask for the protected invariant.
-** Correct: Write invariant first.
+== Zombie Resources
 
-== Trade-Off Analysis
+[plantuml, target=zombie-resources, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-[cols="1,1,1,1", options="header"]
+rectangle "Retry loop" as R
+rectangle "VM 1" as V1
+rectangle "VM 2" as V2
+rectangle "Temp file" as T
+rectangle "Cleanup" as C
+
+R --> V1 : create
+R --> V2 : retry create
+R --> T : partial file
+V1 --> C : orphaned
+V2 --> C : orphaned
+T --> C : delete late
+@enduml
+----
+
+== Invariant First
+
+* State what must stay true
+* Choose the mechanism second
+* Tool names are not invariants
+* Guards protect meaning
+
+== Invariant First
+
+[plantuml, target=invariant-first, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Invariant" as I
+rectangle "Logs" as L
+rectangle "Test" as T
+rectangle "Control" as C
+rectangle "Claim" as M
+
+I --> C : protects
+I --> L : records
+I --> T : repeats
+L --> M : evidence
+T --> M : proof
+@enduml
+----
+
+== Delivery Flow
+
+[plantuml, target=delivery-flow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Checkout" as C
+rectangle "Queue" as Q
+rectangle "Worker" as W
+rectangle "Idempotency store" as S
+rectangle "Notify" as N
+
+C -> Q : ShipOrder
+Q --> W : event-9
+W --> S : claim key
+S --> W : allowed
+W --> N : notify
+W --> Q : ack
+@enduml
+----
+
+== State Model
+
+[plantuml, target=state-model, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+state ENQUEUED
+state DELIVERED
+state PROCESSING
+state COMPLETED
+state ACKED
+state RETRY_PENDING
+
+ENQUEUED -> DELIVERED
+DELIVERED --> PROCESSING
+PROCESSING -> COMPLETED
+COMPLETED -> ACKED
+PROCESSING --> RETRY_PENDING
+RETRY_PENDING --> DELIVERED
+@enduml
+----
+
+== Failure Interleaving
+
+[plantuml, target=failure-interleaving, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Worker A" as A
+rectangle "Queue" as Q
+rectangle "Worker B" as B
+rectangle "Shipment" as S
+rectangle "Log" as L
+
+A -> S : ship order-42
+A -> Q : crash before ack
+Q -> B : redeliver event-9
+B --> S : ship again
+S -> L : duplicate evidence
+@enduml
+----
+
+== Failure Signal
+
+* Duplicate shipment
+* Missing acknowledgement
+* Stale state
+* Broken progress
+
+== Failure Signal
+
+[plantuml, target=failure-signal, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Logs" as L
+rectangle "Trace IDs" as T
+rectangle "Invariant" as I
+rectangle "Reviewer" as R
+rectangle "Claim" as C
+
+L -> R : duplicate event-9
+T --> R : order-42
+I --> C : at-most-once
+R -> C : supports / refutes
+@enduml
+----
+
+== Corrective Pattern
+
+* Idempotency keys
+* Durable completion records
+* Retry-safe handlers
+* Reconciliation scans
+
+== Corrective Pattern
+
+[plantuml, target=corrective-pattern, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Worker" as W
+rectangle "Key store" as K
+rectangle "Side effect" as S
+rectangle "Completion log" as C
+rectangle "Retry" as R
+
+W --> K : claim once
+K --> W : already used
+W -> S : perform work
+S -> C : record done
+R --> W : safe retry
+@enduml
+----
+
+== Tradeoffs
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | Use Case
-| Simple baseline | Easy to explain | Hides timing assumptions | Initial comparison
-| Guarded transition | Protects invariant | Requires modeling | Dynamic status changes
-| Explicit coordination | Visible dependencies | Risk of bottlenecks | Complex workflows
-| Idempotent design | Manages duplicates | Needs deduplication | Queues and external calls
-| Observability-first | Strong evidence | Adds instrumentation | Needs design proof
+| Approach | Strength | Weakness | Use
+| Baseline | Simple | Hides timing | First version
+| Guarded | Protects invariant | Needs modeling | State changes
+| Idempotent | Survives retries | Needs keys | Queues, workers
+| Observed | Strong evidence | Adds logging | Design defense
 |===
 
-== Practical Application
+== Evidence Flow
 
-* Identify the invariant relevant to side effects.
-* Develop sequential and pressure scenarios.
-* Ensure logs enhance traceability before testing.
-* Capture evidence for validation post-fix.
+[plantuml, target=evidence-flow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-== Assignment Integration
+rectangle "Claim" as C
+rectangle "Logs" as L
+rectangle "Trace" as T
+rectangle "Test" as E
+rectangle "Review" as R
 
-* Connect concepts from lecture to project in [A3](../../../assignments/A3/index.md).
-* Provide evidence through logs, diagrams, and behavior analysis.
+C --> L : operation IDs
+C --> T : entity IDs
+C --> E : repeatable run
+L --> R : reconstruct
+T --> R : verify
+E --> R : defend
+@enduml
+----
+
+== A3 Link
+
+* Show the invariant
+* Show the failure
+* Show the fix
+* Show the evidence
+* Defend the trade-off
+
+== A3 Link
+
+[plantuml, target=a3-link, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+
+rectangle "Project" as P
+rectangle "Invariant" as I
+rectangle "Failure test" as F
+rectangle "Logs" as L
+rectangle "Integrity Packet" as G
+
+P -> I : name it
+I --> F : stress it
+F -> L : capture evidence
+L --> G : defend choice
+@enduml
+----
 
 == Discussion
 
-* What invariant is critical for this topic?
-* What hidden assumptions exist in baseline designs?
-* How can failures be forced in tests?
-* What evidence supports failure claims?
-* Which design mechanism has priority, with what trade-off?
-
-== Summary
-
-* Retry side effects help reason about system correctness.
-* Connect concepts to invariants and evidence.
-* Validate designs through stress-testing and proof.
+* What breaks first under retries?
+* Which trade-off would you accept?

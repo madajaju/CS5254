@@ -1,191 +1,242 @@
 = Duplicate Execution
-Dr. Darren Pulsipher
-:revealjs_theme: white
-:revealjs_slideNumber: true
-:revealjs_hash: true
-:revealjs_width: 1280
-:revealjs_height: 720
-:revealjs_transition: fade
-:customcss: custom.css
-:source-highlighter: highlight.js
-:icons: font
-:stem:
 
-== Learning Objectives
+== Overview
 
-* Analyze design pressure from duplicate execution
-* Diagnose hidden assumptions in system behavior
-* Evaluate failure evidence via logs and traces
-* Design corrections preserving invariants
-* Defend decisions in Integrity Packet relating to A3
-
-== Opening Narrative
-
-* Worker completes job, acknowledgement lost.
-* Message delivered again; duplicate processing occurs.
-* System is broken due to lack of tolerance for duplicates.
-* Need to address what changes to prevent workflow corruption.
-
-== Core Concept: At-Least-Once Delivery
-
-* **Definition**: Message guarantee may deliver more than once.
-* **Importance**: Must be explicit for system trust under pressure.
-* **Mechanisms**: Object state, timing, retries, coordination.
-* **Failure Mode**: Duplicate work, stale state, misleading evidence.
-* **Design Implication**: Expose invariant; validate behavior.
-
-== Core Concept: Double Processing
-
-* **Definition**: Same task picked by two workers or a worker twice.
-* **Importance**: Must be clear before trusting system under pressure.
-* **Mechanisms**: Timing, state, retries, coordination.
-* **Failure Mode**: Duplicate work, state corruption, misleading paths.
-* **Design Implication**: Make transitions clear; validate with tests.
-
-== Core Concept: Side Effect Inflation
-
-* **Definition**: Negative impact of repeating work (e.g., double charges).
-* **Importance**: Must be explicit to ensure system trust.
-* **Mechanisms**: Object state, workflow timing, worker behavior.
-* **Failure Mode**: Duplicate outputs, stale states, evidence issues.
-* **Design Implication**: Expose invariants, log transitions.
-
-== Core Concept: System Invariant
-
-* **Definition**: Condition that holds true across executions.
-* **Importance**: Must be made explicit for system reliability.
-* **Mechanisms**: State, timing, retries.
-* **Failure Mode**: Violation of conditions leading to errors.
-* **Design Implication**: Expose invariant, validate with tests.
-
-== Core Concept: Failure Mode
-
-* **Definition**: Recurrent violation of invariants or progress loss.
-* **Importance**: Necessitates clear system assumptions.
-* **Mechanisms**: Timing, state, intersections of workflow.
-* **Failure Mode**: Duplicate work and misleading process evidence.
-* **Design Implication**: Document invariants, validate transitions.
-
-== System Architecture View
-
-[plantuml, target=name, format=svg, width=80%]
-----
+[plantuml, width=100%]
+....
 @startuml
-skinparam monochrome true
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
 skinparam shadowing false
+skinparam componentStyle rectangle
+skinparam defaultTextAlignment center
+skinparam packageBorderColor #123456
+skinparam rectangleBorderColor #123456
+skinparam rectangleBackgroundColor white
+skinparam rectangleFontColor black
 left to right direction
 
-rectangle "Duplicate Execution" as Topic
-rectangle "At-Least-Once Delivery" as A
-rectangle "Double Processing" as B
-rectangle "Side Effect Inflation" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Duplicate Execution" as Topic #white
+rectangle "At-Least-Once\nDelivery" as A #white
+rectangle "Double\nProcessing" as B #white
+rectangle "Side Effect\nInflation" as C #white
+rectangle "System\nInvariant" as I #white
+rectangle "Design\nResponse" as D #white
 
 Topic --> A
 A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+B -> C
+C -> I
+I -> D
+D --> Topic : refine
 @enduml
-----
+....
 
-== Worked Example: Problem Setup
+== Delivery Pressure
 
-* **Podcast Domain**:
-  * Scenario: `AudioCleaner` finishes but acknowledgment lost; job duplicated.
-* **Order System**: Double-shipping from two redundant workers.
+[plantuml, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam participantBorderColor #123456
+skinparam participantBackgroundColor white
+skinparam participantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
 
-== Naive Implementation
+participant "Queue" as Q #white
+participant "Worker A" as A #white
+participant "Worker B" as B #white
+participant "Side Effect" as S #white
 
-* Assumes operation occurs once and correctly.
-* Invisible design assumption leads to false confidence.
+Q --> A : deliver event-9
+A --> S : perform work
+A --> Q : ack lost
+Q --> B : redeliver event-9
+B --> S : repeat work
+@enduml
+....
 
-```text
-actor performs operation
-system reads current state
-system applies transition
-system emits side effect
-```
+== Delivery Pressure
+
+[plantuml, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam participantBorderColor #123456
+skinparam participantBackgroundColor white
+skinparam participantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+
+participant "Worker" as W #white
+participant "Idempotency Store" as S #white
+participant "Audit Log" as L #white
+
+W --> S : claim event-9
+S --> W : already seen?
+W --> L : record transition
+W --> W : decide once
+@enduml
+....
 
 == Failure Scenario
 
-* Overlap execution leads to stale state, or stuck workflow.
-* Misalignment between design and execution model.
+[plantuml, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam participantBorderColor #123456
+skinparam participantBackgroundColor white
+skinparam participantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
 
-== Improved Design Direction
+participant "Worker A" as A #white
+participant "Queue" as Q #white
+participant "Worker B" as B #white
+participant "Order System" as O #white
 
-* Name invariant, ensure observable transitions, add controls.
-* Introduce version checks, idempotency keys, or retries.
+A --> O : ship order-42
+A --> Q : crash before ack
+Q --> B : redeliver order-42
+B --> O : ship order-42 again
+@enduml
+....
 
-== Safer Design Rationale
+== Failure Scenario
 
-* Shift from hoping for order to proving invalid states are addressed.
-* Ensures that workflow interleavings are managed adequately.
+[plantuml, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam participantBorderColor #123456
+skinparam participantBackgroundColor white
+skinparam participantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
 
-== Failure Modes and Anti-Patterns
+participant "Happy Path Test" as T #white
+participant "Real Pressure" as P #white
+participant "False Confidence" as F #white
 
-* **Symptom**: Single happy-path test passes.
-  * **Detection**: Add concurrent events or structured logging.
-  * **Correction**: Maintain happy-path test with failure scenarios.
+T --> F : passes once
+P --> F : duplicate execution appears
+F --> F : invariant is violated
+@enduml
+....
 
-* **Symptom**: Focus on tools rather than design properties.
-  * **Detection**: Identify mechanism protecting invariant.
-  * **Correction**: State invariant first, then select mechanism.
+== Corrective Design
 
-* **Symptom**: Vague evidence fails to support claims.
-  * **Detection**: Reviewer cannot trace failures.
-  * **Correction**: Capture structured evidence directly linked to claims.
+[plantuml, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam participantBorderColor #123456
+skinparam participantBackgroundColor white
+skinparam participantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
 
-* **Symptom**: Fix alters behavior with no baseline comparison.
-  * **Detection**: Lacks a repeatable failure case.
-  * **Correction**: Retain failing test; rerun post-redesign.
+participant "Handler" as H #white
+participant "Guard" as G #white
+participant "State" as S #white
+participant "External Side Effect" as E #white
 
-== Trade-Off Analysis
+H --> G : check idempotency key
+G --> S : verify not completed
+S --> H : claim transition
+H --> E : perform once
+H --> S : record completion
+@enduml
+....
 
-[cols="1,1,1,1", options="header"]
+== Corrective Design
+
+[plantuml, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam participantBorderColor #123456
+skinparam participantBackgroundColor white
+skinparam participantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+
+participant "Retry" as R #white
+participant "Idempotent Handler" as H #white
+participant "Audit Trail" as A #white
+
+R --> H : retry event-9
+H --> A : same decision, same record
+H --> A : no duplicate side effect
+@enduml
+....
+
+== Evidence and Trade-Offs
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain/implement | Hides timing assumptions | First implementation
-| Guarded transitions | Protects core invariant | Needs careful modeling | Workflow steps
-| Explicit coordination | Displays dependencies clearly | Risk of deadlocks | Multi-object workflows
-| Idempotent design | Manages duplicates | Requires additional control | Queued operations
-| Observability focus | Strong evidence production | Instrumentation needed | Failure proof assignments
+|Approach |Strength |Weakness |Use When
+
+|Simple baseline
+|Easy to explain
+|Hides timing pressure
+|First comparison point
+
+|Guarded state transition
+|Protects the invariant
+|Requires state modeling
+|Workflow steps
+
+|Explicit coordination
+|Makes ordering visible
+|Can bottleneck
+|Multiple dependent objects
+
+|Idempotent design
+|Tolerates retries
+|Needs keys or deduplication
+|Queues and async workers
 |===
-
-== Practical Application
-
-* Identify invariants relevant to duplicate execution.
-* Write a sequential success scenario.
-* Write a pressure scenario to expose failure.
-* Include operation IDs in logs for pressure test.
-* Capture before/after evidence post-fix.
-* Update Integrity Packet reflecting assumptions and validation.
-
-== Assignment Integration
-
-* Connect lecture concepts to [A3](../../../assignments/A3/index.md).
-* Demonstrate mastery with structured evidence and explanations.
-
-== Validation Questions
-
-1. What key invariant is relevant to this topic?
-2. Which hidden assumption may mislead the design's correctness?
-3. How would you force failure in testing?
-4. What evidence supports the claim of failure?
-5. What first design mechanism would you choose and why?
-6. How would issues manifest in different implementations?
-7. What to document in Integrity Packet for defense?
-
-== Summary
-
-* Duplicate execution examines system correctness under real conditions.
-* Connect concepts to invariants, behavior, and verifiable trade-offs.
-* Design maturity derives from evidence, stress testing, and validation.
-
-== Further Reading
-
-* Search: "Duplicate Execution distributed systems failure mode"
-* Search: "Duplicate Execution concurrency design tradeoffs"
-* Topics: structured logging, correlation IDs, invariants, message queues, idempotency.

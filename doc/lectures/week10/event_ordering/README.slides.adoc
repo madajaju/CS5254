@@ -11,169 +11,564 @@ Dr. Darren Pulsipher
 :icons: font
 :stem:
 
-== Learning Objectives
+== Why It Breaks
 
-* Analyze design pressure due to out-of-order events
-* Diagnose hidden assumptions in the system
-* Evaluate failure evidence using logs and traces
-* Design corrections to preserve invariants
-* Defend approaches in the Integrity Packet
+* Delivery order is not logical order
+* Fast workers can outrun slow ones
+* Old events can overwrite new state
+* Happy-path tests hide timing pressure
 
-== Opening Narrative
+== Non-FIFO
 
-* Arriving events might not follow expected order.
-* Logic dictates that delivery order ≠ logical order.
-* System must adapt when time and causality diverge.
-
-== Core Concepts: Non-FIFO Queues
-
-* Definition: Many queues don’t guarantee order.
-* Importance: Must be explicit for system trust.
-
-== Core Concepts: Race to the Consumer
-
-* Definition: Event B can finish before Event A.
-* Importance: Must clarify under pressure.
-
-== Core Concepts: State Regression
-
-* Definition: Older event overwrites newer.
-* Importance: Trust requires explicit handling.
-
-== Core Concepts: Asynchronous Boundary
-
-* Definition: Work continues later or on different worker.
-* Importance: Needs clear communication.
-
-== Core Concepts: Temporal Coupling
-
-* Definition: Hidden dependency on event timing.
-* Importance: Must be made clear for trust.
-
-== System / Architecture View
-
-[plantuml, target=architecture, format=svg, width=80%]
+[plantuml, target=non_fifo, format=svg, width=100%]
 ----
 @startuml
-skinparam monochrome true
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 skinparam shadowing false
 left to right direction
 
-rectangle "Out-of-Order Events" as Topic
-rectangle "Non-FIFO Queues" as A
-rectangle "Race to the Consumer" as B
-rectangle "State Regression" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
+rectangle "Producer" as P
+rectangle "Queue" as Q
+rectangle "Worker A" as A
+rectangle "Worker B" as B
 
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
+P -> Q : A then B
+Q --> B : B first
+Q --> A : A later
 @enduml
 ----
 
-== Worked Example
+== Race to Consumer
 
-== Problem Setup
-
-* **Podcast Domain**: `EpisodeApproved` sent, then `EpisodePublished`. 
-* Fails if `Published` arrives first.
-
-* **Order System**: `CancelOrder` arriving before `CreateOrder`.
-
-== Naive Implementation
-
-A naive design assumes operations happen once, in order.
-
-[source,language]
+[plantuml, target=race_consumer, format=svg, width=100%]
 ----
-actor performs operation
-system reads current state
-system applies transition
-system emits side effect
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Event A" as A
+rectangle "Event B" as B
+rectangle "Worker 1" as W1
+rectangle "Worker 2" as W2
+
+A --> W1 : publish
+B --> W2 : publish
+W2 --> W2 : finish first
+W1 --> W1 : still running
+@enduml
 ----
 
-== Failure Scenario
+== Hidden Assumption
 
-* Overlap causes stale state or late arrivals.
+* “First sent” does not mean “first handled”
+* “Handled” does not mean “committed”
+* “Committed” does not mean “acknowledged”
+* Time can split delivery from causality
 
-== Improved Design Direction
+== Async Boundary
 
-* Name invariant and make transitions observable.
+[plantuml, target=async_boundary, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-== Why Improved Design Is Safer
+rectangle "Caller" as C
+rectangle "Queue" as Q
+rectangle "Later Worker" as W
+database "State" as S
 
-* Proves invalid interleavings are handled effectively.
+C --> Q : enqueue
+Q -> W : later delivery
+W --> S : update state
+@enduml
+----
 
-== Failure Modes: Single Happy-Path Pass
+== State Regression
 
-* Symptom: System passes a single happy-path demonstration.
-* Why: Test misses timing pressures.
+[plantuml, target=state_regression, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-== Failure Modes: Tool vs. Property
+state "NEW" as N
+state "APPROVED" as A
+state "PUBLISHED" as P
 
-* Symptom: Names a tool, not a design property.
-* Why: Focus shifts to mechanisms over invariants.
+N -> A : approval
+A --> P : publish
+P --> A : late stale write
+@enduml
+----
 
-== Failure Modes: Vague Evidence
+== Regression Failure
 
-* Symptom: Evidence is too vague to support the claim.
-* Why: Insufficient logs; cannot trace failures.
+[plantuml, target=regression_failure, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
 
-== Failure Modes: Fix Without Comparison
+rectangle "Late Event" as L
+rectangle "Current State" as S
+rectangle "Broken Workflow" as B
 
-* Symptom: Fix changes behavior without comparison.
-* Why: Baseline not preserved as a scenario.
+L -> S : overwrite
+S --> B : stale result
+@enduml
+----
 
-== Trade-Off Analysis
+== Corrective Control
 
-[cols="1,1,1,1", options="header"]
+* Name the invariant first
+* Guard state transitions
+* Make retries safe
+* Capture evidence, not guesses
+
+== Guarded State
+
+[plantuml, target=guarded_state, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+state "Seen" as S
+state "Guarded" as G
+state "Applied" as A
+state "Rejected" as R
+
+S -> G : claim id
+G --> A : valid order
+G --> R : stale event
+@enduml
+----
+
+== Idempotency Flow
+
+[plantuml, target=idempotency_flow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Worker" as W
+database "Dedup Store" as D
+rectangle "Side Effect" as S
+
+W -> D : check key
+D --> W : miss / hit
+W --> S : apply once
+@enduml
+----
+
+== Evidence
+
+[plantuml, target=evidence_flow, format=svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam ActorBorderColor #123456
+skinparam ActorFontColor white
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam database {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam state {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam activity {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam note {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam shadowing false
+left to right direction
+
+rectangle "Claim" as C
+rectangle "Logs" as L
+rectangle "Trace" as T
+rectangle "Review" as R
+
+C -> L : correlate IDs
+L --> T : reconstruct order
+T -> R : defend fix
+@enduml
+----
+
+== Tradeoffs
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-| Simple baseline | Easy to explain | Hides timing assumptions | Initial implementation
-| Guarded transition | Protects invariant | Needs careful modeling | Status changes
-| Explicit coordination | Visibility of dependencies | May cause delays | Multi-object workflows
-| Idempotent design | Handles duplicates | Needs keys & deduplication | Queues, retries
-| Observability design | Strong evidence | Adds instrumentation | Assignments needing proof
+| Approach | Strength | Weakness | Use
+| Baseline | Simple | Hides timing | First version
+| Guarded | Protects invariant | Needs modeling | State changes
+| Idempotent | Retry-safe | Extra storage | Queues and retries
+| Observed | Strong evidence | More logging | Review and defense
 |===
 
-== Practical Application
+== Practical Move
 
-* Identify relevant invariant for out-of-order events.
-* Write a scenario expected to succeed.
-* Write a pressure scenario to expose failure.
-* Enhance logs with operation and entity IDs.
-* Capture evidence before/after fixes.
-* Update Integrity Packet with assumptions and validations.
+* Write the invariant
+* Build one failure test
+* Add operation IDs
+* Capture before and after
+* Update the Integrity Packet
 
-== Assignment Integration
+== Assignment Link
 
-* Connect to [A3](../../../assignments/A3/index.md).
-* Demonstrate mastery with concrete evidence: logs, behavior, design defense.
+* Show the object or workflow
+* Reproduce the failure
+* Defend the correction
+* Connect to A3 evidence
 
-== Validation and Interview Questions
+== Discussion
 
-1. What invariant is relevant here?
-2. What hidden assumption seems correct?
-3. How to force failure in a test?
-4. What evidence proves failure?
-5. Which design mechanism would you choose?
-6. How might this issue appear in your implementations?
-7. What to record in the Integrity Packet?
-
-== Summary
-
-* Out-of-order events reflect system correctness under real conditions.
-* Connect concepts to invariants and observable behavior.
-* A design is mature only when supported by evidence. 
-
-== Further Reading
-
-* "Out-of-Order Events distributed systems failure mode"
-* "Out-of-Order Events concurrency design tradeoffs"
-* Structured logging and correlation IDs
-* Invariants in stateful systems
-* Message queues, idempotency, event ordering
+* What breaks first in your domain: ordering, state, or evidence?
+* Which control would you choose, and what new risk does it create?
