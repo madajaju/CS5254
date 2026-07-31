@@ -192,11 +192,11 @@ skinparam ParticipantBorderColor #123456
 skinparam ParticipantBackgroundColor white
 skinparam ParticipantFontColor black
 
-participant "Order API" as API
-participant "Coordinator" as C
-participant "Inventory" as I
-participant "Payment" as P
-participant "Shipping" as S
+rectangle "Order API" as API
+rectangle "Coordinator" as C
+rectangle "Inventory" as I
+rectangle "Payment" as P
+rectangle "Shipping" as S
 
 API --> C : create order-42
 C --> I : reserve inventory
@@ -330,10 +330,10 @@ skinparam ParticipantBorderColor #123456
 skinparam ParticipantBackgroundColor white
 skinparam ParticipantFontColor black
 
-participant "Coordinator" as C
-participant "Inventory" as I
-participant "Payment" as P
-participant "Callback" as B
+rectangle "Coordinator" as C
+rectangle "Inventory" as I
+rectangle "Payment" as P
+rectangle "Callback" as B
 
 C --> I : acquire inventory lock
 B --> P : acquire payment lock
@@ -361,10 +361,10 @@ skinparam ParticipantBorderColor #123456
 skinparam ParticipantBackgroundColor white
 skinparam ParticipantFontColor black
 
-participant "Payment" as P
-participant "Coordinator" as C
-participant "Inventory" as I
-participant "Order State" as O
+rectangle "Payment" as P
+rectangle "Coordinator" as C
+rectangle "Inventory" as I
+rectangle "Order State" as O
 
 P --> C : payment confirmed early
 C --> O : reads inventory missing

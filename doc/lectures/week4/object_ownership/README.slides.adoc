@@ -265,10 +265,10 @@ skinparam ParticipantBackgroundColor white
 skinparam ParticipantFontColor black
 skinparam shadowing false
 
-participant "Worker A" as A
-participant "Episode Record" as R
-participant "Worker B" as B
-participant "Processing Job" as J
+rectangle "Worker A" as A
+rectangle "Episode Record" as R
+rectangle "Worker B" as B
+rectangle "Processing Job" as J
 
 A --> R : reads DRAFT
 B --> R : reads DRAFT
@@ -368,10 +368,10 @@ skinparam ParticipantBackgroundColor white
 skinparam ParticipantFontColor black
 skinparam shadowing false
 
-participant "Worker A" as A
-participant "Guarded Episode Record" as R
-participant "Worker B" as B
-participant "Processing Job" as J
+rectangle "Worker A" as A
+rectangle "Guarded Episode Record" as R
+rectangle "Worker B" as B
+rectangle "Processing Job" as J
 
 A --> R : compare DRAFT to PROCESSING
 R --> A : accepted

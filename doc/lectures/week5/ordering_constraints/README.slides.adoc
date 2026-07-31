@@ -73,10 +73,10 @@ skinparam sequence {
   ParticipantBackgroundColor white
   ParticipantFontColor black
 }
-participant "Producer" as P
-participant "Queue" as Q
-participant "Approval Handler" as A
-participant "Publish Handler" as H
+rectangle "Producer" as P
+rectangle "Queue" as Q
+rectangle "Approval Handler" as A
+rectangle "Publish Handler" as H
 
 P --> Q : approval event
 P --> Q : publish event
@@ -251,11 +251,11 @@ skinparam sequence {
   ParticipantBackgroundColor white
   ParticipantFontColor black
 }
-participant "Order API" as API
-participant "Coordinator" as C
-participant "Inventory" as I
-participant "Payment" as P
-participant "Shipping" as S
+rectangle "Order API" as API
+rectangle "Coordinator" as C
+rectangle "Inventory" as I
+rectangle "Payment" as P
+rectangle "Shipping" as S
 
 API --> C : create order-42
 C --> I : reserve inventory
@@ -317,10 +317,10 @@ skinparam sequence {
   ParticipantBackgroundColor white
   ParticipantFontColor black
 }
-participant "Payment Service" as P
-participant "Event Bus" as B
-participant "Coordinator" as C
-participant "Shipping Worker" as S
+rectangle "Payment Service" as P
+rectangle "Event Bus" as B
+rectangle "Coordinator" as C
+rectangle "Shipping Worker" as S
 
 P --> B : payment confirmed
 B --> S : ship request delivered early

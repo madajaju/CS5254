@@ -153,11 +153,11 @@ skinparam ParticipantFontColor black
 skinparam sequence {
   ArrowColor white
 }
-participant "Order API" as API
-participant "Coordinator" as C
-participant "Inventory" as I
-participant "Payment" as P
-participant "Shipping" as S
+rectangle "Order API" as API
+rectangle "Coordinator" as C
+rectangle "Inventory" as I
+rectangle "Payment" as P
+rectangle "Shipping" as S
 
 API --> C : create order-42
 C --> I : reserve inventory
@@ -295,10 +295,10 @@ skinparam LifeLineBackgroundColor white
 skinparam ParticipantBorderColor #123456
 skinparam ParticipantBackgroundColor white
 skinparam ParticipantFontColor black
-participant "Coordinator T1" as T1
-participant "Inventory Lock" as IL
-participant "Payment Lock" as PL
-participant "Payment Callback T2" as T2
+rectangle "Coordinator T1" as T1
+rectangle "Inventory Lock" as IL
+rectangle "Payment Lock" as PL
+rectangle "Payment Callback T2" as T2
 
 T1 --> IL : acquire inventory lock
 T2 --> PL : acquire payment lock
@@ -355,11 +355,11 @@ skinparam LifeLineBackgroundColor white
 skinparam ParticipantBorderColor #123456
 skinparam ParticipantBackgroundColor white
 skinparam ParticipantFontColor black
-participant "Queue" as Q
-participant "Worker A" as A
-participant "Worker B" as B
-participant "Payment API" as P
-participant "Order Log" as L
+rectangle "Queue" as Q
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Payment API" as P
+rectangle "Order Log" as L
 
 Q --> A : deliver capture command
 Q --> B : redeliver same command

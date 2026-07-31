@@ -1,7 +1,5 @@
 ﻿# Duplicate Execution
 
-
-## Video: https://youtu.be/NSq8S2dZKVI
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 10
@@ -60,7 +58,7 @@ A worker finishes a job, but its acknowledgement is lost before the queue record
 ## System / Architecture View
 ```plantuml
 @startuml
-
+skinparam monochrome true
 skinparam shadowing false
 left to right direction
 

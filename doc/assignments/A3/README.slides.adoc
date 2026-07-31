@@ -1,0 +1,1093 @@
+= A3 Assignment Review
+:author: Dr. Darren Pulsipher
+:revdate: 2026
+:revealjs_width: "100%"
+:revealjs_height: "100%"
+:revealjs_theme: simple
+:revealjs_transition: slide
+:revealjs_slideNumber: true
+:revealjs_history: true
+:revealjs_controls: true
+:revealjs_progress: true
+:revealjs_center: false
+:icons: font
+:source-highlighter: highlight.js
+:customcss: custom.css
+
+== Asynchronous Object Systems
+
+=== Collective Strengths and Weaknesses
+
+* Review of four A3 submissions
+* Focus on architecture, correctness, evidence, and AI-assisted engineering
+* Goal: move from _making systems asynchronous_ to _proving they are correct_
+
+[.notes]
+--
+Use this opening to frame the review as a collective learning exercise rather than a ranking exercise.
+--
+
+== Assignment Intent
+
+A3 asked students to evolve their A2 coordinated systems into asynchronous or event-driven object systems.
+
+Students were expected to:
+
+[.columns]
+[.column]
+--
+* preserve continuity from A2
+* identify blocking interactions
+* design asynchronous workflows
+* implement comparable behavior in two stacks
+--
+
+[.column]
+--
+* demonstrate async-specific failures
+* add correctness controls
+* compare blocking and asynchronous behavior
+* critically evaluate AI assistance
+--
+
+=== Architectural Evolution
+
+[plantuml, a3-architectural-evolution, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor transparent
+skinparam shadowing false
+skinparam DefaultFontColor #263238
+skinparam ArrowColor #455a64
+skinparam ArrowFontColor #37474f
+skinparam rectangle {
+  BackgroundColor #f7f9fa
+  BorderColor #455a64
+  FontColor #263238
+  RoundCorner 12
+}
+skinparam queue {
+  BackgroundColor #fff3cd
+  BorderColor #b7791f
+  FontColor #5f4500
+}
+left to right direction
+
+rectangle "A2: Coordinated System" as A2 {
+  rectangle "Caller" as C1
+  rectangle "Coordinator" as CO
+  rectangle "Domain\nObjects" as D1
+  C1 --> CO : blocking call
+  CO --> D1 : ordered work
+}
+
+rectangle "A3: Asynchronous Object System" as A3 {
+  rectangle "Producer" as P
+  queue "Event Queue" as Q
+  rectangle "Worker" as W
+  rectangle "Domain\nObjects" as D2
+  P --> Q : immutable event
+  Q --> W : asynchronous delivery
+  W --> D2 : guarded transition
+}
+
+A2 -[#2f80ed,dashed]-> A3 : preserve business meaning\nchange coordination model
+@enduml
+----
+
+[.notes]
+--
+Emphasize that the architectural boundary moved: the caller no longer owns the complete workflow lifetime, but the business semantics still must remain equivalent.
+--
+
+== Collective Performance
+
+[cols="2,1",options="header"]
+|===
+|Area |Overall Performance
+
+|Continuity from A2
+|Excellent
+
+|Async implementation
+|Excellent
+
+|Documentation
+|Excellent
+
+|Dual-stack parity
+|Excellent
+
+|Failure demonstrations
+|Very good
+
+|Correctness reasoning
+|Good
+
+|Blocking analysis
+|Good
+
+|Performance evidence
+|Moderate
+
+|Integrity Packet quality
+|Moderate
+|===
+
+== The Big Picture
+
+The class was highly successful at:
+
+* building asynchronous systems
+* introducing event-driven structures
+* improving object boundaries
+* adding observability
+* working critically with AI
+
+The class was less consistent at:
+
+* proving semantic equivalence
+* defining invariants
+* measuring throughput and latency
+* validating emergent failure behavior
+* consolidating evidence
+
+== Strength 1: Continuity from A2
+
+All strong submissions treated A3 as an evolution rather than a restart.
+
+Students generally:
+
+* preserved the original domain
+* retained core object responsibilities
+* mapped A2 workflow stages into A3
+* isolated what changed and why
+* documented intentional redesigns
+
+=== Why This Matters
+
+Architectural evolution is more realistic than greenfield redesign.
+
+Professionally, engineers rarely get to start over.
+
+The strongest work demonstrated:
+
+* respect for existing responsibilities
+* controlled refactoring
+* bounded architectural change
+* clear migration reasoning
+
+== Strength 2: Event-Driven Thinking
+
+Students moved beyond simply adding `async`, threads, or futures.
+
+Common architectural elements included:
+
+[.columns]
+[.column]
+--
+* producers and consumers
+* event or task queues
+* worker objects
+* background processing
+--
+
+[.column]
+--
+* asynchronous publishers
+* retry paths
+* workflow status tracking
+--
+
+=== Key Learning
+
+Asynchronous design is not a syntax change.
+
+It changes:
+
+[.columns]
+[.column]
+--
+* control flow
+* ownership
+* failure propagation
+--
+
+[.column]
+--
+* observability
+* lifecycle management
+* correctness assumptions
+--
+
+=== Reference Architecture
+
+[plantuml, a3-reference-architecture, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor transparent
+skinparam shadowing false
+skinparam DefaultFontColor #263238
+skinparam ArrowColor #455a64
+skinparam ArrowFontColor #37474f
+skinparam component {
+  BackgroundColor #f7f9fa
+  BorderColor #455a64
+  FontColor #263238
+}
+skinparam queue {
+  BackgroundColor #fff3cd
+  BorderColor #b7791f
+  FontColor #5f4500
+}
+skinparam database {
+  BackgroundColor #e8f5e9
+  BorderColor #2e7d32
+  FontColor #1b5e20
+}
+left to right direction
+
+actor Caller
+component "API / Producer" as API
+queue "Work Queue" as WQ
+component "Consumer / Worker" as Worker
+component "State Machine\n+ Invariant Guards" as FSM
+database "Domain State" as State
+queue "Retry / Dead Letter" as DLQ
+component "Logs, Metrics,\nWorkflow Status" as Obs
+
+Caller --> API : submit
+API --> WQ : event + correlation ID
+API --> Caller : accepted + operation ID
+WQ --> Worker : deliver
+Worker --> FSM : request transition
+FSM --> State : valid, idempotent write
+FSM -[#c0392b]-> DLQ : retry exhausted
+DLQ -[#c0392b,dashed]-> WQ : bounded retry
+API ..> Obs
+Worker ..> Obs
+FSM ..> Obs
+State ..> Obs
+@enduml
+----
+
+The architecture separates _acceptance_, _execution_, _correctness_, and _evidence_.
+
+== Strength 3: Better Object Ownership
+
+Compared with A2, object ownership was usually much clearer.
+
+Common improvements:
+
+[.columns]
+[.column]
+--
+* immutable event objects
+* fewer shared mutable objects
+* explicit worker responsibilities
+--
+
+[.column]
+--
+* domain objects separated from transport messages
+* clearer creation and lifecycle ownership
+* reduced direct coupling between stages
+--
+
+=== Strong Design Pattern
+
+[plantuml, immutable-message-boundary, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor transparent
+skinparam shadowing false
+skinparam DefaultFontColor #263238
+skinparam ArrowColor #455a64
+skinparam ArrowFontColor #37474f
+skinparam rectangle {
+  BackgroundColor #f7f9fa
+  BorderColor #455a64
+  FontColor #263238
+  RoundCorner 12
+}
+skinparam queue {
+  BackgroundColor #fff3cd
+  BorderColor #b7791f
+  FontColor #5f4500
+}
+left to right direction
+
+rectangle "Domain Object" as Domain
+rectangle "Immutable\nEvent / Message" as Event #e3f2fd
+queue "Queue" as Queue
+rectangle "Consumer /\nWorker" as Worker
+rectangle "Guarded State\nTransition" as Transition #e8f5e9
+
+Domain --> Event : snapshot intent
+Event --> Queue : transfer ownership
+Queue --> Worker : deliver
+Worker --> Transition : apply once if legal
+@enduml
+----
+
+== Strength 4: Observability
+
+Most submissions recognized that asynchronous systems are difficult to debug without context.
+
+Common additions included:
+
+[.columns]
+[.column]
+--
+* correlation IDs
+* operation IDs
+* event IDs
+* structured logs
+--
+
+[.column]
+--
+* workflow status endpoints
+* retry counters
+* final-state summaries
+--
+
+=== Why Correlation Matters
+
+Without correlation:
+
+[source,text]
+----
+Worker started
+Retrying
+Publish complete
+Processing failed
+----
+
+With correlation:
+
+[source,text]
+----
+correlationId=abc123 event=PROCESS_REQUESTED
+correlationId=abc123 attempt=2 event=PUBLISH_RETRY
+correlationId=abc123 state=PUBLISHED
+----
+
+== Strength 5: Failure Awareness
+
+Students demonstrated a broad range of asynchronous failure modes:
+
+[.columns]
+[.column]
+--
+* duplicate delivery
+* out-of-order processing
+* stale events
+* lost or delayed messages
+* retry duplication
+--
+
+[.column]
+--
+* post-write ambiguity
+* invalid late completion
+* retry exhaustion
+* worker failure
+--
+
+=== Strongest Submissions
+
+The strongest projects did not merely throw exceptions.
+
+They connected:
+
+* failure cause
+* observed behavior
+* correctness risk
+* control
+* evidence of mitigation
+
+== Strength 6: Correctness Controls
+
+Common controls included:
+
+[.columns]
+[.column]
+--
+* idempotency keys
+* deduplication
+* retry limits
+* status guards
+* event freshness checks
+--
+
+[.column]
+--
+* sequencing
+* state transitions
+* dead-letter handling
+* idempotent output
+--
+
+=== Control Mapping
+
+[cols="2,2",options="header"]
+|===
+|Failure |Typical Control
+
+|Duplicate event
+|Deduplication or idempotency key
+
+|Out-of-order event
+|State guard or sequence number
+
+|Infinite retry
+|Retry limit and dead-letter handling
+
+|Stale event
+|Timestamp or version guard
+
+|Duplicate side effect
+|Idempotent write
+
+|Invalid completion
+|State-machine transition check
+|===
+
+=== Where Correctness Lives
+
+[plantuml, correctness-control-boundaries, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor transparent
+skinparam shadowing false
+skinparam DefaultFontColor #263238
+skinparam ArrowColor #455a64
+skinparam ArrowFontColor #37474f
+skinparam rectangle {
+  BackgroundColor #f7f9fa
+  BorderColor #455a64
+  FontColor #263238
+  RoundCorner 12
+}
+skinparam queue {
+  BackgroundColor #fff3cd
+  BorderColor #b7791f
+  FontColor #5f4500
+}
+left to right direction
+
+rectangle "Event" as E
+rectangle "Identity Gate\nDeduplication" as ID #e3f2fd
+rectangle "Order Gate\nVersion / Sequence" as OG #e3f2fd
+rectangle "State Gate\nLegal Transition" as SG #e3f2fd
+rectangle "Side Effect\nIdempotent Write" as SE #e8f5e9
+queue "Retry or\nDead Letter" as R
+
+E --> ID
+ID --> OG : unseen
+OG --> SG : current
+SG --> SE : legal
+ID -down-> R : duplicate
+OG -down-> R : stale
+SG -down-> R : illegal
+SE -down-> R : transient failure
+@enduml
+----
+
+Each boundary rejects a different class of invalid work; no single queue or lock provides all four guarantees.
+
+== Strength 7: Dual-Stack Parity
+
+Most students implemented comparable behavior across both selected stacks.
+
+Strong submissions matched:
+
+[.columns]
+[.column]
+--
+* event types
+* workflow stages
+* retry semantics
+* logging fields
+--
+
+[.column]
+--
+* configuration
+* tests
+* final-state behavior
+--
+
+=== Important Distinction
+
+Comparable does not mean line-for-line identical.
+
+It means both implementations express the same:
+
+* architecture
+* responsibilities
+* failure behavior
+* correctness model
+* observable outcomes
+
+== Strength 8: Better AI Usage
+
+AI use was much more thoughtful than in earlier assignments.
+
+Students increasingly documented:
+
+[.columns]
+[.column]
+--
+* what AI recommended
+* what risks they identified
+* what they accepted
+--
+
+[.column]
+--
+* what they rejected
+* what they modified
+* how they verified the result
+--
+
+=== Mature AI Use
+
+[source,text]
+----
+AI proposes
+     |
+     v
+Student critiques
+     |
+     v
+Student modifies
+     |
+     v
+Student validates
+     |
+     v
+Evidence retained
+----
+
+== Weakness 1: Implementation Outpaced Correctness
+
+The most common weakness was not implementation quality.
+
+It was insufficient proof that the asynchronous system preserved the original behavior.
+
+Many students explained correctness.
+
+Fewer demonstrated it.
+
+=== Missing Evidence
+
+Few submissions included a deterministic test that:
+
+. runs identical input through A2
+. runs identical input through A3
+. waits for asynchronous completion
+. compares final object state
+. compares side effects
+. fails on any semantic difference
+
+== Recommended Equivalence Test
+
+[plantuml, deterministic-equivalence-test, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor transparent
+skinparam shadowing false
+skinparam DefaultFontColor #263238
+skinparam ArrowColor #455a64
+skinparam ArrowFontColor #37474f
+skinparam rectangle {
+  BackgroundColor #f7f9fa
+  BorderColor #455a64
+  FontColor #263238
+  RoundCorner 12
+}
+left to right direction
+
+rectangle "Fixed Input X" as X #e3f2fd
+rectangle "A2 Blocking\nExecution" as A2
+rectangle "A3 Async\nExecution" as A3
+rectangle "Wait for Terminal\nAsync State" as Wait
+rectangle "Result R1\nstate + effects + invariants" as R1
+rectangle "Result R2\nstate + effects + invariants" as R2
+rectangle "Semantically\nEquivalent?" as Compare #fff3cd
+rectangle "PASS" as Pass #e8f5e9
+rectangle "FAIL:\narchitectural regression" as Fail #ffebee
+
+X --> A2
+X --> A3
+A2 --> R1
+A3 --> Wait
+Wait --> R2
+R1 --> Compare
+R2 --> Compare
+Compare --> Pass : yes
+Compare --> Fail : no
+@enduml
+----
+
+=== Why This Matters
+
+Asynchronous execution should change coordination.
+
+It should not silently change business meaning.
+
+== Weakness 2: Blocking Analysis Was Sometimes Superficial
+
+Most students found blocking calls.
+
+Not all explained the system-level consequences.
+
+Weak analysis:
+
+[source,text]
+----
+This method blocks.
+----
+
+Strong analysis:
+
+[source,text]
+----
+The caller remains occupied until all downstream stages complete,
+which increases response latency, couples lifecycle management,
+limits independent scaling, and makes failures propagate synchronously.
+----
+
+== Weakness 3: Failure Injection Dominated
+
+Many failures were demonstrated by:
+
+* forced exceptions
+* configuration flags
+* artificial delays
+* manually duplicated events
+
+These are valid techniques, but they are not the whole story.
+
+=== Missing Emergent Failures
+
+Students should also explore failures that arise naturally from concurrency:
+
+[.columns]
+[.column]
+--
+* race conditions
+* stale reads
+* conflicting updates
+* timing windows
+--
+
+[.column]
+--
+* reordered completion
+* task completion after cancellation
+* cross-worker ownership conflicts
+--
+
+== Weakness 4: Performance Claims Were Under-Measured
+
+Most submissions claimed improved responsiveness.
+
+Few measured it rigorously.
+
+Useful metrics would include:
+
+[.columns]
+[.column]
+--
+* submission latency
+* end-to-end latency
+* workflows per second
+* queue depth
+--
+
+[.column]
+--
+* average retry count
+* worker utilization
+* backlog growth
+* time to recovery
+--
+
+=== Responsiveness Is Not Throughput
+
+An async design may return control quickly while total processing time remains unchanged.
+
+[source,text]
+----
+Submission latency  !=  End-to-end latency
+Responsiveness      !=  Throughput
+Concurrency         !=  Correctness
+----
+
+== Weakness 5: State Machines Were Underused
+
+Many projects tracked status.
+
+Fewer defined an explicit state machine.
+
+=== Why State Machines Help
+
+A state machine makes legal and illegal transitions visible.
+
+[plantuml, workflow-state-machine, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor transparent
+skinparam shadowing false
+skinparam DefaultFontColor #263238
+skinparam ArrowColor #455a64
+skinparam ArrowFontColor #37474f
+skinparam state {
+  BackgroundColor #f7f9fa
+  BorderColor #455a64
+  FontColor #263238
+}
+left to right direction
+
+[*] --> RECEIVED
+RECEIVED --> PROCESSING : begin
+PROCESSING --> PROCESSED : work succeeds
+PROCESSING --> PROCESSING_FAILED : work fails
+PROCESSING_FAILED --> PROCESSING : retry allowed
+PROCESSED --> PUBLISHING : publish requested
+PUBLISHING --> PUBLISHED : publish succeeds
+PUBLISHING --> PUBLISH_FAILED : publish fails
+PUBLISH_FAILED --> PUBLISHING : retry allowed
+PUBLISHED --> [*]
+
+PROCESSING_FAILED -[#c0392b]-> [*] : retries exhausted
+PUBLISH_FAILED -[#c0392b]-> [*] : retries exhausted
+@enduml
+----
+
+=== What State Machines Clarify
+
+They help answer:
+
+[.columns]
+[.column]
+--
+* Can this event run in the current state?
+* Is this transition legal?
+* Is this event stale?
+--
+
+[.column]
+--
+* Has this workflow already completed?
+* Should this retry continue?
+* Can this side effect occur twice?
+--
+
+== Weakness 6: Integrity Packets Were Fragmented
+
+Most students had the right material.
+
+The problem was organization.
+
+Evidence was often spread across:
+
+[.columns]
+[.column]
+--
+* README files
+* screenshots
+* logs
+--
+
+[.column]
+--
+* AI transcripts
+* test folders
+* separate integrity documents
+--
+
+=== A Better Integrity Packet
+
+A concise packet should contain:
+
+. AI recommendation summary
+. identified risks
+. accepted changes
+. rejected changes
+. student modifications
+. validation commands
+. representative evidence
+. correctness conclusion
+. known limitations
+
+== What Distinguished the Top Submissions
+
+The strongest projects consistently:
+
+[.columns]
+[.column]
+--
+* evolved A2 deliberately
+* separated domain and event objects
+* made ownership explicit
+* designed realistic failure modes
+* tied controls directly to failures
+--
+
+[.column]
+--
+* retained observable evidence
+* compared both stacks carefully
+* questioned AI recommendations
+* acknowledged limitations honestly
+--
+
+== Submission Patterns
+
+=== Flight Processing
+
+Strongest in:
+
+* async correctness reasoning
+* event freshness
+* duplicate handling
+* post-write ambiguity
+* workflow status controls
+
+Opportunity:
+
+* stronger deterministic A2-to-A3 equivalence test
+
+=== Student Registration
+
+Strongest in:
+
+* repository organization
+* dual-stack consistency
+* test infrastructure
+* repeated execution evidence
+
+Opportunity:
+
+* deeper state-machine and correctness reasoning
+
+=== Commodities Exchange
+
+Strongest in:
+
+* distributed architecture
+* performance measurement
+* transport flexibility
+* retry and dead-letter design
+* systems-level maturity
+
+Opportunity:
+
+* clearer semantic equivalence evidence
+
+=== Content Publishing Pipeline
+
+Strongest in:
+
+* object ownership
+* architectural evolution
+* immutable trigger design
+* documentation
+* AI critique
+
+Opportunity:
+
+* more quantitative performance evidence
+
+== Collective Lesson 1
+
+=== Asynchronous Does Not Mean Faster
+
+Async design may improve:
+
+[.columns]
+[.column]
+--
+* responsiveness
+* resource utilization
+* stage independence
+--
+
+[.column]
+--
+* fault isolation
+* scalability potential
+--
+
+It may also increase:
+
+[.columns]
+[.column]
+--
+* complexity
+* latency variance
+* debugging difficulty
+--
+
+[.column]
+--
+* failure modes
+* correctness risk
+--
+
+== Collective Lesson 2
+
+=== Duplicate Messages Are Normal
+
+Reliable asynchronous systems should assume:
+
+[.columns]
+[.column]
+--
+* a message may arrive more than once
+* a message may arrive late
+* a retry may repeat a side effect
+--
+
+[.column]
+--
+* a worker may fail after completing work
+* completion events may be delayed
+--
+
+Correctness controls should be designed around those assumptions.
+
+== Collective Lesson 3
+
+=== Observability Is Part of the Architecture
+
+Logging is not an afterthought.
+
+For async systems, observability must be designed into:
+
+[.columns]
+[.column]
+--
+* messages
+* workers
+* retries
+--
+
+[.column]
+--
+* state transitions
+* side effects
+* final completion
+--
+
+== Collective Lesson 4
+
+=== AI Can Accelerate Design, Not Replace Judgment
+
+Good AI-assisted engineering requires:
+
+* domain understanding
+* architectural skepticism
+* verification
+* evidence
+* ownership of the final decision
+
+== Recommendations for Future A3 Assignments
+
+=== Require Deterministic Equivalence
+
+Students should prove:
+
+[source,text]
+----
+A2 semantics == A3 semantics
+----
+
+for a controlled workload.
+
+=== Require Quantitative Evidence
+
+At minimum, capture:
+
+* submission latency
+* end-to-end completion time
+* throughput under concurrency
+* queue depth during load
+
+=== Require Explicit Invariants
+
+Examples:
+
+* an item cannot publish before processing
+* the same side effect occurs at most once
+* final state is terminal
+* stale events cannot overwrite newer state
+* retries terminate
+
+=== Require a State Machine
+
+Each submission should document:
+
+* states
+* legal transitions
+* invalid transitions
+* terminal states
+* retry behavior
+
+=== Standardize the Integrity Packet
+
+Use one consistent structure across all students.
+
+This will improve:
+
+* grading consistency
+* student reflection
+* AI accountability
+* evidence quality
+
+== Proposed A3 Maturity Model
+
+[cols="1,2",options="header"]
+|===
+|Level |Characteristics
+
+|1 — Async Syntax
+|Uses threads, promises, or async/await
+
+|2 — Async Workflow
+|Introduces queues, events, and workers
+
+|3 — Observable Async System
+|Adds correlation, status, and structured logs
+
+|4 — Correct Async System
+|Adds invariants, idempotency, sequencing, and guards
+
+|5 — Validated Async Architecture
+|Proves equivalence, measures behavior, and documents limitations
+|===
+
+== Final Assessment
+
+The class made a strong transition from coordinated systems to asynchronous object systems.
+
+The strongest collective achievements were:
+
+* architectural evolution
+* event-driven design
+* improved ownership
+* observability
+* AI critique
+
+The next major step is:
+
+[.lead]
+**Move from implementing asynchronous systems to proving that they are correct.**
+
+== Discussion
+
+What would you change in your A3 design after seeing the collective results?

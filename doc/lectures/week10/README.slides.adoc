@@ -1,0 +1,315 @@
+= Week 10
+
+== Duplicate Execution
+
+[plantuml,duplicate_execution_1,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Client
+rectangle Service
+rectangle DB
+Client --> Service : send request
+Service --> DB : write record
+DB --> Service : ack
+Service --> Client : success
+@enduml
+....
+
+[plantuml,duplicate_execution_2,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Client
+rectangle Service
+rectangle DB
+Client --> Service : retry same request
+Service --> DB : write again
+DB --> Service : duplicate row
+Service --> Client : error or double side effect
+@enduml
+....
+
+[plantuml,duplicate_execution_3,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Client
+rectangle Service
+rectangle DB
+Client --> Service : send idempotency key
+Service --> DB : check key
+DB --> Service : key exists
+Service --> Client : return cached result
+@enduml
+....
+
+== Out-of-Order Events
+
+[plantuml,event_ordering_1,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Producer
+rectangle Broker
+rectangle Consumer
+Producer --> Broker : event A then event B
+Broker --> Consumer : event B first
+Broker --> Consumer : event A later
+@enduml
+....
+
+[plantuml,event_ordering_2,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Producer
+rectangle Broker
+rectangle Consumer
+Producer --> Broker : attach sequence number
+Broker --> Consumer : deliver with ordering metadata
+Consumer --> Consumer : buffer until next expected number
+Consumer --> Consumer : release in order
+@enduml
+....
+
+== Lost Messages
+
+[plantuml,lost_messages_1,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Sender
+rectangle Network
+rectangle Receiver
+Sender --> Network : send message
+Network --> Receiver : message dropped
+Receiver --> Sender : no response
+@enduml
+....
+
+[plantuml,lost_messages_2,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Sender
+rectangle Network
+rectangle Receiver
+Sender --> Network : send with timeout
+Sender --> Network : retry after timeout
+Network --> Receiver : deliver once
+Receiver --> Sender : ack
+@enduml
+....
+
+[plantuml,lost_messages_3,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Sender
+rectangle Network
+rectangle Receiver
+Sender --> Network : send
+Network --> Receiver : deliver
+Receiver --> Sender : ack lost
+Sender --> Network : retry
+@enduml
+....
+
+== Retry Side Effects
+
+[plantuml,retry_side_effects_1,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Client
+rectangle API
+rectangle Payment
+Client --> API : submit order
+API --> Payment : charge card
+Payment --> API : charged
+API --> Client : success
+@enduml
+....
+
+[plantuml,retry_side_effects_2,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Client
+rectangle API
+rectangle Payment
+Client --> API : retry after timeout
+API --> Payment : charge card again
+Payment --> API : charged twice
+API --> Client : duplicate side effect
+@enduml
+....
+
+[plantuml,retry_side_effects_3,png,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+}
+actor Client
+rectangle API
+rectangle Store
+Client --> API : retry with request id
+API --> Store : check prior result
+Store --> API : already processed
+API --> Client : return same outcome
+@enduml
+....

@@ -1,0 +1,52 @@
+[
+  {
+    "slide": 1,
+    "topic": "Week 12",
+    "text": "Welcome to Week 12. This week we connect three ideas: what system stress actually means, how to load test in a disciplined way, and how observability helps you understand behavior when a system is under pressure. The goal is not just to make a system slow on purpose. The goal is to learn how to recognize safe operating limits, measure them, and defend those results with evidence."
+  },
+  {
+    "slide": 2,
+    "topic": "What is System Stress?",
+    "text": "System stress appears when demand approaches or exceeds capacity. As traffic rises, a system can move from normal behavior into a stress zone and then into failure if resources saturate. That transition matters because hidden assumptions often break down there. A system may look fine at low volume and still fail when queues build, dependencies slow down, or one bottleneck starts dragging everything else with it."
+  },
+  {
+    "slide": 3,
+    "topic": "What is System Stress?",
+    "text": "Stress is usually visible as a pattern. Latency grows first, then queues begin to pile up, and eventually errors appear. Common causes include traffic spikes, slow downstream services, memory pressure, CPU saturation, and I/O backlogs. The professional habit is to look for the earliest signs of overload before users experience a visible outage. That is how you find the safe limit instead of discovering it in production."
+  },
+  {
+    "slide": 4,
+    "topic": "What is System Stress?",
+    "text": "A useful mental model is the progression from normal load to a stress zone and then to failure mode. The point of studying stress is to understand where the system crosses from acceptable behavior into unsafe behavior. Once you can name that boundary, you can measure it, communicate it, and design around it."
+  },
+  {
+    "slide": 5,
+    "topic": "Load Testing Basics",
+    "text": "Load testing is a feedback loop. You generate traffic, observe how the system behaves, and then adjust the rate or the pattern based on what you learn. The important part is that it is controlled and repeatable. You are not trying to break things randomly; you are trying to measure where bottlenecks appear and how quickly the system recovers. That loop turns a stress test into engineering evidence."
+  },
+  {
+    "slide": 6,
+    "topic": "Load Testing Basics",
+    "text": "A good load test starts with realistic user journeys. If the traffic does not resemble real usage, the results can be misleading. Increase load gradually and repeatably so you can see where performance changes. Measure throughput, latency, and error rate together, because a system can keep serving requests while still becoming unhealthy. Keep the test data and environment as stable as you can, and stop once you reach a known limit or unsafe behavior."
+  },
+  {
+    "slide": 7,
+    "topic": "Load Testing Basics",
+    "text": "A common mistake is to drive the system too fast or use unrealistic traffic patterns. That can create false confidence because you may miss ramp-up problems or fail to reproduce real user behavior. If the test is too synthetic, the system may look stronger than it really is. A bad test can be worse than no test, because it produces evidence that seems authoritative but does not actually match the world you need to defend against."
+  },
+  {
+    "slide": 8,
+    "topic": "Observability Under Stress",
+    "text": "When a system is under load, observability becomes the difference between guessing and knowing. Metrics tell you when saturation is starting, logs help explain retries and errors, and traces let you follow a slow request across multiple services. Alerting should catch rate changes, not only complete outages, because stress usually builds before collapse. The key is to correlate these signals before and after the load increase so you can understand cause and effect."
+  },
+  {
+    "slide": 9,
+    "topic": "Observability Under Stress",
+    "text": "The recovery workflow matters as much as the failure itself. First you detect the issue, then you mitigate it with scaling, load shedding, or tuning, and then you retest to verify that the system actually recovered. After that, compare the before-and-after results so you can see whether the change protected the right property. A mitigation is only good if it restores the system without hiding the underlying limit or creating a new bottleneck elsewhere."
+  },
+  {
+    "slide": 10,
+    "topic": "Observability Under Stress",
+    "text": "Observability under stress is about closing the loop: detect, explain, mitigate, and verify. The goal is not just to know that a system is failing, but to understand why it is failing and whether the fix really worked. Metrics, logs, and traces together give you the evidence you need to make that judgment."
+  }
+]

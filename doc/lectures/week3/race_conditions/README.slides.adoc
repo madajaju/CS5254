@@ -33,7 +33,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -105,7 +105,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -178,7 +178,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -217,9 +217,9 @@ skinparam note {
 }
 skinparam shadowing false
 
-participant "Thread A" as A
-participant "Shared state" as S
-participant "Thread B" as B
+rectangle "Thread A" as A
+rectangle "Shared state" as S
+rectangle "Thread B" as B
 A --> S : read
 B --> S : read before A writes
 A --> S : modify write
@@ -249,7 +249,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -288,9 +288,9 @@ skinparam note {
 }
 skinparam shadowing false
 
-participant "Worker A" as A
-participant "Counter=7" as C
-participant "Worker B" as B
+rectangle "Worker A" as A
+rectangle "Counter=7" as C
+rectangle "Worker B" as B
 A --> C : read 7
 B --> C : read 7
 A --> C : write 8
@@ -320,7 +320,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -359,9 +359,9 @@ skinparam note {
 }
 skinparam shadowing false
 
-participant "Thread A" as A
-participant "Queue" as Q
-participant "Thread B" as B
+rectangle "Thread A" as A
+rectangle "Queue" as Q
+rectangle "Thread B" as B
 A --> Q : check not empty
 B --> Q : remove item
 A --> Q : act on missing item
@@ -390,7 +390,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -459,7 +459,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -521,7 +521,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -598,7 +598,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -637,9 +637,9 @@ skinparam note {
 }
 skinparam shadowing false
 
-participant "Podcast request A" as A
-participant "Episode row" as E
-participant "Podcast request B" as B
+rectangle "Podcast request A" as A
+rectangle "Episode row" as E
+rectangle "Podcast request B" as B
 A --> E : read ready
 B --> E : read ready
 A --> E : publish
@@ -660,7 +660,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -699,9 +699,9 @@ skinparam note {
 }
 skinparam shadowing false
 
-participant "Thread A" as A
-participant "Value x=10" as X
-participant "Thread B" as B
+rectangle "Thread A" as A
+rectangle "Value x=10" as X
+rectangle "Thread B" as B
 A --> X : read 10
 B --> X : read 10
 A --> X : write 11
@@ -729,7 +729,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -768,9 +768,9 @@ skinparam note {
 }
 skinparam shadowing false
 
-participant "Request A" as A
-participant "Episode status" as E
-participant "Request B" as B
+rectangle "Request A" as A
+rectangle "Episode status" as E
+rectangle "Request B" as B
 A --> E : sees pending
 B --> E : sees pending
 A --> E : publishes
@@ -797,7 +797,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -862,7 +862,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -952,7 +952,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -1023,7 +1023,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -1105,7 +1105,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black

@@ -66,3 +66,16 @@
 .reveal .slides section {
   width: 80%;                 /* keep some right margin */
 }
+
+/* Support paired AsciiDoc column blocks inside otherwise normal slides. */
+.reveal .slide-content > .openblock.columns.column,
+.reveal .slide-content > .openblock.columns.column + .openblock.column {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 48%;
+  vertical-align: top;
+}
+
+.reveal .slide-content > .openblock.columns.column {
+  margin-right: 3%;
+}

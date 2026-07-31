@@ -119,10 +119,10 @@ skinparam rectangle {
   BorderColor #123456
 }
 
-participant "Test Runner" as T
-participant "Worker A" as A
-participant "Worker B" as B
-participant "Episode Record" as R
+rectangle "Test Runner" as T
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Episode Record" as R
 
 T --> A : start publish attempt
 T --> B : start publish attempt
@@ -154,10 +154,10 @@ skinparam rectangle {
   BorderColor #123456
 }
 
-participant "Worker" as W
-participant "Episode Service" as S
-participant "Episode Record" as R
-participant "Publisher" as P
+rectangle "Worker" as W
+rectangle "Episode Service" as S
+rectangle "Episode Record" as R
+rectangle "Publisher" as P
 
 W --> S : publish episode-42
 S --> R : read status
@@ -190,10 +190,10 @@ skinparam rectangle {
   BorderColor #123456
 }
 
-participant "Worker A" as A
-participant "Worker B" as B
-participant "Episode Record" as R
-participant "Publisher" as P
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Episode Record" as R
+rectangle "Publisher" as P
 
 A --> R : check DRAFT
 B --> R : check DRAFT

@@ -242,9 +242,9 @@ skinparam LifeLineBackgroundColor white
 skinparam ParticipantBorderColor #123456
 skinparam ParticipantBackgroundColor white
 skinparam ParticipantFontColor black
-participant "Worker A" as A
-participant "Episode Store" as S
-participant "Episode Record" as R
+rectangle "Worker A" as A
+rectangle "Episode Store" as S
+rectangle "Episode Record" as R
 A --> S : read episode-42
 S --> R : load status
 R --> S : DRAFT
@@ -274,9 +274,9 @@ skinparam LifeLineBackgroundColor white
 skinparam ParticipantBorderColor #123456
 skinparam ParticipantBackgroundColor white
 skinparam ParticipantFontColor black
-participant "Worker A" as A
-participant "Episode Store" as S
-participant "Worker B" as B
+rectangle "Worker A" as A
+rectangle "Episode Store" as S
+rectangle "Worker B" as B
 A --> S : read DRAFT
 S --> A : DRAFT
 B --> S : read DRAFT before A writes
@@ -406,9 +406,9 @@ skinparam LifeLineBackgroundColor white
 skinparam ParticipantBorderColor #123456
 skinparam ParticipantBackgroundColor white
 skinparam ParticipantFontColor black
-participant "Worker A" as A
-participant "Episode Store" as S
-participant "Worker B" as B
+rectangle "Worker A" as A
+rectangle "Episode Store" as S
+rectangle "Worker B" as B
 A --> S : update if version 7
 S --> A : accepted version 8
 B --> S : update if version 7

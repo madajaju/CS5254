@@ -1,0 +1,42 @@
+[
+  {
+    "slide": 1,
+    "topic": "Load Testing Basics",
+    "text": "Welcome to Load Testing Basics. The key idea here is that correctness is not just about whether a system works once; it's about whether it still behaves predictably when requests pile up, timing shifts, or workers start competing for the same state. In this lecture, we'll connect pressure, evidence, and design choices so you can explain not only what failed, but why it failed and what you did about it."
+  },
+  {
+    "slide": 2,
+    "topic": "Load Testing Under Pressure",
+    "text": "Let's start with the core pressure concepts: throughput, latency, ramp-up, and steady state. Throughput tells us how much work the system can accept per second. Latency tells us how long requests take, especially in the slow tail where the painful failures usually appear. Ramp-up is where we gradually increase load to find the edge of stability, and steady state is where we hold pressure long enough to see leaks, queue growth, or exhaustion. The important lesson is that load testing is really about exposing whether the system's invariant survives under sustained demand."
+  },
+  {
+    "slide": 3,
+    "topic": "Pressure Reveals Hidden Assumptions",
+    "text": "A common mistake is assuming that a clean happy-path test proves the design is safe. It usually doesn't. The hidden assumption is often that operations happen one at a time, in order, with fresh state. Under concurrent pressure, that assumption breaks, and the result can be intermittent failure: duplicate work, stale reads, stuck workflows, or misleading success signals. This matters because scale does not create the bug; it reveals the design assumption that was already there."
+  },
+  {
+    "slide": 4,
+    "topic": "Evidence Must Be Repeatable",
+    "text": "If we want to make a claim about failure, the evidence has to be repeatable. A single log line or one noisy run is not enough. We want a load profile that says what pressure we applied, structured logs that include IDs and state transitions, traces that connect the pieces of the workflow, and repeatable test output that shows the same behavior again. The professional standard here is simple: if a reviewer cannot reconstruct the failure from the evidence, then the evidence is too weak."
+  },
+  {
+    "slide": 5,
+    "topic": "Design Responses",
+    "text": "Once the invariant is clear, we can choose a response that protects it. Backpressure prevents the system from accepting more than it can safely handle. Idempotency protects against duplicate execution. Retries help with transient failures, but only if they are controlled and bounded. Reconciliation closes the gap when something still slips through. None of these are free fixes; each one improves safety by introducing a trade-off, usually less peak throughput, more latency, or more implementation complexity."
+  },
+  {
+    "slide": 6,
+    "topic": "State Transition Model",
+    "text": "A useful way to reason about load is as a state machine. The system starts healthy, then moves into saturation when demand exceeds capacity, then degrades as queues and latency cross thresholds. From there it may recover if load drops or backpressure kicks in, and eventually return to stable operation. The invariant to protect is that accepted work either completes or fails in a bounded, explainable way. That boundary between controlled degradation and uncontrolled collapse is exactly what load testing is meant to discover."
+  },
+  {
+    "slide": 7,
+    "topic": "Failure Interleaving",
+    "text": "Imagine a concrete failure: two hundred concurrent requests hit the system, workers start retrying slow writes, and the queue keeps accepting more work. At first glance, everything still looks active, which is what makes the problem uncomfortable. But underneath, latency spikes, duplicate work appears, logs stop lining up cleanly, and the queue grows without bound. The reason this failure is hidden in the baseline case is that the happy path never forces the system to show what happens when execution order and capacity are no longer under control."
+  },
+  {
+    "slide": 8,
+    "topic": "Trade-Off Analysis",
+    "text": "Let's compare the main approaches. A simple baseline is easy to explain, but it hides timing assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes dependencies visible, yet it can introduce waiting and bottlenecks. Observability-first design gives you strong evidence for review, but it takes real effort to instrument well. When you choose among these, do not ask which one is strongest in the abstract; ask which invariant you need to protect and what cost you are willing to pay."
+  }
+]

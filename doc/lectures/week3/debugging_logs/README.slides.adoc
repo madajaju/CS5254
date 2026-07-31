@@ -32,7 +32,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -102,7 +102,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -174,7 +174,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -213,9 +213,9 @@ skinparam note {
 }
 skinparam shadowing false
 
-participant "Worker A" as A
-participant "Log stream" as L
-participant "Worker B" as B
+rectangle "Worker A" as A
+rectangle "Log stream" as L
+rectangle "Worker B" as B
 A --> L : op=42 read DRAFT
 B --> L : op=77 read DRAFT
 A --> L : op=42 write PROCESSING
@@ -244,7 +244,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -312,7 +312,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -382,7 +382,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -445,7 +445,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -519,7 +519,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -582,7 +582,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -661,7 +661,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -735,7 +735,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -802,7 +802,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -871,7 +871,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -945,7 +945,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -1007,7 +1007,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -1092,7 +1092,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -1162,7 +1162,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -1236,7 +1236,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -1306,7 +1306,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black

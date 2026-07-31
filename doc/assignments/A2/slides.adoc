@@ -1,0 +1,326 @@
+= A2 Postmortem: What We Learned About Coordinated Object Systems
+:revealjs_theme: white
+:revealjs_slideNumber: true
+:revealjs_hash: true
+:revealjs_width: 1280
+:revealjs_height: 720
+:revealjs_transition: fade
+:source-highlighter: highlight.js
+:icons: font
+
+== Introduction
+
+* A2 was not mainly about threads.
+* It was about moving from shared-variable thinking to coordination thinking.
+* The strongest submissions treated the system as a workflow of objects with clear responsibilities.
+* The class patterns showed real progress from A1.
+
+== System Shape
+
+[plantuml, a2-system-shape, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 14
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Producer" as P
+rectangle "Coordinator" as C
+rectangle "State\nMachine" as S
+rectangle "Domain\nObject" as D
+rectangle "Invariant" as I
+
+P --> C : submits\nwork
+C -> S : orders stage\nchanges
+S -> D : owns legal\ntransitions
+D --> I : must\npreserve
+I -> C : rejects\nillegal flow
+@enduml
+----
+
+== Lesson 1: Stop Thinking About Threads
+
+* The best projects rarely centered their explanation on threads.
+* They focused on workflows, ownership, orchestration, events, and invariants.
+* Weak submissions talked about locks first.
+* Strong submissions talked about coordination first.
+
+== Lesson 2: Ownership Beats Synchronization
+
+* The best systems divided responsibility cleanly.
+* Queue, coordinator, FSM, and domain object each had a different job.
+* Correctness lived in ownership boundaries, not in any single lock.
+* Good design made illegal transitions hard to express.
+
+== Lesson 3: Queues Are Not Magic
+
+* Adding a queue changes delivery, not correctness.
+* A queue does not guarantee order, legality, uniqueness, or freshness.
+* Several projects learned that "delivery is not correctness."
+* The architecture still has to enforce the rules.
+
+== Queue Is Not Correctness
+
+[plantuml, queue-not-correctness, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 14
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "Incoming work" as W
+rectangle "Queue" as Q
+rectangle "Coordinator" as C
+rectangle "Rule check" as R
+rectangle "Correct\nstate" as S
+
+W -> Q : delivery only
+Q -down-> C : preserves arrival
+C -down-> R : evaluates legality
+R -> S : allows transition
+R ---> W : rejects duplicates\nstale work
+@enduml
+----
+
+== Lesson 4: Invariants Matter
+
+* The strongest submissions started describing system rules as invariants.
+* They moved from "step B happens after step A" to "step B cannot happen unless condition A is true."
+* That shift matters because it describes the system, not just the code.
+* Architects think in invariants.
+
+== Lesson 5: Failure Became a Design Tool
+
+* In A1, failure usually meant a crash.
+* In A2, failure meant the architecture allowed something illegal.
+* Good teams intentionally exposed duplicate completion, stale validation, deadlock, races, and premature publication.
+* The point was to locate where correctness actually lived.
+
+== Failure To Repair
+
+[plantuml, failure-to-repair, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 14
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "Implicit\nassumption" as A
+rectangle "Observed\nfailure" as F
+rectangle "Root-cause\nanalysis" as R
+rectangle "Corrected\ndesign" as C
+rectangle "Evidence\nand tests" as E
+
+A --> F : pressure exposes gap
+F --> R : explain why
+R -down-> C : move responsibility
+C -left-> E : prove improvement
+E -left-> A : refine invariant
+@enduml
+----
+
+== Lesson 6: Most Bugs Were Ownership Bugs
+
+* Very few failures were pure thread bugs.
+* Most were object design failures.
+* Examples included workers mutating state they did not own and coordinators skipping validation.
+* These are coordination problems first and synchronization problems second.
+
+== Lesson 7: Message Passing Does Not Remove Coordination
+
+* Different languages used different primitives.
+* Python, Go, Rust, Java, C++, and Node still converged on the same architecture shape.
+* Producer -> Coordinator -> State Machine -> Domain Object
+* The language changed; the design pressure did not.
+
+== Lesson 8: Synchronization Is Local
+
+* Locks solve local access problems.
+* Workflow solves global business problems.
+* A mutex can protect an account object.
+* A mutex cannot enforce a payment, shipping, and inventory sequence by itself.
+
+== Local Versus Global
+
+[plantuml, local-versus-global, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 14
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "Mutex\nprotects object" as M
+rectangle "Account\nstate" as A
+rectangle "Payment" as P
+rectangle "Shipping" as S
+rectangle "Inventory" as I
+rectangle "Workflow\ninvariant" as W
+
+M --> A : local access
+P -> W : contributes
+S -> W : contributes
+I -> W : contributes
+W --> P : constrains
+W --> S : constrains
+W --> I : constrains
+@enduml
+----
+
+== Lesson 9: AI Helped More With Syntax Than Architecture
+
+* Almost every project used AI in some form.
+* AI was helpful for syntax, queue APIs, channels, and locking code.
+* AI was weaker on ownership, invariants, architecture, and failure analysis.
+* The strongest students questioned AI output instead of copying it.
+
+== Lesson 10: The Best Submissions Read Like Architecture Docs
+
+* The best writeups did not read like code comments.
+* They read like a system document:
+** Architecture
+** Workflow
+** Ownership
+** Invariants
+** Failure
+** Repair
+** Evidence
+** Validation
+
+== Cross-Class Pattern
+
+* Different domains still converged on the same structure.
+* Examples included enrollment, trading, content pipelines, aircraft processing, and media workflows.
+* The recurring ideas were explicit ownership, coordinated workflows, state transitions, and separation of responsibilities.
+* That convergence is the real signal from A2.
+
+== What Still Needs Improvement
+
+* Testing: logs are not enough; assertions and repeatable tests matter.
+* Failure analysis: students need to explain why the architecture allowed the bug.
+* AI critique: documenting AI use is not the same as evaluating it.
+* Engineers need to validate tool output, not just acknowledge it.
+
+== Evidence Gap
+
+[plantuml, evidence-gap, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 14
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+
+rectangle "Logs" as L
+rectangle "Assertions" as A
+rectangle "Tests" as T
+rectangle "Failure\nanalysis" as F
+rectangle "Repair" as R
+
+L -> F : explain
+A -> T : prove
+T -> R : validate
+F -> R : justify
+R --> A : strengthen
+@enduml
+----
+
+== Biggest Takeaway
+
+* Correct concurrent systems come from clear ownership.
+* They do not come from adding more synchronization.
+* If one rule stays with you from A2, this is the one.
+
+== Looking Ahead to A3
+
+* A2 coordinated objects in one process.
+* A3 removes shared memory.
+* Locks disappear, method calls disappear, and object references disappear.
+* The architecture lessons from A2 still apply: ownership, invariants, coordination, workflow, state transitions, and failure containment.
+
+== A2 To A3
+
+[plantuml, a2-to-a3, svg, width=100%]
+----
+@startuml
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 14
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  FontColor black
+  BorderColor #123456
+}
+left to right direction
+
+rectangle "A2\nshared process" as A2
+rectangle "A3\nseparate memory" as A3
+rectangle "Ownership" as O
+rectangle "Invariant" as I
+rectangle "Workflow" as W
+rectangle "Failure\ncontainment" as F
+
+A2 -> A3 : boundaries harden
+A2 -> O : establish
+O -> I : define
+I -> W : constrain
+W -> F : validate
+F --> A3 : carry forward
+@enduml
+----
+
+== Final Reflection
+
+* The strongest solutions across the class converged on the same architectural ideas.
+* That happened across different languages and different problem domains.
+* Convergence is a sign that the ideas are fundamental, not accidental.
+* A2 was about discovering those ideas and making them explicit.

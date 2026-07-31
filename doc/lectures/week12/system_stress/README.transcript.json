@@ -1,0 +1,57 @@
+[
+  {
+    "slide": 1,
+    "topic": "What is System Stress?",
+    "text": "Welcome everyone. Today we’re asking what it means for a system to be under stress, especially when that system has shared state, concurrency, and real operational pressure. The key idea is that a design can look perfectly correct in a simple test and still fail once timing, load, retries, or coordination come into play. Our job is to learn how to recognize that pressure, measure it, and defend a design with evidence."
+  },
+  {
+    "slide": 2,
+    "topic": "Topic Overview",
+    "text": "Let’s start with the basic vocabulary. Stress is what reveals hidden limits. Contention is what happens when multiple actors compete for the same resource. Saturation is the point where more work actually makes performance worse instead of just leveling off. Under those conditions, edge cases appear, operational behavior changes, and the evidence we collect has to be repeatable and structured. That is the frame for the rest of the lecture."
+  },
+  {
+    "slide": 3,
+    "topic": "System Stress Model",
+    "text": "The key idea here is that stress is not an isolated event; it starts a chain reaction. Stress increases contention, contention amplifies saturation, saturation reveals evidence, and that evidence should inform a design choice. Then the design gets refined and the cycle begins again. This matters because a professional system is not judged by one happy execution, but by whether it still behaves in a defensible way when pressure changes the execution model."
+  },
+  {
+    "slide": 4,
+    "topic": "Hidden Assumption",
+    "text": "A common mistake is to build around a happy-path test and never name the assumption that made it pass. Here, the system is effectively being exercised by a single thread reading current state, so everything appears correct. But that success depends on a hidden assumption: that the operation happens once, in order, without overlapping actors. Once that assumption is broken, the design may no longer mean what the test seemed to prove."
+  },
+  {
+    "slide": 5,
+    "topic": "Failure Scenario",
+    "text": "Now imagine the uncomfortable version. Multiple requests arrive at the same time, and one thread is looking at stale state while another is already moving the workflow forward. The result can be duplicate work, blocked progress, or both. This failure is easy to miss in a baseline test because the baseline avoids the very timing conditions that create the bug. When you evaluate this kind of failure, you need evidence that captures the race, the stale read, and the visible consequence."
+  },
+  {
+    "slide": 6,
+    "topic": "Evidence Path",
+    "text": "The important question is not just, did it fail? The question is, can we prove why it failed in a way another engineer could reproduce? That is why load profiles, logs, traces, and repeatable tests matter together. Each one supports the claim from a different angle. Structured evidence makes the failure reconstructable, and without that, the design review becomes guesswork instead of engineering judgment."
+  },
+  {
+    "slide": 7,
+    "topic": "Design Response",
+    "text": "Once the invariant is named, we can choose a mechanism that protects it. Backpressure can slow incoming work, idempotency can make retries safe, and guarded transitions can prevent illegal state changes. The trade-off is never free: you may give up peak throughput, add coordination, or delay completion. But that trade-off is often exactly what makes the system trustworthy under stress."
+  },
+  {
+    "slide": 8,
+    "topic": "Design Trade-Offs",
+    "text": "Let’s compare the common approaches. A simple baseline is easy to explain, but it hides pressure assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes dependencies visible, but it can bottleneck or even deadlock. Idempotent design handles duplicates and retries, but it needs keys and deduplication logic. The right choice depends on which failure you are trying to control."
+  },
+  {
+    "slide": 9,
+    "topic": "Integrity Packet View",
+    "text": "This is where the Integrity Packet becomes important. Start with the assumption, then show the failure evidence that exposed it, then present the correction, and finally name the residual risk. That structure keeps you honest. It also keeps you from pretending the fix is perfect. A strong defense explains what was protected, what changed, and what still remains to be monitored."
+  },
+  {
+    "slide": 10,
+    "topic": "Practical Application",
+    "text": "For your own project, the task is very concrete. Write one sequential test that should succeed, and one pressure test that might expose the failure. Add structured logging with operation IDs and entity IDs so the behavior can be reconstructed. If you apply a fix, capture before-and-after evidence using the same workload. Then fold that into the Integrity Packet so you can defend the decision in a review or oral assessment."
+  },
+  {
+    "slide": 11,
+    "topic": "Summary",
+    "text": "The big takeaway is that stress is not just load. Stress is what makes hidden assumptions visible. A system is mature when it can survive pressure, explain its failures, recover in a controlled way, and defend its design with evidence. So as you work through A4 and your own project, keep asking: what invariant matters, what pressure breaks it, and what proof do I have that the correction really helps?"
+  }
+]

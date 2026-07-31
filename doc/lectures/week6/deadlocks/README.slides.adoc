@@ -185,9 +185,9 @@ skinparam sequence {
   ParticipantBackgroundColor white
   ParticipantFontColor black
 }
-participant "Coordinator" as C
-participant "Payment" as P
-participant "Inventory" as I
+rectangle "Coordinator" as C
+rectangle "Payment" as P
+rectangle "Inventory" as I
 C --> I : reserve
 I -> C : waiting
 C --> P : charge

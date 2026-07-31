@@ -1,7 +1,5 @@
 ﻿# Out-of-Order Events
 
-
-## Video: https://youtu.be/OntoBAO_mXI
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 10
@@ -60,7 +58,7 @@ A publish event arrives before the approval event it depends on. The service han
 ## System / Architecture View
 ```plantuml
 @startuml
-
+skinparam monochrome true
 skinparam shadowing false
 left to right direction
 

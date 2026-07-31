@@ -70,11 +70,11 @@ skinparam sequence {
   ParticipantBackgroundColor white
   ParticipantFontColor black
 }
-participant "Order API" as API
-participant "Workflow\nCoordinator" as C
-participant "Inventory\nService" as I
-participant "Payment\nService" as P
-participant "Shipping\nWorker" as S
+rectangle "Order API" as API
+rectangle "Workflow\nCoordinator" as C
+rectangle "Inventory\nService" as I
+rectangle "Payment\nService" as P
+rectangle "Shipping\nWorker" as S
 API --> C : create order-42
 C --> I : reserve inventory
 I --> C : reservation confirmed
@@ -210,10 +210,10 @@ skinparam sequence {
   ParticipantBackgroundColor white
   ParticipantFontColor black
 }
-participant "Coordinator" as C
-participant "Payment\nCallback" as P
-participant "Order\nState" as O
-participant "Shipping\nWorker" as S
+rectangle "Coordinator" as C
+rectangle "Payment\nCallback" as P
+rectangle "Order\nState" as O
+rectangle "Shipping\nWorker" as S
 C --> O : mark compensating
 P --> O : report payment success late
 S --> O : read mixed state
@@ -280,10 +280,10 @@ skinparam sequence {
   ParticipantBackgroundColor white
   ParticipantFontColor black
 }
-participant "Worker A" as A
-participant "Order\nState" as O
-participant "Worker B" as B
-participant "Shipping\nSystem" as S
+rectangle "Worker A" as A
+rectangle "Order\nState" as O
+rectangle "Worker B" as B
+rectangle "Shipping\nSystem" as S
 A --> O : read READY_TO_SHIP
 B --> O : read READY_TO_SHIP
 A --> S : emit shipment

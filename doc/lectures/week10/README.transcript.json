@@ -1,0 +1,27 @@
+[
+  {
+    "slide": 1,
+    "topic": "Week 10",
+    "text": "Welcome to Week 10. This lecture covers a set of distributed-systems failure modes that all come from unreliable communication: duplicate execution, out-of-order events, lost messages, and retry side effects. The main goal is to understand why these failures happen and how to design systems that detect them, tolerate them, or avoid turning them into user-visible bugs."
+  },
+  {
+    "slide": 2,
+    "topic": "Duplicate Execution",
+    "text": "A request can be processed more than once even when the client intended it only once. For example, a client sends a request, the service writes a record, and then a retry causes the same work to happen again, creating a duplicate row or another repeated side effect. The usual fix is idempotency: the service stores a request identifier and, if it sees the same request again, returns the cached result instead of repeating the action."
+  },
+  {
+    "slide": 3,
+    "topic": "Out-of-Order Events",
+    "text": "Even if every event is eventually delivered, it may not arrive in the order it was created. A producer can emit event A and then event B, while the broker delivers B first and A later. Systems that depend on sequence must therefore treat reordering as normal and use ordering metadata, such as sequence numbers, to buffer and release events safely in the correct order."
+  },
+  {
+    "slide": 4,
+    "topic": "Lost Messages",
+    "text": "Sometimes a message never arrives at all, or the acknowledgment is lost on the way back. From the sender's perspective, silence is ambiguous: the message may have been dropped, the receiver may be slow, or the ack may have disappeared. The standard response is timeout and retry, but that recovery strategy must be paired with deduplication or idempotency because the original message may actually have been delivered."
+  },
+  {
+    "slide": 5,
+    "topic": "Retry Side Effects",
+    "text": "Retries are not free when the operation has side effects. If a client submits an order, the API charges the card, and then a timeout triggers a retry, the payment can happen twice unless the system is designed carefully. The right approach is to store a request ID or similar key so the API can recognize a repeated request and return the same outcome without repeating the side effect."
+  }
+]

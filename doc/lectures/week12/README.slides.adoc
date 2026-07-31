@@ -1,0 +1,209 @@
+= Week 12
+
+== What is System Stress?
+[plantuml, stress-overview, svg, width=100%]
+----
+@startuml
+!pragma useBetaStyle true
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+skinparam componentBackgroundColor white
+skinparam componentBorderColor #123456
+skinparam componentFontColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor #123456
+skinparam noteFontColor black
+skinparam DefaultTextAlignment center
+title System stress as demand exceeds safe operating range
+rectangle "Normal load" as N
+rectangle "Stress zone" as S
+rectangle "Failure mode" as F
+N --> S : traffic rises
+S --> F : resources saturate
+@enduml
+----
+
+== What is System Stress?
+* Stress appears when demand approaches or exceeds capacity
+* Symptoms include latency growth, queue buildup, and errors
+* Causes can be traffic spikes, slow dependencies, or resource contention
+* The goal is to find safe operating limits before users do
+
+== What is System Stress?
+[plantuml, stress-signals, svg, width=100%]
+----
+@startuml
+!pragma useBetaStyle true
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+skinparam componentBackgroundColor white
+skinparam componentBorderColor #123456
+skinparam componentFontColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor #123456
+skinparam noteFontColor black
+rectangle "CPU" as CPU
+rectangle "Memory" as MEM
+rectangle "I/O" as IO
+rectangle "Latency" as LAT
+CPU --> LAT : saturation
+MEM --> LAT : pressure
+IO --> LAT : backlog
+@enduml
+----
+
+== Load Testing Basics
+[plantuml, load-test-loop, svg, width=100%]
+----
+@startuml
+!pragma useBetaStyle true
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+skinparam componentBackgroundColor white
+skinparam componentBorderColor #123456
+skinparam componentFontColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor #123456
+skinparam noteFontColor black
+rectangle "Generate load" as G
+rectangle "Observe system" as O
+rectangle "Adjust rate" as A
+G --> O : collect metrics
+O --> A : detect bottleneck
+A --> G : change pattern
+@enduml
+----
+
+== Load Testing Basics
+* Start with realistic user journeys
+* Increase traffic gradually and repeatably
+* Measure throughput, latency, and error rate
+* Keep test data and environment as stable as possible
+* Stop when you reach a known limit or unsafe behavior
+
+== Load Testing Basics
+[plantuml, load-test-failure, svg, width=100%]
+----
+@startuml
+!pragma useBetaStyle true
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+skinparam componentBackgroundColor white
+skinparam componentBorderColor #123456
+skinparam componentFontColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor #123456
+skinparam noteFontColor black
+rectangle "Test too fast" as T
+rectangle "Unrealistic traffic" as U
+rectangle "False confidence" as F
+T --> F : hides ramp-up issues
+U --> F : misses real usage
+@enduml
+----
+
+== Observability Under Stress
+[plantuml, observability-loop, svg, width=100%]
+----
+@startuml
+!pragma useBetaStyle true
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+skinparam componentBackgroundColor white
+skinparam componentBorderColor #123456
+skinparam componentFontColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor #123456
+skinparam noteFontColor black
+rectangle "Metrics" as M
+rectangle "Logs" as L
+rectangle "Traces" as T
+rectangle "Alerting" as A
+M --> A : signal
+L --> A : evidence
+T --> A : causality
+@enduml
+----
+
+== Observability Under Stress
+* Use metrics to detect saturation early
+* Use logs to explain errors and retries
+* Use traces to follow slow calls across services
+* Alert on rate changes, not only on outages
+* Correlate signals before and after the load increase
+
+== Observability Under Stress
+[plantuml, stress-response, svg, width=100%]
+----
+@startuml
+!pragma useBetaStyle true
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundcorner 8
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+skinparam componentBackgroundColor white
+skinparam componentBorderColor #123456
+skinparam componentFontColor black
+skinparam noteBackgroundColor white
+skinparam noteBorderColor #123456
+skinparam noteFontColor black
+rectangle "Detect issue" as D
+rectangle "Mitigate" as M
+rectangle "Retest" as R
+D --> M : scale, shed, tune
+M --> R : verify recovery
+R --> D : compare results
+@enduml
+----

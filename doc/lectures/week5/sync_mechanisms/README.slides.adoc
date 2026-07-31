@@ -32,7 +32,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -70,7 +70,7 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
+
 left to right direction
 
 rectangle "Happy path" as H
@@ -108,7 +108,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -146,12 +146,12 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
 
-participant "Actor" as A
-participant "System" as S
-participant "State" as T
-participant "Side effect" as X
+
+rectangle "Actor" as A
+rectangle "System" as S
+rectangle "State" as T
+rectangle "Side effect" as X
 
 A --> S : request
 S --> T : read current
@@ -180,7 +180,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -218,12 +218,12 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
 
-participant "Thread A" as A
-participant "Mutex" as M
-participant "Shared state" as S
-participant "Thread B" as B
+
+rectangle "Thread A" as A
+rectangle "Mutex" as M
+rectangle "Shared state" as S
+rectangle "Thread B" as B
 
 A --> M : acquire
 A --> S : update safely
@@ -246,7 +246,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -284,7 +284,7 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
+
 left to right direction
 
 rectangle "Coordinator" as C
@@ -321,7 +321,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -359,12 +359,12 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
 
-participant "AudioProcessor" as A
-participant "Condition" as C
-participant "TranscriptWorker" as T
-participant "Audio state" as S
+
+rectangle "AudioProcessor" as A
+rectangle "Condition" as C
+rectangle "TranscriptWorker" as T
+rectangle "Audio state" as S
 
 T --> C : wait while not ingested
 A --> S : mark ingested
@@ -387,7 +387,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -425,12 +425,12 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
 
-participant "Producer" as P
-participant "Condition" as C
-participant "Consumer" as K
-participant "Job state" as S
+
+rectangle "Producer" as P
+rectangle "Condition" as C
+rectangle "Consumer" as K
+rectangle "Job state" as S
 
 P --> S : ready=true
 P --> C : notify early
@@ -460,7 +460,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -498,7 +498,7 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
+
 left to right direction
 
 rectangle "Podcast API" as A
@@ -527,7 +527,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -565,7 +565,7 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
+
 left to right direction
 
 rectangle "Fast producers" as P
@@ -602,7 +602,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -640,12 +640,12 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
 
-participant "Caller" as C
-participant "Future" as F
-participant "Worker" as W
-participant "Result" as R
+
+rectangle "Caller" as C
+rectangle "Future" as F
+rectangle "Worker" as W
+rectangle "Result" as R
 
 C --> W : start async
 W --> F : promise result
@@ -676,7 +676,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -714,7 +714,7 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
+
 left to right direction
 
 state "CREATED" as C
@@ -753,7 +753,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -791,13 +791,13 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
 
-participant "Order API" as A
-participant "Coordinator" as C
-participant "Inventory" as I
-participant "Payment" as P
-participant "Shipping" as S
+
+rectangle "Order API" as A
+rectangle "Coordinator" as C
+rectangle "Inventory" as I
+rectangle "Payment" as P
+rectangle "Shipping" as S
 
 A --> C : create order-42
 C --> I : reserve
@@ -830,7 +830,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -868,7 +868,7 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
+
 left to right direction
 
 rectangle "Baseline action" as B
@@ -920,7 +920,7 @@ skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam ActorBorderColor #123456
 skinparam ActorFontColor white
-skinparam participant {
+skinparam rectangle {
   BackgroundColor white
   BorderColor #123456
   FontColor black
@@ -958,7 +958,7 @@ skinparam note {
   FontColor black
 }
 skinparam shadowing false
-skinparam linetype ortho
+
 left to right direction
 
 rectangle "Claim" as C

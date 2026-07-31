@@ -223,9 +223,9 @@ skinparam rectangle {
   BorderColor #123456
 }
 
-participant "Worker A" as A
-participant "Episode Record" as R
-participant "Worker B" as B
+rectangle "Worker A" as A
+rectangle "Episode Record" as R
+rectangle "Worker B" as B
 
 A --> R : read DRAFT
 B --> R : read DRAFT
@@ -295,9 +295,9 @@ skinparam rectangle {
   BorderColor #123456
 }
 
-participant "Worker A" as A
-participant "Episode Record" as R
-participant "Worker B" as B
+rectangle "Worker A" as A
+rectangle "Episode Record" as R
+rectangle "Worker B" as B
 
 A --> R : check status equals DRAFT
 B --> R : check status equals DRAFT

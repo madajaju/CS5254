@@ -68,9 +68,9 @@ skinparam sequence {
   ParticipantBackgroundColor white
   ParticipantFontColor black
 }
-participant "Worker A" as A
-participant "Episode Service" as S
-participant "Episode Record" as R
+rectangle "Worker A" as A
+rectangle "Episode Service" as S
+rectangle "Episode Record" as R
 
 A --> S : request processing
 S --> R : read status
@@ -333,9 +333,9 @@ skinparam sequence {
   ParticipantBackgroundColor white
   ParticipantFontColor black
 }
-participant "Worker A" as A
-participant "Worker B" as B
-participant "Episode Record" as R
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Episode Record" as R
 
 A --> R : read status for episode 42
 R --> A : DRAFT

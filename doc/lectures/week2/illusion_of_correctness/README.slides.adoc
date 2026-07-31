@@ -18,7 +18,7 @@
 [plantuml, format=svg]
 ----
 @startuml
-
+skinparam monochrome true
 skinparam shadowing false
 left to right direction
 
@@ -37,7 +37,7 @@ A --> D
 [plantuml, format=svg]
 ----
 @startuml
-
+skinparam monochrome true
 skinparam shadowing false
 left to right direction
 
@@ -56,7 +56,7 @@ A --> D
 [plantuml, format=svg]
 ----
 @startuml
-
+skinparam monochrome true
 skinparam shadowing false
 left to right direction
 
@@ -75,7 +75,7 @@ A --> D
 [plantuml, format=svg]
 ----
 @startuml
-
+skinparam monochrome true
 skinparam shadowing false
 left to right direction
 
@@ -94,7 +94,7 @@ A --> D
 [plantuml, format=svg]
 ----
 @startuml
-
+skinparam monochrome true
 skinparam shadowing false
 left to right direction
 
@@ -113,7 +113,7 @@ A --> D
 [plantuml, format=svg]
 ----
 @startuml
-
+skinparam monochrome true
 skinparam shadowing false
 left to right direction
 
@@ -160,7 +160,7 @@ system emits side effect
 [plantuml, format=svg]
 ----
 @startuml
-
+skinparam monochrome true
 skinparam shadowing false
 left to right direction
 
@@ -196,7 +196,7 @@ B --> R : attempts transition
 [plantuml, format=svg]
 ----
 @startuml
-
+skinparam monochrome true
 skinparam shadowing false
 left to right direction
 

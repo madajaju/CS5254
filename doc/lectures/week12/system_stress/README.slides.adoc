@@ -1,0 +1,265 @@
+= What is System Stress?
+
+== Topic Overview
+
+[.column]
+* Stress reveals hidden limits
+* Contention exposes shared-resource pressure
+* Saturation turns added work into worse performance
+
+[.column]
+* Edge cases appear under timing pressure
+* Operational pressure changes behavior
+* Evidence must be repeatable and structured
+
+== System Stress Model
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Stress" as S
+rectangle "Contention" as C
+rectangle "Saturation" as Z
+rectangle "Evidence" as E
+rectangle "Design Choice" as D
+S --> C : increases
+C --> Z : amplifies
+Z --> E : reveals
+E --> D : informs
+D --> S : refine
+@enduml
+----
+
+== Hidden Assumption
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Happy Path Test" as H
+rectangle "Single Thread" as T
+rectangle "Current State" as U
+rectangle "Appears Correct" as A
+H --> T : uses
+T --> U : reads
+U --> A : passes
+@enduml
+----
+
+== Failure Scenario
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Concurrent Requests" as R
+rectangle "Stale State" as S
+rectangle "Duplicate Work" as D
+rectangle "Blocked Progress" as B
+R --> S : races
+S --> D : causes
+S --> B : causes
+@enduml
+----
+
+== Evidence Path
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Load Profile" as L
+rectangle "Logs" as G
+rectangle "Traces" as T
+rectangle "Repeatable Test" as R
+rectangle "Claim" as C
+L --> G : records
+L --> T : records
+L --> R : reproduces
+G --> C : supports
+T --> C : supports
+R --> C : supports
+@enduml
+----
+
+== Design Response
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Invariant" as I
+rectangle "Backpressure" as B
+rectangle "Idempotency" as M
+rectangle "Guarded Transition" as G
+rectangle "Recovery Evidence" as E
+I --> B : protects
+I --> M : protects
+I --> G : protects
+B --> E : exposes
+M --> E : exposes
+G --> E : exposes
+@enduml
+----
+
+== Design Trade-Offs
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach
+|Strength
+|Weakness
+|Best Use
+
+|Simple baseline
+|Easy to explain
+|Hides pressure assumptions
+|First comparison point
+
+|Guarded transition
+|Protects the invariant directly
+|Needs careful state modeling
+|Workflow steps and status changes
+
+|Explicit coordination
+|Makes dependencies visible
+|Can bottleneck or deadlock
+|Multi-object ordering
+
+|Idempotent design
+|Handles duplicates and retries
+|Needs keys and deduplication
+|Queues and external calls
+|===
+
+== Integrity Packet View
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Assumption" as A
+rectangle "Failure Evidence" as F
+rectangle "Correction" as C
+rectangle "Residual Risk" as R
+A --> F : exposed by
+F --> C : motivates
+C --> R : leaves
+@enduml
+----
+
+== Practical Application
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Sequential Test" as S
+rectangle "Pressure Test" as P
+rectangle "Structured Logs" as L
+rectangle "Before/After Evidence" as B
+rectangle "Integrity Packet" as I
+S --> P : compare with
+P --> L : capture
+L --> B : document
+B --> I : defend
+@enduml
+----
+
+== Summary
+
+[.column]
+* Stress is not just load
+* Stress makes hidden assumptions visible
+* Correctness must survive pressure
+
+[.column]
+* Evidence must show failure and recovery
+* Trade-offs must be stated clearly
+* The design must be defensible
