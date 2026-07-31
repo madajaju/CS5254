@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 12,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "observability_stress",
+  "source": "doc/lectures/week12/observability_stress/README.md",
+  "videoPath": "doc/lectures/week12/observability_stress/.output/output.mp4",
+  "youtube_title": "Observability Under Stress | CS 5254 Week 12",
+  "summary": "Logs, traces, and filtered evidence become the only way to explain failures once the system is under load.",
+  "youtube_description": "Logs, traces, and filtered evidence become the only way to explain failures once the system is under load. The lecture focuses on log aggregation, pressure-based filtering, and operational evidence that preserves the invariant.\n\nThis CS 5254 Week 12 lecture explores observability under stress and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "observability",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "logs",
+    "tracing",
+    "log aggregation",
+    "filtering",
+    "operational pressure"
+  ]
+}

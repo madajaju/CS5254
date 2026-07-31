@@ -1,5 +1,7 @@
 ﻿# Observability Under Stress
 
+
+## Video: https://youtu.be/8E0JJSFOv54
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 12

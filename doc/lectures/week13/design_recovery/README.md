@@ -1,5 +1,7 @@
 ﻿# Designing for Recovery
 
+
+## Video: https://youtu.be/srXQIGWCTwI
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 13

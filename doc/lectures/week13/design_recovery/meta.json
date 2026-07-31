@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 13,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "design_recovery",
+  "source": "doc/lectures/week13/design_recovery/README.md",
+  "videoPath": "doc/lectures/week13/design_recovery/.output/output.mp4",
+  "youtube_title": "Designing for Recovery | CS 5254 Week 13",
+  "summary": "Recovery becomes a design problem when checkpointing, reconciliation, and stateless workers have to defend a system under pressure.",
+  "youtube_description": "Recovery becomes a design problem when checkpointing, reconciliation, and stateless workers have to defend a system under pressure. The lecture covers recovery-oriented design, invariants, failure modes, and how to produce evidence that the system can resume safely.\n\nThis CS 5254 Week 13 lecture explores designing for recovery and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "designing for recovery",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "checkpointing",
+    "reconciliation",
+    "stateless workers",
+    "invariants",
+    "evidence"
+  ]
+}

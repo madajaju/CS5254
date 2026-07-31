@@ -1,0 +1,304 @@
+= Where Systems Break at Scale
+
+== Lecture Map
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Topic" as T
+rectangle "Pressure" as P
+rectangle "Evidence" as E
+rectangle "Fix" as F
+T 0-> P
+P -> E
+E --> F
+F -> T : refine
+@enduml
+----
+
+== Pressure Changes Behavior
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam linetype ortho
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Happy path" as H
+rectangle "Load" as L
+rectangle "Latency" as A
+rectangle "Queue growth" as Q
+rectangle "Failure becomes visible" as V
+H -> L
+L --> A
+A -> Q
+Q --> V
+@enduml
+----
+
+== Hidden Assumption
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam linetype ortho
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Sequential order" as S
+rectangle "Current state" as C
+rectangle "Single actor" as A
+rectangle "Appears correct" as P
+S -> C
+C --> A
+A -> P
+@enduml
+----
+
+== Failure Evidence
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam linetype ortho
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Logs" as L
+rectangle "Traces" as T
+rectangle "Interleavings" as I
+rectangle "Repeatable test" as R
+rectangle "Claim supported" as C
+L --> C
+T --> C
+I --> C
+R --> C
+@enduml
+----
+
+== Common Failure Modes
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam linetype ortho
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Duplicate work" as D
+rectangle "Stale state" as S
+rectangle "Blocked progress" as B
+rectangle "Misleading evidence" as M
+rectangle "Scale exposes bug" as X
+X --> D
+X --> S
+X --> B
+X --> M
+@enduml
+----
+
+== Design Responses
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam linetype ortho
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Invariant" as I
+rectangle "Guard" as G
+rectangle "Backpressure" as B
+rectangle "Retry-safe" as R
+rectangle "Evidence" as E
+I --> G
+G -> B
+B --> R
+R -> E
+@enduml
+----
+
+== Pressure, Control, Recovery
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam linetype ortho
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Load rises" as L
+rectangle "System saturates" as S
+rectangle "Control engages" as C
+rectangle "Damage bounded" as D
+rectangle "Recovery observed" as R
+L --> S
+S -> C
+C --> D
+D -> R
+@enduml
+----
+
+== Trade-Offs
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach |Strength |Weakness |Use when
+
+|Simple baseline |Easy to explain |Hides pressure assumptions |First pass and comparison
+|Guarded state transition |Protects invariant |Needs careful state modeling |Status and workflow steps
+|Explicit coordination |Makes dependencies visible |Can bottleneck or deadlock |Ordering matters
+|Observability-first |Strong evidence |Adds instrumentation work |Need proof for review
+|===
+
+== Integrity Packet
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam linetype ortho
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Assumption" as A
+rectangle "Evidence" as E
+rectangle "Validation" as V
+rectangle "Residual risk" as R
+A -> E
+E --> V
+V -> R
+@enduml
+----
+
+== Assignment A4
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam linetype ortho
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Project domain" as P
+rectangle "Failure scenario" as F
+rectangle "Before/after evidence" as B
+rectangle "Integrity Packet" as I
+P -> F
+F --> B
+B -> I
+@enduml
+----
+
+== Takeaway
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam arrowColor white
+skinparam arrowFontColor #ffd166
+skinparam arrowFontStyle bold
+skinparam arrowFontSize 16
+skinparam linetype ortho
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Explainable" as E
+rectangle "Stress-tested" as S
+rectangle "Repaired" as R
+rectangle "Validated" as V
+E -> S
+S --> R
+R -> V
+@enduml
+----

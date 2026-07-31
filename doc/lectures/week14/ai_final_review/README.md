@@ -1,5 +1,7 @@
 ﻿# AI Final Review: What Was Learned?
 
+
+## Video: https://youtu.be/T3QsjmeJ3UU
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 14

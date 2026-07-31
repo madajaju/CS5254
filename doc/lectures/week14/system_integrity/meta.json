@@ -1,0 +1,23 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 14,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "system_integrity",
+  "source": "doc/lectures/week14/system_integrity/README.md",
+  "videoPath": "doc/lectures/week14/system_integrity/.output/output.mp4",
+  "youtube_title": "System Integrity Under Pressure | CS 5254 Week 14",
+  "summary": "A system can look correct in a demo, then pressure exposes hidden assumptions about integrity, invariants, and recovery.",
+  "youtube_description": "A system can look correct in a demo, then pressure exposes hidden assumptions about integrity, invariants, and recovery. The lecture covers system integrity, the integrity chain, failure modes, and the evidence needed to defend a design under pressure.\n\nThis CS 5254 Week 14 lecture explores system integrity under pressure and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "system integrity",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "invariants",
+    "integrity chain",
+    "failure modes",
+    "evidence"
+  ]
+}

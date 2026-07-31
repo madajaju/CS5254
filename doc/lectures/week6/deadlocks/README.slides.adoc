@@ -1,33 +1,44 @@
 = Deadlocks Explained
 
 == Deadlock
-[plantuml,width=100%]
+[d2,width=100%]
 ----
-@startuml
-skinparam backgroundColor #123456
-skinparam defaultFontColor black
-skinparam ArrowColor white
-skinparam ArrowFontColor #ffd166
-skinparam ArrowFontStyle bold
-skinparam ArrowFontSize 16
-skinparam shadowing false
-skinparam class {
-  BackgroundColor white
-  BorderColor #123456
-  FontColor black
-}
-rectangle "Thread A" as A
-rectangle "Thread B" as B
-rectangle "Resource 1" as R1
-rectangle "Resource 2" as R2
+direction: right
 
-A --> R1 : holds
-R1 --> A : waits for
-B --> R2 : holds
-R2 --> B : waits for
-A -> R2 : requests
-B --> R1 : requests
-@enduml
+A: "Thread A" {
+  shape: rectangle
+  style.fill: white
+  style.stroke: "#123456"
+  style.font-color: black
+}
+
+B: "Thread B" {
+  shape: rectangle
+  style.fill: white
+  style.stroke: "#123456"
+  style.font-color: black
+}
+
+R1: "Resource 1" {
+  shape: rectangle
+  style.fill: white
+  style.stroke: "#123456"
+  style.font-color: black
+}
+
+R2: "Resource 2" {
+  shape: rectangle
+  style.fill: white
+  style.stroke: "#123456"
+  style.font-color: black
+}
+
+A -> R1: holds
+R1 -> A: waits for
+B -> R2: holds
+R2 -> B: waits for
+A -> R2: requests
+B -> R1: requests
 ----
 
 == The Four Conditions

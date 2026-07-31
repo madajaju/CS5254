@@ -1,0 +1,77 @@
+[
+  {
+    "slide": 1,
+    "topic": "Designing for Recovery",
+    "text": "Welcome. The key idea in this lecture is that a system can look correct in a simple demo and still fail under pressure. Our job is not just to make the happy path work, but to defend how the design behaves when timing, retries, crashes, or coordination problems show up. That means we have to think in terms of recovery, evidence, and the invariant we are trying to protect."
+  },
+  {
+    "slide": 2,
+    "topic": "Opening Question",
+    "text": "Let's start with a very practical question: why does a project often seem fine until it meets real pressure? The answer is usually that some hidden assumption was never stated. Maybe we assumed one worker, no crash, no retry, or perfectly ordered execution. This lecture is about making those assumptions explicit and then designing so we can trust the result even when the system is stressed."
+  },
+  {
+    "slide": 3,
+    "topic": "Recovery Design Pressure",
+    "text": "The key idea here is that pressure exposes the design. A hidden assumption may survive a normal test, but once you introduce load, timing variation, or partial failure, you get evidence that the baseline was incomplete. At that point, the right response is not to hope the problem goes away. It is to identify the failure evidence, understand what invariant was violated, and then choose a correction that actually protects the system property you care about."
+  },
+  {
+    "slide": 4,
+    "topic": "Check-pointing",
+    "text": "Checkpointing means saving progress so a long-running workflow can restart from the last known good state. Imagine a render job, a batch process, or an order workflow that gets interrupted halfway through. If you have a checkpoint, restart is not a fresh attempt from zero; it is a continuation from a known safe point. The trade-off is that you now have to define what counts as a good point, and you need evidence that the resume logic really picks up there instead of repeating or skipping work."
+  },
+  {
+    "slide": 5,
+    "topic": "Reconciliation",
+    "text": "Reconciliation, or self-healing, is the background process that scans for work that got stuck, orphaned, or left in an inconsistent state. This matters because not every failure can be prevented at the moment it happens. Sometimes the safer design is to detect the bad state later and repair it deliberately. The important engineering judgment is to make the recovery rule explicit: what gets scanned, what gets fixed, and what evidence proves the repair happened correctly."
+  },
+  {
+    "slide": 6,
+    "topic": "Stateless Workers",
+    "text": "A stateless worker is designed so it does not depend on critical in-memory state to finish the job. That means if the worker restarts, nothing important is lost. This is a powerful recovery strategy because it reduces the damage caused by crashes and rebalancing, especially in queued or asynchronous systems. But it is not free: if the worker no longer remembers anything, then the durable state, queue semantics, and idempotency behavior all have to carry more of the correctness burden."
+  },
+  {
+    "slide": 7,
+    "topic": "System Invariant",
+    "text": "Before you pick a mechanism, name the invariant. The invariant is the condition that must stay true across all valid executions, even when the system is under pressure. For recovery design, that might mean accepted work is eventually completed, or that failed work leaves enough evidence to recover safely. If you cannot state the invariant clearly, then you are probably describing a tool, not a design property."
+  },
+  {
+    "slide": 8,
+    "topic": "Failure Mode",
+    "text": "A failure mode is a repeatable way the system violates the invariant or loses progress. A common mistake is to assume the happy-path test is enough just because it passes once. But timing pressure can reveal duplicate work, stale state, or missing progress very quickly. The failure is often hidden in the baseline because the test avoids the very condition that exposes the weakness. So the goal is to force the failure in a repeatable way and capture evidence that makes the problem undeniable."
+  },
+  {
+    "slide": 9,
+    "topic": "Pressure Scenario",
+    "text": "Think about sustained concurrent requests meeting a slow dependency and then triggering a retry storm. That combination can turn a healthy-looking workflow into queue growth, latency spikes, and overlapping duplicate actions. This is the uncomfortable part of recovery design: the system may still be accepting work while silently falling behind. Good evidence here includes latency percentiles, queue depth, retry counts, and logs that show what happened to each operation."
+  },
+  {
+    "slide": 10,
+    "topic": "Design Response",
+    "text": "The protected property here is system integrity under failure. The mechanism can be backpressure, idempotency, reconciliation, or explicit coordination, depending on the problem. The trade-off is that you usually give up something: peak throughput, simplicity, or immediate completion. That trade-off is not a flaw; it is the cost of making recovery controlled instead of accidental. A mature design makes the protection visible and the cost honest."
+  },
+  {
+    "slide": 11,
+    "topic": "Evidence Flow",
+    "text": "This is where the lecture becomes defensible. A design claim is only strong if you can compare the baseline run, the failure run, the corrected run, and the residual risk. In practice, that means your evidence should include structured logs, timing data, and a repeatable test scenario. The question to ask is not just whether the fix works, but what proof you have that it works for the right reason."
+  },
+  {
+    "slide": 12,
+    "topic": "Comparison of Approaches",
+    "text": "Here we are comparing several recovery strategies. A simple baseline is easy to understand, but it often hides the pressure assumption. Guarded transitions protect the invariant directly, but they require careful modeling of state. Idempotent retry-safe designs handle duplicates and partial failure well, though they need deduplication or side-effect control. An observability-first approach adds instrumentation, but it gives you the evidence needed for review and defense. The key is to choose the mechanism that matches the invariant and the failure mode."
+  },
+  {
+    "slide": 13,
+    "topic": "Practical Recovery Loop",
+    "text": "Let's pause here and turn the lecture into a workflow. First, write the invariant. Then force the failure with a repeatable test. Next, capture the logs and traces that prove what went wrong. After that, apply the fix, and rerun the same test to compare before and after. That loop is the heart of recovery engineering, and it is exactly the kind of process you should document in your Integrity Packet."
+  },
+  {
+    "slide": 14,
+    "topic": "Assignment Connection",
+    "text": "This lecture connects directly to your project work. You need to identify the relevant object, workflow, event, or recovery mechanism in your own domain, and then show how it behaves under pressure. The artifact matters: runnable commands, structured logs, failure reproduction, before-and-after evidence, and a clear Integrity Packet explanation. In other words, do not just say the system recovers. Demonstrate what breaks, how you fixed it, and why the design choice is defensible."
+  },
+  {
+    "slide": 15,
+    "topic": "Closing Summary",
+    "text": "The central takeaway is that recovery is really about correctness under realistic execution. A design is not mature until it can be explained, stressed, repaired, and validated with evidence. So name the invariant first, make the failure visible, choose the mechanism with its trade-off in mind, and then defend the result with repeatable proof."
+  }
+]

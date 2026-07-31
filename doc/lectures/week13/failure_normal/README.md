@@ -1,5 +1,7 @@
 ﻿# Failure is Normal
 
+
+## Video: https://youtu.be/c6KWuAEAxYU
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 13

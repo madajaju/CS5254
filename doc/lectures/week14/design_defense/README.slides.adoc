@@ -1,0 +1,183 @@
+= Defending Your Design
+
+== Design Pressure
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Happy Path" as H
+rectangle "Concurrency Pressure" as P
+rectangle "Hidden Assumption" as A
+rectangle "Failure Evidence" as E
+H --> A : appears correct
+P --> A : stress reveals gap
+A --> E : logs or traces
+@enduml
+----
+
+== Design Justification
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Why" as W
+rectangle "How" as H
+rectangle "Invariant" as I
+rectangle "Trade-off" as T
+W -> I : explain
+H --> T : implement
+I --> T : constrain
+@enduml
+----
+
+== Evidence-First Defense
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Stress Test" as S
+rectangle "Structured Logs" as L
+rectangle "Integrity Packet" as I
+rectangle "Defense" as D
+S --> L : produce
+L -> I : summarize
+I --> D : support
+@enduml
+----
+
+== System Invariant
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Valid Execution" as V
+rectangle "Invariant Holds" as H
+rectangle "Invalid Interleaving" as X
+rectangle "Reject or Recover" as R
+V --> H : preserves
+X --> R : corrects
+R --> H : restores
+@enduml
+----
+
+== Failure Interleaving
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Worker A" as A
+participant "Worker B" as B
+participant "Episode Record" as R
+A --> R : read DRAFT
+B --> R : read DRAFT
+A --> R : write PROCESSING
+B --> R : write PROCESSING
+@enduml
+----
+
+== Design Response
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Baseline" as B
+rectangle "Guarded Transition" as G
+rectangle "Version Check" as V
+rectangle "Observability" as O
+B --> G : refine
+G --> V : protect
+G --> O : prove
+@enduml
+----
+
+== Trade-Offs
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach |Strengths |Weaknesses |Use When
+|Simple baseline |Easy to explain |Hides timing assumptions |First pass
+|Guarded transition |Direct invariant protection |More state modeling |Workflow steps
+|Explicit coordination |Visible ordering |Can bottleneck |Multi-object flows
+|Observability-first |Strong evidence |More instrumentation |Defend with logs
+|===

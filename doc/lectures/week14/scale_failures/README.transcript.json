@@ -1,0 +1,62 @@
+[
+  {
+    "slide": 1,
+    "topic": "Where Systems Break at Scale",
+    "text": "Welcome. The central question in this lecture is what happens when a system that looks correct in a normal workflow starts to behave differently under pressure. We are not just asking whether the code runs once. We are asking whether the same invariant still holds when load increases, timing shifts, retries happen, or coordination becomes more complex. That is the professional challenge: explain the failure, measure it, repair it, and defend the trade-off with evidence."
+  },
+  {
+    "slide": 2,
+    "topic": "Lecture Map",
+    "text": "Let's start with the roadmap. We begin with the basic idea that pressure changes behavior. Then we uncover the hidden assumption that makes the baseline look correct. From there, we focus on the evidence you need to prove failure, the common ways systems break, and the design responses that protect the invariant. The loop closes with validation and repair: the key is not only finding the problem, but showing that your fix really addresses it without hiding the trade-offs."
+  },
+  {
+    "slide": 3,
+    "topic": "Pressure Changes Behavior",
+    "text": "The key idea here is that scale does not create a new bug out of nowhere; it makes an existing weakness visible. A happy-path workflow can look fine when there is one request, one worker, or one actor. But once load rises, latency increases, queues grow, and eventually the failure becomes obvious. A common mistake is to treat the success of the first run as proof of correctness. In practice, pressure is what reveals whether the design can really sustain the invariant."
+  },
+  {
+    "slide": 4,
+    "topic": "Hidden Assumption",
+    "text": "Behind many apparently correct systems is a quiet assumption: execution is sequential, state is current, and only one actor is involved. That model feels natural because it works in a simple test. The problem is that the real system may involve concurrency, delay, or overlapping work, and then the assumption stops holding. This matters because the design was never actually validated against the execution model it will face in production."
+  },
+  {
+    "slide": 5,
+    "topic": "Failure Evidence",
+    "text": "When a system fails under pressure, you need evidence that makes the failure undeniable. Logs, traces, interleavings, and repeatable tests each capture a different part of the story. A single vague error message is not enough. You want structured proof that a reviewer can use to reconstruct what happened and why. The goal is to support the claim with artifacts, not just with intuition or a one-time observation."
+  },
+  {
+    "slide": 6,
+    "topic": "Common Failure Modes",
+    "text": "There are a few recurring ways systems break at scale. Duplicate work happens when retries or overlapping actors repeat an action that should happen once. Stale state appears when a decision is made on old information. Blocked progress shows up when one shared resource becomes a bottleneck. Misleading evidence is especially dangerous because the system may be failing while the logs make it look healthy. Scale exposes all of these because it pushes the system beyond the assumptions hidden in the baseline design."
+  },
+  {
+    "slide": 7,
+    "topic": "Design Responses",
+    "text": "The first thing to protect is the invariant. Once that is clear, you can choose a mechanism to defend it: a guard, backpressure, retry-safe behavior, or stronger observability. Each mechanism has a cost. Backpressure can reduce throughput, guards can require careful state modeling, and observability adds implementation work. So the fix is never free. The right question is whether the mechanism makes invalid behavior visible, bounded, or recoverable in a way that supports the design claim."
+  },
+  {
+    "slide": 8,
+    "topic": "Pressure, Control, Recovery",
+    "text": "A robust system does not pretend pressure will never happen. Instead, it recognizes saturation, engages control, and keeps the damage bounded. That is the sequence we want to reason about: load rises, the system saturates, a control mechanism activates, and recovery becomes observable. This matters because good engineering is not just about preventing all failure; it is about making failure contained, measurable, and recoverable enough that the system remains understandable."
+  },
+  {
+    "slide": 9,
+    "topic": "Trade-Offs",
+    "text": "This is where design judgment becomes concrete. A simple baseline is easy to explain, but it often hides pressure assumptions. A guarded state transition protects the invariant directly, but it demands disciplined state modeling. Explicit coordination makes dependencies visible, but it can become a bottleneck. An observability-first design produces strong evidence, but it takes instrumentation effort. The right choice depends on what property you need to defend and what cost you can accept."
+  },
+  {
+    "slide": 10,
+    "topic": "Integrity Packet",
+    "text": "The Integrity Packet is where you defend the design, not just describe it. Start with the assumption that matters, then show the evidence, then explain how you validated the behavior, and finally state the residual risk. That sequence is important because it connects the failure to the proof and the proof to the decision. A strong packet does not hide uncertainty; it shows that the uncertainty was measured and handled deliberately."
+  },
+  {
+    "slide": 11,
+    "topic": "Assignment A4",
+    "text": "For A4, you need to bring this lecture into your own project domain. Identify a real object, workflow, event, or recovery path where scale or pressure could expose a weakness. Then produce a failure scenario, capture before-and-after evidence, and explain the result in your Integrity Packet. The expectation is not just a working implementation. You need to demonstrate that you can reproduce the issue, defend the correction, and explain the trade-off in your own system."
+  },
+  {
+    "slide": 12,
+    "topic": "Takeaway",
+    "text": "The takeaway is straightforward but demanding: a system is not mature until it can be explained, stressed, repaired, and validated. At scale, the important question is not whether the happy path works. It is whether the invariant survives pressure, whether failure is visible, and whether the correction is defensible. If you can show those things with evidence, then you are practicing professional engineering judgment."
+  }
+]

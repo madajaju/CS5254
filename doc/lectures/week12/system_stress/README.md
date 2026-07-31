@@ -1,5 +1,7 @@
 ﻿# What is System Stress?
 
+
+## Video: https://youtu.be/3ILWMUPG0S0
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 12

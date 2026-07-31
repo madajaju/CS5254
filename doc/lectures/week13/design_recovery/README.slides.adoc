@@ -1,0 +1,360 @@
+= Designing for Recovery
+
+== Opening Question
+
+* A project can look correct in a simple demo
+* Pressure reveals hidden assumptions
+* The real task is to defend recovery, not just success
+
+== Recovery Design Pressure
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Designing for Recovery" as T
+rectangle "Hidden Assumption" as H
+rectangle "Pressure" as P
+rectangle "Failure Evidence" as E
+rectangle "Correction" as C
+T -> H
+H --> P
+P -> E
+E --> C
+@enduml
+----
+
+== Check-pointing
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Running Workflow" as A
+rectangle "Save State" as B
+rectangle "Restart" as C
+rectangle "Resume at Last Good Point" as D
+A --> B : checkpoint
+B --> C : crash or stop
+C --> D : recover
+@enduml
+----
+
+== Reconciliation
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "System State" as S
+rectangle "Scanner" as R
+rectangle "Orphaned Object" as O
+rectangle "Repair Action" as X
+S --> R
+R --> O : find
+O --> X : fix
+X --> S : restore
+@enduml
+----
+
+== Stateless Workers
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Queue" as Q
+rectangle "Worker A" as A
+rectangle "Worker B" as B
+rectangle "Restart" as R
+Q --> A : task
+Q --> B : task
+A --> R : stateless
+B --> R : stateless
+@enduml
+----
+
+== System Invariant
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Invariant" as I
+rectangle "Accepted Work" as W
+rectangle "Valid Transition" as T
+rectangle "Evidence" as E
+I --> W
+W --> T
+T --> E
+@enduml
+----
+
+== Failure Mode
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Happy Path Test" as H
+rectangle "Timing Pressure" as P
+rectangle "Duplicate Work" as D
+rectangle "Stale State" as S
+H --> P
+P --> D
+P --> S
+@enduml
+----
+
+== Pressure Scenario
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Concurrent Requests" as R
+rectangle "Slow Dependency" as D
+rectangle "Retry Storm" as T
+rectangle "Queue Growth" as Q
+R --> D
+D --> T
+T --> Q
+@enduml
+----
+
+== Design Response
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Invariant" as I
+rectangle "Backpressure" as B
+rectangle "Idempotency" as M
+rectangle "Reconciliation" as R
+rectangle "Evidence" as E
+I --> B
+I --> M
+I --> R
+B --> E
+M --> E
+R --> E
+@enduml
+----
+
+== Evidence Flow
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Baseline Run" as B
+rectangle "Failure Run" as F
+rectangle "Fixed Run" as X
+rectangle "Residual Risk" as R
+B --> F
+F --> X
+X --> R
+@enduml
+----
+
+== Comparison of Approaches
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach |Strength |Weakness |Best Use
+
+|Simple baseline
+|Easy to explain
+|Hides pressure assumptions
+|Starting point
+
+|Guarded state transition
+|Protects the invariant directly
+|Requires careful modeling
+|Workflow steps
+
+|Idempotent retry-safe design
+|Handles duplicates and partial failure
+|Needs deduplication support
+|Queues and async work
+
+|Observability-first design
+|Produces strong evidence
+|Adds instrumentation work
+|Assignments and review
+|===
+
+== Practical Recovery Loop
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Write Invariant" as I
+rectangle "Force Failure" as F
+rectangle "Capture Logs" as L
+rectangle "Apply Fix" as X
+rectangle "Rerun Test" as T
+I --> F
+F --> L
+L --> X
+X --> T
+@enduml
+----
+
+== Assignment Connection
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Lecture Concept" as L
+rectangle "Project Domain" as P
+rectangle "Failure Evidence" as E
+rectangle "Integrity Packet" as I
+L --> P
+P --> E
+E --> I
+@enduml
+----
+
+== Closing Summary
+
+* Recovery design is about correctness under pressure
+* Name the invariant before choosing the mechanism
+* Use repeatable failure evidence to defend the fix
+* Connect the result to the Integrity Packet

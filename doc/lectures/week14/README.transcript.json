@@ -1,0 +1,27 @@
+[
+  {
+    "slide": 1,
+    "topic": "Week 14",
+    "text": "Welcome to Week 14. This part of the course brings together integrity under stress, large-scale failure behavior, design defense, and final review for the AI-related material. The key idea here is that good engineering is not just about making a system work once, but about understanding how it behaves when pressure rises, when scale changes the rules, and when you have to defend your choices clearly."
+  },
+  {
+    "slide": 2,
+    "topic": "System Integrity Under Pressure",
+    "text": "The key idea here is that integrity comes from protecting the system at its boundaries and in its core. Requests enter, they get validated, approved data flows into the main system, and only then do we produce a safe result. A common mistake is to assume the core logic can somehow clean up bad input later. In practice, validation and containment have to happen early, especially when load increases and the system starts to feel stress. The last part of this idea is that checks are not just about rejecting bad data; they also help contain damage when instability starts to appear."
+  },
+  {
+    "slide": 3,
+    "topic": "Where Systems Break at Scale",
+    "text": "Imagine demand rising faster than the system was built to handle. More users hit a shared bottleneck, queues grow, and latency climbs until the service collapses. That failure path is important because it often hides behind an apparently healthy happy path: things look fine at small load, then suddenly become unstable when traffic rises. Another common failure at scale is the thundering herd problem. A hot key misses cache, the database gets overloaded, and the overload amplifies itself. In a tightly coupled system, one slow dependency can spread trouble everywhere, so the blast radius becomes much larger than people expect."
+  },
+  {
+    "slide": 4,
+    "topic": "Defending Your Design",
+    "text": "This section is about making a design argument that can survive criticism. Redundancy absorbs spikes, backpressure limits how far failure spreads, isolation keeps one subsystem from infecting another, and observability helps expose problems before they become disasters. The trade-off is that every protective mechanism adds cost, complexity, or latency, so none of these are free. Rate limiting and queues can smooth bursts and support recovery, but they also change user experience and system behavior. When you defend a design, you need to explain the protected property, the mechanism that preserves it, and the cost you accepted in return."
+  },
+  {
+    "slide": 5,
+    "topic": "AI Final Review",
+    "text": "For the final review, connect the ideas across the course. Start with the concept, identify the failure mode, choose the defense, and then apply it to a concrete example. That sequence matters because strong engineering judgment comes from moving between abstract principles and specific evidence. When you work with AI systems or any complex system, you should be able to ask clear questions, draft a response, and then refine it through review. A strong answer states the scope, makes its assumptions explicit, cites evidence, and balances the trade-offs instead of pretending they do not exist. This is the standard you should aim for in the final review and in design defense more generally."
+  }
+]

@@ -1,202 +1,327 @@
 = Load Testing Basics
 
-== Load Testing Under Pressure
-[plantuml,width=100%]
+== Concept: Load as Design Pressure
+[plantuml, width=100%]
 ----
 @startuml
 skinparam shadowing false
-skinparam backgroundColor #123456
-skinparam defaultFontColor black
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
-skinparam BoxBackgroundColor white
-skinparam BoxFontColor black
 skinparam BorderColor #123456
-skinparam ParticipantBorderColor #123456
-skinparam ParticipantBackgroundColor white
-skinparam ParticipantFontColor black
-skinparam LifeLineBorderColor white
-skinparam LifeLineBackgroundColor white
-left to right direction
-rectangle "Load Testing Basics" as T
-rectangle "Throughput" as A
-rectangle "Latency" as B
-rectangle "Ramp-up" as C
-rectangle "Steady State" as D
-T --> A
-T --> B
-T --> C
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Load Testing Basics" as Topic
+rectangle "Throughput" as T
+rectangle "Latency" as L
+rectangle "Ramp-up" as R
+rectangle "Steady State" as S
+rectangle "Operational Pressure" as P
+Topic --> T
+Topic --> L
+Topic --> R
+Topic --> S
+Topic --> P
+@enduml
+----
+
+== Throughput and Latency
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Throughput\nTPS / RPS" as T
+rectangle "Latency\np95 / p99" as L
+T --> L : load changes timing
+L --> T : slowdowns reduce rate
+@enduml
+----
+
+== Ramp-up and Steady State
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Ramp-up" as R
+rectangle "Steady State" as S
+rectangle "Measure" as M
+R --> M : increase load gradually
+S --> M : hold load over time
+@enduml
+----
+
+== Evidence Flow
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Claim" as C
+rectangle "Load profile" as L
+rectangle "Structured logs" as S
+rectangle "Repeatable output" as R
+rectangle "Decision" as D
+C --> L
+L -> S
+S --> R
+R -> D
+@enduml
+----
+
+== Hidden Assumptions
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Happy path" as H
+rectangle "Single actor" as A
+rectangle "Current state" as C
+rectangle "Correctness appears stable" as P
+H --> P
+A --> P
+C --> P
+@enduml
+----
+
+== Failure Scenario
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Concurrent requests" as Q
+rectangle "Queue growth" as G
+rectangle "Timeouts" as T
+rectangle "Duplicate work" as D
+rectangle "Stale state" as S
+Q -> G
+G --> T
 T --> D
+T --> S
 @enduml
 ----
 
-== Pressure Reveals Hidden Assumptions
-[plantuml,width=100%]
+== Design Response
+[plantuml, width=100%]
 ----
 @startuml
 skinparam shadowing false
-skinparam backgroundColor #123456
-skinparam defaultFontColor black
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
-skinparam BoxBackgroundColor white
-skinparam BoxFontColor black
 skinparam BorderColor #123456
-skinparam ParticipantBorderColor #123456
-skinparam ParticipantBackgroundColor white
-skinparam ParticipantFontColor black
-skinparam LifeLineBorderColor white
-skinparam LifeLineBackgroundColor white
-left to right direction
-rectangle "Happy Path" as H
-rectangle "Hidden Timing Assumption" as I
-rectangle "Concurrent Pressure" as P
-rectangle "Intermittent Failure" as F
-H --> I
-I --> P
-P --> F
-@enduml
-----
-
-== Evidence Must Be Repeatable
-[plantuml,width=100%]
-----
-@startuml
-skinparam shadowing false
-skinparam backgroundColor #123456
-skinparam defaultFontColor black
-skinparam ArrowColor white
-skinparam ArrowFontColor #ffd166
-skinparam ArrowFontStyle bold
-skinparam ArrowFontSize 16
-skinparam BoxBackgroundColor white
-skinparam BoxFontColor black
-skinparam BorderColor #123456
-skinparam ParticipantBorderColor #123456
-skinparam ParticipantBackgroundColor white
-skinparam ParticipantFontColor black
-skinparam LifeLineBorderColor white
-skinparam LifeLineBackgroundColor white
-left to right direction
-rectangle "Load Profile" as L
-rectangle "Structured Logs" as S
-rectangle "Traces" as T
-rectangle "Repeatable Test Output" as R
-L --> S
-S --> T
-T --> R
-@enduml
-----
-
-== Design Responses
-[plantuml,width=100%]
-----
-@startuml
-skinparam shadowing false
-skinparam backgroundColor #123456
-skinparam defaultFontColor black
-skinparam ArrowColor white
-skinparam ArrowFontColor #ffd166
-skinparam ArrowFontStyle bold
-skinparam ArrowFontSize 16
-skinparam BoxBackgroundColor white
-skinparam BoxFontColor black
-skinparam BorderColor #123456
-skinparam ParticipantBorderColor #123456
-skinparam ParticipantBackgroundColor white
-skinparam ParticipantFontColor black
-skinparam LifeLineBorderColor white
-skinparam LifeLineBackgroundColor white
-left to right direction
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 rectangle "Invariant" as I
 rectangle "Backpressure" as B
 rectangle "Idempotency" as M
-rectangle "Retries" as R
-rectangle "Reconciliation" as C
+rectangle "Retries with backoff" as R
+rectangle "Recovery evidence" as E
 I --> B
 I --> M
 I --> R
-I --> C
+I --> E
 @enduml
 ----
 
-== State Transition Model
-[plantuml,width=100%]
+== State Model
+[plantuml, width=100%]
 ----
 @startuml
 skinparam shadowing false
-skinparam backgroundColor #123456
-skinparam defaultFontColor black
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
-skinparam BoxBackgroundColor white
-skinparam BoxFontColor black
 skinparam BorderColor #123456
-skinparam ParticipantBorderColor #123456
-skinparam ParticipantBackgroundColor white
-skinparam ParticipantFontColor black
-skinparam LifeLineBorderColor white
-skinparam LifeLineBackgroundColor white
-left to right direction
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 rectangle "HEALTHY" as H
 rectangle "SATURATED" as S
 rectangle "DEGRADED" as D
 rectangle "RECOVERING" as R
 rectangle "STABLE" as T
-H --> S
-S --> D
-D --> R
-R --> T
+H -> S : rate exceeds capacity
+S --> D : latency and queue grow
+D --> R : load drops or backpressure starts
+R --> T : evidence returns to baseline
 @enduml
 ----
 
 == Failure Interleaving
-[plantuml,width=100%]
+[plantuml, width=100%]
 ----
 @startuml
 skinparam shadowing false
-skinparam backgroundColor #123456
-skinparam defaultFontColor black
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
 skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
-skinparam BoxBackgroundColor white
-skinparam BoxFontColor black
 skinparam BorderColor #123456
-skinparam ParticipantBorderColor #123456
-skinparam ParticipantBackgroundColor white
-skinparam ParticipantFontColor black
-skinparam LifeLineBorderColor white
-skinparam LifeLineBackgroundColor white
-left to right direction
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 rectangle "T1: 200 concurrent requests" as T1
-rectangle "Worker retries slow writes" as T2
-rectangle "Queue keeps growing" as T3
-rectangle "Invariant violated" as V
-T1 --> T2
-T2 --> T3
-T3 --> V
+rectangle "T2: slow database retries" as T2
+rectangle "Queue keeps accepting work" as Q
+rectangle "Latency spike" as L
+rectangle "Unbounded growth" as U
+T1 --> Q
+T2 --> Q
+Q --> L
+Q --> U
 @enduml
 ----
 
-== Trade-Off Analysis
+== Trade-Offs
 [.stretch]
 [cols="1,1,1,1", options="header", width="100%"]
 |===
-| Approach | Strengths | Weaknesses | When to Use
-
-| Simple baseline | Easy to explain | Hides timing assumptions | First comparison point
-
-| Guarded transition | Protects the invariant directly | Needs careful state modeling | Workflow steps and status changes
-
-| Explicit coordination | Makes dependencies visible | Can add waiting or bottlenecks | Multi-object ordering
-
-| Observability-first design | Produces strong evidence | Adds instrumentation work | Failure proof and defense
+|Approach |Strengths |Weaknesses |When to Use
+|Simple baseline |Easy to explain and implement |Hides timing and pressure assumptions |First comparison point
+|Guarded transition |Protects the invariant directly |Needs careful state modeling |Workflow state changes
+|Explicit coordination |Makes dependencies visible |Can bottleneck or deadlock |Ordered multi-object work
+|Idempotent design |Handles duplicates and partial failure |Needs keys and deduplication |Queues, retries, async work
+|Observability-first |Strong evidence for review |Adds instrumentation work |Failure proof and defense
 |===
+
+== Verification Loop
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Sequential scenario" as S
+rectangle "Pressure scenario" as P
+rectangle "Before/after evidence" as E
+rectangle "Integrity Packet" as I
+S -> P
+P --> E
+E -> I
+@enduml
+----
+
+== Practical Checklist
+* Identify the invariant or progress property.
+* Write one sequential scenario.
+* Write one pressure scenario.
+* Add operation IDs and entity IDs.
+* Capture before/after evidence.
+* Record assumptions, validation, and remaining risk.
+
+== Assignment Connection
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam BackgroundColor #123456
+skinparam DefaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BorderColor #123456
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Lecture concept" as L
+rectangle "Your project domain" as P
+rectangle "A4 evidence" as A
+rectangle "Integrity Packet" as I
+L -> P
+P --> A
+A -> I
+@enduml
+----

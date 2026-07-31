@@ -1,0 +1,362 @@
+= Failure is Normal
+
+== Failure Is a Design Pressure
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+skinparam sequenceLifeLineBorderColor white
+skinparam sequenceLifeLineBackgroundColor white
+skinparam sequenceParticipantBorderColor #123456
+skinparam sequenceParticipantBackgroundColor white
+skinparam sequenceParticipantFontColor black
+
+rectangle "Failure is Normal" as Topic
+rectangle "Pressure" as P
+rectangle "Invariant" as I
+rectangle "Evidence" as E
+rectangle "Design Choice" as D
+rectangle "Trade-off" as T
+
+Topic --> P
+P -> I
+I --> E
+E -> D
+D --> T
+@enduml
+----
+
+== Partial Failure
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+
+rectangle "One component fails" as A
+rectangle "Other components continue" as B
+rectangle "Visible state change" as C
+rectangle "Bounded blast radius" as D
+
+A -> B
+B --> C
+C -> D
+@enduml
+----
+
+== Fail-Fast
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+
+rectangle "Detect error early" as A
+rectangle "Stop unsafe work" as B
+rectangle "Protect data" as C
+rectangle "Expose evidence" as D
+
+A -> B
+B --> C
+C -> D
+@enduml
+----
+
+== Graceful Degradation
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+
+rectangle "Normal service" as A
+rectangle "Reduced feature set" as B
+rectangle "Continue operating" as C
+rectangle "Controlled recovery" as D
+
+A -> B
+B --> C
+C -> D
+@enduml
+----
+
+== AI Hypothesis Must Be Validated
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+
+rectangle "AI draft" as A
+rectangle "Hidden assumption" as B
+rectangle "Stress test" as C
+rectangle "Observed failure" as D
+rectangle "Repair or reject" as E
+
+A -> B
+B --> C
+C -> D
+D --> E
+@enduml
+----
+
+== Podcast Failure Scenario
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+skinparam sequenceLifeLineBorderColor white
+skinparam sequenceLifeLineBackgroundColor white
+skinparam sequenceParticipantBorderColor #123456
+skinparam sequenceParticipantBackgroundColor white
+skinparam sequenceParticipantFontColor black
+
+participant "API" as API
+participant "Transcription API" as T
+participant "Cleaner" as C
+participant "Editor" as E
+
+API --> T : request transcript
+T --> API : failure
+API --> C : continue cleanup
+API --> E : allow preview
+@enduml
+----
+
+== System Interaction
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+
+rectangle "Load driver" as A
+rectangle "API gateway" as B
+rectangle "Worker pool" as C
+rectangle "Database" as D
+rectangle "Logs and metrics" as E
+
+A --> B
+B -> C
+C -> D
+C --> E
+D --> E
+@enduml
+----
+
+== State Under Pressure
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+
+rectangle "HEALTHY" as A
+rectangle "SATURATED" as B
+rectangle "DEGRADED" as C
+rectangle "RECOVERING" as D
+rectangle "STABLE" as E
+
+A --> B
+B -> C
+C --> D
+D -> E
+@enduml
+----
+
+== Failure Interleaving
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+skinparam sequenceLifeLineBorderColor white
+skinparam sequenceLifeLineBackgroundColor white
+skinparam sequenceParticipantBorderColor #123456
+skinparam sequenceParticipantBackgroundColor white
+skinparam sequenceParticipantFontColor black
+
+participant "Load Test" as L
+participant "Worker" as W
+participant "Database" as D
+participant "Queue" as Q
+
+L --> Q : 200 concurrent requests
+W --> D : retry slow write
+Q --> W : keep dispatching work
+W --> Q : duplicate or stalled work
+@enduml
+----
+
+== Design Response
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+
+rectangle "Invariant" as A
+rectangle "Guard" as B
+rectangle "Backpressure" as C
+rectangle "Retry control" as D
+rectangle "Evidence" as E
+
+A --> B
+B -> C
+C --> D
+D -> E
+@enduml
+----
+
+== Evidence Flow
+
+[plantuml, width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultBackgroundColor white
+skinparam defaultBorderColor #123456
+skinparam classBackgroundColor white
+skinparam classBorderColor #123456
+skinparam classFontColor black
+
+rectangle "Baseline run" as A
+rectangle "Failure run" as B
+rectangle "Corrected run" as C
+rectangle "Residual risk" as D
+
+A -> B
+B --> C
+C -> D
+@enduml
+----
+
+== Trade-Offs
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach |Strengths |Weaknesses |When to use
+|Simple baseline |Easy to explain |Hides pressure assumptions |First pass and comparison
+|Guarded transition |Protects invariant directly |Needs careful state modeling |Status changes and workflow steps
+|Explicit coordination |Makes dependencies visible |Can add waiting and bottlenecks |Multi-object ordering
+|Observability-first |Strong evidence for review |Adds instrumentation work |Failure proof and defense
+|===

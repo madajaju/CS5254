@@ -1,6 +1,6 @@
 = Observability Under Stress
 
-== Topic Map
+== Topic and Pressure
 
 [plantuml,width=100%]
 ----
@@ -12,54 +12,25 @@ skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
-skinparam object {
-  BackgroundColor white
-  BorderColor #123456
-  FontColor black
-}
-rectangle "Observability Under Stress" as Topic
-rectangle "Log Aggregation" as A
-rectangle "Filtering by Pressure" as B
-rectangle "Operational Pressure" as C
-rectangle "Validation Evidence" as V
-rectangle "Design Decision" as D
-Topic --> A
-A --> B
-B --> C
-C --> V
-V --> D
-D --> A : refine
-@enduml
-----
-
-== Pressure Reveals Hidden Assumptions
-
-[plantuml,width=100%]
-----
-@startuml
-skinparam shadowing false
-skinparam backgroundColor #123456
-skinparam defaultFontColor black
-skinparam ArrowColor white
-skinparam ArrowFontColor #ffd166
-skinparam ArrowFontStyle bold
-skinparam ArrowFontSize 16
-skinparam object {
-  BackgroundColor white
-  BorderColor #123456
-  FontColor black
-}
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BoxBorderColor #123456
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
 rectangle "Happy Path" as H
-rectangle "Assumption" as S
 rectangle "Pressure" as P
-rectangle "Visible Failure" as F
-H --> S
-S --> P
-P --> F
+rectangle "Hidden Assumption" as A
+rectangle "Observable Failure" as F
+H --> A : seems correct
+P --> F : reveals limits
+A --> F : under stress
 @enduml
 ----
 
-== Evidence Signals
+== Operational Pressure
 
 [plantuml,width=100%]
 ----
@@ -71,24 +42,27 @@ skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
-skinparam object {
-  BackgroundColor white
-  BorderColor #123456
-  FontColor black
-}
-rectangle "Load profile" as L
-rectangle "Queue depth" as Q
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BoxBorderColor #123456
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+rectangle "Load" as L
 rectangle "Latency" as T
-rectangle "Retry counts" as R
-rectangle "Correlation IDs" as C
-L --> Q
-Q --> T
-T --> R
-R --> C
+rectangle "Queues" as Q
+rectangle "Retries" as R
+rectangle "Saturation" as S
+L --> T : increases
+T --> Q : grows
+Q --> R : triggers
+R --> S : worsens
 @enduml
 ----
 
-== Failure Interleaving
+== Evidence Signal
 
 [plantuml,width=100%]
 ----
@@ -100,24 +74,27 @@ skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
-skinparam sequence {
-  LifeLineBorderColor white
-  LifeLineBackgroundColor white
-  ParticipantBorderColor #123456
-  ParticipantBackgroundColor white
-  ParticipantFontColor black
-}
-participant "Load Driver" as LD
-participant "Worker Pool" as WP
-participant "Database" as DB
-LD --> WP : submit concurrent requests
-WP --> DB : retry slow write
-DB --> WP : delayed response
-WP --> LD : duplicate or late completion
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BoxBorderColor #123456
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+rectangle "Log" as L
+rectangle "Trace" as T
+rectangle "Metric" as M
+rectangle "Correlation ID" as C
+rectangle "Repeatable Test" as R
+L --> C : links events
+T --> C : follows flow
+M --> R : quantifies pressure
+C --> R : supports proof
 @enduml
 ----
 
-== Design Responses
+== Failure Scenario
 
 [plantuml,width=100%]
 ----
@@ -129,22 +106,27 @@ skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
-skinparam object {
-  BackgroundColor white
-  BorderColor #123456
-  FontColor black
-}
-rectangle "Backpressure" as B1
-rectangle "Bounded retries" as B2
-rectangle "Circuit breaker" as B3
-rectangle "Reconciliation" as B4
-B1 --> B2
-B2 --> B3
-B3 --> B4
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BoxBorderColor #123456
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+participant "Client" as C
+participant "Worker" as W
+participant "Queue" as Q
+participant "Database" as D
+C --> Q : submit work
+W --> Q : fetch work
+W --> D : slow write
+Q --> C : backlog grows
+W --> Q : retry storm
 @enduml
 ----
 
-== State Under Stress
+== Design Response
 
 [plantuml,width=100%]
 ----
@@ -156,27 +138,112 @@ skinparam ArrowColor white
 skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
-skinparam object {
-  BackgroundColor white
-  BorderColor #123456
-  FontColor black
-}
-rectangle "HEALTHY" as H
-rectangle "SATURATED" as S
-rectangle "DEGRADED" as D
-rectangle "RECOVERING" as R
-rectangle "STABLE" as T
-H --> S : rate exceeds capacity
-S --> D : queue and latency cross threshold
-D --> R : load is reduced
-R --> T : metrics return to baseline
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BoxBorderColor #123456
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+rectangle "Invariant" as I
+rectangle "Backpressure" as B
+rectangle "Bounded Retry" as R
+rectangle "Idempotency" as I2
+rectangle "Evidence" as E
+I --> B : protect
+B --> R : contain
+R --> I2 : avoid duplicates
+I2 --> E : prove behavior
 @enduml
 ----
 
-== What to Defend
+== Sequence Under Stress
 
-* State the invariant first.
-* Show the failure with repeatable evidence.
-* Compare baseline and corrected behavior.
-* Record the trade-off explicitly.
-* Connect the result to the Integrity Packet.
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BoxBorderColor #123456
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+participant "Load Driver" as L
+participant "API Gateway" as G
+participant "Worker Pool" as W
+participant "Metrics Store" as M
+L --> G : concurrent requests
+G --> W : forward work
+W --> M : emit timing and errors
+W --> W : retry or wait
+M --> L : evidence of pressure
+@enduml
+----
+
+== Comparison
+
+[.column]
+* Baseline
+* Easy to explain
+* Hides timing assumptions
+* Passes one happy path
+
+[.column]
+* Stress-aware design
+* Makes the invariant explicit
+* Exposes latency and queue growth
+* Supports repeatable failure tests
+
+== Practical Application
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BoxBorderColor #123456
+skinparam ParticipantBorderColor #123456
+skinparam ParticipantBackgroundColor white
+skinparam ParticipantFontColor black
+skinparam LifeLineBorderColor white
+skinparam LifeLineBackgroundColor white
+rectangle "Invariant" as I
+rectangle "Sequential Test" as S
+rectangle "Pressure Test" as P
+rectangle "Structured Logs" as L
+rectangle "Before/After Evidence" as E
+I --> S : define success
+S --> P : expose failure
+P --> L : add IDs and timing
+L --> E : capture proof
+@enduml
+----
+
+== Trade-Off Analysis
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach |Strength |Weakness |Use Case
+|Simple baseline |Fast to build |Hides pressure assumptions |First pass
+|Guarded state transition |Protects invariant |Needs careful modeling |Workflow steps
+|Explicit coordination |Shows ordering |Can bottleneck |Multi-object flows
+|Idempotent retry-safe design |Handles duplicates |Adds key management |Queues and async work
+|===

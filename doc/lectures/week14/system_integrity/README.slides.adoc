@@ -1,0 +1,231 @@
+= System Integrity Under Pressure
+
+== Topic Map
+[plantuml, width=100%]
+....
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "System Integrity\nUnder Pressure" as T
+rectangle "Invariant" as I
+rectangle "Failure Mode" as F
+rectangle "Evidence" as E
+rectangle "Trade-Off" as D
+T -> I
+I --> F
+F -> E
+E -> D
+D --> I : refine
+@enduml
+....
+
+== Integrity Under Pressure
+* A system may look correct on the happy path.
+* Pressure reveals the hidden assumption.
+* Integrity means the invariant still holds.
+* The question is not only "does it run?"
+* The question is "does it stay correct?"
+
+== Integrity Chain
+[plantuml, width=100%]
+....
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Object State" as S
+rectangle "Workflow Timing" as W
+rectangle "Worker Behavior" as B
+rectangle "Retries / Queues" as Q
+rectangle "Coordination Boundary" as C
+rectangle "System Integrity" as I
+S --> W
+W -> B
+B --> Q
+Q -> C
+C --> I
+@enduml
+....
+
+== Invariant and Failure
+[plantuml, width=100%]
+....
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Invariant\nmust remain true" as I
+rectangle "Valid execution" as V
+rectangle "Failure mode\nviolates invariant" as F
+rectangle "Design response" as D
+V -> I
+F --> I : breaks
+I --> D
+D --> V : protect
+@enduml
+....
+
+== Evidence Model
+[plantuml, width=100%]
+....
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Logs" as L
+rectangle "Traces" as T
+rectangle "Interleavings" as I
+rectangle "Repeatable Tests" as R
+rectangle "Claim" as C
+L --> C
+T --> C
+I --> C
+R --> C
+@enduml
+....
+
+== Failure Scenario
+[plantuml, width=100%]
+....
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Happy path" as H
+rectangle "Concurrent pressure" as P
+rectangle "Stale state" as S
+rectangle "Duplicate work" as D
+rectangle "Misleading evidence" as E
+H -> P
+P --> S
+S -> D
+D --> E
+@enduml
+....
+
+== Design Response
+[plantuml, width=100%]
+....
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Protect invariant" as I
+rectangle "Backpressure" as B
+rectangle "Idempotency" as M
+rectangle "Retry with bounds" as R
+rectangle "Observability" as O
+I --> B
+I --> M
+I --> R
+I --> O
+@enduml
+....
+
+== Pressures and Controls
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Pressure |What breaks |Useful control |Trade-off
+|Concurrency |Ordering assumptions |State guard |More modeling effort
+|Retries |Duplicate side effects |Idempotency key |Key management
+|Load |Unbounded queues |Backpressure |Lower peak throughput
+|Failure |Invisible recovery |Structured logs |Instrumentation cost
+|===
+
+== Practical Response
+* Write the invariant first.
+* Reproduce the failure with pressure.
+* Capture structured evidence.
+* Apply one control that preserves the invariant.
+* Compare before and after runs.
+* Defend the trade-off in the Integrity Packet
+
+== Assignment Link
+[plantuml, width=100%]
+....
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Lecture concept" as L
+rectangle "Project object" as P
+rectangle "Failure evidence" as E
+rectangle "Integrity Packet" as I
+rectangle "A4 deliverable" as A
+L -> P
+P --> E
+E -> I
+I --> A
+@enduml
+....

@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 12,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "system_stress",
+  "source": "doc/lectures/week12/system_stress/README.md",
+  "videoPath": "doc/lectures/week12/system_stress/.output/output.mp4",
+  "youtube_title": "What is System Stress? | CS 5254 Week 12",
+  "summary": "Stress exposes the point where added load stops improving throughput and starts breaking the system.",
+  "youtube_description": "Stress exposes the point where added load stops improving throughput and starts breaking the system. The lecture frames contention, saturation, and operational limits as the pressure that reveals whether the design can still make progress.\n\nThis CS 5254 Week 12 lecture explores system stress and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "system stress",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "stress",
+    "contention",
+    "saturation",
+    "operational limits",
+    "throughput"
+  ]
+}

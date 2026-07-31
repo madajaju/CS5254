@@ -1,0 +1,332 @@
+= Week 14
+
+== System Integrity Under Pressure
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Inputs" as I
+participant "Validation" as V
+participant "Core System" as C
+participant "Outputs" as O
+I --> V : request data
+V --> C : approved data
+C --> O : safe result
+@enduml
+....
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Load" as L
+participant "State" as S
+participant "Checks" as K
+L --> S : pressure increases
+S --> K : instability appears
+K --> S : contain damage
+@enduml
+....
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Input Flood" as A
+rectangle "Resource Contention" as B
+rectangle "Latency Spike" as C
+rectangle "Failure" as D
+A -> B : saturates
+B --> C : delays
+C -> D : breaks service
+@enduml
+....
+
+== Where Systems Break at Scale
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "More Users" as U
+rectangle "Shared Bottleneck" as B
+rectangle "Queue Growth" as Q
+rectangle "Outage" as O
+U -> B : demand rises
+B --> Q : backlog expands
+Q -> O : service collapses
+@enduml
+....
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Cache" as C
+rectangle "Database" as D
+rectangle "Hot Key" as H
+rectangle "Thundering Herd" as T
+H -> C : miss storm
+C --> D : overload
+D -> T : amplification
+@enduml
+....
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Single Service" as S
+rectangle "Tight Coupling" as C
+rectangle "Slow Recovery" as R
+S -> C : shared dependency
+C --> R : blast radius grows
+@enduml
+....
+
+== Defending Your Design
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Redundancy" as R
+rectangle "Backpressure" as B
+rectangle "Isolation" as I
+rectangle "Observability" as O
+R -> B : absorbs spikes
+B --> I : limits spread
+I -> O : exposes issues
+@enduml
+....
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Rate Limit" as L
+rectangle "Queue" as Q
+rectangle "Retry" as R
+rectangle "Recovery" as C
+L -> Q : controls intake
+Q --> R : smooths bursts
+R -> C : supports recovery
+@enduml
+....
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Design Claim" as A
+rectangle "Evidence" as E
+rectangle "Tradeoff" as T
+rectangle "Decision" as D
+A -> E : supports it
+E --> T : reveals cost
+T -> D : justifies choice
+@enduml
+....
+
+== AI Final Review
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Concepts" as C
+rectangle "Failure Modes" as F
+rectangle "Defenses" as D
+rectangle "Examples" as E
+C -> F : identify risk
+F --> D : choose response
+D -> E : apply lesson
+@enduml
+....
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+participant "Prompt" as P
+participant "Model" as M
+participant "Review" as R
+P --> M : ask clearly
+M --> R : draft answer
+R --> M : refine output
+@enduml
+....
+
+[plantuml,width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam roundCorner 8
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Strong Answer" as S
+rectangle "Clear Assumptions" as A
+rectangle "Specific Evidence" as E
+rectangle "Good Tradeoffs" as T
+S -> A : states scope
+A --> E : cites support
+E -> T : balances choices
+@enduml
+....

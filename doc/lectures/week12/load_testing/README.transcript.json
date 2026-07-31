@@ -2,41 +2,71 @@
   {
     "slide": 1,
     "topic": "Load Testing Basics",
-    "text": "Welcome to Load Testing Basics. The key idea here is that correctness is not just about whether a system works once; it's about whether it still behaves predictably when requests pile up, timing shifts, or workers start competing for the same state. In this lecture, we'll connect pressure, evidence, and design choices so you can explain not only what failed, but why it failed and what you did about it."
+    "text": "Welcome to Load Testing Basics. The key idea here is that a system can look correct in a simple functional test and still fail when real pressure changes timing, ordering, and recovery behavior. In this lecture, we are not just asking whether the code runs once. We are asking what happens when throughput rises, latency grows, queues build up, and the same invariant starts to break in ways that only evidence can reveal."
   },
   {
     "slide": 2,
-    "topic": "Load Testing Under Pressure",
-    "text": "Let's start with the core pressure concepts: throughput, latency, ramp-up, and steady state. Throughput tells us how much work the system can accept per second. Latency tells us how long requests take, especially in the slow tail where the painful failures usually appear. Ramp-up is where we gradually increase load to find the edge of stability, and steady state is where we hold pressure long enough to see leaks, queue growth, or exhaustion. The important lesson is that load testing is really about exposing whether the system's invariant survives under sustained demand."
+    "topic": "Concept: Load as Design Pressure",
+    "text": "Start by thinking of load as a design pressure, not just a performance number. Throughput, latency, ramp-up, steady state, and operational pressure are all ways of making hidden assumptions visible. A common mistake is to treat load testing as a benchmark exercise alone. Instead, we want to ask what condition the system must preserve under pressure, what evidence would prove it, and where the design might fail when concurrency, retries, or timing shifts."
   },
   {
     "slide": 3,
-    "topic": "Pressure Reveals Hidden Assumptions",
-    "text": "A common mistake is assuming that a clean happy-path test proves the design is safe. It usually doesn't. The hidden assumption is often that operations happen one at a time, in order, with fresh state. Under concurrent pressure, that assumption breaks, and the result can be intermittent failure: duplicate work, stale reads, stuck workflows, or misleading success signals. This matters because scale does not create the bug; it reveals the design assumption that was already there."
+    "topic": "Throughput and Latency",
+    "text": "Throughput and latency are tied together. If request rate increases, timing changes, and if work slows down, the effective rate drops. The important lesson is that TPS or RPS is not meaningful by itself unless you also know how long requests are taking. p95 and p99 matter because they reveal the tail behavior that users and operators actually feel. This matters because a system can still appear healthy at the average while the slowest requests are already failing the invariant."
   },
   {
     "slide": 4,
-    "topic": "Evidence Must Be Repeatable",
-    "text": "If we want to make a claim about failure, the evidence has to be repeatable. A single log line or one noisy run is not enough. We want a load profile that says what pressure we applied, structured logs that include IDs and state transitions, traces that connect the pieces of the workflow, and repeatable test output that shows the same behavior again. The professional standard here is simple: if a reviewer cannot reconstruct the failure from the evidence, then the evidence is too weak."
+    "topic": "Ramp-up and Steady State",
+    "text": "Ramp-up is how we discover the point where the system starts to degrade, and steady state is how we learn whether it can stay healthy over time. Imagine you are building a service that seems fine for a few minutes but leaks memory or accumulates queue depth after half an hour. Gradually increasing load helps expose the onset of failure, while holding load steady helps reveal exhaustion, drift, or recovery problems. Both are necessary because short tests can miss the real limit."
   },
   {
     "slide": 5,
-    "topic": "Design Responses",
-    "text": "Once the invariant is clear, we can choose a response that protects it. Backpressure prevents the system from accepting more than it can safely handle. Idempotency protects against duplicate execution. Retries help with transient failures, but only if they are controlled and bounded. Reconciliation closes the gap when something still slips through. None of these are free fixes; each one improves safety by introducing a trade-off, usually less peak throughput, more latency, or more implementation complexity."
+    "topic": "Evidence Flow",
+    "text": "The key idea here is that a claim about system behavior needs a chain of evidence. You start with a claim, then capture the load profile, then structured logs, then repeatable output, and only then make a decision. A common mistake is to jump straight from a feeling that the system is slower to a conclusion that it is broken. Instead, we want evidence that a reviewer can reconstruct: what load was applied, what the system recorded, what repeated, and what changed after the design response."
   },
   {
     "slide": 6,
-    "topic": "State Transition Model",
-    "text": "A useful way to reason about load is as a state machine. The system starts healthy, then moves into saturation when demand exceeds capacity, then degrades as queues and latency cross thresholds. From there it may recover if load drops or backpressure kicks in, and eventually return to stable operation. The invariant to protect is that accepted work either completes or fails in a bounded, explainable way. That boundary between controlled degradation and uncontrolled collapse is exactly what load testing is meant to discover."
+    "topic": "Hidden Assumptions",
+    "text": "This is where hidden assumptions become dangerous. The happy path, a single actor, and current state all make correctness appear stable because nothing is competing with nothing else. Under those conditions, the design may look perfect simply because the timing problem never had a chance to appear. The real question is what assumption disappears first when multiple requests overlap, when state is stale, or when the same operation is repeated. That is the assumption your load test has to challenge."
   },
   {
     "slide": 7,
-    "topic": "Failure Interleaving",
-    "text": "Imagine a concrete failure: two hundred concurrent requests hit the system, workers start retrying slow writes, and the queue keeps accepting more work. At first glance, everything still looks active, which is what makes the problem uncomfortable. But underneath, latency spikes, duplicate work appears, logs stop lining up cleanly, and the queue grows without bound. The reason this failure is hidden in the baseline case is that the happy path never forces the system to show what happens when execution order and capacity are no longer under control."
+    "topic": "Failure Scenario",
+    "text": "Now make the failure concrete. Concurrent requests arrive, the queue starts growing, timeouts appear, and then the unpleasant part begins: duplicate work and stale state. What makes this uncomfortable is that the baseline version may have looked correct because each step was tested in isolation. Under pressure, though, the system can accept more work than it can safely complete. That is exactly the kind of failure students should capture with logs, timing data, and repeatable runs."
   },
   {
     "slide": 8,
-    "topic": "Trade-Off Analysis",
-    "text": "Let's compare the main approaches. A simple baseline is easy to explain, but it hides timing assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes dependencies visible, yet it can introduce waiting and bottlenecks. Observability-first design gives you strong evidence for review, but it takes real effort to instrument well. When you choose among these, do not ask which one is strongest in the abstract; ask which invariant you need to protect and what cost you are willing to pay."
+    "topic": "Design Response",
+    "text": "The protected property here is system integrity under pressure. The mechanism is not magic; it is a set of controls such as backpressure, idempotency, retries with backoff, and recovery evidence. Each one protects the invariant in a different way. The trade-off is real: you may give up some peak throughput or add delay in exchange for bounded behavior and a system you can explain. Good engineering is not about eliminating cost, but about making the cost visible and justified."
+  },
+  {
+    "slide": 9,
+    "topic": "State Model",
+    "text": "Think of the system as moving through states like healthy, saturated, degraded, recovering, and stable. The important transition is not just failure, but the path into failure and back out again. When request rate exceeds capacity, the queue grows and latency crosses the threshold; that is saturation becoming degradation. If load is reduced or backpressure starts, the system can recover, and eventually return to stable behavior. The invariant is that accepted work is either completed or the degradation stays bounded and explainable."
+  },
+  {
+    "slide": 10,
+    "topic": "Failure Interleaving",
+    "text": "This is the kind of interleaving that causes real trouble in concurrent systems. One thread pushes a large burst of requests while another keeps retrying slow database writes, and the queue continues to accept work as if nothing is wrong. The result can be latency spikes, duplicate work, missing completion logs, or unbounded queue growth. The reason this is hidden in the baseline is that the happy path never had competing actors or delayed recovery. Your evidence has to capture the interleaving itself, not just the final symptom."
+  },
+  {
+    "slide": 11,
+    "topic": "Trade-Offs",
+    "text": "Here we compare the main design responses. A simple baseline is easy to explain, but it often hides timing and pressure assumptions. Guarded transitions protect the invariant directly, but they require careful state modeling. Explicit coordination makes dependencies visible, but it can bottleneck or deadlock. Idempotent design helps with duplicates and partial failure, but it requires keys and deduplication logic. Observability-first design gives strong evidence for review, but you have to pay the instrumentation cost."
+  },
+  {
+    "slide": 12,
+    "topic": "Verification Loop",
+    "text": "The verification loop is what makes the lecture practical. First, run a sequential scenario that should succeed. Then run a pressure scenario that is likely to fail. Capture before-and-after evidence using the same workload so the comparison is meaningful. Finally, record what happened in the Integrity Packet so you can defend the assumption, the validation, and the remaining risk. This is how the design moves from an intuition to a defensible engineering decision."
+  },
+  {
+    "slide": 13,
+    "topic": "Practical Checklist",
+    "text": "Before you finish, do the checklist in order. Identify the invariant or progress property. Write one sequential scenario. Write one pressure scenario. Add operation IDs and entity IDs so the logs are reconstructable. Capture before-and-after evidence if you apply a fix. Then record the assumptions, the validation, and any remaining risk. This is the minimum professional discipline for making a load-related claim credible."
+  },
+  {
+    "slide": 14,
+    "topic": "Assignment Connection",
+    "text": "This lecture connects directly to A4. What students should demonstrate is not just that they understand the vocabulary, but that they can apply it to their own project domain. That means showing the relevant workflow, the failure or recovery mechanism, and the evidence that supports the design choice. The artifact may include runnable commands, structured logs, diagrams, repeated failure reproduction, and an Integrity Packet explanation that defends the trade-off. In other words, the assignment is asking you to prove the system under stress, not just describe it."
   }
 ]

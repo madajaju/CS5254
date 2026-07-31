@@ -1,5 +1,7 @@
 ﻿# System Integrity Under Pressure
 
+
+## Video: https://youtu.be/bI3Z1PPtiX0
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 14

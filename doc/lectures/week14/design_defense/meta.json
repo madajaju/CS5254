@@ -1,0 +1,23 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 14,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "design_defense",
+  "source": "doc/lectures/week14/design_defense/README.md",
+  "videoPath": "doc/lectures/week14/design_defense/.output/output.mp4",
+  "youtube_title": "Defending Your Design | CS 5254 Week 14",
+  "summary": "A design defense is only credible when the explanation is backed by evidence, limits, and a clear trade-off story.",
+  "youtube_description": "A design defense is only credible when the explanation is backed by evidence, limits, and a clear trade-off story. The lecture covers design justification, handling challenges, evidence-first defense, and how to defend choices in the Integrity Packet.\n\nThis CS 5254 Week 14 lecture explores defending your design and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "design defense",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "justification",
+    "evidence",
+    "trade-offs",
+    "integrity packet"
+  ]
+}

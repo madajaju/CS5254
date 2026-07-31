@@ -1,5 +1,7 @@
 ﻿# Where Systems Break at Scale
 
+
+## Video: https://youtu.be/T5ymOVNLftg
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 14

@@ -1,0 +1,23 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 14,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "ai_final_review",
+  "source": "doc/lectures/week14/ai_final_review/README.md",
+  "videoPath": "doc/lectures/week14/ai_final_review/.output/output.mp4",
+  "youtube_title": "AI Final Review: What Was Learned? | CS 5254 Week 14",
+  "summary": "The final review separates AI acceleration from human verification, and turns the result into defensible evidence.",
+  "youtube_description": "The final review separates AI acceleration from human verification, and turns the result into defensible evidence. The lecture covers the competency gap, validation as the constant, and how to review AI-assisted work without losing responsibility for correctness.\n\nThis CS 5254 Week 14 lecture explores AI final review and what was learned about concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "ai final review",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "ai-assisted design",
+    "validation",
+    "human verification",
+    "evidence"
+  ]
+}

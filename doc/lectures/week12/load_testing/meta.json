@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 12,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "load_testing",
+  "source": "doc/lectures/week12/load_testing/README.md",
+  "videoPath": "doc/lectures/week12/load_testing/.output/output.mp4",
+  "youtube_title": "Load Testing Basics | CS 5254 Week 12",
+  "summary": "A system passes functional tests, then falls apart as traffic rises and hidden timing assumptions surface.",
+  "youtube_description": "A system passes functional tests, then falls apart as traffic rises and hidden timing assumptions surface. The lecture covers throughput, latency, ramp-up, and repeatable evidence for finding where correctness changes under pressure.\n\nThis CS 5254 Week 12 lecture explores load testing basics and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "load testing",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "throughput",
+    "latency",
+    "ramp-up",
+    "evidence",
+    "pressure testing"
+  ]
+}

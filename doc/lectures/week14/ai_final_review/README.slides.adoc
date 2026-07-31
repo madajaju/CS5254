@@ -1,0 +1,361 @@
+= AI Final Review: What Was Learned?
+:revealjsdir: https://cdn.jsdelivr.net/npm/reveal.js
+
+== The Lecture at a Glance
+
+* AI can accelerate drafting, but it does not verify correctness.
+* Concurrency pressure reveals hidden assumptions.
+* Evidence must come from repeatable tests, logs, and traces.
+* The engineer remains responsible for the invariant.
+* The Integrity Packet records the defended conclusion.
+
+== What the Topic Means
+
+[.column]
+* The lecture asks what was learned from using AI in a stateful concurrent system.
+* The real question is whether the design still works under pressure.
+* A good answer names the invariant, the failure evidence, and the correction.
+
+[.column]
+* AI output is a hypothesis.
+* Human verification turns that hypothesis into an engineering decision.
+* Validation is the constant across all design choices.
+
+== AI Helper Versus AI Judgment
+
+[.column]
+* AI helps with boilerplate, patterns, and fast drafts.
+* AI may miss deep races, ordering bugs, and state drift.
+* AI can increase speed without increasing correctness.
+
+[.column]
+* Human review checks assumptions against code and tests.
+* The engineer decides whether the evidence is strong enough.
+* Correctness must survive load, retries, and timing changes.
+
+== Competency Gap
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "AI draft" as A
+rectangle "Human review" as H
+rectangle "Hidden race" as R
+rectangle "Verified invariant" as V
+A --> H : suggest
+H -> R : inspect
+R -> V : detect
+@enduml
+----
+
+== Acceleration Factor
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "Boilerplate" as B
+rectangle "Standard pattern" as P
+rectangle "AI draft" as A
+rectangle "Human check" as H
+B --> A : generate
+P --> A : suggest
+A -> H : review
+@enduml
+----
+
+== Validation as the Constant
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "Happy path" as H
+rectangle "Pressure test" as P
+rectangle "Structured logs" as L
+rectangle "Repeatable evidence" as E
+H -> P : challenge
+P --> L : record
+L -> E : support
+@enduml
+----
+
+== AI-Assisted Hypothesis
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "AI suggestion" as S
+rectangle "Code" as C
+rectangle "Tests" as T
+rectangle "Evidence" as E
+S -> C : draft
+C --> T : run
+T -> E : confirm
+@enduml
+----
+
+== Human Verification
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "Claim" as C
+rectangle "Code review" as R
+rectangle "Log review" as L
+rectangle "Test rerun" as T
+C -> R : inspect
+R --> L : compare
+L -> T : validate
+@enduml
+----
+
+== System View
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "Topic" as Topic
+rectangle "Competency gap" as A
+rectangle "Acceleration" as B
+rectangle "Validation" as C
+rectangle "Evidence" as V
+rectangle "Design decision" as D
+Topic --> A
+A -> B
+B -> C
+C -> V
+V --> D
+D --> A : refine
+@enduml
+----
+
+== Failure Scenario
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "Concurrent request" as R
+rectangle "Stale read" as S
+rectangle "Duplicate work" as D
+rectangle "Blocked progress" as P
+R -> S : overlap
+S --> D : retry
+D -> P : stall
+@enduml
+----
+
+== Design Response
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "Invariant" as I
+rectangle "Guard" as G
+rectangle "Observability" as O
+rectangle "Repeatable test" as T
+I -> G : protect
+G --> O : expose
+O -> T : verify
+@enduml
+----
+
+== Evidence Flow
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "Baseline run" as B
+rectangle "Failure run" as F
+rectangle "Fix run" as X
+rectangle "Residual risk" as R
+B -> F : compare
+F --> X : rerun
+X -> R : report
+@enduml
+----
+
+== Trade-Offs
+
+[.stretch]
+[cols="1,1,1,1", options="header", width="100%"]
+|===
+|Approach |Strength |Weakness |Best use
+
+|Simple baseline |Easy to explain |Hides pressure assumptions |First pass
+
+|Guarded transition |Protects invariant directly |Needs careful state modeling |Status changes
+
+|Explicit coordination |Makes ordering visible |May add waiting |Multi-object workflows
+
+|Observability-first |Produces strong evidence |Adds instrumentation work |Defensible review
+|===
+
+== Practical Application
+
+* Identify the invariant or progress property.
+* Write one sequential success case.
+* Write one pressure failure case.
+* Add operation IDs and entity IDs.
+* Capture before and after evidence.
+* Update the Integrity Packet.
+
+== Assignment Connection
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "A1 deliverable" as A1
+rectangle "Design choice" as D
+rectangle "Evidence" as E
+rectangle "Integrity Packet" as I
+A1 -> D : align
+D --> E : support
+E -> I : defend
+@enduml
+----
+
+== Final Takeaway
+
+[width=100%]
+[plantuml]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam BoxBackgroundColor white
+skinparam BoxFontColor black
+skinparam BorderColor #123456
+left to right direction
+rectangle "Explain" as E1
+rectangle "Stress" as E2
+rectangle "Repair" as E3
+rectangle "Validate" as E4
+E1 -> E2 : then
+E2 --> E3 : then
+E3 -> E4 : then
+@enduml
+----

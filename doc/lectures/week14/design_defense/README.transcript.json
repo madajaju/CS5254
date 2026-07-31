@@ -1,0 +1,42 @@
+[
+  {
+    "slide": 1,
+    "topic": "Defending Your Design",
+    "text": "Welcome. In this lecture, we are looking at a design from the outside and asking a professional question: what has to be true for this system to remain trustworthy when it is under pressure? A design can look fine in a simple demo, but once concurrency, retries, or coordination complexity enters the picture, hidden assumptions start to matter. The goal here is not just to explain how the system works, but to defend why the chosen design is acceptable."
+  },
+  {
+    "slide": 2,
+    "topic": "Design Pressure",
+    "text": "The key idea here is that a design often appears correct in a happy path, but stress reveals the assumption underneath it. A sequential run can make everything look safe, while concurrency pressure exposes a gap between what the code seems to promise and what execution actually allows. We want to move from a believable demo to failure evidence, because that is where engineering judgment starts. If you can identify the hidden assumption, you can decide whether to guard it, log it, or redesign around it."
+  },
+  {
+    "slide": 3,
+    "topic": "Design Justification",
+    "text": "Design justification means explaining the why, not just the how. A common mistake is to describe the mechanism without naming the invariant it protects. The important question is: what condition must remain true, and what trade-off are you accepting to preserve it? Once that invariant is explicit, the implementation can be evaluated under pressure instead of just on paper. In practice, that means the code, the logs, and the test all need to support the same story."
+  },
+  {
+    "slide": 4,
+    "topic": "Evidence-First Defense",
+    "text": "When someone challenges your design, the strongest response is evidence first. Stress tests, structured logs, and the Integrity Packet work together as the defense package. The test creates the pressure, the logs capture what actually happened, and the packet explains why the chosen response is justified. This matters because a design defense that relies on confidence alone will not survive review. You want proof that the system behaved as claimed, especially when the failure mode is subtle or intermittent."
+  },
+  {
+    "slide": 5,
+    "topic": "System Invariant",
+    "text": "A system invariant is the condition that must stay true across all valid executions. Here, the point is that valid behavior is not just about one thread or one request; it is about every interleaving that the system permits. If the invariant is violated, the system may still appear to run, but it is no longer trustworthy. The job of the design is to reject, contain, or recover from invalid interleavings without hiding the cost of doing so. That is what makes the design defensible."
+  },
+  {
+    "slide": 6,
+    "topic": "Failure Interleaving",
+    "text": "Imagine two workers both reaching for the same episode at nearly the same time. Worker A checks that the episode is still draft, and before A finishes, Worker B checks the same state and gets the same answer. Now both believe they are allowed to start processing. This is the uncomfortable failure: the baseline looked correct because each step seemed reasonable in isolation, but the split between read and write created a race. In your evidence, you want the worker IDs, the episode ID, the state before and after, and repeated runs that make the interleaving visible."
+  },
+  {
+    "slide": 7,
+    "topic": "Design Response",
+    "text": "The protected property here is simple: only one actor should own the state transition at a time. The design response is to make that transition guarded, whether through an atomic compare-and-set, a version check, a synchronized method, or a single-owner queue. Each of those mechanisms strengthens the invariant, but none of them is free. The trade-off is usually less parallelism, more state modeling, or more explicit coordination. That trade-off is acceptable when the goal is to prevent stale or competing transitions from silently succeeding."
+  },
+  {
+    "slide": 8,
+    "topic": "Trade-Offs",
+    "text": "This table is really about choosing the smallest mechanism that still protects the invariant you care about. A simple baseline is easy to build, but it often hides timing assumptions. A guarded transition directly protects the critical state change, but it requires careful modeling. Explicit coordination makes ordering visible, yet it can introduce bottlenecks or waiting. An observability-first approach does not remove the problem by itself, but it gives you the evidence needed to defend the design. The professional skill is matching the mechanism to the risk, not just picking the most familiar tool."
+  }
+]

@@ -1,0 +1,210 @@
+= Retries, Compensation, Dead Letter Queues
+
+== Design Pressure
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Retries" as R
+rectangle "Compensation" as C
+rectangle "DLQ" as D
+rectangle "Evidence" as E
+rectangle "Invariant" as I
+R --> C : pressure
+C -> D : failure path
+D --> E : inspect
+E -> I : justify
+@enduml
+----
+
+== Asynchronous Boundary
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Caller" as A
+rectangle "Queue" as B
+rectangle "Worker" as C
+rectangle "Side Effect" as D
+A --> B : enqueue
+B -> C : deliver later
+C --> D : perform work
+D -> B : ack or retry
+@enduml
+----
+
+== Exponential Backoff
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Attempt 1" as A
+rectangle "Delay 1" as B
+rectangle "Attempt 2" as C
+rectangle "Delay 2" as D
+rectangle "Attempt 3" as E
+A --> B : fails
+B -> C : wait longer
+C --> D : fails again
+D -> E : wait longer
+@enduml
+----
+
+== Compensation
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Payment" as A
+rectangle "Shipping" as B
+rectangle "Failure" as C
+rectangle "Refund" as D
+A -> B : succeeds
+B --> C : out of stock
+C -> D : undo prior step
+@enduml
+----
+
+== Dead Letter Queue
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Main Queue" as A
+rectangle "Retry Attempts" as B
+rectangle "Dead Letter Queue" as C
+rectangle "Operator Review" as D
+A --> B : process
+B -> C : exhausted retries
+C --> D : inspect manually
+@enduml
+----
+
+== Failure Scenario
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Worker A" as A
+rectangle "Crash" as B
+rectangle "Worker B" as C
+rectangle "Duplicate Work" as D
+A -> B : succeeds before ack
+B --> C : redelivery
+C -> D : repeats side effect
+@enduml
+----
+
+== Design Response
+[plantuml,width=100%]
+----
+@startuml
+skinparam shadowing false
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Invariant" as A
+rectangle "Idempotency Key" as B
+rectangle "Durable State" as C
+rectangle "Retry Policy" as D
+rectangle "Evidence" as E
+A -> B : protect
+B --> C : record
+C -> D : recover
+D --> E : prove
+@enduml
+----
+
+== Comparison
+[.column]
+* Simple baseline
+* Easy to build
+* Hides pressure assumptions
+* Good starting point
+
+[.column]
+* Guarded or idempotent design
+* Protects the invariant
+* Handles duplicates and retries
+* Requires more state and evidence

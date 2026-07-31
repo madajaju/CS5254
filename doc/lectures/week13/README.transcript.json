@@ -1,0 +1,47 @@
+[
+  {
+    "slide": 1,
+    "topic": "Week 13",
+    "text": "Welcome to Week 13. This week is about what strong engineers accept as a fact of life: failure is normal, retries and compensation are everyday tools, and recovery is a design discipline. The goal is not to pretend systems are reliable in the abstract, but to learn how to build systems that behave responsibly when things go wrong."
+  },
+  {
+    "slide": 2,
+    "topic": "Failure is Normal",
+    "text": "The key idea here is that failure is not an exception in distributed systems; it is the baseline. Every boundary in a system can fail: a request can be lost, a service can be slow, a database can acknowledge too late, or a response can never make it back. If you are building software across a network, you have to assume these faults will happen and design your system so the overall behavior remains understandable and safe."
+  },
+  {
+    "slide": 3,
+    "topic": "Failure Sources",
+    "text": "A common mistake is to think of failures as rare, dramatic events. In practice, they are ordinary and local. A process can crash, a network timeout can trigger a retry, a partial write can leave data in an ambiguous state, and a dependency outage can cascade into other failures. The important engineering judgment is to ask not whether failure happens, but how far it spreads and what evidence you capture when it does."
+  },
+  {
+    "slide": 4,
+    "topic": "Retries",
+    "text": "Retries are the first instinct for many systems, and they can help when the failure is transient. But retries are not free. If a store times out, the service may not know whether the write succeeded, so the next step is often to return a retryable error. The client then has to decide whether to try again. That works only if repeated calls are safe enough that you do not create duplicate side effects or overload the dependency further."
+  },
+  {
+    "slide": 5,
+    "topic": "Retry Limits",
+    "text": "Retries need discipline. If you keep trying forever, you can turn a temporary problem into a system-wide outage. That is why retries need both a cap and a deadline. The protected property here is controlled recovery: you want to give the system a chance to heal without letting one bad operation consume unlimited time, memory, or capacity. The trade-off is that some requests will fail sooner, but that is better than making the whole service unstable."
+  },
+  {
+    "slide": 6,
+    "topic": "Compensation",
+    "text": "Sometimes you cannot simply retry, because the operation has already changed the world. Imagine reserving inventory, charging a payment, and then failing before shipping completes. In that case, the system needs compensation: a way to undo the completed steps as best it can. That might mean refunding the payment or canceling the reservation. The important point is that compensation is a design choice, not a magic reset button, and it can only approximate the original state."
+  },
+  {
+    "slide": 7,
+    "topic": "Dead Letter Queues",
+    "text": "Dead letter queues are where you send messages that cannot be processed safely after repeated attempts. That keeps poison messages from blocking the main queue and gives operators a place to inspect what went wrong later. The key idea is containment: isolate the bad work, preserve evidence, and let the system continue operating. A DLQ is not a garbage can; it is an operational recovery path."
+  },
+  {
+    "slide": 8,
+    "topic": "Designing for Recovery",
+    "text": "This is the design pattern stack for recovery. Idempotent APIs make repeated calls safe. Timeouts prevent callers from waiting forever. Backoff reduces pressure on struggling dependencies. Circuit breakers stop you from hammering something that is already failing. Dead letter queues isolate poison work, and compensation gives you a way to repair state after a partial failure. The trade-off is complexity: each safeguard adds behavior you must test, explain, and defend."
+  },
+  {
+    "slide": 9,
+    "topic": "Recovery Response",
+    "text": "Recovery is a process, not a single action. First you detect the failure, then you contain it so the blast radius stays small. After that you retry only if it is safe to do so. If the system is still broken, you compensate to repair any partial work, and then you restore the underlying state. This is the mindset students should carry into design review: show how the system limits damage, proves what happened, and returns to a trustworthy state."
+  }
+]

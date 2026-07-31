@@ -1,0 +1,47 @@
+[
+  {
+    "slide": 1,
+    "topic": "Retries, Compensation, Dead Letter Queues",
+    "text": "Welcome. The key idea in this lecture is that once work moves into retries, background workers, or queues, the business idea may stay the same, but the correctness problem changes. You are no longer just asking whether the code runs once. You are asking whether it still behaves correctly when delivery is delayed, repeated, interrupted, or abandoned. That is why we connect retries, compensation, and dead letter queues to evidence and invariants, not just to implementation tricks."
+  },
+  {
+    "slide": 2,
+    "topic": "Design Pressure",
+    "text": "Let's start with the big picture. Retries create pressure that can force compensation, and when retries are exhausted the work may end up in a dead letter queue for inspection. From there, the real question becomes whether we can produce evidence that explains what happened and defend the invariant we care about. A common mistake is to treat these as separate tools, when in practice they form a chain of design pressure, failure handling, and proof."
+  },
+  {
+    "slide": 3,
+    "topic": "Asynchronous Boundary",
+    "text": "Imagine you are building a system where a caller hands work to a queue and a worker finishes it later. That boundary is where assumptions start to matter. The caller and the worker do not share the same moment in time, so success is no longer just about sending a request and getting a response. The key idea here is that enqueue, delivery, side effect, and acknowledgement are distinct events, and any of them can fail or be repeated. Professional judgment means designing for that separation instead of pretending it is still one straight-line method call."
+  },
+  {
+    "slide": 4,
+    "topic": "Exponential Backoff",
+    "text": "Retries need a policy, and exponential backoff is one of the most common ones. Instead of hammering a struggling dependency over and over, the system waits longer between attempts. That matters because a retry mechanism can easily become part of the problem if it floods a broken service. The design trade-off is that you are protecting the downstream system, but you are also accepting longer recovery time for the caller. So the real question is not just 'can we retry,' but 'what invariant are we trying to preserve while we retry, and how do we know the retry behavior is safe?'"
+  },
+  {
+    "slide": 5,
+    "topic": "Compensation",
+    "text": "Compensation is a rollback-like response to partial success. A payment may complete, then shipping fails, and now the system has to undo the earlier step with a refund or another corrective action. This is uncomfortable because the system has already changed the world, and now it must reconcile that state with a later failure. The important thing is that compensation is not free cleanup. It is a deliberate design choice that preserves a larger invariant, but it introduces its own timing, auditing, and correctness concerns."
+  },
+  {
+    "slide": 6,
+    "topic": "Dead Letter Queue",
+    "text": "When retries are exhausted, a dead letter queue gives you a place to put the message instead of losing it or looping forever. That is useful because the failure becomes visible and reviewable rather than hidden in a busy retry loop. But the uncomfortable part is that a DLQ means the system has admitted defeat for the automated path. Now an operator or engineer has to inspect the message, understand why it failed, and decide how to recover it. So the DLQ is not a happy ending; it is a controlled failure boundary with evidence attached."
+  },
+  {
+    "slide": 7,
+    "topic": "Failure Scenario",
+    "text": "Let's make the failure concrete. A worker succeeds in performing the side effect, but crashes before acknowledgement. Then the queue redelivers the same work to another worker, which performs the side effect again. From the operator's point of view, the system may look healthy because the first worker did real work and the second worker also reports success, but the customer sees duplicate shipping, duplicate charges, or missing notifications depending on the workflow. The reason this was hidden in the happy path is that the sequential case never exposed the gap between execution count and delivery count. This is exactly the kind of failure where logs, delivery IDs, and idempotency evidence matter."
+  },
+  {
+    "slide": 8,
+    "topic": "Design Response",
+    "text": "The protected property here is that retries should not inflate side effects or hide lost work. One way to defend that property is with idempotency keys, durable completion records, and retry-safe handlers that can tell whether work has already been done. That gives you a safer system, but it also adds state, coordination, and more complicated handler logic. The trade-off is real: you are buying correctness under pressure by making the implementation more explicit and more observable. The key idea is to protect the invariant first, then choose the mechanism that fits the failure mode."
+  },
+  {
+    "slide": 9,
+    "topic": "Comparison",
+    "text": "Here is the practical comparison. A simple baseline is easy to build and easy to explain, but it often hides the timing and pressure assumptions that matter most. A guarded or idempotent design protects the invariant directly and handles duplicates or retries more safely, but it needs more state and stronger evidence. When you defend a design in an interview, an oral exam, or an Integrity Packet, you need to say which property you are protecting, what the mechanism costs, and what failure evidence convinced you that the baseline was not enough. That is the professional move: not just choosing a tool, but justifying the trade-off."
+  }
+]

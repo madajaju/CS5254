@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 14,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "scale_failures",
+  "source": "doc/lectures/week14/scale_failures/README.md",
+  "videoPath": "doc/lectures/week14/scale_failures/.output/output.mp4",
+  "youtube_title": "Where Systems Break at Scale | CS 5254 Week 14",
+  "summary": "Load, contention, and exhaustion reveal the breakpoints that hidden assumptions kept out of view.",
+  "youtube_description": "Load, contention, and exhaustion reveal the breakpoints that hidden assumptions kept out of view. The lecture covers linear vs. non-linear scaling, single points of contention, resource exhaustion, and the evidence needed to understand saturation.\n\nThis CS 5254 Week 14 lecture explores where systems break at scale and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "scale failures",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "scaling",
+    "contention",
+    "resource exhaustion",
+    "saturation",
+    "load"
+  ]
+}

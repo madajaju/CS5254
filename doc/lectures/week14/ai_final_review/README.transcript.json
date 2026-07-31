@@ -1,0 +1,87 @@
+[
+  {
+    "slide": 1,
+    "topic": "AI Final Review: What Was Learned?",
+    "text": "Welcome. This review is about what we learned from using AI in a stateful concurrent system. The key idea is that AI can speed up drafting, but it cannot verify correctness for you. Our job is still to protect the invariant, especially when timing, retries, and load start to stress the design."
+  },
+  {
+    "slide": 2,
+    "topic": "The Lecture at a Glance",
+    "text": "Here is the big picture. AI can help you move faster, but concurrency pressure is where hidden assumptions usually break. So we rely on repeatable tests, logs, and traces, not confidence alone. The engineer stays responsible for the invariant, and the Integrity Packet is where that defended conclusion gets recorded."
+  },
+  {
+    "slide": 3,
+    "topic": "What the Topic Means",
+    "text": "This lecture asks a simple but uncomfortable question: what did we actually learn from using AI in a concurrent system? The real issue is not whether the first draft looks plausible. The real issue is whether the design still works under pressure. A strong answer names the invariant, shows the failure evidence, and explains the correction. AI gives you a hypothesis; human verification turns it into an engineering decision."
+  },
+  {
+    "slide": 4,
+    "topic": "AI Helper Versus AI Judgment",
+    "text": "A common mistake is treating AI like an authority instead of a helper. AI is very good at boilerplate, common patterns, and fast drafts. But it can miss deep races, ordering bugs, and state drift. Human review is where we check assumptions against code and tests. The important point is that speed does not count as correctness unless the design survives load, retries, and timing changes."
+  },
+  {
+    "slide": 5,
+    "topic": "Competency Gap",
+    "text": "The competency gap is the difference between what the AI draft can produce and what you, as the engineer, are able to verify. In practice, this is where hidden races get caught by human review after the draft looked fine. That matters because the system can appear correct until concurrency pressure exposes the missing guard. The professional move is to detect that gap early, name the invariant, and prove it with evidence."
+  },
+  {
+    "slide": 6,
+    "topic": "Acceleration Factor",
+    "text": "The acceleration factor is the part of the workflow where AI genuinely helps. It can generate boilerplate and suggest standard patterns quickly, which saves time. But that speed only matters if the human review still checks the result carefully. So the trade-off is clear: you gain drafting speed, but you do not get a pass on verification."
+  },
+  {
+    "slide": 7,
+    "topic": "Validation as the Constant",
+    "text": "Validation is the constant across every design choice. A happy-path run is not enough, because pressure is what reveals whether the system is actually sound. The right workflow is to challenge the design with a pressure test, capture structured logs, and turn that into repeatable evidence. That is what makes the result defensible instead of merely optimistic."
+  },
+  {
+    "slide": 8,
+    "topic": "AI-Assisted Hypothesis",
+    "text": "A generated design or explanation should be treated as a hypothesis, not a conclusion. The workflow starts with the AI suggestion, then moves into code, then tests, and finally evidence. That sequence matters because the suggestion is only useful if it survives verification. In other words, the draft is the beginning of the engineering process, not the end."
+  },
+  {
+    "slide": 9,
+    "topic": "Human Verification",
+    "text": "Human verification is the engineer-led process of checking the claim against reality. We inspect the code, compare the logs, and rerun the tests instead of accepting the first plausible answer. The goal is to validate the claim in a way another reviewer could follow. That is the difference between a convenient explanation and a defensible design decision."
+  },
+  {
+    "slide": 10,
+    "topic": "System View",
+    "text": "Think of the lecture topic as a system of pressure and response. The topic leads into the competency gap, then into the acceleration provided by AI, then into validation, then into evidence, and finally into a design decision. And that decision feeds back into the gap, because every new conclusion should sharpen what you inspect next. This matters because engineering judgment is really about closing the loop between ideas and evidence."
+  },
+  {
+    "slide": 11,
+    "topic": "Failure Scenario",
+    "text": "Here is the uncomfortable version. A concurrent request arrives, the system reads stale state, work gets duplicated, and then progress gets blocked. That failure is easy to miss in the baseline because the sequential happy path never creates the overlap that causes the bug. What you want to capture is not just that it failed, but how it failed: the request IDs, the state transition, the retry behavior, and the point where progress stopped."
+  },
+  {
+    "slide": 12,
+    "topic": "Design Response",
+    "text": "The protected property here is system integrity under pressure. The mechanism is a guard around the invariant, plus observability so you can actually see what happened, plus a repeatable test so you can prove it. The trade-off is that you usually give up some simplicity or throughput to get that protection. That is not a free fix, but it is a more honest one."
+  },
+  {
+    "slide": 13,
+    "topic": "Evidence Flow",
+    "text": "The evidence story should move from baseline run to failure run to fix run, and then to residual risk. That comparison is what makes the design defensible. If someone asks whether the system is still controlled under stress, you should be able to point to metrics like latency, queue depth, retry counts, and the recovery timeline. The goal is not to hide the failure; the goal is to document it and show what changed."
+  },
+  {
+    "slide": 14,
+    "topic": "Trade-Offs",
+    "text": "Each design approach carries a different trade-off. A simple baseline is easy to explain, but it often hides pressure assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes ordering visible, but it can add waiting. And observability-first design gives you strong evidence, at the cost of more instrumentation work. The right choice depends on what property you must defend."
+  },
+  {
+    "slide": 15,
+    "topic": "Practical Application",
+    "text": "Let’s make this concrete. First identify the invariant or progress property that matters most. Then write one sequential case that should succeed and one pressure case that could fail. Add operation IDs and entity IDs to the logs before you run the stress scenario. If you apply a fix, capture before-and-after evidence, and then update the Integrity Packet with the assumption, the validation, and the remaining risk."
+  },
+  {
+    "slide": 16,
+    "topic": "Assignment Connection",
+    "text": "This is where the lecture connects to the assignment. For A1, you should show the relevant object, workflow, event, failure, or recovery mechanism in your own domain. What matters is not just having a design choice, but demonstrating it with runnable commands, structured logs, failure reproduction, and a clear Integrity Packet defense. In an oral review, you should be able to explain why you chose that mechanism and what trade-off it introduces."
+  },
+  {
+    "slide": 17,
+    "topic": "Final Takeaway",
+    "text": "The final takeaway is simple but important: explain the system, stress it, repair it, and validate it. AI can help you move faster through the explanation stage, but only evidence proves the design holds under pressure. A mature design is one you can defend after you have tested it, broken it, fixed it, and recorded what you learned."
+  }
+]

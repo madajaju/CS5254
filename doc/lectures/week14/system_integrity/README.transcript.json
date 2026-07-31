@@ -1,0 +1,57 @@
+[
+  {
+    "slide": 1,
+    "topic": "System Integrity Under Pressure",
+    "text": "Welcome everyone. In this lecture, we are looking at what it means for a system to stay correct when the environment stops being friendly. A design can look fine in a demo and still fall apart under concurrency, retries, load, or partial failure. The key idea here is that integrity is not just about making something run once; it is about defending the invariant that keeps the system trustworthy."
+  },
+  {
+    "slide": 2,
+    "topic": "Topic Map",
+    "text": "This topic map gives us the path for the lecture. We start with the invariant, then look at how failures appear when pressure is introduced, then move to the evidence that proves what happened, and finally talk about the trade-off in the design response. A common mistake is jumping straight to tools or fixes before naming the property that actually matters. Here, we want to reason from the invariant outward."
+  },
+  {
+    "slide": 3,
+    "topic": "Integrity Under Pressure",
+    "text": "A system may look perfectly correct on the happy path, especially in a small demo or a single-threaded test. But pressure reveals the hidden assumption behind that success. Maybe the code assumes one request at a time, or that retries never duplicate work, or that state is always current. Integrity means the invariant still holds when the system is stressed, and that is the real question: does it only run, or does it stay correct?"
+  },
+  {
+    "slide": 4,
+    "topic": "Integrity Chain",
+    "text": "The key idea here is that system integrity is not isolated in one place. It is built through a chain: object state, workflow timing, worker behavior, retries and queues, and the coordination boundary. If any one of those links makes an unsafe assumption, the whole system can misbehave. This matters because the failure often appears far away from the original cause, so you need to trace the chain, not just inspect one class or one method."
+  },
+  {
+    "slide": 5,
+    "topic": "Invariant and Failure",
+    "text": "An invariant is the condition that must remain true across every valid execution. The failure mode is what happens when pressure breaks that condition. A professional design response does not pretend the failure cannot happen; it protects the invariant with something concrete, like a guard, coordination rule, or retry-safe behavior. The important habit is to ask first, what must stay true, and only then decide how to protect it."
+  },
+  {
+    "slide": 6,
+    "topic": "Evidence Model",
+    "text": "To defend a claim about integrity, you need evidence that a reviewer can actually inspect. Logs, traces, interleavings, and repeatable tests all contribute different kinds of proof. A vague statement like \"it worked\" is not enough. We want structured evidence that lets someone reconstruct the execution and understand why the invariant held or failed. This is exactly the kind of material that belongs in an Integrity Packet."
+  },
+  {
+    "slide": 7,
+    "topic": "Failure Scenario",
+    "text": "Imagine the happy path works once, but then concurrency arrives. Now one request sees stale state, a retry duplicates the side effect, and the evidence becomes confusing because the logs do not clearly identify which operation did what. That is a painful failure because it was hidden by the baseline version. The system looked fine until pressure exposed that the design was relying on timing luck rather than a real protection for the invariant."
+  },
+  {
+    "slide": 8,
+    "topic": "Design Response",
+    "text": "The protected property here is system integrity under stress. The mechanisms are things like backpressure, idempotency, bounded retries, and observability. Each one adds protection, but none of them is free. Backpressure can reduce throughput, idempotency needs key management, and more logging adds instrumentation cost. So the design response is not \"add everything\"; it is to choose the control that best protects the invariant while being honest about the trade-off."
+  },
+  {
+    "slide": 9,
+    "topic": "Pressures and Controls",
+    "text": "This table helps match the pressure to the control. Concurrency usually breaks ordering assumptions, so a state guard can help. Retries often create duplicate side effects, so idempotency is useful. Load can create unbounded queues, which is where backpressure matters. And when recovery is invisible, structured logs become essential. The lesson is to name the pressure, name what breaks, and then choose the smallest control that actually protects the invariant."
+  },
+  {
+    "slide": 10,
+    "topic": "Practical Response",
+    "text": "Here is the practical workflow I want you to use. Start by writing the invariant first. Then reproduce the failure under pressure, not just under a happy-path test. Capture structured evidence, apply one control, and compare the before and after runs. Finally, defend the trade-off in the Integrity Packet. That sequence is important because it turns a guess into an engineering argument."
+  },
+  {
+    "slide": 11,
+    "topic": "Assignment Link",
+    "text": "This lecture connects directly to A4 and especially the final Integrity Packet. What you need to demonstrate is not just that your project works, but that you can explain the object or workflow being protected, show the failure evidence, and defend the correction. In oral assessment or design defense, you should be able to point to the invariant, the pressure scenario, the recovery path, and the residual risk. That is the standard for proving you understand the design."
+  }
+]

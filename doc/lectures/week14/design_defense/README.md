@@ -1,5 +1,7 @@
 ﻿# Defending Your Design
 
+
+## Video: https://youtu.be/kVCNEpg0Oiw
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 14

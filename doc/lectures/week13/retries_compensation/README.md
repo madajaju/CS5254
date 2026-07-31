@@ -1,5 +1,7 @@
 ﻿# Retries, Compensation, Dead Letter Queues
 
+
+## Video: https://youtu.be/FOG7u9ZlEaU
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 13

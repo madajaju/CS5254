@@ -2,56 +2,46 @@
   {
     "slide": 1,
     "topic": "What is System Stress?",
-    "text": "Welcome everyone. Today we’re asking what it means for a system to be under stress, especially when that system has shared state, concurrency, and real operational pressure. The key idea is that a design can look perfectly correct in a simple test and still fail once timing, load, retries, or coordination come into play. Our job is to learn how to recognize that pressure, measure it, and defend a design with evidence."
+    "text": "Welcome. The central idea in this lecture is that stress is not just “more load” — it is pressure that reveals whether a system still behaves correctly. In a stateful concurrent system, the real question is whether the invariant survives when timing shifts, retries happen, queues build up, or multiple actors compete for the same resource. We will keep coming back to one professional habit: name the assumption, make the pressure visible, and collect evidence that proves what actually happened."
   },
   {
     "slide": 2,
-    "topic": "Topic Overview",
-    "text": "Let’s start with the basic vocabulary. Stress is what reveals hidden limits. Contention is what happens when multiple actors compete for the same resource. Saturation is the point where more work actually makes performance worse instead of just leveling off. Under those conditions, edge cases appear, operational behavior changes, and the evidence we collect has to be repeatable and structured. That is the frame for the rest of the lecture."
+    "topic": "Stress as Design Pressure",
+    "text": "The key idea here is that stress is a design pressure, not just an accident. When a system is stressed, load, timing shifts, retries, queues, and contention start exposing whether the design really holds. A common mistake is to judge a system by one clean run. Instead, we ask a harder question: under pressure, does the invariant still hold? Good engineering makes that question measurable, observable, and testable."
   },
   {
     "slide": 3,
-    "topic": "System Stress Model",
-    "text": "The key idea here is that stress is not an isolated event; it starts a chain reaction. Stress increases contention, contention amplifies saturation, saturation reveals evidence, and that evidence should inform a design choice. Then the design gets refined and the cycle begins again. This matters because a professional system is not judged by one happy execution, but by whether it still behaves in a defensible way when pressure changes the execution model."
+    "topic": "Stress and Hidden Assumptions",
+    "text": "This is where hidden assumptions become dangerous. A baseline design often assumes the workflow runs once, state changes happen in order, load never changes behavior, and failure evidence is optional. But reality is messier: concurrent runs overlap, timing affects what state is visible, pressure exposes limits, and evidence becomes necessary if you want to defend the design. So when a system looks correct on the happy path, we should ask what it is quietly assuming about execution."
   },
   {
     "slide": 4,
-    "topic": "Hidden Assumption",
-    "text": "A common mistake is to build around a happy-path test and never name the assumption that made it pass. Here, the system is effectively being exercised by a single thread reading current state, so everything appears correct. But that success depends on a hidden assumption: that the operation happens once, in order, without overlapping actors. Once that assumption is broken, the design may no longer mean what the test seemed to prove."
+    "topic": "Failure Under Pressure",
+    "text": "Let's pause here and make the failure concrete. One sequential run can hide the real execution model, because the code may appear correct when nothing overlaps and nothing delays. Under pressure, the same workflow can interleave, delay, or even repeat. That means the failure is often not a syntax problem — it is a mismatch between the design assumption and the real execution environment. Repeatable pressure tests are how we expose that gap between intent and reality."
   },
   {
     "slide": 5,
     "topic": "Failure Scenario",
-    "text": "Now imagine the uncomfortable version. Multiple requests arrive at the same time, and one thread is looking at stale state while another is already moving the workflow forward. The result can be duplicate work, blocked progress, or both. This failure is easy to miss in a baseline test because the baseline avoids the very timing conditions that create the bug. When you evaluate this kind of failure, you need evidence that captures the race, the stale read, and the visible consequence."
+    "text": "A common stress failure has a very recognizable shape. You start seeing latency spikes, duplicate work, missing completion logs, and queues that never seem to drain. The causes are usually uncomfortable but ordinary: slow dependencies, retry storms, stale state, or hidden coordination costs. What makes this serious is that the baseline version can look healthy until the system is pushed far enough to reveal the problem. That is exactly why we collect evidence under pressure, not just success screenshots."
   },
   {
     "slide": 6,
-    "topic": "Evidence Path",
-    "text": "The important question is not just, did it fail? The question is, can we prove why it failed in a way another engineer could reproduce? That is why load profiles, logs, traces, and repeatable tests matter together. Each one supports the claim from a different angle. Structured evidence makes the failure reconstructable, and without that, the design review becomes guesswork instead of engineering judgment."
+    "topic": "Evidence Under Pressure",
+    "text": "This matters because stress claims are only defensible if they come with structured evidence. Useful evidence includes logs, traces, interleavings, and repeatable test output. Ideally, you want to show baseline behavior, failure behavior, and then the corrected behavior with its trade-off. Without that, a reviewer has to take your word for it, and that is not enough in an engineering defense. The point is to make the failure reproducible and the conclusion checkable."
   },
   {
     "slide": 7,
-    "topic": "Design Response",
-    "text": "Once the invariant is named, we can choose a mechanism that protects it. Backpressure can slow incoming work, idempotency can make retries safe, and guarded transitions can prevent illegal state changes. The trade-off is never free: you may give up peak throughput, add coordination, or delay completion. But that trade-off is often exactly what makes the system trustworthy under stress."
+    "topic": "Design Responses to Stress",
+    "text": "When pressure reveals a weakness, the response should protect the invariant directly. You might use state guards or version checks to stop invalid transitions, backpressure or circuit breakers to limit damage, idempotency or deduplication to make duplicates safe, or compensation and reconciliation to recover after partial failure. The key idea is to choose the smallest control that preserves the relevant property. Every fix has a cost, so we do not pretend the solution is free."
   },
   {
     "slide": 8,
-    "topic": "Design Trade-Offs",
-    "text": "Let’s compare the common approaches. A simple baseline is easy to explain, but it hides pressure assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes dependencies visible, but it can bottleneck or even deadlock. Idempotent design handles duplicates and retries, but it needs keys and deduplication logic. The right choice depends on which failure you are trying to control."
+    "topic": "Repair Strategy",
+    "text": "Here the contrast is between hoping the happy path represents reality and deliberately engineering for pressure. Before the repair, teams often treat logs as optional and assume timing will cooperate. After the repair, they name the invariant, add structured evidence, and apply controls like backpressure, guards, or idempotency. That shift matters because a system is only mature when it can explain not just what worked, but what failed and how it recovered."
   },
   {
     "slide": 9,
-    "topic": "Integrity Packet View",
-    "text": "This is where the Integrity Packet becomes important. Start with the assumption, then show the failure evidence that exposed it, then present the correction, and finally name the residual risk. That structure keeps you honest. It also keeps you from pretending the fix is perfect. A strong defense explains what was protected, what changed, and what still remains to be monitored."
-  },
-  {
-    "slide": 10,
-    "topic": "Practical Application",
-    "text": "For your own project, the task is very concrete. Write one sequential test that should succeed, and one pressure test that might expose the failure. Add structured logging with operation IDs and entity IDs so the behavior can be reconstructed. If you apply a fix, capture before-and-after evidence using the same workload. Then fold that into the Integrity Packet so you can defend the decision in a review or oral assessment."
-  },
-  {
-    "slide": 11,
-    "topic": "Summary",
-    "text": "The big takeaway is that stress is not just load. Stress is what makes hidden assumptions visible. A system is mature when it can survive pressure, explain its failures, recover in a controlled way, and defend its design with evidence. So as you work through A4 and your own project, keep asking: what invariant matters, what pressure breaks it, and what proof do I have that the correction really helps?"
+    "topic": "Stress Concepts",
+    "text": "Let’s organize the vocabulary. Stress is pressure that exposes limits, contention is multiple actors fighting over the same resource, saturation is the point where more work makes performance worse, and edge cases are the rare timing combinations that appear only under load. In each case, the professional task is the same: measure the invariant, observe the failure mode, and choose a design response that keeps the system understandable under pressure. That is the language you will use in design review and in the Integrity Packet."
   }
 ]

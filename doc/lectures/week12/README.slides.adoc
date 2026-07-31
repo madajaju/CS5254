@@ -1,10 +1,10 @@
 = Week 12
 
-== What is System Stress?
-[plantuml, stress-overview, svg, width=100%]
+== System Stress Overview
+
+[plantuml,width=100%]
 ----
 @startuml
-!pragma useBetaStyle true
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
 skinparam ArrowColor white
@@ -12,37 +12,42 @@ skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam shadowing false
-skinparam roundcorner 8
-skinparam classBackgroundColor white
-skinparam classBorderColor #123456
-skinparam classFontColor black
-skinparam componentBackgroundColor white
-skinparam componentBorderColor #123456
-skinparam componentFontColor black
-skinparam noteBackgroundColor white
-skinparam noteBorderColor #123456
-skinparam noteFontColor black
-skinparam DefaultTextAlignment center
-title System stress as demand exceeds safe operating range
-rectangle "Normal load" as N
-rectangle "Stress zone" as S
-rectangle "Failure mode" as F
-N --> S : traffic rises
-S --> F : resources saturate
+skinparam defaultTextAlignment center
+skinparam roundCorner 12
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+rectangle "System Stress" as SS
+rectangle "More load than usual" as L
+rectangle "Resource saturation" as R
+rectangle "Latency increases" as T
+rectangle "Errors appear" as E
+SS --> L : begins with
+L --> R : causes
+R --> T : leads to
+T --> E : may trigger
 @enduml
 ----
 
-== What is System Stress?
-* Stress appears when demand approaches or exceeds capacity
-* Symptoms include latency growth, queue buildup, and errors
-* Causes can be traffic spikes, slow dependencies, or resource contention
-* The goal is to find safe operating limits before users do
+== Stress Signals
 
-== What is System Stress?
-[plantuml, stress-signals, svg, width=100%]
+[plantuml,width=100%]
 ----
 @startuml
-!pragma useBetaStyle true
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
 skinparam ArrowColor white
@@ -50,31 +55,30 @@ skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam shadowing false
-skinparam roundcorner 8
-skinparam classBackgroundColor white
-skinparam classBorderColor #123456
-skinparam classFontColor black
-skinparam componentBackgroundColor white
-skinparam componentBorderColor #123456
-skinparam componentFontColor black
-skinparam noteBackgroundColor white
-skinparam noteBorderColor #123456
-skinparam noteFontColor black
+skinparam defaultTextAlignment center
+skinparam roundCorner 12
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
 rectangle "CPU" as CPU
 rectangle "Memory" as MEM
-rectangle "I/O" as IO
+rectangle "Disk" as DISK
+rectangle "Network" as NET
 rectangle "Latency" as LAT
-CPU --> LAT : saturation
+CPU --> LAT : high usage
 MEM --> LAT : pressure
-IO --> LAT : backlog
+DISK --> LAT : queueing
+NET --> LAT : congestion
 @enduml
 ----
 
-== Load Testing Basics
-[plantuml, load-test-loop, svg, width=100%]
+== Load Testing Workflow
+
+[plantuml,width=100%]
 ----
 @startuml
-!pragma useBetaStyle true
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
 skinparam ArrowColor white
@@ -82,37 +86,30 @@ skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam shadowing false
-skinparam roundcorner 8
-skinparam classBackgroundColor white
-skinparam classBorderColor #123456
-skinparam classFontColor black
-skinparam componentBackgroundColor white
-skinparam componentBorderColor #123456
-skinparam componentFontColor black
-skinparam noteBackgroundColor white
-skinparam noteBorderColor #123456
-skinparam noteFontColor black
-rectangle "Generate load" as G
-rectangle "Observe system" as O
-rectangle "Adjust rate" as A
-G --> O : collect metrics
-O --> A : detect bottleneck
-A --> G : change pattern
+skinparam defaultTextAlignment center
+skinparam roundCorner 12
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Plan" as P
+rectangle "Generate Load" as G
+rectangle "Measure" as M
+rectangle "Analyze" as A
+rectangle "Tune" as T
+P --> G : define scenario
+G --> M : collect metrics
+M --> A : review results
+A --> T : improve system
 @enduml
 ----
 
-== Load Testing Basics
-* Start with realistic user journeys
-* Increase traffic gradually and repeatably
-* Measure throughput, latency, and error rate
-* Keep test data and environment as stable as possible
-* Stop when you reach a known limit or unsafe behavior
+== Common Load Patterns
 
-== Load Testing Basics
-[plantuml, load-test-failure, svg, width=100%]
+[plantuml,width=100%]
 ----
 @startuml
-!pragma useBetaStyle true
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
 skinparam ArrowColor white
@@ -120,29 +117,28 @@ skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam shadowing false
-skinparam roundcorner 8
-skinparam classBackgroundColor white
-skinparam classBorderColor #123456
-skinparam classFontColor black
-skinparam componentBackgroundColor white
-skinparam componentBorderColor #123456
-skinparam componentFontColor black
-skinparam noteBackgroundColor white
-skinparam noteBorderColor #123456
-skinparam noteFontColor black
-rectangle "Test too fast" as T
-rectangle "Unrealistic traffic" as U
-rectangle "False confidence" as F
-T --> F : hides ramp-up issues
-U --> F : misses real usage
+skinparam defaultTextAlignment center
+skinparam roundCorner 12
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Ramp Up" as RU
+rectangle "Spike" as SP
+rectangle "Soak" as SO
+rectangle "Step Test" as ST
+RU --> SP : gradual growth
+SP --> SO : sudden burst
+SO --> ST : sustained pressure
 @enduml
 ----
 
-== Observability Under Stress
-[plantuml, observability-loop, svg, width=100%]
+== Observability Goals
+
+[plantuml,width=100%]
 ----
 @startuml
-!pragma useBetaStyle true
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
 skinparam ArrowColor white
@@ -150,38 +146,28 @@ skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam shadowing false
-skinparam roundcorner 8
-skinparam classBackgroundColor white
-skinparam classBorderColor #123456
-skinparam classFontColor black
-skinparam componentBackgroundColor white
-skinparam componentBorderColor #123456
-skinparam componentFontColor black
-skinparam noteBackgroundColor white
-skinparam noteBorderColor #123456
-skinparam noteFontColor black
-rectangle "Metrics" as M
-rectangle "Logs" as L
-rectangle "Traces" as T
-rectangle "Alerting" as A
-M --> A : signal
-L --> A : evidence
-T --> A : causality
+skinparam defaultTextAlignment center
+skinparam roundCorner 12
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Metrics" as MET
+rectangle "Logs" as LOG
+rectangle "Traces" as TR
+rectangle "Alerts" as AL
+MET --> AL : signals
+LOG --> AL : context
+TR --> AL : causality
 @enduml
 ----
 
-== Observability Under Stress
-* Use metrics to detect saturation early
-* Use logs to explain errors and retries
-* Use traces to follow slow calls across services
-* Alert on rate changes, not only on outages
-* Correlate signals before and after the load increase
+== Failure Scenarios
 
-== Observability Under Stress
-[plantuml, stress-response, svg, width=100%]
+[plantuml,width=100%]
 ----
 @startuml
-!pragma useBetaStyle true
 skinparam backgroundColor #123456
 skinparam defaultFontColor black
 skinparam ArrowColor white
@@ -189,21 +175,58 @@ skinparam ArrowFontColor #ffd166
 skinparam ArrowFontStyle bold
 skinparam ArrowFontSize 16
 skinparam shadowing false
-skinparam roundcorner 8
-skinparam classBackgroundColor white
-skinparam classBorderColor #123456
-skinparam classFontColor black
-skinparam componentBackgroundColor white
-skinparam componentBorderColor #123456
-skinparam componentFontColor black
-skinparam noteBackgroundColor white
-skinparam noteBorderColor #123456
-skinparam noteFontColor black
-rectangle "Detect issue" as D
-rectangle "Mitigate" as M
-rectangle "Retest" as R
-D --> M : scale, shed, tune
-M --> R : verify recovery
-R --> D : compare results
+skinparam defaultTextAlignment center
+skinparam roundCorner 12
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Overloaded App" as OA
+rectangle "Queue Growth" as QG
+rectangle "Timeouts" as TO
+rectangle "Retries" as RE
+OA --> QG : requests pile up
+QG --> TO : wait too long
+TO --> RE : clients retry
+RE --> OA : adds more load
 @enduml
 ----
+
+== Design Responses
+
+[plantuml,width=100%]
+----
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam defaultTextAlignment center
+skinparam roundCorner 12
+skinparam class {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+rectangle "Cache" as C
+rectangle "Backpressure" as BP
+rectangle "Autoscaling" as AS
+rectangle "Circuit Breaker" as CB
+C --> BP : reduce work
+BP --> AS : control demand
+AS --> CB : absorb spikes
+@enduml
+----
+
+== Testing and Monitoring Checklist
+
+* Define the workload before running tests.
+* Measure latency, throughput, and error rate.
+* Watch CPU, memory, disk, and network.
+* Compare expected and observed behavior.
+* Capture logs and traces for root cause analysis.
+* Adjust capacity or controls based on findings.

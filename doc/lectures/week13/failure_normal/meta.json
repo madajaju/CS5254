@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 13,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "failure_normal",
+  "source": "doc/lectures/week13/failure_normal/README.md",
+  "videoPath": "doc/lectures/week13/failure_normal/.output/output.mp4",
+  "youtube_title": "Failure is Normal | CS 5254 Week 13",
+  "summary": "A system looks correct in a simple demo, then pressure reveals hidden assumptions about failure, recovery, and evidence.",
+  "youtube_description": "A system looks correct in a simple demo, then pressure reveals hidden assumptions about failure, recovery, and evidence. The lecture covers partial failure, fail-fast behavior, graceful degradation, blast radius, and how to validate AI-assisted ideas before trusting them.\n\nThis CS 5254 Week 13 lecture explores failure is normal and its impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "failure is normal",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "partial failure",
+    "fail-fast",
+    "graceful degradation",
+    "blast radius",
+    "evidence"
+  ]
+}

@@ -2,41 +2,51 @@
   {
     "slide": 1,
     "topic": "Observability Under Stress",
-    "text": "Welcome to Observability Under Stress. The big idea in this lecture is that a system can look correct in a simple test and still fail once timing, load, retries, or coordination pressure are introduced. We are not just asking whether the code works once. We are asking whether we can still understand, explain, and defend its behavior when the system is under strain."
+    "text": "Welcome. In this lecture, we are looking at what happens when a system is no longer judged by the happy path alone. The key idea here is that a design can look correct in one clean run and still fail once timing, load, retries, or coordination pressure are introduced. Our goal is to connect behavior under stress to the invariants we care about, and then use evidence to defend a correction or control."
   },
   {
     "slide": 2,
-    "topic": "Topic Map",
-    "text": "The key idea here is that observability is part of the design loop, not an afterthought. We start with the topic itself, then move through log aggregation, filtering by pressure, operational stress, validation evidence, and finally design decisions. That loop matters because evidence should change how we think about the system. A good engineer uses logs, traces, and measurements to refine the design, not just to describe failure after the fact."
+    "topic": "Topic and Pressure",
+    "text": "A common mistake is to treat a passing demo as proof that the system is sound. Under pressure, hidden assumptions become visible very quickly. Something that seemed orderly can turn into an observable failure once requests overlap or the system slows down. The important engineering move is to identify the assumption first, then ask what evidence would prove that it breaks when the workload changes."
   },
   {
     "slide": 3,
-    "topic": "Pressure Reveals Hidden Assumptions",
-    "text": "A common mistake is to treat the happy path as proof that the design is sound. In reality, the happy path often hides an assumption about order, timing, or capacity. Pressure makes that assumption visible. Once the system is stressed, the failure stops being theoretical and becomes something you can reproduce, observe, and reason about. That is why we care about pressure-driven testing: it exposes the boundary between apparent correctness and actual correctness."
+    "topic": "Operational Pressure",
+    "text": "Here the chain is straightforward: load increases latency, latency grows queues, queues trigger retries, and retries make saturation worse. This matters because pressure is not just a bigger number; it changes the behavior of the whole workflow. If you are building a stateful concurrent system, you have to expect that one bottleneck can ripple outward and turn a manageable delay into a saturation problem."
   },
   {
     "slide": 4,
-    "topic": "Evidence Signals",
-    "text": "This slide is really about the signals that let you distinguish truth from guesswork. Load profile tells you what was being asked of the system. Queue depth tells you whether work is accumulating. Latency tells you when the system is slowing down. Retry counts tell you whether the code is trying to recover or just amplifying the problem. Correlation IDs let you follow one request or one entity through a noisy system. Without those signals, you may have activity, but you do not yet have evidence."
+    "topic": "Evidence Signal",
+    "text": "The key idea here is that evidence has to separate real behavior from assumption. Logs, traces, and metrics become much more useful when they are tied together with a correlation ID and checked against a repeatable test. A metric alone may tell you something is slow, but it does not always explain why. A structured trace or log sequence can show the path of one request and prove whether the design is actually behaving as intended."
   },
   {
     "slide": 5,
-    "topic": "Failure Interleaving",
-    "text": "Imagine a load driver sending many requests at once while the worker pool keeps retrying a slow database write. That interleaving is where the interesting failure lives. The worker may complete late, complete twice, or never complete cleanly at all. Meanwhile the customer sees delays, duplicate effects, or missing completion. The uncomfortable part is that the baseline version may look fine when requests are serialized, so the real bug only appears when the execution model changes."
+    "topic": "Failure Scenario",
+    "text": "Imagine a client submits work, a worker fetches it, the database write slows down, and the queue starts backing up. Then the worker retries, and suddenly the system is doing more work while making less progress. That is the uncomfortable failure case: backlog growth, retry storms, and missing or delayed completion evidence. The failure was hidden in the baseline because the happy path never forced overlapping execution or slow dependency behavior."
   },
   {
     "slide": 6,
-    "topic": "Design Responses",
-    "text": "The protected property here is system integrity under pressure: the workflow should remain explainable even when capacity or dependencies fail. Backpressure, bounded retries, circuit breakers, and reconciliation are all ways to protect that property. But none of them are free. Backpressure can reduce throughput, retries can delay work, and coordination can create bottlenecks. The right question is not whether the fix is elegant in isolation, but whether it preserves the invariant with an acceptable trade-off."
+    "topic": "Design Response",
+    "text": "The protected property here is system integrity under pressure. The mechanism is not one single trick; it is a combination of backpressure, bounded retries, idempotency, and evidence collection. Each piece has a trade-off. Backpressure can reduce throughput, bounded retries can delay completion, and idempotency requires extra state or keys. The point is not to pretend the fix is free. The point is to contain the failure and make the system explainable when the load is hostile."
   },
   {
     "slide": 7,
-    "topic": "State Under Stress",
-    "text": "Think of the system as moving through states rather than just passing or failing. Healthy means the capacity is keeping up. Saturated means demand is exceeding what the workers can absorb. Degraded means queues and latency have crossed a threshold and the system is no longer behaving normally. Recovering means load is reduced or backpressure is helping. Stable is the return to baseline. The important invariant is that accepted work is either completed or the system exposes bounded degradation with enough evidence to recover. That is what professional judgment looks like under stress."
+    "topic": "Sequence Under Stress",
+    "text": "Let's pause here and follow the stressed workflow. A load driver sends concurrent requests through the API gateway, the worker pool processes them, and the metrics store records timing and errors. Under stress, the worker may have to wait or retry, and that waiting itself is part of the evidence. This matters because a professional design defense should be able to explain not just success, but also the controlled delay and the preserved invariant."
   },
   {
     "slide": 8,
-    "topic": "What to Defend",
-    "text": "For the assignment and for the Integrity Packet, you need to defend more than a fix. Start with the invariant. Show the failure with repeatable evidence. Compare the baseline behavior with the corrected behavior. State the trade-off explicitly, because every control changes something. And then connect the result back to your project domain so that the reasoning is grounded in your own system, not just in a generic example. The goal is to make your evidence strong enough that another reviewer could reconstruct the failure and understand why your design choice is justified."
+    "topic": "Comparison",
+    "text": "A simple baseline is easy to explain, but it often hides timing assumptions. A stress-aware design is more explicit: it names the invariant, exposes latency and queue growth, and supports repeatable failure tests. A common mistake is to choose the simpler design because it looks cleaner, without asking whether it can survive realistic pressure. The better choice is the one that can be defended with evidence, not just hoped into correctness."
+  },
+  {
+    "slide": 9,
+    "topic": "Practical Application",
+    "text": "For your own project, start with the invariant or progress property that matters most. Write one sequential scenario that should succeed, and one pressure scenario that is likely to expose the failure. Then add operation IDs, entity IDs, and timing information before you run the stress case. If you apply a fix, capture before-and-after evidence and update the Integrity Packet so you can defend the assumption, the validation, and the remaining risk."
+  },
+  {
+    "slide": 10,
+    "topic": "Trade-Off Analysis",
+    "text": "Here we compare the main approaches. The simple baseline is fast, but it hides pressure assumptions. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes ordering visible, but it can bottleneck. Idempotent, retry-safe design handles duplicates and partial failure, but it needs keys or deduplication logic. The key question is always the same: which design preserves the property you care about, and what cost are you accepting to get that protection?"
   }
 ]

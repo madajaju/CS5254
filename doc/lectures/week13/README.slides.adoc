@@ -1,0 +1,284 @@
+= Week 13
+
+== Failure is Normal
+
+[plantuml, failure-normal, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+left to right direction
+rectangle "Distributed System" as DS
+rectangle "Network" as NET
+rectangle "Service A" as A
+rectangle "Service B" as B
+rectangle "Database" as DB
+A --> NET : send request
+NET --> B : deliver
+B --> DB : write data
+DB --> B : ack
+B --> A : response
+note bottom of DS
+Failures are expected
+at every boundary
+end note
+@enduml
+....
+
+== Failure Sources
+
+[plantuml, failure-sources, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Process crash" as P
+rectangle "Network timeout" as N
+rectangle "Partial write" as W
+rectangle "Duplicate delivery" as D
+rectangle "Dependency outage" as O
+P --> W : interrupts work
+N --> D : causes retry
+O -> P : cascades failure
+W -> D : creates ambiguity
+note left of P
+Most failures are
+ordinary and local
+end note
+@enduml
+....
+
+== Retries
+
+[plantuml, retries, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam participant {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+skinparam sequence {
+  LifeLineBorderColor white
+  LifeLineBackgroundColor white
+  ParticipantBorderColor #123456
+  ParticipantBackgroundColor white
+  ParticipantFontColor black
+}
+participant "Client" as C
+participant "API" as API
+participant "Service" as S
+participant "Store" as ST
+C --> API : request
+API --> S : call
+S --> ST : write
+ST --> S : timeout
+S --> API : retryable error
+API --> C : ask to retry
+@enduml
+....
+
+== Retry Limits
+
+[plantuml, retry-limits, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Attempt 1" as A1
+rectangle "Attempt 2" as A2
+rectangle "Attempt 3" as A3
+rectangle "Deadline" as DL
+A1 --> A2 : retry after delay
+A2 -> A3 : retry again
+A3 --> DL : stop at limit
+note bottom of DL
+Retries need a cap
+and a deadline
+end note
+@enduml
+....
+
+== Compensation
+
+[plantuml, compensation, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Reserve inventory" as R
+rectangle "Charge payment" as C
+rectangle "Ship order" as S
+rectangle "Cancel reservation" as CR
+rectangle "Refund payment" as RF
+R --> C : success path
+C -> S : continue
+S -> RF : if shipping fails
+RF --> CR : if order aborts
+note bottom of R
+Compensation undoes
+completed steps
+end note
+@enduml
+....
+
+== Dead Letter Queues
+
+[plantuml, dlq, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Main queue" as MQ
+rectangle "Worker" as W
+rectangle "Dead letter queue" as DLQ
+rectangle "Operator review" as O
+MQ --> W : deliver message
+W --> MQ : success ack
+W --> DLQ : poison message
+DLQ --> O : inspect later
+note bottom of DLQ
+Use DLQ for messages
+that cannot be processed
+end note
+@enduml
+....
+
+== Designing for Recovery
+
+[plantuml, recovery-design, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Idempotent API" as I
+rectangle "Timeouts" as T
+rectangle "Backoff" as B
+rectangle "Circuit breaker" as C
+rectangle "DLQ" as D
+rectangle "Compensation" as P
+I -> T : repeated calls safe
+T --> B : reduce pressure
+B -> C : avoid overload
+C -> D : isolate poison work
+D --> P : recover manually
+@enduml
+....
+
+== Recovery Response
+
+[plantuml, recovery-response, width=100%]
+....
+@startuml
+skinparam backgroundColor #123456
+skinparam defaultFontColor black
+skinparam ArrowColor white
+skinparam ArrowFontColor #ffd166
+skinparam ArrowFontStyle bold
+skinparam ArrowFontSize 16
+skinparam shadowing false
+skinparam rectangle {
+  BackgroundColor white
+  BorderColor #123456
+  FontColor black
+}
+left to right direction
+rectangle "Detect" as D
+rectangle "Contain" as C
+rectangle "Retry safely" as R
+rectangle "Compensate" as P
+rectangle "Repair" as X
+D --> C : alert
+C -> R : limit blast radius
+R --> P : if still broken
+P -> X : restore state
+note bottom of X
+Recovery is a process,
+not a single action
+end note
+@enduml
+....

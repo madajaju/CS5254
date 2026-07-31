@@ -1,0 +1,24 @@
+{
+  "course": "CS 5254b - Object-Oriented Systems Under Concurrency",
+  "week": 13,
+  "generated_for": "youtube_upload_metadata",
+  "slug": "retries_compensation",
+  "source": "doc/lectures/week13/retries_compensation/README.md",
+  "videoPath": "doc/lectures/week13/retries_compensation/.output/output.mp4",
+  "youtube_title": "Retries, Compensation, and DLQs | CS 5254 Week 13",
+  "summary": "Once work moves across time, correctness depends on retries, compensation, dead letter queues, and control over side effects.",
+  "youtube_description": "Once work moves across time, correctness depends on retries, compensation, dead letter queues, and control over side effects. The lecture covers exponential backoff, rollback-style compensation, DLQs, circuit breakers, and asynchronous boundaries.\n\nThis CS 5254 Week 13 lecture explores retries, compensation, and dead letter queues and their impact on concurrent system design.\n\n#Concurrency #SystemDesign #SoftwareEngineering #CS5254",
+  "tags": [
+    "retries",
+    "compensation",
+    "dead letter queues",
+    "concurrency",
+    "system design",
+    "software engineering",
+    "CS5254",
+    "object-oriented design",
+    "backoff",
+    "circuit breaker",
+    "async boundaries"
+  ]
+}

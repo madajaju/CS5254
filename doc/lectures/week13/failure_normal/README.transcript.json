@@ -1,0 +1,67 @@
+[
+  {
+    "slide": 1,
+    "topic": "Failure is Normal",
+    "text": "Welcome to Failure is Normal. The key idea here is that in concurrent and stateful systems, failure is not an exception to the design problem; it is part of the design problem. Today we are going to treat failure as a pressure that exposes hidden assumptions, and we will connect that pressure to invariants, evidence, and trade-offs."
+  },
+  {
+    "slide": 2,
+    "topic": "Failure Is a Design Pressure",
+    "text": "The key idea here is that failure is a force acting on the design, not just an unfortunate event. A system might look correct when everything runs once in order, but the real question is whether the same design still protects the invariant when timing changes, load increases, or retries happen. So we start with pressure, move to the invariant, then require evidence, then make a design choice, and finally accept the trade-off that choice introduces."
+  },
+  {
+    "slide": 3,
+    "topic": "Partial Failure",
+    "text": "Partial failure means one part of the system fails while the rest keeps going. That matters because the dangerous situation is often not total outage; it is when some components continue and others quietly drift into a bad state. In practice, that can leave stale state, duplicate work, or blocked progress. The engineering task is to make the affected boundary visible, log the important transition, and validate that the system behaves in a bounded way when one piece breaks."
+  },
+  {
+    "slide": 4,
+    "topic": "Fail-Fast",
+    "text": "Fail-fast means detecting the error early and stopping unsafe work before it corrupts data or spreads damage. This is not about being dramatic; it is about protecting the invariant as soon as we know the state is no longer trustworthy. A common mistake is to keep pushing ahead because the code can still execute. The better approach is to stop, expose the failure clearly, and preserve evidence that explains why the stop happened."
+  },
+  {
+    "slide": 5,
+    "topic": "Graceful Degradation",
+    "text": "Graceful degradation is the opposite posture: instead of stopping everything, the system continues with reduced capability. Imagine you are building a service where one non-essential component fails, but users can still complete the core workflow. The protected property is continued operation, but the trade-off is that some features are temporarily unavailable. This matters because a resilient design is often not free performance-wise, and the reduced mode has to be intentional, observable, and safe."
+  },
+  {
+    "slide": 6,
+    "topic": "AI Hypothesis Must Be Validated",
+    "text": "This is where AI-assisted design needs discipline. An AI draft is a hypothesis, not proof. It may sound confident while still relying on a hidden assumption about ordering, state, or retries. The right response is to stress the design, reproduce the failure, and then either repair it or reject it. In other words, the model can help you start, but validation is what earns trust."
+  },
+  {
+    "slide": 7,
+    "topic": "Podcast Failure Scenario",
+    "text": "Here the failure is concrete: the transcription service is unavailable, but the rest of the workflow should still behave sensibly. The expected outcome is not a complete collapse of the episode pipeline. Instead, the system records transcription failure, lets cleanup continue, and still allows preview. That kind of behavior is useful because it narrows the blast radius. The key engineering question is whether the system records the failure clearly enough that operators and reviewers can explain what happened."
+  },
+  {
+    "slide": 8,
+    "topic": "System Interaction",
+    "text": "Think of this as the normal interaction pattern before pressure is applied. A load driver sends concurrent requests through an API gateway, workers process them, and the database plus logs and metrics capture what happened. This matters because correctness under concurrency is not just about the worker logic; it is also about what gets observed and recorded. If the evidence is weak, the system may appear healthy while actually hiding failure."
+  },
+  {
+    "slide": 9,
+    "topic": "State Under Pressure",
+    "text": "The important idea here is that systems move through states under load. Healthy becomes saturated, saturated becomes degraded, and then the system either recovers or stabilizes after backpressure or load reduction. The invariant we care about is that accepted work is either completed or the degradation stays bounded and explainable. Professional judgment means recognizing that saturation is not a surprise; it is a state that should be designed for and measured."
+  },
+  {
+    "slide": 10,
+    "topic": "Failure Interleaving",
+    "text": "Now we make the failure uncomfortable. A load test pushes a large number of concurrent requests while a worker retries a slow database write, and the queue keeps handing out more work. That combination can produce duplicate work, stalled processing, missing completion logs, or unbounded queue growth. The reason this is hidden in the baseline version is simple: the happy path assumes orderly execution and does not create the timing overlap that reveals the problem. Good evidence here includes the request profile, retry counts, queue depth, and timing of the failure."
+  },
+  {
+    "slide": 11,
+    "topic": "Design Response",
+    "text": "The protected property here is system integrity under pressure: the system must remain explainable when capacity, timing, or dependencies fail. The mechanism is to add a guard around the invariant, then use backpressure, retry control, and related recovery mechanisms to keep the failure bounded. The trade-off is real: you usually give up some throughput or accept delayed work in exchange for controlled recovery. That is not a flaw in the fix; it is the cost of making correctness explicit."
+  },
+  {
+    "slide": 12,
+    "topic": "Evidence Flow",
+    "text": "A defensible design needs a story told through evidence. Start with the baseline run, then preserve the failure run, then show the corrected run, and finally explain any residual risk that remains. The review question is not just whether the system works better, but whether you can point to the metric that proves the system is degraded yet still controlled. In an Integrity Packet, that means your claim is only as strong as the measurements behind it."
+  },
+  {
+    "slide": 13,
+    "topic": "Trade-Offs",
+    "text": "This table is a reminder that every approach carries strengths and weaknesses. A simple baseline is easy to explain, but it often hides the pressure condition. A guarded transition protects the invariant directly, but it requires careful state modeling. Explicit coordination makes dependencies visible, but it can add waiting and bottlenecks. An observability-first design gives strong evidence for review, but it requires more instrumentation work. The right choice depends on the invariant you need to defend."
+  }
+]

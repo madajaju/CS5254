@@ -1,5 +1,7 @@
 ﻿# Load Testing Basics
 
+
+## Video: https://youtu.be/9CCZmpyWqC8
 ## Metadata
 - Course: CS 5254b - Object-Oriented Systems Under Concurrency
 - Week: 12
